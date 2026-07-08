@@ -1,5 +1,6 @@
 package ai.openclaw.app.ui
 
+import ai.openclaw.app.BuildConfig
 import ai.openclaw.app.MainViewModel
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -13,6 +14,11 @@ fun RootScreen(viewModel: MainViewModel) {
 
     if (!onboardingCompleted) {
         OnboardingFlow(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+        return
+    }
+
+    if (BuildConfig.OPENCLAW_DEFAULT_HUD) {
+        HudScreen(viewModel = viewModel)
         return
     }
 

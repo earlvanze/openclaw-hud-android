@@ -1080,7 +1080,7 @@ private fun GatewayStep(
 
     StepShell(title = "Gateway Connection") {
         Text(
-            "Run `openclaw qr` on your gateway host, then scan the code with this device. For Tailscale or public hosts, use wss:// or Tailscale Serve.",
+            "Run `openclaw qr` on your gateway host, then scan the code with this device. Tailnet and private LAN ws:// are supported; public hosts need wss:// or Tailscale Serve.",
             style = onboardingCalloutStyle,
             color = onboardingTextSecondary,
         )
@@ -1113,7 +1113,7 @@ private fun GatewayStep(
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text("Advanced setup", style = onboardingHeadlineStyle, color = onboardingText)
                     Text(
-                        "Paste setup code or enter host/port manually. Private LAN ws:// is supported; Tailscale/public hosts need wss://.",
+                        "Paste setup code or enter host/port manually. Private LAN and Tailnet ws:// are supported; public hosts need wss://.",
                         style = onboardingCaption1Style,
                         color = onboardingTextSecondary,
                     )
@@ -1214,7 +1214,7 @@ private fun GatewayStep(
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text("Use TLS", style = onboardingHeadlineStyle, color = onboardingText)
                             Text(
-                                "Turn this on for Tailscale or public hosts. Private LAN ws:// remains supported.",
+                                "Turn this on for public hosts. Private LAN and Tailnet ws:// remain supported.",
                                 style = onboardingCalloutStyle.copy(lineHeight = 18.sp),
                                 color = onboardingTextSecondary,
                             )

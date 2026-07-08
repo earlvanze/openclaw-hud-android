@@ -11,6 +11,11 @@ const releaseOutputDir = join(androidDir, "build", "release-bundles");
 
 const releaseVariants = [
   {
+    flavorName: "hud",
+    gradleTask: ":app:bundleHudRelease",
+    bundlePath: join(androidDir, "app", "build", "outputs", "bundle", "hudRelease", "app-hud-release.aab"),
+  },
+  {
     flavorName: "play",
     gradleTask: ":app:bundlePlayRelease",
     bundlePath: join(androidDir, "app", "build", "outputs", "bundle", "playRelease", "app-play-release.aab"),

@@ -1,0 +1,6 @@
+Initial M1 HUD release candidate.
+
+- Minimal green-on-black HUD presentation for AirVision M1 and Samsung DeX.
+- Secure OpenClaw gateway pairing and reconnect handling.
+- Compact chat, notification summaries, voice controls, and captions controls.
+- HUD build removes SMS and Call Log permissions for Google Play.

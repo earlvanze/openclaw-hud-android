@@ -108,7 +108,7 @@ class ConnectionManagerTest {
     }
 
     @Test
-    fun resolveTlsParamsForEndpoint_manualPrivateLanForcesTlsWhenToggleIsOff() {
+    fun resolveTlsParamsForEndpoint_manualPrivateLanCanStayCleartextWhenToggleIsOff() {
         val endpoint = GatewayEndpoint.manual(host = "192.168.1.20", port = 18789)
 
         val params =
@@ -118,9 +118,7 @@ class ConnectionManagerTest {
                 manualTlsEnabled = false,
             )
 
-        assertEquals(true, params?.required)
-        assertNull(params?.expectedFingerprint)
-        assertEquals(false, params?.allowTOFU)
+        assertNull(params)
     }
 
     @Test
@@ -244,10 +242,11 @@ class ConnectionManagerTest {
     }
 
     @Test
-    fun isPrivateLanGatewayHost_acceptsLanIpsButRejectsMdnsAndTailnetHosts() {
+    fun isPrivateLanGatewayHost_acceptsLanAndTailnetIpsButRejectsDnsHosts() {
         assertTrue(isPrivateLanGatewayHost("192.168.1.20"))
+        assertTrue(isPrivateLanGatewayHost("100.64.0.9"))
+        assertTrue(isPrivateLanGatewayHost("100.115.208.70"))
         assertFalse(isPrivateLanGatewayHost("gateway.local"))
-        assertFalse(isPrivateLanGatewayHost("100.64.0.9"))
         assertFalse(isPrivateLanGatewayHost("gateway.tailnet.ts.net"))
     }
 

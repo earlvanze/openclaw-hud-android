@@ -188,7 +188,7 @@ class GatewayBootstrapAuthTest {
         )
 
         assertEquals(
-            "Failed: this host requires wss:// or Tailscale Serve. No TLS endpoint detected.",
+            "Failed: public hosts require wss:// or Tailscale Serve. No TLS endpoint detected.",
             waitForStatusText(runtime),
         )
         assertNull(runtime.pendingGatewayTrust.value)

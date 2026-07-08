@@ -9,6 +9,7 @@ import ai.openclaw.app.gateway.GatewayConnectOptions
 import ai.openclaw.app.gateway.GatewayEndpoint
 import ai.openclaw.app.gateway.GatewayTlsParams
 import ai.openclaw.app.gateway.isLoopbackGatewayHost
+import ai.openclaw.app.gateway.isPrivateLanGatewayHost
 import android.os.Build
 
 class ConnectionManager(
@@ -34,10 +35,11 @@ class ConnectionManager(
             val stableId = endpoint.stableId
             val stored = storedFingerprint?.trim().takeIf { !it.isNullOrEmpty() }
             val isManual = stableId.startsWith("manual|")
-            val cleartextAllowedHost = isLoopbackGatewayHost(endpoint.host)
+            val manualCleartextAllowedHost = isPrivateLanGatewayHost(endpoint.host)
+            val discoveryCleartextAllowedHost = isLoopbackGatewayHost(endpoint.host)
 
             if (isManual) {
-                if (!manualTlsEnabled && cleartextAllowedHost) return null
+                if (!manualTlsEnabled && manualCleartextAllowedHost) return null
                 if (!stored.isNullOrBlank()) {
                     return GatewayTlsParams(
                         required = true,
@@ -75,7 +77,7 @@ class ConnectionManager(
                 )
             }
 
-            if (!cleartextAllowedHost) {
+            if (!discoveryCleartextAllowedHost) {
                 return GatewayTlsParams(
                     required = true,
                     expectedFingerprint = null,

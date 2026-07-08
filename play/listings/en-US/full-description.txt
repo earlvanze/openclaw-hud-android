@@ -1,0 +1,15 @@
+OpenClaw HUD is a low-distraction assistant companion for Android phones connected to wearable displays such as the Asus AirVision M1.
+
+The app is optimized for Samsung DeX and has been tested with Galaxy Fold 7 and AirVision M1. It renders glanceable green text on black in Android Presentation mode, keeping status, chat, notifications, captions, microphone state, and speaker state readable without filling the display with a full desktop interface.
+
+Key features:
+- Minimal always-on HUD for external displays
+- OpenClaw gateway pairing and secure local setup storage
+- Compact chat with hardware keyboard send support
+- Notification summaries for navigation and assistant context
+- Voice controls with wake-word and push-to-talk workflows
+- Samsung/native caption launcher plus OpenClaw realtime translation fallback
+- Speaker routing support for AirVision M1 audio devices
+- Agent and provider/model controls for OpenClaw sessions
+
+OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does not use AccessibilityService, overlay windows, SMS, or Call Log permissions in the Play/HUD build. Notification access is optional and is used only after the user grants Android notification-listener access.

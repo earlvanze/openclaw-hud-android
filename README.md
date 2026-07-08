@@ -145,25 +145,45 @@ ADB=/home/linuxbrew/.linuxbrew/bin/adb \
   ./scripts/install-launch-hud.sh --serial 100.88.253.107:46793
 ```
 
-`bun scripts/build-release-aab.ts` auto-bumps Android
-`versionName`/`versionCode` in `app/build.gradle.kts`, then builds two signed
-release bundles:
+`node scripts/build-release-aab.mjs` auto-bumps Android
+`versionName`/`versionCode` in `app/build.gradle.kts`, then builds signed
+release bundles. The HUD/M1 bundle is the Google Play target package:
 
+- HUD/M1 build: `build/release-bundles/openclaw-<version>-hud-release.aab`
+  (`ai.openclaw.app.hud`)
 - Play build: `build/release-bundles/openclaw-<version>-play-release.aab`
+  (`ai.openclaw.app`)
 - Third-party build: `build/release-bundles/openclaw-<version>-third-party-release.aab`
+  (`ai.openclaw.app`)
 
 Release helper:
 
 ```bash
-bun scripts/build-release-aab.ts
+node scripts/build-release-aab.mjs
+node scripts/build-release-aab.mjs --flavor hud
 ```
 
 Flavor-specific direct Gradle tasks:
 
 ```bash
+./gradlew :app:bundleHudRelease
 ./gradlew :app:bundlePlayRelease
 ./gradlew :app:bundleThirdPartyRelease
 ```
+
+Google Play internal-track publishing helper:
+
+```bash
+node scripts/publish-play-internal.mjs --dry-run
+GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=/path/to/service-account.json \
+  node scripts/publish-play-internal.mjs --commit
+```
+
+The publish helper defaults to package `ai.openclaw.app.hud`, track `internal`,
+release status `draft`, and the newest
+`build/release-bundles/*-hud-release.aab`. It creates a Play edit, uploads the
+AAB, assigns the internal track, and commits only when `--commit` is supplied.
+Store listing and policy prep files live under `play/`.
 
 ## Kotlin Lint + Format
 

@@ -69,6 +69,7 @@ internal fun isPrivateLanGatewayHost(
         val second = ipv4[1].toInt() and 0xff
         return when {
             first == 10 -> true
+            first == 100 && second in 64..127 -> true
             first == 172 && second in 16..31 -> true
             first == 192 && second == 168 -> true
             first == 169 && second == 254 -> true

@@ -961,26 +961,7 @@ class NodeRuntime(
                 auth = auth,
                 storedOperatorToken = loadStoredRoleDeviceToken("operator"),
             )
-        val connectNodeBeforeOperator =
-            !auth.bootstrapToken.isNullOrBlank() &&
-                auth.token.isNullOrBlank() &&
-                auth.password.isNullOrBlank()
-        if (connectNodeBeforeOperator) {
-            nodeSession.connect(
-                endpoint,
-                auth.token,
-                auth.bootstrapToken,
-                auth.password,
-                connectionManager.buildNodeConnectOptions(),
-                tls,
-            )
-        }
-        if (connectNodeBeforeOperator) {
-            operatorConnected = false
-            operatorStatusText = "Waiting for node bootstrap…"
-            operatorSession.disconnect()
-            updateStatus()
-        } else if (operatorAuth == null) {
+        if (operatorAuth == null) {
             operatorConnected = false
             operatorStatusText = "Offline"
             operatorSession.disconnect()
@@ -995,16 +976,14 @@ class NodeRuntime(
                 tls,
             )
         }
-        if (!connectNodeBeforeOperator) {
-            nodeSession.connect(
-                endpoint,
-                auth.token,
-                auth.bootstrapToken,
-                auth.password,
-                connectionManager.buildNodeConnectOptions(),
-                tls,
-            )
-        }
+        nodeSession.connect(
+            endpoint,
+            auth.token,
+            auth.bootstrapToken,
+            auth.password,
+            connectionManager.buildNodeConnectOptions(),
+            tls,
+        )
         if (reconnect && operatorAuth != null) {
             operatorSession.reconnect()
         }
@@ -1075,7 +1054,7 @@ class NodeRuntime(
     private fun gatewayTlsProbeFailureMessage(failure: GatewayTlsProbeFailure?): String =
         when (failure) {
             GatewayTlsProbeFailure.TLS_UNAVAILABLE ->
-                "Failed: this host requires wss:// or Tailscale Serve. No TLS endpoint detected."
+                "Failed: public hosts require wss:// or Tailscale Serve. No TLS endpoint detected."
             GatewayTlsProbeFailure.ENDPOINT_UNREACHABLE, null ->
                 "Failed: couldn't reach the secure gateway endpoint for this host."
         }
