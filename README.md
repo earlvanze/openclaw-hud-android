@@ -1,14 +1,29 @@
-## OpenClaw Android App
+## OpenClaw HUD Android
 
-Status: **extremely alpha**. The app is actively being rebuilt from the ground up.
+Status: **active HUD prototype**. This repository contains the Android
+companion/HUD app for OpenClaw, currently tuned for Samsung DeX plus the Asus
+AirVision M1 display. The app is still pre-release, but the HUD path is usable
+for live testing.
+
+Current live target:
+
+- Host context: Cyber gateway / Umbrel OpenClaw.
+- Device path: Fold over wireless ADB, with the M1 connected to the Fold.
+- HUD package: `ai.openclaw.app.hud`, labeled **OpenClaw HUD**.
+- Default launch mode: Android `Presentation` mode. The phone Activity stays on
+  display 0 and the HUD presentation owns the external M1 display.
+- Visual mode: green text on black, minimal status lights, chat input retained.
+- Known caveat: Samsung/DeX may still composite its shelf over the external
+  display when focus changes. The HUD layout avoids the shelf area, but Android
+  does not always let the app fully suppress that system UI.
 
 ### Rebuild Checklist
 
 - [x] New 4-step onboarding flow
-- [x] Connect tab with `Setup Code` + `Manual` modes
+- [x] Gateway setup folded into Settings with `Setup Code` + `Manual` modes
 - [x] Encrypted persistence for gateway setup/auth state
 - [x] Chat UI restyled
-- [x] Settings UI restyled and de-duplicated (gateway controls moved to Connect)
+- [x] Settings UI restyled and de-duplicated
 - [x] QR code scanning in onboarding
 - [x] Performance improvements
 - [x] Streaming support in chat UI
@@ -16,28 +31,30 @@ Status: **extremely alpha**. The app is actively being rebuilt from the ground u
 - [x] Push notifications for gateway/chat status updates
 - [x] Security hardening (biometric lock, token handling, safer defaults)
 - [x] Voice tab full functionality
-- [x] Screen tab full functionality
+- [x] Agents tab for agent/session selection and provider/model controls
+- [x] HUD presentation mode for wearable display testing
+- [x] Minimal HUD gestures: swipe scrolls chat, double-tap dismisses clearable notification
+- [x] HUD input: Enter sends, Shift+Enter inserts a newline
+- [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [ ] Full end-to-end QA and release hardening
 
 ## Open in Android Studio
 
-- Open the folder `apps/android`.
+- Open this repository root.
 
 ## Build / Run
 
+From this repo root:
+
 ```bash
-cd apps/android
 ./gradlew :app:assemblePlayDebug
 ./gradlew :app:installPlayDebug
 ./gradlew :app:testPlayDebugUnitTest
-cd ../..
-bun run android:bundle:release
 ```
 
 Third-party debug flavor:
 
 ```bash
-cd apps/android
 ./gradlew :app:assembleThirdPartyDebug
 ./gradlew :app:installThirdPartyDebug
 ./gradlew :app:testThirdPartyDebugUnitTest
@@ -46,16 +63,29 @@ cd apps/android
 AirVision / HUD debug flavor:
 
 ```bash
-cd apps/android
 ./gradlew :app:assembleHudDebug
-./scripts/install-launch-hud.sh --serial <adb-serial> --display auto
+./scripts/install-launch-hud.sh --serial <adb-serial>
 ```
 
 The HUD flavor installs as `ai.openclaw.app.hud`, is labeled **OpenClaw HUD**,
 does not request SMS or Call Log permissions, and opens directly to the HUD tab.
-`--display auto` launches on the first external Android display reported by
-`dumpsys display`, falling back to the built-in display when the glasses are not
-connected.
+
+`scripts/install-launch-hud.sh` now defaults to `--display presentation`.
+Presentation mode starts the Android Activity on display 0 and lets
+`HudPresentation` render the external HUD display. This avoids forcing the app
+into Samsung DeX/freeform mode by default.
+
+Display modes:
+
+- `--display presentation` or `--display auto`: current default; phone Activity
+  on display 0, external display via Android Presentation.
+- `--display default`: phone display only.
+- `--display external`: find the first external display and launch the Activity
+  there, using the older DeX/freeform path.
+- `--display <id>`: force a specific Android display id.
+
+The launch script also attempts non-destructive DeX/taskbar suppression and sets
+Samsung external-display audio output when an external display is present.
 
 The HUD flavor is designed to remain Google Play publishable: it uses the
 standard notification-listener grant for notification summaries, foreground
@@ -65,28 +95,59 @@ SMS, or Call Log permissions.
 
 HUD display behavior is intentionally low-distraction for wearable displays:
 Google Maps / Waze navigation notifications are promoted to the main glance
-line, OpenClaw/Codex run status and active tool calls are shown as compact
-status chips, and voice wake/mic state stays visible without opening the full
-chat interface.
+line, OpenClaw run status and active tool calls are shown as compact text, and
+voice wake/mic/speaker state stays visible without opening the full chat
+interface.
+
+HUD controls:
+
+- Tap the mic status area/touch surface to toggle mic capture when available.
+- Swipe vertically to scroll the compact chat transcript.
+- Double-tap a clearable notification to dismiss it.
+- Tap the thinking-level text in the status lights to cycle thinking level.
+- Press Enter on a hardware keyboard to send the chat input.
+- Press Shift+Enter for a newline.
+
+Notification text is whitespace-cleaned and secret-shaped assignments such as
+`token=...`, `password=...`, and `accountSignatureKey=...` are redacted before
+being rendered in the HUD.
 
 To pair on first launch, pass a setup code directly or from a local file:
 
 ```bash
-./scripts/install-launch-hud.sh --serial <adb-serial> --display auto --setup-json /tmp/openclaw-android-pair/qr-tailnet-wss.json
+./scripts/install-launch-hud.sh --serial <adb-serial> --setup-json /tmp/openclaw-android-pair/qr-tailnet-wss.json
 ```
 
 The setup launch stores the gateway endpoint/auth, marks onboarding complete for
 the HUD package, and starts connecting immediately.
 
-`bun run android:bundle:release` auto-bumps Android `versionName`/`versionCode` in `apps/android/app/build.gradle.kts`, then builds two signed release bundles:
+Recent live validation command:
 
-- Play build: `apps/android/build/release-bundles/openclaw-<version>-play-release.aab`
-- Third-party build: `apps/android/build/release-bundles/openclaw-<version>-third-party-release.aab`
+```bash
+ANDROID_HOME=/home/digit/android-sdk ANDROID_SDK_ROOT=/home/digit/android-sdk \
+  ./gradlew :app:assembleHudDebug :app:testHudDebugUnitTest \
+  --tests 'ai.openclaw.app.ui.HudNotificationFormatterTest'
+
+ADB=/home/linuxbrew/.linuxbrew/bin/adb \
+  ./scripts/install-launch-hud.sh --serial 100.88.253.107:46793
+```
+
+`bun scripts/build-release-aab.ts` auto-bumps Android
+`versionName`/`versionCode` in `app/build.gradle.kts`, then builds two signed
+release bundles:
+
+- Play build: `build/release-bundles/openclaw-<version>-play-release.aab`
+- Third-party build: `build/release-bundles/openclaw-<version>-third-party-release.aab`
+
+Release helper:
+
+```bash
+bun scripts/build-release-aab.ts
+```
 
 Flavor-specific direct Gradle tasks:
 
 ```bash
-cd apps/android
 ./gradlew :app:bundlePlayRelease
 ./gradlew :app:bundleThirdPartyRelease
 ```
@@ -94,22 +155,13 @@ cd apps/android
 ## Kotlin Lint + Format
 
 ```bash
-pnpm android:lint
-pnpm android:format
+./gradlew :app:ktlintCheck :benchmark:ktlintCheck
+./gradlew :app:ktlintFormat :benchmark:ktlintFormat
 ```
 
 Android framework/resource lint (separate pass):
 
 ```bash
-pnpm android:lint:android
-```
-
-Direct Gradle tasks:
-
-```bash
-cd apps/android
-./gradlew :app:ktlintCheck :benchmark:ktlintCheck
-./gradlew :app:ktlintFormat :benchmark:ktlintFormat
 ./gradlew :app:lintDebug
 ```
 
@@ -118,20 +170,18 @@ cd apps/android
 ## Macrobenchmark (Startup + Frame Timing)
 
 ```bash
-cd apps/android
 ./gradlew :benchmark:connectedDebugAndroidTest
 ```
 
 Reports are written under:
 
-- `apps/android/benchmark/build/reports/androidTests/connected/`
+- `benchmark/build/reports/androidTests/connected/`
 
 ## Perf CLI (low-noise)
 
 Deterministic startup measurement + hotspot extraction with compact CLI output:
 
 ```bash
-cd apps/android
 ./scripts/perf-startup-benchmark.sh
 ./scripts/perf-startup-hotspots.sh
 ```
@@ -140,7 +190,7 @@ Benchmark script behavior:
 
 - Runs only `StartupMacrobenchmark#coldStartup` (10 iterations).
 - Prints median/min/max/COV in one line.
-- Writes timestamped snapshot JSON to `apps/android/benchmark/results/`.
+- Writes timestamped snapshot JSON to `benchmark/results/`.
 - Auto-compares with previous local snapshot (or pass explicit baseline: `--baseline <old-benchmarkData.json>`).
 
 Hotspot script behavior:
@@ -162,8 +212,8 @@ adb devices -l
 4) Install + launch debug build:
 
 ```bash
-pnpm android:install
-pnpm android:run
+./gradlew :app:installPlayDebug
+adb shell am start -n ai.openclaw.app/ai.openclaw.app.MainActivity
 ```
 
 If `adb devices -l` shows `unauthorized`, re-plug and accept the trust prompt again.
@@ -172,7 +222,7 @@ If `adb devices -l` shows `unauthorized`, re-plug and accept the trust prompt ag
 
 Use `adb reverse` so Android `localhost:18789` tunnels to your laptop `localhost:18789`.
 
-Terminal A (gateway):
+Terminal A, from the parent OpenClaw workspace:
 
 ```bash
 pnpm openclaw gateway --port 18789 --verbose
@@ -184,7 +234,7 @@ Terminal B (USB tunnel):
 adb reverse tcp:18789 tcp:18789
 ```
 
-Then in app **Connect → Manual**:
+Then in app **Settings → Manual**:
 
 - Host: `127.0.0.1`
 - Port: `18789`
@@ -196,12 +246,12 @@ This app is native Kotlin + Jetpack Compose.
 
 - For Compose UI edits: use Android Studio **Live Edit** on a debug build (works on physical devices; project `minSdk=31` already meets API requirement).
 - For many non-structural code/resource changes: use Android Studio **Apply Changes**.
-- For structural/native/manifest/Gradle changes: do full reinstall (`pnpm android:run`).
-- Canvas web content already supports live reload when loaded from Gateway `__openclaw__/canvas/` (see `docs/platforms/android.md`).
+- For structural/native/manifest/Gradle changes: do a full reinstall.
+- Canvas web content already supports live reload when loaded from Gateway `__openclaw__/canvas/`.
 
 ## Connect / Pair
 
-1) Start the gateway (on your main machine):
+1) Start the gateway from the parent OpenClaw workspace:
 
 ```bash
 pnpm openclaw gateway --port 18789 --verbose
@@ -209,7 +259,7 @@ pnpm openclaw gateway --port 18789 --verbose
 
 2) In the Android app:
 
-- Open the **Connect** tab.
+- Open **Settings**.
 - Use **Setup Code** or **Manual** mode to connect.
 
 3) Approve pairing (on the gateway machine):
@@ -219,7 +269,8 @@ openclaw devices list
 openclaw devices approve <requestId>
 ```
 
-More details: `docs/platforms/android.md`.
+For HUD pairing, prefer `scripts/install-launch-hud.sh --setup-json ...` so the
+HUD package is marked onboarded and starts connecting immediately.
 
 ## Permissions
 
@@ -282,12 +333,12 @@ Pre-req checklist:
 1) Gateway is running and reachable from the Android app.
 2) Android app is connected to that gateway and `openclaw nodes status` shows it as paired + connected.
 3) App stays unlocked and in foreground for the whole run.
-4) Open the app **Screen** tab and keep it active during the run (canvas/A2UI commands require the canvas WebView attached there).
+4) Open the app **Agents** tab and keep it active during the run if canvas/A2UI commands require the canvas WebView attached there.
 5) Grant runtime permissions for capabilities you expect to pass (camera/mic/location/notification listener/location, etc.).
 6) No interactive system dialogs should be pending before test start.
 7) Canvas host is enabled and reachable from the device (do not run gateway with `OPENCLAW_SKIP_CANVAS_HOST=1`; startup logs should include `canvas host mounted at .../__openclaw__/`).
 8) Local operator test client pairing is approved. If first run fails with `pairing required`, approve latest pending device pairing request, then rerun:
-9) For A2UI checks, keep the app on **Screen** tab; the node now auto-refreshes canvas capability once on first A2UI reachability failure (TTL-safe retry).
+9) For A2UI checks, keep the app on **Agents** tab; the node now auto-refreshes canvas capability once on first A2UI reachability failure (TTL-safe retry).
 
 ```bash
 openclaw devices list
@@ -297,6 +348,7 @@ openclaw devices approve --latest
 Run:
 
 ```bash
+cd /home/digit/.openclaw/workspace/tmp/openclaw-src
 pnpm android:test:integration
 ```
 
@@ -319,9 +371,9 @@ Common failure quick-fixes:
 - `pairing required` before tests start:
   - approve pending device pairing (`openclaw devices approve --latest`) and rerun.
 - `A2UI host not reachable` / `A2UI_HOST_NOT_CONFIGURED`:
-  - ensure gateway canvas host is running and reachable, keep the app on the **Screen** tab. The app will auto-refresh canvas capability once; if it still fails, reconnect app and rerun.
+  - ensure gateway canvas host is running and reachable, keep the app on the **Agents** tab. The app will auto-refresh canvas capability once; if it still fails, reconnect app and rerun.
 - `NODE_BACKGROUND_UNAVAILABLE: canvas unavailable`:
-  - app is not effectively ready for canvas commands; keep app foregrounded and **Screen** tab active.
+  - app is not effectively ready for canvas commands; keep app foregrounded and **Agents** tab active.
 
 ## Contributions
 
