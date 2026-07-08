@@ -142,6 +142,11 @@ fun HudScreen(viewModel: MainViewModel) {
         }
     val chatScrollState = rememberScrollState()
     val gestureScope = rememberCoroutineScope()
+    LaunchedEffect(viewModel, chatScrollState) {
+        viewModel.hudScrollRequests.collect { deltaPx ->
+            chatScrollState.scrollBy(deltaPx)
+        }
+    }
     val primaryLine =
         runningLine
             ?: latestAssistant
@@ -174,11 +179,14 @@ fun HudScreen(viewModel: MainViewModel) {
                 .background(hudBackground)
                 .pointerInput(notificationLine?.key) {
                     detectTapGestures(
-                        onDoubleTap = {
+                        onTap = {
                             val line = notificationLine
                             if (line?.isClearable == true) {
                                 viewModel.dismissNotification(line.key)
                             }
+                        },
+                        onDoubleTap = {
+                            viewModel.toggleMicEnabled()
                         },
                     )
                 }.pointerInput(chatScrollState) {

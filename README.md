@@ -1,9 +1,9 @@
 ## OpenClaw HUD Android
 
 Status: **active HUD prototype**. This repository contains the Android
-companion/HUD app for OpenClaw, currently tuned for Samsung DeX plus the Asus
-AirVision M1 display. The app is still pre-release, but the HUD path is usable
-for live testing.
+companion/HUD app for OpenClaw, optimized for Samsung DeX and the Asus
+AirVision M1 display. It has been live-tested with a Samsung Galaxy Fold 7. The
+app is still pre-release, but the HUD path is usable for live testing.
 
 Current live target:
 

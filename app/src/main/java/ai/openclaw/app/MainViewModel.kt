@@ -16,7 +16,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -37,6 +39,8 @@ class MainViewModel(
     val chatDraft: StateFlow<String?> = _chatDraft
     private val _pendingAssistantAutoSend = MutableStateFlow<String?>(null)
     val pendingAssistantAutoSend: StateFlow<String?> = _pendingAssistantAutoSend
+    private val _hudScrollRequests = MutableSharedFlow<Float>(extraBufferCapacity = 16)
+    val hudScrollRequests: SharedFlow<Float> = _hudScrollRequests
 
     private fun ensureRuntime(): NodeRuntime {
         runtimeRef.value?.let { return it }
@@ -271,6 +275,10 @@ class MainViewModel(
 
     fun dismissNotification(key: String) {
         ensureRuntime().dismissNotification(key)
+    }
+
+    fun requestHudScroll(deltaPx: Float) {
+        _hudScrollRequests.tryEmit(deltaPx)
     }
 
     fun setVoiceScreenActive(active: Boolean) {

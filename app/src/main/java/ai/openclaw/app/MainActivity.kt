@@ -318,6 +318,15 @@ class MainActivity : ComponentActivity() {
 
     internal fun handleHudKeyEvent(event: KeyEvent): Boolean {
         if (!BuildConfig.OPENCLAW_DEFAULT_HUD) return false
+        val scrollDelta = hudScrollKeyDeltas[event.keyCode]
+        if (scrollDelta != null) {
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                viewModel.requestHudScroll(scrollDelta)
+                Log.d(TAG, "M1/brightness key scrolled HUD keyCode=${event.keyCode} delta=$scrollDelta")
+            }
+            return event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
+        }
+
         val isHudMediaKey = hudMicToggleKeys.contains(event.keyCode)
         if (!isHudMediaKey || (!event.isAirVisionM1Event() && event.keyCode !in hudGlobalMicToggleKeys)) {
             if (event.action == KeyEvent.ACTION_UP && event.isAirVisionM1Event()) {
@@ -414,5 +423,11 @@ class MainActivity : ComponentActivity() {
                 KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
                 KeyEvent.KEYCODE_HEADSETHOOK,
             )
+        private val hudScrollKeyDeltas =
+            mapOf(
+                KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_SCROLL_PIXELS,
+                KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_SCROLL_PIXELS,
+            )
+        private const val HUD_KEY_SCROLL_PIXELS = 160f
     }
 }
