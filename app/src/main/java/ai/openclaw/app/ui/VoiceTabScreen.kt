@@ -1,6 +1,10 @@
+@file:Suppress("FunctionName")
+
 package ai.openclaw.app.ui
 
 import ai.openclaw.app.MainViewModel
+import ai.openclaw.app.TranslationCaptionLanguage
+import ai.openclaw.app.TranslationCaptionMode
 import ai.openclaw.app.voice.VoiceConversationEntry
 import ai.openclaw.app.voice.VoiceConversationRole
 import android.Manifest
@@ -40,10 +44,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -90,6 +97,9 @@ fun VoiceTabScreen(viewModel: MainViewModel) {
     val micConversation by viewModel.micConversation.collectAsState()
     val micInputLevel by viewModel.micInputLevel.collectAsState()
     val micIsSending by viewModel.micIsSending.collectAsState()
+    val translationCaptionsEnabled by viewModel.translationCaptionsEnabled.collectAsState()
+    val translationCaptionSourceLanguage by viewModel.translationCaptionSourceLanguage.collectAsState()
+    val translationCaptionTargetLanguage by viewModel.translationCaptionTargetLanguage.collectAsState()
 
     val hasStreamingAssistant = micConversation.any { it.role == VoiceConversationRole.Assistant && it.isStreaming }
     val showThinkingBubble = micIsSending && !hasStreamingAssistant
@@ -191,6 +201,14 @@ fun VoiceTabScreen(viewModel: MainViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+            TranslationCaptionLanguageRow(
+                enabled = translationCaptionsEnabled,
+                sourceLanguageCode = translationCaptionSourceLanguage,
+                targetLanguageCode = translationCaptionTargetLanguage,
+                onSourceSelected = viewModel::setTranslationCaptionSourceLanguage,
+                onTargetSelected = viewModel::setTranslationCaptionTargetLanguage,
+            )
+
             if (!micLiveTranscript.isNullOrBlank()) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
@@ -306,6 +324,9 @@ fun VoiceTabScreen(viewModel: MainViewModel) {
             val queueCount = micQueuedMessages.size
             val stateText =
                 when {
+                    translationCaptionsEnabled && queueCount > 0 -> "CC · $queueCount queued"
+                    translationCaptionsEnabled && micIsSending -> "CC · translating"
+                    translationCaptionsEnabled && micEnabled -> "CC · listening"
                     queueCount > 0 -> "$queueCount queued"
                     micIsSending -> "Sending"
                     micCooldown -> "Cooldown"
@@ -358,6 +379,102 @@ fun VoiceTabScreen(viewModel: MainViewModel) {
             }
         }
     }
+}
+
+@Composable
+private fun TranslationCaptionLanguageRow(
+    enabled: Boolean,
+    sourceLanguageCode: String,
+    targetLanguageCode: String,
+    onSourceSelected: (String) -> Unit,
+    onTargetSelected: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        TranslationLanguagePicker(
+            title = "Source",
+            selectedCode = sourceLanguageCode,
+            modifier = Modifier.weight(1f),
+            onSelected = onSourceSelected,
+        )
+        TranslationLanguagePicker(
+            title = if (enabled) "Captions on" else "Target",
+            selectedCode = targetLanguageCode,
+            modifier = Modifier.weight(1f),
+            onSelected = onTargetSelected,
+        )
+    }
+}
+
+@Composable
+private fun TranslationLanguagePicker(
+    title: String,
+    selectedCode: String,
+    modifier: Modifier = Modifier,
+    onSelected: (String) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val language = TranslationCaptionMode.languageFor(selectedCode)
+    Box(modifier = modifier) {
+        Surface(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            color = mobileCardSurface,
+            border = BorderStroke(1.dp, mobileBorder),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 11.dp, vertical = 9.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                    Text(title, style = mobileCaption2, color = mobileTextSecondary, maxLines = 1)
+                    Text(language.label, style = mobileCallout.copy(fontWeight = FontWeight.SemiBold), color = mobileText, maxLines = 1)
+                }
+                Icon(Icons.Default.ArrowDropDown, contentDescription = "Select language", tint = mobileTextTertiary)
+            }
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = mobileCardSurface,
+            tonalElevation = 0.dp,
+            shadowElevation = 8.dp,
+            border = BorderStroke(1.dp, mobileBorder),
+        ) {
+            TranslationCaptionMode.languages.forEach { option ->
+                TranslationLanguageMenuItem(
+                    language = option,
+                    selected = option.code == language.code,
+                    onClick = {
+                        onSelected(option.code)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TranslationLanguageMenuItem(
+    language: TranslationCaptionLanguage,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    DropdownMenuItem(
+        text = { Text(language.label, style = mobileCallout, color = mobileText) },
+        onClick = onClick,
+        trailingIcon = {
+            if (selected) {
+                Text("✓", style = mobileCallout, color = mobileAccent)
+            }
+        },
+    )
 }
 
 @Composable

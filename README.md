@@ -36,6 +36,7 @@ Current live target:
 - [x] Minimal HUD gestures: swipe scrolls chat, double-tap dismisses clearable notification
 - [x] HUD input: Enter sends, Shift+Enter inserts a newline
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
+- [x] Realtime translation closed captions mode with two-speaker labels
 - [ ] Full end-to-end QA and release hardening
 
 ## Open in Android Studio
@@ -105,8 +106,16 @@ HUD controls:
 - Swipe vertically to scroll the compact chat transcript.
 - Double-tap a clearable notification to dismiss it.
 - Tap the thinking-level text in the status lights to cycle thinking level.
+- Tap `cc` in the HUD status lights to toggle realtime translation captions.
 - Press Enter on a hardware keyboard to send the chat input.
 - Press Shift+Enter for a newline.
+
+Translation captions mode is intended for low-latency walking use. It forces
+thinking `off`, prefers the `sage-router/fast` model profile, suppresses spoken
+assistant replies while captions are active, and labels alternating turns as
+`S1` / `S2`. The default target language is Spanish. Source and target language
+selection live in the Voice tab and currently support Auto, English, Spanish,
+French, German, Italian, Portuguese, Japanese, Korean, and Chinese.
 
 Notification text is whitespace-cleaned and secret-shaped assignments such as
 `token=...`, `password=...`, and `accountSignatureKey=...` are redacted before

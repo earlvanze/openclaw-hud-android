@@ -121,6 +121,9 @@ class MainViewModel(
     val micConversation: StateFlow<List<VoiceConversationEntry>> = runtimeState(initial = emptyList()) { it.micConversation }
     val micInputLevel: StateFlow<Float> = runtimeState(initial = 0f) { it.micInputLevel }
     val micIsSending: StateFlow<Boolean> = runtimeState(initial = false) { it.micIsSending }
+    val translationCaptionsEnabled: StateFlow<Boolean> = runtimeState(initial = false) { it.translationCaptionsEnabled }
+    val translationCaptionSourceLanguage: StateFlow<String> = prefs.translationCaptionSourceLanguage
+    val translationCaptionTargetLanguage: StateFlow<String> = prefs.translationCaptionTargetLanguage
 
     val chatSessionKey: StateFlow<String> = runtimeState(initial = "main") { it.chatSessionKey }
     val chatSessionId: StateFlow<String?> = runtimeState(initial = null) { it.chatSessionId }
@@ -332,6 +335,18 @@ class MainViewModel(
 
     fun setSpeakerEnabled(enabled: Boolean) {
         ensureRuntime().setSpeakerEnabled(enabled)
+    }
+
+    fun setTranslationCaptionsEnabled(enabled: Boolean) {
+        ensureRuntime().setTranslationCaptionsEnabled(enabled)
+    }
+
+    fun setTranslationCaptionSourceLanguage(value: String) {
+        ensureRuntime().setTranslationCaptionSourceLanguage(value)
+    }
+
+    fun setTranslationCaptionTargetLanguage(value: String) {
+        ensureRuntime().setTranslationCaptionTargetLanguage(value)
     }
 
     fun refreshGatewayConnection() {

@@ -169,6 +169,24 @@ class SecurePrefs(
     private val _speakerEnabled = MutableStateFlow(plainPrefs.getBoolean("voice.speakerEnabled", true))
     val speakerEnabled: StateFlow<Boolean> = _speakerEnabled
 
+    private val _translationCaptionSourceLanguage =
+        MutableStateFlow(
+            TranslationCaptionMode.normalizeLanguageCode(
+                plainPrefs.getString("translationCaptions.sourceLanguage", TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE),
+                TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
+            ),
+        )
+    val translationCaptionSourceLanguage: StateFlow<String> = _translationCaptionSourceLanguage
+
+    private val _translationCaptionTargetLanguage =
+        MutableStateFlow(
+            TranslationCaptionMode.normalizeLanguageCode(
+                plainPrefs.getString("translationCaptions.targetLanguage", TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE),
+                TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
+            ),
+        )
+    val translationCaptionTargetLanguage: StateFlow<String> = _translationCaptionTargetLanguage
+
     fun setLastDiscoveredStableId(value: String) {
         val trimmed = value.trim()
         plainPrefs.edit { putString("gateway.lastDiscoveredStableID", trimmed) }
@@ -493,6 +511,26 @@ class SecurePrefs(
     fun setSpeakerEnabled(value: Boolean) {
         plainPrefs.edit { putBoolean("voice.speakerEnabled", value) }
         _speakerEnabled.value = value
+    }
+
+    fun setTranslationCaptionSourceLanguage(value: String) {
+        val normalized =
+            TranslationCaptionMode.normalizeLanguageCode(
+                value,
+                TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
+            )
+        plainPrefs.edit { putString("translationCaptions.sourceLanguage", normalized) }
+        _translationCaptionSourceLanguage.value = normalized
+    }
+
+    fun setTranslationCaptionTargetLanguage(value: String) {
+        val normalized =
+            TranslationCaptionMode.normalizeLanguageCode(
+                value,
+                TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
+            )
+        plainPrefs.edit { putString("translationCaptions.targetLanguage", normalized) }
+        _translationCaptionTargetLanguage.value = normalized
     }
 
     private fun loadNotificationForwardingPackages(): Set<String> {

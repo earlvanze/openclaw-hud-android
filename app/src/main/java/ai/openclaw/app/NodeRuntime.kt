@@ -1,8 +1,8 @@
 package ai.openclaw.app
 
 import ai.openclaw.app.chat.ChatController
-import ai.openclaw.app.chat.ChatModelChoice
 import ai.openclaw.app.chat.ChatMessage
+import ai.openclaw.app.chat.ChatModelChoice
 import ai.openclaw.app.chat.ChatPendingToolCall
 import ai.openclaw.app.chat.ChatSessionEntry
 import ai.openclaw.app.chat.OutgoingAttachment
@@ -31,9 +31,9 @@ import ai.openclaw.app.node.InvokeDispatcher
 import ai.openclaw.app.node.LocationCaptureManager
 import ai.openclaw.app.node.LocationHandler
 import ai.openclaw.app.node.MotionHandler
-import ai.openclaw.app.node.NotificationsHandler
 import ai.openclaw.app.node.NotificationActionKind
 import ai.openclaw.app.node.NotificationActionRequest
+import ai.openclaw.app.node.NotificationsHandler
 import ai.openclaw.app.node.PhotosHandler
 import ai.openclaw.app.node.Quad
 import ai.openclaw.app.node.SmsHandler
@@ -70,6 +70,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
 class NodeRuntime(
@@ -431,6 +432,12 @@ class NodeRuntime(
     private val voiceReplySpeaker: TalkModeManager
         get() = voiceReplySpeakerLazy.value
 
+    private val _translationCaptionsEnabled = MutableStateFlow(false)
+    val translationCaptionsEnabled: StateFlow<Boolean> = _translationCaptionsEnabled.asStateFlow()
+    val translationCaptionSourceLanguage: StateFlow<String> = prefs.translationCaptionSourceLanguage
+    val translationCaptionTargetLanguage: StateFlow<String> = prefs.translationCaptionTargetLanguage
+    private val translationCaptionTurnIndex = AtomicInteger(0)
+
     private val micCapture: MicCaptureManager by lazy {
         MicCaptureManager(
             context = appContext,
@@ -440,18 +447,37 @@ class NodeRuntime(
                 // Notify MicCaptureManager of the idempotency key *before* the network
                 // call so pendingRunId is set before any chat events can arrive.
                 onRunIdKnown(idempotencyKey)
+                val captionsEnabled = _translationCaptionsEnabled.value
+                val speakerLabel =
+                    if (captionsEnabled) {
+                        TranslationCaptionMode.speakerLabelForTurn(translationCaptionTurnIndex.getAndIncrement())
+                    } else {
+                        null
+                    }
+                val outgoingMessage =
+                    if (captionsEnabled && speakerLabel != null) {
+                        TranslationCaptionMode.buildPrompt(
+                            transcript = message,
+                            speakerLabel = speakerLabel,
+                            sourceLanguageCode = prefs.translationCaptionSourceLanguage.value,
+                            targetLanguageCode = prefs.translationCaptionTargetLanguage.value,
+                        )
+                    } else {
+                        message
+                    }
                 val params =
                     buildJsonObject {
                         put("sessionKey", JsonPrimitive(resolveMainSessionKey()))
-                        put("message", JsonPrimitive(message))
-                        put("thinking", JsonPrimitive(chatThinkingLevel.value))
+                        put("message", JsonPrimitive(outgoingMessage))
+                        put("thinking", JsonPrimitive(if (captionsEnabled) "off" else chatThinkingLevel.value))
                         put("timeoutMs", JsonPrimitive(30_000))
                         put("idempotencyKey", JsonPrimitive(idempotencyKey))
                     }
                 val response = operatorSession.request("chat.send", params.toString())
                 parseChatSendRunId(response) ?: idempotencyKey
             },
-            speakAssistantReply = { text ->
+            speakAssistantReply = speak@{ text ->
+                if (_translationCaptionsEnabled.value) return@speak
                 // Voice-tab replies should speak through the dedicated reply speaker.
                 // Relying on talkMode.ttsOnAllResponses here can drop playback if the
                 // chat-event path misses the terminal event for this turn.
@@ -1215,6 +1241,30 @@ class NodeRuntime(
 
     fun setChatSessionModel(modelId: String?) {
         chat.setSessionModel(modelId)
+    }
+
+    fun setTranslationCaptionsEnabled(value: Boolean) {
+        if (_translationCaptionsEnabled.value == value) return
+        _translationCaptionsEnabled.value = value
+        if (value) {
+            translationCaptionTurnIndex.set(0)
+            chat.setThinkingLevel("off")
+            stopVoicePlayback()
+            setMicEnabled(true)
+            scope.launch {
+                chat.refreshModelChoices()
+                delay(250L)
+                chat.setSessionModel(TranslationCaptionMode.preferredFastModel(chatModelChoices.value))
+            }
+        }
+    }
+
+    fun setTranslationCaptionSourceLanguage(value: String) {
+        prefs.setTranslationCaptionSourceLanguage(value)
+    }
+
+    fun setTranslationCaptionTargetLanguage(value: String) {
+        prefs.setTranslationCaptionTargetLanguage(value)
     }
 
     fun switchChatSession(sessionKey: String) {

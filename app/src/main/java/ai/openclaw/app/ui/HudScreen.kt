@@ -3,19 +3,19 @@
 package ai.openclaw.app.ui
 
 import ai.openclaw.app.MainViewModel
+import ai.openclaw.app.TranslationCaptionMode
 import ai.openclaw.app.chat.ChatMessage
+import ai.openclaw.app.voice.VoiceConversationEntry
+import ai.openclaw.app.voice.VoiceConversationRole
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,7 +27,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -92,7 +94,10 @@ fun HudScreen(viewModel: MainViewModel) {
     val speakerEnabled by viewModel.speakerEnabled.collectAsState()
     val micStatusText by viewModel.micStatusText.collectAsState()
     val micLiveTranscript by viewModel.micLiveTranscript.collectAsState()
+    val micConversation by viewModel.micConversation.collectAsState()
     val micInputLevel by viewModel.micInputLevel.collectAsState()
+    val translationCaptionsEnabled by viewModel.translationCaptionsEnabled.collectAsState()
+    val translationCaptionTargetLanguage by viewModel.translationCaptionTargetLanguage.collectAsState()
     val notificationSnapshot by viewModel.notificationSnapshot.collectAsState()
     val pendingTrust by viewModel.pendingGatewayTrust.collectAsState()
     var prompt by rememberSaveable { mutableStateOf("") }
@@ -183,8 +188,7 @@ fun HudScreen(viewModel: MainViewModel) {
                             chatScrollState.scrollBy(-dragAmount.y)
                         }
                     }
-                }
-                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+                }.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
                 .padding(horizontal = 30.dp, vertical = 22.dp),
     ) {
         HudSignalLights(
@@ -194,7 +198,10 @@ fun HudScreen(viewModel: MainViewModel) {
             micInputLevel = micInputLevel,
             speakerEnabled = speakerEnabled,
             thinkingLevel = thinkingLevel,
+            translationCaptionsEnabled = translationCaptionsEnabled,
+            translationCaptionTargetLanguage = translationCaptionTargetLanguage,
             onToggleThinking = { viewModel.setChatThinkingLevel(nextHudThinkingLevel(thinkingLevel)) },
+            onToggleTranslationCaptions = { viewModel.setTranslationCaptionsEnabled(!translationCaptionsEnabled) },
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -214,7 +221,17 @@ fun HudScreen(viewModel: MainViewModel) {
                     )
                 }
 
-                if (chatTranscript.isNotEmpty()) {
+                if (translationCaptionsEnabled) {
+                    HudTranslationCaptions(
+                        conversation = micConversation,
+                        liveTranscript = micLiveTranscript,
+                        targetLanguageCode = translationCaptionTargetLanguage,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .weight(1f, fill = false),
+                    )
+                } else if (chatTranscript.isNotEmpty()) {
                     HudChatTranscript(
                         entries = chatTranscript,
                         scrollState = chatScrollState,
@@ -264,7 +281,11 @@ fun HudScreen(viewModel: MainViewModel) {
                     val text = prompt.trim()
                     if (text.isNotEmpty()) {
                         prompt = ""
-                        viewModel.sendChat(message = text, thinking = thinkingLevel, attachments = emptyList())
+                        viewModel.sendChat(
+                            message = text,
+                            thinking = if (translationCaptionsEnabled) "off" else thinkingLevel,
+                            attachments = emptyList(),
+                        )
                     }
                 },
                 modifier =
@@ -357,6 +378,60 @@ private fun HudChatTranscript(
 }
 
 @Composable
+private fun HudTranslationCaptions(
+    conversation: List<VoiceConversationEntry>,
+    liveTranscript: String?,
+    targetLanguageCode: String,
+    modifier: Modifier = Modifier,
+) {
+    val entries = hudCaptionEntries(conversation, liveTranscript)
+    val targetLanguageLabel = TranslationCaptionMode.languageFor(targetLanguageCode).label.lowercase()
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            "cc $targetLanguageLabel",
+            style = hudReadableTextStyle,
+            color = hudMuted,
+            maxLines = 1,
+        )
+        if (entries.isEmpty()) {
+            Text(
+                "listening for captions",
+                style = hudPrimaryTextStyle.copy(fontWeight = FontWeight.SemiBold),
+                color = hudMuted,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        } else {
+            entries.forEachIndexed { index, entry ->
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        entry.speaker,
+                        style = hudReadableTextStyle,
+                        color = if (entry.speaker == "S1") hudSecondary else hudAccent,
+                        maxLines = 1,
+                    )
+                    Text(
+                        entry.text,
+                        style =
+                            if (index == entries.lastIndex) {
+                                hudPrimaryTextStyle.copy(fontWeight = FontWeight.SemiBold)
+                            } else {
+                                hudReadableTextStyle
+                            },
+                        color = if (entry.isLive) hudMuted else hudText,
+                        maxLines = if (index == entries.lastIndex) 3 else 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun HudChatInputBar(
     prompt: String,
     enabled: Boolean,
@@ -425,7 +500,10 @@ private fun HudSignalLights(
     micInputLevel: Float,
     speakerEnabled: Boolean,
     thinkingLevel: String,
+    translationCaptionsEnabled: Boolean,
+    translationCaptionTargetLanguage: String,
     onToggleThinking: () -> Unit,
+    onToggleTranslationCaptions: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -434,13 +512,23 @@ private fun HudSignalLights(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = thinkingLevel,
+            text = if (translationCaptionsEnabled) "off" else thinkingLevel,
             modifier =
                 Modifier
-                    .clickable(onClick = onToggleThinking)
+                    .clickable(enabled = !translationCaptionsEnabled, onClick = onToggleThinking)
                     .padding(horizontal = 4.dp, vertical = 4.dp),
             style = hudReadableTextStyle,
-            color = if (thinkingLevel == "off") hudMuted else hudSecondary,
+            color = if (translationCaptionsEnabled || thinkingLevel == "off") hudMuted else hudSecondary,
+            maxLines = 1,
+        )
+        Text(
+            text = if (translationCaptionsEnabled) "cc:$translationCaptionTargetLanguage" else "cc",
+            modifier =
+                Modifier
+                    .clickable(onClick = onToggleTranslationCaptions)
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
+            style = hudReadableTextStyle,
+            color = if (translationCaptionsEnabled) hudAccent else hudMuted,
             maxLines = 1,
         )
         Icon(
@@ -541,6 +629,41 @@ private data class HudChatTranscriptEntry(
     val text: String,
 )
 
+private data class HudCaptionEntry(
+    val speaker: String,
+    val text: String,
+    val isLive: Boolean = false,
+)
+
+private fun hudCaptionEntries(
+    conversation: List<VoiceConversationEntry>,
+    liveTranscript: String?,
+): List<HudCaptionEntry> {
+    val entries = mutableListOf<HudCaptionEntry>()
+    var userTurnIndex = 0
+    var lastSpeaker = "S1"
+    for (entry in conversation) {
+        val text = entry.text.trim()
+        if (text.isEmpty()) continue
+        when (entry.role) {
+            VoiceConversationRole.User -> {
+                lastSpeaker = TranslationCaptionMode.speakerLabelForTurn(userTurnIndex)
+                userTurnIndex += 1
+            }
+            VoiceConversationRole.Assistant -> {
+                val (speaker, caption) = TranslationCaptionMode.stripSpeakerPrefix(text)
+                entries += HudCaptionEntry(speaker = speaker ?: lastSpeaker, text = caption)
+            }
+        }
+    }
+    val live = liveTranscript?.trim()?.takeIf { it.isNotEmpty() }
+    if (live != null) {
+        val speaker = TranslationCaptionMode.speakerLabelForTurn(userTurnIndex)
+        entries += HudCaptionEntry(speaker = speaker, text = live, isLive = true)
+    }
+    return entries.takeLast(HUD_CAPTION_ENTRY_COUNT)
+}
+
 private fun hudChatTranscript(
     messages: List<ChatMessage>,
     streamingAssistantText: String?,
@@ -590,3 +713,4 @@ private fun String.shortSessionLabel(): String {
 
 private const val HUD_TRANSCRIPT_ENTRY_COUNT = 8
 private const val HUD_TRANSCRIPT_ENTRY_MAX_CHARS = 360
+private const val HUD_CAPTION_ENTRY_COUNT = 5
