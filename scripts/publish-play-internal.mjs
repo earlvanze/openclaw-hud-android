@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { createSign } from "node:crypto";
+import { spawnSync } from "node:child_process";
 import { createReadStream } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
@@ -19,6 +20,7 @@ function parseArgs(argv) {
     commit: false,
     bundle: null,
     serviceAccount: process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_APPLICATION_CREDENTIALS || null,
+    auth: process.env.GOOGLE_PLAY_AUTH || "auto",
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -28,6 +30,7 @@ function parseArgs(argv) {
     else if (arg === "--status") args.status = argv[++index];
     else if (arg === "--bundle") args.bundle = argv[++index];
     else if (arg === "--service-account") args.serviceAccount = argv[++index];
+    else if (arg === "--auth") args.auth = argv[++index];
     else if (arg === "--commit") args.commit = true;
     else if (arg === "--dry-run") args.commit = false;
     else if (arg === "--help" || arg === "-h") {
@@ -36,7 +39,10 @@ function parseArgs(argv) {
           "Usage: node scripts/publish-play-internal.mjs [--commit] [--bundle path] [--package ai.openclaw.app.hud]",
           "",
           "Defaults to a dry-run for the latest HUD AAB in build/release-bundles.",
-          "Set GOOGLE_PLAY_SERVICE_ACCOUNT_JSON or GOOGLE_APPLICATION_CREDENTIALS to a Play Console service-account JSON file.",
+          "Auth modes:",
+          "  --auth auto             Use service-account JSON when configured, otherwise gcloud.",
+          "  --auth service-account  Require GOOGLE_PLAY_SERVICE_ACCOUNT_JSON, GOOGLE_APPLICATION_CREDENTIALS, or --service-account.",
+          "  --auth gcloud           Use `gcloud auth print-access-token` from the active account.",
         ].join("\n"),
       );
       process.exit(0);
@@ -103,6 +109,31 @@ async function accessToken(serviceAccount) {
   return body.access_token;
 }
 
+function gcloudAccessToken() {
+  const result = spawnSync("gcloud", ["auth", "print-access-token", `--scopes=${androidPublisherScope}`], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (result.status !== 0) {
+    const detail = result.stderr.trim() || result.stdout.trim() || "gcloud auth print-access-token failed";
+    throw new Error(`Unable to get gcloud access token: ${detail}`);
+  }
+  const token = result.stdout.trim();
+  if (!token) throw new Error("gcloud auth print-access-token returned an empty token");
+  return token;
+}
+
+async function resolveAccessToken(args) {
+  if (args.auth === "service-account" || (args.auth === "auto" && args.serviceAccount)) {
+    const serviceAccount = await loadServiceAccount(args.serviceAccount);
+    return { token: await accessToken(serviceAccount), source: "service-account" };
+  }
+  if (args.auth === "gcloud" || args.auth === "auto") {
+    return { token: gcloudAccessToken(), source: "gcloud" };
+  }
+  throw new Error(`Unknown auth mode: ${args.auth}`);
+}
+
 async function googleJson(token, url, options = {}) {
   const response = await fetch(url, {
     ...options,
@@ -112,7 +143,21 @@ async function googleJson(token, url, options = {}) {
       ...(options.headers ?? {}),
     },
   });
-  if (!response.ok) throw new Error(`${options.method ?? "GET"} ${url} failed: ${response.status} ${await response.text()}`);
+  if (!response.ok) {
+    const text = await response.text();
+    let message = `${options.method ?? "GET"} ${url} failed: ${response.status} ${text}`;
+    if (response.status === 404 && text.includes("Package not found")) {
+      message += [
+        "",
+        "Play Console setup required:",
+        "  1. Create the app in Play Console with package ai.openclaw.app.hud.",
+        "  2. Link/grant this Google Cloud service account access in Play Console.",
+        "  3. Complete required App content, Data safety, and store listing forms.",
+        "  4. Re-run this command.",
+      ].join("\n");
+    }
+    throw new Error(message);
+  }
   return response.json();
 }
 
@@ -150,8 +195,8 @@ async function main() {
     return;
   }
 
-  const serviceAccount = await loadServiceAccount(args.serviceAccount);
-  const token = await accessToken(serviceAccount);
+  const { token, source } = await resolveAccessToken(args);
+  console.log(`Auth: ${source}`);
   const baseUrl = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(args.packageName)}`;
   const edit = await googleJson(token, `${baseUrl}/edits`, { method: "POST", body: "{}" });
   console.log(`Created edit: ${edit.id}`);

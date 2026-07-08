@@ -12,6 +12,7 @@ import android.content.Context
 import android.content.Intent
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import androidx.core.content.edit
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -300,13 +301,12 @@ class DeviceNotificationListenerService : NotificationListenerService() {
             val hasNew = prefs.contains(recentPackagesPref)
             val legacy = prefs.getString(legacyRecentPackagesPref, null)?.trim().orEmpty()
             if (!hasNew && legacy.isNotEmpty()) {
-                prefs
-                    .edit()
-                    .putString(recentPackagesPref, legacy)
-                    .remove(legacyRecentPackagesPref)
-                    .apply()
+                prefs.edit {
+                    putString(recentPackagesPref, legacy)
+                    remove(legacyRecentPackagesPref)
+                }
             } else if (hasNew && prefs.contains(legacyRecentPackagesPref)) {
-                prefs.edit().remove(legacyRecentPackagesPref).apply()
+                prefs.edit { remove(legacyRecentPackagesPref) }
             }
         }
 
@@ -379,7 +379,7 @@ class DeviceNotificationListenerService : NotificationListenerService() {
                     .filter { it.isNotEmpty() && it != normalized }
                     .take(recentPackagesLimit - 1)
             val updated = listOf(normalized) + existing
-            prefs.edit().putString(recentPackagesPref, updated.joinToString(",")).apply()
+            prefs.edit { putString(recentPackagesPref, updated.joinToString(",")) }
         }
     }
 

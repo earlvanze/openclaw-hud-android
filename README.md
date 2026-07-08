@@ -177,13 +177,18 @@ Google Play internal-track publishing helper:
 node scripts/publish-play-internal.mjs --dry-run
 GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=/path/to/service-account.json \
   node scripts/publish-play-internal.mjs --commit
+node scripts/publish-play-internal.mjs --auth gcloud --commit
 ```
 
 The publish helper defaults to package `ai.openclaw.app.hud`, track `internal`,
 release status `draft`, and the newest
 `build/release-bundles/*-hud-release.aab`. It creates a Play edit, uploads the
 AAB, assigns the internal track, and commits only when `--commit` is supplied.
-Store listing and policy prep files live under `play/`.
+Auth can come from a Play Console service-account JSON file or the active
+`gcloud auth print-access-token` account. Store listing and policy prep files
+live under `play/`. The Play Console app must already exist for
+`ai.openclaw.app.hud`; follow `play/console-checklist.md` before the first
+commit.
 
 ## Kotlin Lint + Format
 

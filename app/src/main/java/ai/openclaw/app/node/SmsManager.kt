@@ -8,6 +8,7 @@ import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.Telephony
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -964,7 +965,7 @@ class SmsManager(
             return emptyList()
         }
 
-        val uri = Uri.parse("$MMS_SMS_BY_PHONE_BASE/${Uri.encode(lookupNumber)}")
+        val uri = "$MMS_SMS_BY_PHONE_BASE/${Uri.encode(lookupNumber)}".toUri()
         val projection = buildMixedByPhoneProjection()
 
         val maxCandidates = params.offset + params.limit
@@ -1074,7 +1075,7 @@ class SmsManager(
     private fun getMmsTextBody(messageId: Long): String? {
         val cursor =
             context.contentResolver.query(
-                Uri.parse(MMS_PART_URI),
+                MMS_PART_URI.toUri(),
                 arrayOf("text", "ct"),
                 "mid=?",
                 arrayOf(messageId.toString()),
@@ -1098,7 +1099,7 @@ class SmsManager(
     private fun getMmsMeta(messageId: Long): Pair<Int?, Boolean?> {
         val cursor =
             context.contentResolver.query(
-                Uri.parse("$MMS_CONTENT_BASE/$messageId"),
+                "$MMS_CONTENT_BASE/$messageId".toUri(),
                 arrayOf("msg_box", "read"),
                 null,
                 null,
@@ -1130,7 +1131,7 @@ class SmsManager(
 
         val cursor =
             context.contentResolver.query(
-                Uri.parse("$MMS_CONTENT_BASE/$messageId/addr"),
+                "$MMS_CONTENT_BASE/$messageId/addr".toUri(),
                 arrayOf("address", "type"),
                 null,
                 null,

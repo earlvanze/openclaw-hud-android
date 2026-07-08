@@ -65,7 +65,7 @@ android {
         applicationId = "ai.openclaw.app"
         minSdk = 31
         targetSdk = 36
-        versionCode = 2026070900
+        versionCode = 26070900
         versionName = "2026.7.9"
         ndk {
             // Support all major ABIs — native libs are tiny (~47 KB per ABI)

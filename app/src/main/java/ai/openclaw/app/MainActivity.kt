@@ -2,6 +2,7 @@ package ai.openclaw.app
 
 import ai.openclaw.app.ui.OpenClawTheme
 import ai.openclaw.app.ui.RootScreen
+import android.annotation.SuppressLint
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -136,6 +137,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (handleHudKeyEvent(event)) {
             return true
@@ -160,6 +162,7 @@ class MainActivity : ComponentActivity() {
         hudPresentation = null
         hudMediaSession?.release()
         hudMediaSession = null
+        AirVisionAudioRouter.clearHudRoute(this)
         super.onDestroy()
     }
 
@@ -400,12 +403,10 @@ class MainActivity : ComponentActivity() {
         window.navigationBarColor = Color.BLACK
         WindowCompat.setDecorFitsSystemWindows(window, true)
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            window.attributes =
-                window.attributes.apply {
-                    layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-                }
-        }
+        window.attributes =
+            window.attributes.apply {
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+            }
         WindowInsetsControllerCompat(window, window.decorView).apply {
             show(WindowInsetsCompat.Type.systemBars())
         }

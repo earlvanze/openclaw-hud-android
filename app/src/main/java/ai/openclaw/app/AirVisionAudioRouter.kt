@@ -1,9 +1,9 @@
 package ai.openclaw.app
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
-import android.os.Build
 import android.util.Log
 
 object AirVisionAudioRouter {
@@ -26,17 +26,17 @@ object AirVisionAudioRouter {
         return null
     }
 
+    @SuppressLint("SetAndClearCommunicationDevice")
     fun applyHudRoute(context: Context) {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
         val target = preferredOutput(context) ?: return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val applied = audioManager.setCommunicationDevice(target)
-            Log.i(TAG, "preferred communication output=${target.routeLabel()} applied=$applied")
-        } else {
-            @Suppress("DEPRECATION")
-            audioManager.isSpeakerphoneOn = false
-            Log.i(TAG, "preferred output=${target.routeLabel()}; communication routing requires Android 12+")
-        }
+        val applied = audioManager.setCommunicationDevice(target)
+        Log.i(TAG, "preferred communication output=${target.routeLabel()} applied=$applied")
+    }
+
+    fun clearHudRoute(context: Context) {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
+        audioManager.clearCommunicationDevice()
     }
 
     private fun AudioDeviceInfo.isAirVisionM1Output(): Boolean {

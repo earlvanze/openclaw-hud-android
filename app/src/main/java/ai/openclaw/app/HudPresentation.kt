@@ -4,7 +4,6 @@ import ai.openclaw.app.ui.HudScreen
 import ai.openclaw.app.ui.OpenClawTheme
 import android.app.Presentation
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -112,12 +111,10 @@ internal class HudPresentation(
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            presentationWindow.attributes =
-                presentationWindow.attributes.apply {
-                    layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-                }
-        }
+        presentationWindow.attributes =
+            presentationWindow.attributes.apply {
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
         WindowInsetsControllerCompat(presentationWindow, presentationWindow.decorView).apply {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             hide(WindowInsetsCompat.Type.systemBars())

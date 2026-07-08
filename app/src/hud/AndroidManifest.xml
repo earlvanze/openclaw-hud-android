@@ -27,6 +27,7 @@
         tools:node="remove" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage"
         tools:node="remove" />
     <uses-permission
         android:name="android.permission.READ_CONTACTS"
@@ -48,6 +49,7 @@
         tools:node="remove" />
     <uses-feature
         android:name="android.hardware.telephony"
+        tools:ignore="UnnecessaryRequiredFeature"
         tools:node="remove" />
     <application>
         <activity
