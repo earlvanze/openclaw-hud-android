@@ -5,6 +5,7 @@ package ai.openclaw.app.ui
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.TranslationCaptionLanguage
 import ai.openclaw.app.TranslationCaptionMode
+import ai.openclaw.app.openNativeCaptionSettings
 import ai.openclaw.app.voice.VoiceConversationEntry
 import ai.openclaw.app.voice.VoiceConversationRole
 import android.Manifest
@@ -97,6 +98,7 @@ fun VoiceTabScreen(viewModel: MainViewModel) {
     val micConversation by viewModel.micConversation.collectAsState()
     val micInputLevel by viewModel.micInputLevel.collectAsState()
     val micIsSending by viewModel.micIsSending.collectAsState()
+    val nativeCaptionsEnabled by viewModel.nativeCaptionsEnabled.collectAsState()
     val translationCaptionsEnabled by viewModel.translationCaptionsEnabled.collectAsState()
     val translationCaptionSourceLanguage by viewModel.translationCaptionSourceLanguage.collectAsState()
     val translationCaptionTargetLanguage by viewModel.translationCaptionTargetLanguage.collectAsState()
@@ -201,6 +203,23 @@ fun VoiceTabScreen(viewModel: MainViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+            CaptionProviderRow(
+                nativeEnabled = nativeCaptionsEnabled,
+                openClawEnabled = translationCaptionsEnabled,
+                onNativeSelected = {
+                    viewModel.setNativeCaptionsEnabled(true)
+                    openNativeCaptionSettings(context)
+                },
+                onOpenClawSelected = {
+                    viewModel.setNativeCaptionsEnabled(false)
+                    viewModel.setTranslationCaptionsEnabled(true)
+                },
+                onOffSelected = {
+                    viewModel.setNativeCaptionsEnabled(false)
+                    viewModel.setTranslationCaptionsEnabled(false)
+                },
+            )
+
             TranslationCaptionLanguageRow(
                 enabled = translationCaptionsEnabled,
                 sourceLanguageCode = translationCaptionSourceLanguage,
@@ -378,6 +397,64 @@ fun VoiceTabScreen(viewModel: MainViewModel) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CaptionProviderRow(
+    nativeEnabled: Boolean,
+    openClawEnabled: Boolean,
+    onNativeSelected: () -> Unit,
+    onOpenClawSelected: () -> Unit,
+    onOffSelected: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        CaptionProviderButton(
+            label = "Samsung",
+            selected = nativeEnabled,
+            modifier = Modifier.weight(1f),
+            onClick = onNativeSelected,
+        )
+        CaptionProviderButton(
+            label = "OpenClaw",
+            selected = openClawEnabled,
+            modifier = Modifier.weight(1f),
+            onClick = onOpenClawSelected,
+        )
+        CaptionProviderButton(
+            label = "Off",
+            selected = !nativeEnabled && !openClawEnabled,
+            modifier = Modifier.weight(1f),
+            onClick = onOffSelected,
+        )
+    }
+}
+
+@Composable
+private fun CaptionProviderButton(
+    label: String,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(14.dp),
+        color = if (selected) mobileAccentSoft else mobileCardSurface,
+        border = BorderStroke(1.dp, if (selected) mobileAccent.copy(alpha = 0.35f) else mobileBorder),
+    ) {
+        Text(
+            label,
+            modifier = Modifier.padding(horizontal = 11.dp, vertical = 10.dp),
+            style = mobileCallout.copy(fontWeight = FontWeight.SemiBold),
+            color = if (selected) mobileAccent else mobileText,
+            maxLines = 1,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 

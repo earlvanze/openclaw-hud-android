@@ -169,6 +169,9 @@ class SecurePrefs(
     private val _speakerEnabled = MutableStateFlow(plainPrefs.getBoolean("voice.speakerEnabled", true))
     val speakerEnabled: StateFlow<Boolean> = _speakerEnabled
 
+    private val _nativeCaptionsEnabled = MutableStateFlow(plainPrefs.getBoolean("nativeCaptions.enabled", false))
+    val nativeCaptionsEnabled: StateFlow<Boolean> = _nativeCaptionsEnabled
+
     private val _translationCaptionSourceLanguage =
         MutableStateFlow(
             TranslationCaptionMode.normalizeLanguageCode(
@@ -511,6 +514,11 @@ class SecurePrefs(
     fun setSpeakerEnabled(value: Boolean) {
         plainPrefs.edit { putBoolean("voice.speakerEnabled", value) }
         _speakerEnabled.value = value
+    }
+
+    fun setNativeCaptionsEnabled(value: Boolean) {
+        plainPrefs.edit { putBoolean("nativeCaptions.enabled", value) }
+        _nativeCaptionsEnabled.value = value
     }
 
     fun setTranslationCaptionSourceLanguage(value: String) {

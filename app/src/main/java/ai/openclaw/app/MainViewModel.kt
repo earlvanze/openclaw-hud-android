@@ -116,6 +116,7 @@ class MainViewModel(
     val canvasDebugStatusEnabled: StateFlow<Boolean> = prefs.canvasDebugStatusEnabled
     val speakerEnabled: StateFlow<Boolean> = prefs.speakerEnabled
     val micEnabled: StateFlow<Boolean> = prefs.talkEnabled
+    val nativeCaptionsEnabled: StateFlow<Boolean> = prefs.nativeCaptionsEnabled
 
     val micCooldown: StateFlow<Boolean> = runtimeState(initial = false) { it.micCooldown }
     val micStatusText: StateFlow<String> = runtimeState(initial = "Mic off") { it.micStatusText }
@@ -345,7 +346,17 @@ class MainViewModel(
         ensureRuntime().setSpeakerEnabled(enabled)
     }
 
+    fun setNativeCaptionsEnabled(enabled: Boolean) {
+        prefs.setNativeCaptionsEnabled(enabled)
+        if (enabled) {
+            ensureRuntime().setTranslationCaptionsEnabled(false)
+        }
+    }
+
     fun setTranslationCaptionsEnabled(enabled: Boolean) {
+        if (enabled) {
+            prefs.setNativeCaptionsEnabled(false)
+        }
         ensureRuntime().setTranslationCaptionsEnabled(enabled)
     }
 

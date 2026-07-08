@@ -5,6 +5,7 @@ package ai.openclaw.app.ui
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.TranslationCaptionMode
 import ai.openclaw.app.chat.ChatMessage
+import ai.openclaw.app.openNativeCaptionSettings
 import ai.openclaw.app.voice.VoiceConversationEntry
 import ai.openclaw.app.voice.VoiceConversationRole
 import androidx.compose.foundation.background
@@ -57,6 +58,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -77,6 +79,7 @@ private val hudConnectedOff = Color(0xFF07210D)
 
 @Composable
 fun HudScreen(viewModel: MainViewModel) {
+    val context = LocalContext.current
     val statusText by viewModel.statusText.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
     val isNodeConnected by viewModel.isNodeConnected.collectAsState()
@@ -98,6 +101,7 @@ fun HudScreen(viewModel: MainViewModel) {
     val micInputLevel by viewModel.micInputLevel.collectAsState()
     val translationCaptionsEnabled by viewModel.translationCaptionsEnabled.collectAsState()
     val translationCaptionTargetLanguage by viewModel.translationCaptionTargetLanguage.collectAsState()
+    val nativeCaptionsEnabled by viewModel.nativeCaptionsEnabled.collectAsState()
     val notificationSnapshot by viewModel.notificationSnapshot.collectAsState()
     val pendingTrust by viewModel.pendingGatewayTrust.collectAsState()
     var prompt by rememberSaveable { mutableStateOf("") }
@@ -208,8 +212,15 @@ fun HudScreen(viewModel: MainViewModel) {
             thinkingLevel = thinkingLevel,
             translationCaptionsEnabled = translationCaptionsEnabled,
             translationCaptionTargetLanguage = translationCaptionTargetLanguage,
+            nativeCaptionsEnabled = nativeCaptionsEnabled,
             onToggleThinking = { viewModel.setChatThinkingLevel(nextHudThinkingLevel(thinkingLevel)) },
-            onToggleTranslationCaptions = { viewModel.setTranslationCaptionsEnabled(!translationCaptionsEnabled) },
+            onToggleTranslationCaptions = {
+                val enabled = !nativeCaptionsEnabled
+                viewModel.setNativeCaptionsEnabled(enabled)
+                if (enabled) {
+                    openNativeCaptionSettings(context)
+                }
+            },
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -510,6 +521,7 @@ private fun HudSignalLights(
     thinkingLevel: String,
     translationCaptionsEnabled: Boolean,
     translationCaptionTargetLanguage: String,
+    nativeCaptionsEnabled: Boolean,
     onToggleThinking: () -> Unit,
     onToggleTranslationCaptions: () -> Unit,
     modifier: Modifier = Modifier,
@@ -530,13 +542,18 @@ private fun HudSignalLights(
             maxLines = 1,
         )
         Text(
-            text = if (translationCaptionsEnabled) "cc:$translationCaptionTargetLanguage" else "cc",
+            text =
+                when {
+                    nativeCaptionsEnabled -> "cc:native"
+                    translationCaptionsEnabled -> "cc:$translationCaptionTargetLanguage"
+                    else -> "cc"
+                },
             modifier =
                 Modifier
                     .clickable(onClick = onToggleTranslationCaptions)
                     .padding(horizontal = 4.dp, vertical = 4.dp),
             style = hudReadableTextStyle,
-            color = if (translationCaptionsEnabled) hudAccent else hudMuted,
+            color = if (nativeCaptionsEnabled || translationCaptionsEnabled) hudAccent else hudMuted,
             maxLines = 1,
         )
         Icon(
