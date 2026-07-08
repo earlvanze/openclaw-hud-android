@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import android.view.Display
 import android.view.InputDevice
@@ -42,6 +43,7 @@ class MainActivity : ComponentActivity() {
     private var hudMediaSession: MediaSession? = null
     private var hudPresentation: HudPresentation? = null
     private var hudDisplayListenerRegistered = false
+    private var lastHudMicTapUptimeMs = 0L
     private val hudSystemBarsHandler = Handler(Looper.getMainLooper())
     private val hudDisplayListener =
         object : DisplayManager.DisplayListener {
@@ -259,24 +261,16 @@ class MainActivity : ComponentActivity() {
                             if (event.action != KeyEvent.ACTION_UP) {
                                 return false
                             }
-                            Log.d(TAG, "M1/media play-pause toggled mic")
-                            toggleMicFromHudInput()
-                            refreshHudMediaSessionState()
+                            handleHudMicTap(event.eventTime, source = "media-button")
                             return true
                         }
 
                         override fun onPlay() {
-                            if (!viewModel.micEnabled.value) {
-                                toggleMicFromHudInput()
-                            }
-                            refreshHudMediaSessionState()
+                            handleHudMicTap(SystemClock.uptimeMillis(), source = "media-play")
                         }
 
                         override fun onPause() {
-                            if (viewModel.micEnabled.value) {
-                                toggleMicFromHudInput()
-                            }
-                            refreshHudMediaSessionState()
+                            handleHudMicTap(SystemClock.uptimeMillis(), source = "media-pause")
                         }
                     },
                 )
@@ -342,11 +336,27 @@ class MainActivity : ComponentActivity() {
             return false
         }
 
-        toggleMicFromHudInput()
-        Log.d(TAG, "M1 key toggled mic enabled=${viewModel.micEnabled.value}")
-        refreshHudMediaSessionState()
-        applyPhoneSystemBars()
+        handleHudMicTap(event.eventTime, source = "key")
         return true
+    }
+
+    private fun handleHudMicTap(
+        eventTimeMs: Long,
+        source: String,
+    ) {
+        val now = eventTimeMs.takeIf { it > 0L } ?: SystemClock.uptimeMillis()
+        val elapsedMs = now - lastHudMicTapUptimeMs
+        if (elapsedMs in 1..HUD_MIC_DOUBLE_TAP_TIMEOUT_MS) {
+            lastHudMicTapUptimeMs = 0L
+            toggleMicFromHudInput()
+            Log.d(TAG, "M1 $source double-tap toggled mic enabled=${viewModel.micEnabled.value}")
+            refreshHudMediaSessionState()
+            applyPhoneSystemBars()
+            return
+        }
+
+        lastHudMicTapUptimeMs = now
+        Log.d(TAG, "M1 $source tap armed mic double-tap")
     }
 
     private fun toggleMicFromHudInput() {
@@ -429,5 +439,6 @@ class MainActivity : ComponentActivity() {
                 KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_SCROLL_PIXELS,
             )
         private const val HUD_KEY_SCROLL_PIXELS = 160f
+        private const val HUD_MIC_DOUBLE_TAP_TIMEOUT_MS = 500L
     }
 }
