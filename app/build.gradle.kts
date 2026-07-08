@@ -20,7 +20,7 @@ val hasAndroidReleaseSigning =
 
 val wantsAndroidReleaseBuild =
     gradle.startParameter.taskNames.any { taskName ->
-        taskName.contains("Release", ignoreCase = true) ||
+        Regex("""(^|:)(bundle|assemble).+Release$""").containsMatchIn(taskName) ||
             Regex("""(^|:)(bundle|assemble)$""").containsMatchIn(taskName)
     }
 

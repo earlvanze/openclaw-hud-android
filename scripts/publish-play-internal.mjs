@@ -18,6 +18,7 @@ function parseArgs(argv) {
     track: "internal",
     status: "draft",
     commit: false,
+    preflight: false,
     bundle: null,
     serviceAccount: process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_APPLICATION_CREDENTIALS || null,
     auth: process.env.GOOGLE_PLAY_AUTH || "auto",
@@ -32,6 +33,7 @@ function parseArgs(argv) {
     else if (arg === "--service-account") args.serviceAccount = argv[++index];
     else if (arg === "--auth") args.auth = argv[++index];
     else if (arg === "--commit") args.commit = true;
+    else if (arg === "--preflight") args.preflight = true;
     else if (arg === "--dry-run") args.commit = false;
     else if (arg === "--help" || arg === "-h") {
       console.log(
@@ -43,6 +45,8 @@ function parseArgs(argv) {
           "  --auth auto             Use service-account JSON when configured, otherwise gcloud.",
           "  --auth service-account  Require GOOGLE_PLAY_SERVICE_ACCOUNT_JSON, GOOGLE_APPLICATION_CREDENTIALS, or --service-account.",
           "  --auth gcloud           Use `gcloud auth print-access-token` from the active account.",
+          "",
+          "Use --preflight to verify Play API package/access state without uploading a bundle.",
         ].join("\n"),
       );
       process.exit(0);
@@ -178,6 +182,10 @@ async function uploadBundle(token, packageName, editId, bundlePath) {
   return response.json();
 }
 
+async function deleteEdit(token, baseUrl, editId) {
+  await googleJson(token, `${baseUrl}/edits/${encodeURIComponent(editId)}:delete`, { method: "DELETE" }).catch(() => {});
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const bundlePath = args.bundle ?? (await latestHudBundle());
@@ -188,10 +196,10 @@ async function main() {
   console.log(`Track: ${args.track}`);
   console.log(`Release status: ${args.status}`);
   console.log(`Bundle: ${bundlePath} (${bundleInfo.size} bytes)`);
-  console.log(`Mode: ${args.commit ? "commit" : "dry-run"}`);
+  console.log(`Mode: ${args.preflight ? "preflight" : args.commit ? "commit" : "dry-run"}`);
 
-  if (!args.commit) {
-    console.log("Dry-run complete. Re-run with --commit to create, upload, assign track, and commit a Google Play edit.");
+  if (!args.commit && !args.preflight) {
+    console.log("Dry-run complete. Re-run with --preflight to verify Play access, or --commit to upload and commit a Google Play edit.");
     return;
   }
 
@@ -200,6 +208,12 @@ async function main() {
   const baseUrl = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(args.packageName)}`;
   const edit = await googleJson(token, `${baseUrl}/edits`, { method: "POST", body: "{}" });
   console.log(`Created edit: ${edit.id}`);
+
+  if (args.preflight) {
+    await deleteEdit(token, baseUrl, edit.id);
+    console.log("Preflight complete. Play package and auth are valid; no bundle was uploaded.");
+    return;
+  }
 
   try {
     const bundle = await uploadBundle(token, args.packageName, edit.id, bundlePath);
@@ -223,9 +237,12 @@ async function main() {
     await googleJson(token, `${baseUrl}/edits/${encodeURIComponent(edit.id)}:commit`, { method: "POST", body: "{}" });
     console.log(`Committed Google Play edit ${edit.id}`);
   } catch (error) {
-    await googleJson(token, `${baseUrl}/edits/${encodeURIComponent(edit.id)}:delete`, { method: "DELETE" }).catch(() => {});
+    await deleteEdit(token, baseUrl, edit.id);
     throw error;
   }
 }
 
-await main();
+await main().catch((error) => {
+  console.error(error.message);
+  process.exit(1);
+});

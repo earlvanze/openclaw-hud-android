@@ -175,6 +175,7 @@ Google Play internal-track publishing helper:
 
 ```bash
 node scripts/publish-play-internal.mjs --dry-run
+node scripts/publish-play-internal.mjs --auth gcloud --preflight
 GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=/path/to/service-account.json \
   node scripts/publish-play-internal.mjs --commit
 node scripts/publish-play-internal.mjs --auth gcloud --commit
