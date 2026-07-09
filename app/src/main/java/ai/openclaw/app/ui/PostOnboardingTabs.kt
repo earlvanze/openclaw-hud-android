@@ -8,6 +8,7 @@ import ai.openclaw.app.chat.ChatModelChoice
 import ai.openclaw.app.resolveAgentIdFromMainSessionKey
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -54,8 +55,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -228,11 +236,33 @@ private fun AirVisionPhoneMainScreenHidden(
     onShowPhone: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     Box(
         modifier =
             modifier
                 .fillMaxSize()
                 .background(Color.Black)
+                .focusRequester(focusRequester)
+                .focusable()
+                .onPreviewKeyEvent { event ->
+                    val shouldRestore =
+                        event.type == KeyEventType.KeyUp &&
+                            (
+                                event.key == Key.Enter ||
+                                    event.key == Key.NumPadEnter ||
+                                    event.key == Key.Back ||
+                                    event.key == Key.Escape
+                            )
+                    if (shouldRestore) {
+                        onShowPhone()
+                    }
+                    shouldRestore
+                }
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)),
     ) {
         Box(
