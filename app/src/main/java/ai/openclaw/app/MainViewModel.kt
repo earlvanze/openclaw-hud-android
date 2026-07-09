@@ -123,6 +123,7 @@ class MainViewModel(
     val nativeCaptionsEnabled: StateFlow<Boolean> = prefs.nativeCaptionsEnabled
     val airVisionDisplaySettings: StateFlow<AirVisionDisplaySettings> = prefs.airVisionDisplaySettings
     val airVisionHudControls: StateFlow<AirVisionHudControls> = prefs.airVisionHudControls
+    val airVisionAppLanguage: StateFlow<AirVisionAppLanguage> = prefs.airVisionAppLanguage
     val airVisionUsbState: StateFlow<AirVisionUsbState> = nodeApp.airVisionUsb.state
 
     val micCooldown: StateFlow<Boolean> = runtimeState(initial = false) { it.micCooldown }
@@ -445,6 +446,10 @@ class MainViewModel(
 
     fun setAirVisionHudMediaKeyAction(action: AirVisionHudMediaKeyAction) {
         prefs.setAirVisionHudMediaKeyAction(action)
+    }
+
+    fun setAirVisionAppLanguage(language: AirVisionAppLanguage) {
+        prefs.setAirVisionAppLanguage(language)
     }
 
     fun refreshAirVisionUsb() {

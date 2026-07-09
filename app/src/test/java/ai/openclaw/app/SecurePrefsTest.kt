@@ -260,4 +260,18 @@ class SecurePrefsTest {
         assertEquals(AirVisionHudKeyAction.AdjustDistance, controls.brightnessKeyAction)
         assertEquals(AirVisionHudMediaKeyAction.None, controls.mediaKeyAction)
     }
+
+    @Test
+    fun airVisionAppLanguage_persists() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        assertEquals(AirVisionAppLanguage.System, prefs.airVisionAppLanguage.value)
+
+        prefs.setAirVisionAppLanguage(AirVisionAppLanguage.Spanish)
+
+        assertEquals(AirVisionAppLanguage.Spanish, SecurePrefs(context).airVisionAppLanguage.value)
+    }
 }

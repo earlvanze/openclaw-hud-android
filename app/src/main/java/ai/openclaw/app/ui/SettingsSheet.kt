@@ -1,5 +1,6 @@
 package ai.openclaw.app.ui
 
+import ai.openclaw.app.AirVisionAppLanguage
 import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionHudDoubleTapAction
 import ai.openclaw.app.AirVisionHudKeyAction
@@ -50,6 +51,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -61,6 +63,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -77,6 +80,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -103,6 +107,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val notificationForwardingSessionKey by viewModel.notificationForwardingSessionKey.collectAsState()
     val airVisionDisplaySettings by viewModel.airVisionDisplaySettings.collectAsState()
     val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
+    val airVisionAppLanguage by viewModel.airVisionAppLanguage.collectAsState()
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
 
     var notificationQuietStartDraft by remember(notificationForwardingQuietStart) {
@@ -166,6 +171,8 @@ fun SettingsSheet(viewModel: MainViewModel) {
                 versionName
             }
         }
+    val appBuild = remember { BuildConfig.VERSION_CODE.toString() }
+    var showAirVisionLegalNote by remember { mutableStateOf(false) }
     var assistantRoleAvailable by remember(context) { mutableStateOf(isAssistantRoleAvailable(context)) }
     var assistantRoleHeld by remember(context) { mutableStateOf(isAssistantRoleHeld(context)) }
     val listItemColors =
@@ -176,6 +183,28 @@ fun SettingsSheet(viewModel: MainViewModel) {
             trailingIconColor = mobileTextSecondary,
             leadingIconColor = mobileTextSecondary,
         )
+
+    if (showAirVisionLegalNote) {
+        AlertDialog(
+            onDismissRequest = { showAirVisionLegalNote = false },
+            containerColor = mobileCardSurface,
+            title = {
+                Text("AirVision Legal", style = mobileTitle2, color = mobileText)
+            },
+            text = {
+                Text(
+                    "ASUS displays the AirVision EULA inside the Windows AirVision app. This Android HUD is an OpenClaw companion and does not replace ASUS firmware, warranty, registration, or license terms.",
+                    style = mobileCallout,
+                    color = mobileTextSecondary,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { showAirVisionLegalNote = false }) {
+                    Text("Understood", color = mobileAccent)
+                }
+            },
+        )
+    }
 
     val permissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { perms ->
@@ -935,6 +964,69 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     color = mobileTextSecondary,
                 )
             }
+            item {
+                Column(modifier = Modifier.settingsRowModifier()) {
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("App Preferences", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Windows-style AirVision companion preferences, support links, and release metadata.",
+                                style = mobileCallout,
+                            )
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "Language",
+                        currentLabel = airVisionAppLanguage.label,
+                        supportingText = "Stores the preferred AirVision companion language; Android UI follows system resources.",
+                        options = AirVisionAppLanguage.entries.toList(),
+                        selected = airVisionAppLanguage,
+                        optionLabel = { it.label },
+                        optionDescription = ::airVisionAppLanguageDescription,
+                        onSelected = viewModel::setAirVisionAppLanguage,
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Software Version", style = mobileHeadline) },
+                        supportingContent = {
+                            Text("OpenClaw HUD $appVersion ($appBuild)", style = mobileCallout)
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionLinkRow(
+                        title = "End-User License",
+                        supportingText = "Shows the Android companion legal note and ASUS EULA availability.",
+                        buttonText = "View",
+                        onClick = { showAirVisionLegalNote = true },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionLinkRow(
+                        title = "FAQ & Tutorials",
+                        supportingText = "Open the official ASUS AirVision M1 setup, app, and troubleshooting FAQ.",
+                        buttonText = "Open",
+                        onClick = { openExternalUrl(context, AIR_VISION_FAQ_URL) },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionLinkRow(
+                        title = "Product Registration",
+                        supportingText = "Open the official ASUS product registration page.",
+                        buttonText = "Open",
+                        onClick = { openExternalUrl(context, AIR_VISION_PRODUCT_REGISTRATION_URL) },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionLinkRow(
+                        title = "ASUS Support",
+                        supportingText = "Open the AirVision M1 support page for warranty, service, and manuals.",
+                        buttonText = "Open",
+                        onClick = { openExternalUrl(context, AIR_VISION_SUPPORT_URL) },
+                    )
+                }
+            }
 
             // ── Media ──
             item {
@@ -1618,6 +1710,37 @@ fun SettingsSheet(viewModel: MainViewModel) {
 }
 
 @Composable
+private fun AirVisionLinkRow(
+    title: String,
+    supportingText: String,
+    buttonText: String,
+    onClick: () -> Unit,
+) {
+    ListItem(
+        modifier = Modifier.fillMaxWidth(),
+        colors =
+            ListItemDefaults.colors(
+                containerColor = Color.Transparent,
+                headlineColor = mobileText,
+                supportingColor = mobileTextSecondary,
+                trailingIconColor = mobileTextSecondary,
+                leadingIconColor = mobileTextSecondary,
+            ),
+        headlineContent = { Text(title, style = mobileHeadline) },
+        supportingContent = { Text(supportingText, style = mobileCallout) },
+        trailingContent = {
+            Button(
+                onClick = onClick,
+                colors = settingsPrimaryButtonColors(),
+                shape = RoundedCornerShape(14.dp),
+            ) {
+                Text(buttonText, style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+            }
+        },
+    )
+}
+
+@Composable
 private fun <T> AirVisionOptionGroup(
     title: String,
     currentLabel: String,
@@ -1758,6 +1881,12 @@ private fun airVisionBrightnessKeyActionDescription(action: AirVisionHudKeyActio
         AirVisionHudKeyAction.ScrollChat -> "Use brightness key events as chat scroll controls."
         AirVisionHudKeyAction.AdjustBrightness -> "Use brightness up and down to step Android HUD brightness."
         AirVisionHudKeyAction.AdjustDistance -> "Use brightness up and down to step virtual distance farther or closer."
+    }
+
+private fun airVisionAppLanguageDescription(language: AirVisionAppLanguage): String =
+    when (language) {
+        AirVisionAppLanguage.System -> "Follow the Android system language."
+        else -> "Store ${language.label} as the AirVision companion language preference."
     }
 
 private fun airVisionMediaKeyActionDescription(action: AirVisionHudMediaKeyAction): String =
@@ -1918,6 +2047,18 @@ private fun openNotificationListenerSettings(context: Context) {
     }
 }
 
+private fun openExternalUrl(
+    context: Context,
+    url: String,
+) {
+    val intent =
+        Intent(Intent.ACTION_VIEW, url.toUri())
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    runCatching {
+        context.startActivity(intent)
+    }
+}
+
 private fun hasNotificationsPermission(context: Context): Boolean {
     if (Build.VERSION.SDK_INT < 33) return true
     return ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
@@ -1934,6 +2075,11 @@ private fun hasMotionCapabilities(context: Context): Boolean {
 
 private fun isAssistantRoleAvailable(context: Context): Boolean =
     context.getSystemService(RoleManager::class.java).isRoleAvailable(RoleManager.ROLE_ASSISTANT)
+
+private const val AIR_VISION_FAQ_URL = "https://www.asus.com/support/faq/1054069/"
+private const val AIR_VISION_PRODUCT_REGISTRATION_URL = "https://account.asus.com/product_reg.aspx"
+private const val AIR_VISION_SUPPORT_URL =
+    "https://www.asus.com/displays-desktops/glasses/airvision/asus-airvision-m1/helpdesk_knowledge?model2Name=ASUS-AirVision-M1"
 
 private fun isAssistantRoleHeld(context: Context): Boolean =
     context.getSystemService(RoleManager::class.java).isRoleHeld(RoleManager.ROLE_ASSISTANT)

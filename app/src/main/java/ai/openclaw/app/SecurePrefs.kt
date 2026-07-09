@@ -53,6 +53,7 @@ class SecurePrefs(
         private const val AIR_VISION_HUD_SWIPE_ACTION_KEY = "airVision.hud.swipeAction"
         private const val AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY = "airVision.hud.brightnessKeyAction"
         private const val AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY = "airVision.hud.mediaKeyAction"
+        private const val AIR_VISION_APP_LANGUAGE_KEY = "airVision.app.language"
     }
 
     private val appContext = context.applicationContext
@@ -193,6 +194,12 @@ class SecurePrefs(
 
     private val _airVisionHudControls = MutableStateFlow(loadAirVisionHudControls())
     val airVisionHudControls: StateFlow<AirVisionHudControls> = _airVisionHudControls
+
+    private val _airVisionAppLanguage =
+        MutableStateFlow(
+            AirVisionAppLanguage.fromRawValue(plainPrefs.getString(AIR_VISION_APP_LANGUAGE_KEY, null)),
+        )
+    val airVisionAppLanguage: StateFlow<AirVisionAppLanguage> = _airVisionAppLanguage
 
     private val _translationCaptionSourceLanguage =
         MutableStateFlow(
@@ -721,6 +728,11 @@ class SecurePrefs(
     fun setAirVisionHudMediaKeyAction(action: AirVisionHudMediaKeyAction) {
         plainPrefs.edit { putString(AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY, action.rawValue) }
         _airVisionHudControls.value = _airVisionHudControls.value.copy(mediaKeyAction = action)
+    }
+
+    fun setAirVisionAppLanguage(language: AirVisionAppLanguage) {
+        plainPrefs.edit { putString(AIR_VISION_APP_LANGUAGE_KEY, language.rawValue) }
+        _airVisionAppLanguage.value = language
     }
 
     fun setTranslationCaptionSourceLanguage(value: String) {
