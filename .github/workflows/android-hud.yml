@@ -23,6 +23,12 @@ jobs:
 
       - uses: android-actions/setup-android@v4
 
+      - name: Pin Android SDK platform
+        run: |
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+          find "$ANDROID_HOME/platforms" -mindepth 1 -maxdepth 1 -type d ! -name android-36 -exec rm -rf {} +
+          ls "$ANDROID_HOME/platforms"
+
       - name: Verify HUD build
         run: |
           ./gradlew --no-daemon --max-workers=1 \

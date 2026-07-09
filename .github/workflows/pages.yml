@@ -27,11 +27,11 @@ jobs:
       - name: Verify generated privacy policy
         run: node scripts/render-privacy-policy-site.mjs --check
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
 
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: docs
 
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
