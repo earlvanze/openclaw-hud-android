@@ -58,7 +58,8 @@ Current local status:
 - `lintHudRelease` passes.
 - `testHudDebugUnitTest` passes.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
-  English listing copy, and release notes character limits.
+  English listing copy, release notes character limits, and local Play
+  submission packet.
 - `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account
   earlvanze@gmail.com --auth-check` verifies the selected local OAuth publisher
   account before any Play API request.

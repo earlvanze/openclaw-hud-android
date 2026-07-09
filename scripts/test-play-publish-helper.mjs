@@ -89,6 +89,15 @@ exit 64
       GOOGLE_PLAY_AUTH: "gcloud",
     };
 
+    const dryRun = runPublish(["--dry-run"], env);
+    const dryRunText = outputText(dryRun);
+    if (!dryRunText.includes("Local Play submission package verified.")) {
+      throw new Error(`Dry-run did not verify the local Play submission package:\n${dryRunText}`);
+    }
+    if (!dryRunText.includes("Dry-run complete.")) {
+      throw new Error(`Dry-run did not complete before Play API access:\n${dryRunText}`);
+    }
+
     const missingAllowed = runPublish(
       ["--auth", "gcloud", "--gcloud-account", allowedAccount, "--auth-check"],
       { ...env, OPENCLAW_FAKE_GCLOUD_SCENARIO: "missing-allowed" },

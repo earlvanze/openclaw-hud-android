@@ -270,13 +270,15 @@ node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@
 The publish helper defaults to package `ai.openclaw.app.hud`, track `internal`,
 release status `draft`, and the newest HUD AAB from either
 `build/release-bundles/*-hud-release.aab` or Gradle's direct
-`app/build/outputs/bundle/hudRelease/app-hud-release.aab` output. It validates the English Play
-listing files, creates a Play edit, uploads the AAB, patches the localized
-store listing, attaches localized release notes to the internal-track release,
-and commits only when `--commit` is supplied. Commit mode refuses to create a
-Play edit or upload a bundle until `node scripts/verify-play-submission-package.mjs --final`
-passes, so screenshots, hosted privacy URL, tester setup, reviewer access, and
-app creation status must be recorded locally first. Auth can come from a Play
+`app/build/outputs/bundle/hudRelease/app-hud-release.aab` output. It validates
+the English Play listing files and runs
+`node scripts/verify-play-submission-package.mjs` during dry-run, preflight, and
+commit flows. Commit mode creates a Play edit, uploads the AAB, patches the
+localized store listing, attaches localized release notes to the internal-track
+release, and refuses to upload until
+`node scripts/verify-play-submission-package.mjs --final` passes, so
+screenshots, hosted privacy URL, tester setup, reviewer access, and app creation
+status must be recorded locally first. Auth can come from a Play
 Console service-account JSON file or the active `gcloud auth print-access-token`
 account. For `--auth gcloud`, the helper restricts publishing to
 `earlvanze@gmail.com` or `earl@earlbnb.com` by default so an accidental active

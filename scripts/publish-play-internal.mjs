@@ -399,6 +399,27 @@ function verifyFinalSubmissionReadinessBeforeUpload() {
   console.log("Final Play submission readiness verified.");
 }
 
+function verifyLocalSubmissionPackageBeforePublish() {
+  const result = spawnSync(process.execPath, [join(scriptDir, "verify-play-submission-package.mjs")], {
+    cwd: androidDir,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (result.status !== 0) {
+    const detail = result.stderr.trim() || result.stdout.trim() || "Local Play submission verifier failed.";
+    throw new Error(
+      [
+        "Refusing Google Play publish flow because the local submission package has not passed.",
+        detail,
+        "Run `node scripts/verify-play-submission-package.mjs` and fix the local Play packet before retrying.",
+      ].join("\n"),
+    );
+  }
+  const summary = result.stdout.trim();
+  if (summary) console.log(summary);
+  console.log("Local Play submission package verified.");
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const bundlePath = args.bundle ?? (args.preflight || args.authCheck ? null : await latestHudBundle());
@@ -437,6 +458,10 @@ async function main() {
     console.log("Release notes: skipped");
   }
   console.log(`Mode: ${args.authCheck ? "auth-check" : args.preflight ? "preflight" : args.commit ? "commit" : "dry-run"}`);
+
+  if (!args.authCheck) {
+    verifyLocalSubmissionPackageBeforePublish();
+  }
 
   if (!args.commit && !args.preflight && !args.authCheck) {
     console.log("Dry-run complete. Re-run with --preflight to verify Play access, or --commit to upload and commit a Google Play edit.");
