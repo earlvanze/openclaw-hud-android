@@ -1,0 +1,91 @@
+{
+  "schema": "openclaw.play.app-content",
+  "version": 1,
+  "packageName": "ai.openclaw.app.hud",
+  "privacyPolicy": {
+    "sourceFile": "play/privacy-policy.md",
+    "inAppLocation": "Settings > AirVision M1 > App Preferences > EULA / Privacy note",
+    "requiresHostedUrlBeforeSubmission": true
+  },
+  "ads": {
+    "containsAds": false
+  },
+  "appAccess": {
+    "restrictedFeatures": true,
+    "reviewAccessInstructions": "OpenClaw HUD can be reviewed without a live gateway by opening Settings > AirVision M1 > App Preferences and enabling Demo Mode. Gateway pairing is optional for the HUD surface. If Google Play review needs live gateway features, provide a temporary setup code or demo gateway credentials in the Play Console App access form only; do not store those credentials in this repository."
+  },
+  "targetAudience": {
+    "designedForChildren": false,
+    "recommendedAgeGroups": ["18+"],
+    "rationale": "OpenClaw HUD is a developer/operator assistant HUD for Samsung DeX and wearable display workflows, not a children-directed app."
+  },
+  "contentRating": {
+    "category": "Productivity",
+    "notes": "No gambling, financial trading, dating, UGC social feed, or ads. Assistant responses depend on the user-configured OpenClaw gateway and selected model/provider."
+  },
+  "dataDeletion": {
+    "accountCreationInApp": false,
+    "userDeletionPath": "Android Settings > Apps > OpenClaw HUD > Storage > Clear data, or uninstall the app.",
+    "webDeletionRequestRequired": false,
+    "notes": "The HUD app does not create an OpenClaw cloud account. Gateway accounts, logs, and model-provider data are controlled by the user's configured gateway/provider."
+  },
+  "dataSafety": {
+    "sellsData": false,
+    "dataUsedForAdvertising": false,
+    "dataEncryptedInTransitAnswer": "no_not_all_paths",
+    "dataEncryptedInTransitNotes": "Public gateway URLs require wss:// or Tailscale Serve. The app also permits cleartext ws:// only for localhost, Android emulator, private LAN, link-local, and Tailnet-style addresses so developers can connect to self-hosted gateways. Do not answer that all collected user data is encrypted in transit unless these self-hosted cleartext paths are disabled before submission.",
+    "dataDeletionSupported": true,
+    "collectedData": [
+      {
+        "playType": "Audio",
+        "optional": true,
+        "purpose": ["App functionality"],
+        "whereUsed": "Wake word, push-to-talk, and realtime caption/translation workflows when enabled by the user.",
+        "destination": "Configured OpenClaw gateway and the model/provider selected through that gateway."
+      },
+      {
+        "playType": "App activity",
+        "optional": true,
+        "purpose": ["App functionality"],
+        "whereUsed": "HUD chat messages, assistant run status, active session/provider selections, and notification summaries when enabled.",
+        "destination": "Configured OpenClaw gateway."
+      },
+      {
+        "playType": "App info and performance",
+        "optional": false,
+        "purpose": ["App functionality"],
+        "whereUsed": "Local gateway connection state, device capability status, AirVision profile settings, and diagnostics exports created explicitly by the user.",
+        "destination": "Stored locally unless the user exports diagnostics or connects to a gateway."
+      }
+    ],
+    "notCollected": [
+      "Advertising ID",
+      "Precise location",
+      "Contacts",
+      "Calendar",
+      "SMS",
+      "Call logs",
+      "Photos and videos"
+    ]
+  },
+  "sensitivePermissions": {
+    "sms": false,
+    "callLog": false,
+    "camera": false,
+    "location": false,
+    "contacts": false,
+    "calendar": false,
+    "mediaLibrary": false,
+    "accessibilityService": false,
+    "overlayWindows": false,
+    "microphone": true,
+    "notifications": true,
+    "nearbyDevices": true
+  },
+  "reviewEvidence": {
+    "releaseVerifier": "node scripts/verify-play-hud-release.mjs",
+    "submissionVerifier": "node scripts/verify-play-submission-package.mjs",
+    "ciWorkflow": ".github/workflows/android-hud.yml",
+    "demoMode": "Settings > AirVision M1 > App Preferences > Demo Mode"
+  }
+}

@@ -242,6 +242,7 @@ Google Play internal-track publishing helper:
 
 ```bash
 node scripts/verify-play-hud-release.mjs
+node scripts/verify-play-submission-package.mjs
 node scripts/publish-play-internal.mjs --dry-run
 node scripts/publish-play-internal.mjs --auth gcloud --preflight
 GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=/path/to/service-account.json \
@@ -271,6 +272,13 @@ GitHub Actions also builds the HUD release bundle with
 `--skip-signature` so CI can validate the release manifest and listing without
 repo-stored signing keys. Publishing still requires the locally signed bundle
 from `scripts/build-release-aab.mjs`.
+
+`verify-play-submission-package.mjs` checks the local Play App content packet in
+`play/app-content-answers.json` against the generated HUD manifest, privacy
+policy, data-safety notes, console checklist, and English listing files. It is a
+drift guard for Play Console form prep; the final hosted privacy-policy URL,
+screenshots, tester access, and any reviewer setup codes still belong in Play
+Console.
 
 ## Kotlin Lint + Format
 

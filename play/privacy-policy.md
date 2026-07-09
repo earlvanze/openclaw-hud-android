@@ -6,6 +6,6 @@ The Google Play HUD build may request microphone, notification, nearby-device, n
 
 Notification access is optional. If enabled, notification text may be summarized locally in the app UI and sent to your configured OpenClaw gateway so your assistant can display glanceable context. Secret-shaped fields such as tokens and passwords are redacted before HUD display.
 
-Voice and caption features may send microphone transcripts or caption text to your configured OpenClaw gateway and its selected model provider. OpenClaw HUD does not sell personal data and does not include advertising.
+Voice and caption features may send microphone transcripts, caption text, chat text, assistant status, and selected AirVision HUD settings to your configured OpenClaw gateway and its selected model provider for app functionality. Public gateway URLs require `wss://` or Tailscale Serve. Developer/self-hosted connections may use local, private LAN, Tailnet, or emulator `ws://` endpoints that you configure.
 
-To delete app data, use Android Settings > Apps > OpenClaw HUD > Storage > Clear data, or uninstall the app.
+OpenClaw HUD does not sell personal data and does not include advertising. The app does not create an OpenClaw cloud account. To delete app data stored on this Android device, use Android Settings > Apps > OpenClaw HUD > Storage > Clear data, or uninstall the app. Gateway-side accounts, logs, model-provider data, and backups are controlled by the gateway or provider you configured.

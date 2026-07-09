@@ -1,0 +1,249 @@
+#!/usr/bin/env node
+
+import { readFile, stat } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const androidDir = join(scriptDir, "..");
+const defaultManifestPath = join(
+  androidDir,
+  "app",
+  "build",
+  "intermediates",
+  "packaged_manifests",
+  "hudRelease",
+  "processHudReleaseManifestForPackage",
+  "AndroidManifest.xml",
+);
+const defaultAppContentPath = join(androidDir, "play", "app-content-answers.json");
+const defaultPrivacyPolicyPath = join(androidDir, "play", "privacy-policy.md");
+const defaultDataSafetyNotesPath = join(androidDir, "play", "data-safety-notes.md");
+const defaultConsoleChecklistPath = join(androidDir, "play", "console-checklist.md");
+const defaultListingDir = join(androidDir, "play", "listings", "en-US");
+
+const expectedPackage = "ai.openclaw.app.hud";
+const expectedSchema = "openclaw.play.app-content";
+
+const forbiddenPermissionGroups = {
+  sms: ["android.permission.SEND_SMS", "android.permission.READ_SMS"],
+  callLog: ["android.permission.READ_CALL_LOG"],
+  camera: ["android.permission.CAMERA"],
+  location: ["android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_BACKGROUND_LOCATION"],
+  contacts: ["android.permission.READ_CONTACTS", "android.permission.WRITE_CONTACTS"],
+  calendar: ["android.permission.READ_CALENDAR", "android.permission.WRITE_CALENDAR"],
+  mediaLibrary: [
+    "android.permission.READ_EXTERNAL_STORAGE",
+    "android.permission.READ_MEDIA_IMAGES",
+    "android.permission.READ_MEDIA_VIDEO",
+    "android.permission.READ_MEDIA_AUDIO",
+    "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+  ],
+  overlayWindows: ["android.permission.SYSTEM_ALERT_WINDOW"],
+};
+
+const requiredTruePermissionGroups = {
+  microphone: ["android.permission.RECORD_AUDIO"],
+  notifications: ["android.permission.POST_NOTIFICATIONS"],
+  nearbyDevices: ["android.permission.NEARBY_WIFI_DEVICES"],
+};
+
+function parseArgs(argv) {
+  const args = {
+    manifest: defaultManifestPath,
+    appContent: defaultAppContentPath,
+    privacyPolicy: defaultPrivacyPolicyPath,
+    dataSafetyNotes: defaultDataSafetyNotesPath,
+    consoleChecklist: defaultConsoleChecklistPath,
+    listingDir: defaultListingDir,
+  };
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--manifest") args.manifest = resolve(argv[++index]);
+    else if (arg === "--app-content") args.appContent = resolve(argv[++index]);
+    else if (arg === "--privacy-policy") args.privacyPolicy = resolve(argv[++index]);
+    else if (arg === "--data-safety-notes") args.dataSafetyNotes = resolve(argv[++index]);
+    else if (arg === "--console-checklist") args.consoleChecklist = resolve(argv[++index]);
+    else if (arg === "--listing-dir") args.listingDir = resolve(argv[++index]);
+    else if (arg === "--help" || arg === "-h") {
+      console.log(
+        [
+          "Usage: node scripts/verify-play-submission-package.mjs [--manifest path]",
+          "",
+          "Checks the local Google Play submission packet against the generated HUD manifest,",
+          "privacy policy, data-safety notes, console checklist, and English listing files.",
+        ].join("\n"),
+      );
+      process.exit(0);
+    } else {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+  }
+
+  return args;
+}
+
+async function readText(path) {
+  return readFile(path, "utf8");
+}
+
+async function readJson(path) {
+  return JSON.parse(await readText(path));
+}
+
+async function requireFile(path, label) {
+  const info = await stat(path);
+  if (!info.isFile() || info.size <= 0) throw new Error(`${label} is missing or empty: ${path}`);
+  return info.size;
+}
+
+function openingTags(xml, tagName) {
+  return [...xml.matchAll(new RegExp(`<${tagName}\\b[^>]*>`, "gu"))].map((match) => match[0]);
+}
+
+function attr(element, attrName) {
+  const escaped = attrName.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  return element.match(new RegExp(`\\b${escaped}\\s*=\\s*"([^"]*)"`, "u"))?.[1] ?? null;
+}
+
+function manifestPermissions(xml) {
+  return new Set(
+    openingTags(xml, "uses-permission")
+      .map((tag) => attr(tag, "android:name"))
+      .filter((value) => value !== null),
+  );
+}
+
+function manifestServicePermissions(xml) {
+  return new Set(
+    openingTags(xml, "service")
+      .map((tag) => attr(tag, "android:permission"))
+      .filter((value) => value !== null),
+  );
+}
+
+function requireIncludes(label, text, needles) {
+  const lower = text.toLowerCase();
+  const missing = needles.filter((needle) => !lower.includes(needle.toLowerCase()));
+  if (missing.length > 0) throw new Error(`${label} is missing required text: ${missing.join(", ")}`);
+}
+
+function requireArrayIncludes(label, values, expected) {
+  const missing = expected.filter((value) => !values.includes(value));
+  if (missing.length > 0) throw new Error(`${label} is missing: ${missing.join(", ")}`);
+}
+
+function requireBoolean(value, expected, label) {
+  if (value !== expected) throw new Error(`${label} expected ${expected}, got ${value}`);
+}
+
+function verifyAppContentShape(appContent) {
+  if (appContent.schema !== expectedSchema) throw new Error(`Unsupported app-content schema: ${appContent.schema}`);
+  if (appContent.version !== 1) throw new Error(`Unsupported app-content version: ${appContent.version}`);
+  if (appContent.packageName !== expectedPackage) throw new Error(`App-content package is ${appContent.packageName}, expected ${expectedPackage}`);
+  requireBoolean(appContent.ads?.containsAds, false, "Ads declaration");
+  requireBoolean(appContent.targetAudience?.designedForChildren, false, "Target-audience children declaration");
+  requireBoolean(appContent.dataDeletion?.accountCreationInApp, false, "Account creation declaration");
+  requireBoolean(appContent.dataDeletion?.webDeletionRequestRequired, false, "Web deletion request declaration");
+  requireBoolean(appContent.dataSafety?.sellsData, false, "Data sale declaration");
+  requireBoolean(appContent.dataSafety?.dataUsedForAdvertising, false, "Advertising data declaration");
+  requireBoolean(appContent.dataSafety?.dataDeletionSupported, true, "Data deletion support declaration");
+  if (appContent.dataSafety?.dataEncryptedInTransitAnswer !== "no_not_all_paths") {
+    throw new Error("Data safety transport-security answer must reflect that not all self-hosted gateway paths are encrypted.");
+  }
+  if (!appContent.privacyPolicy?.requiresHostedUrlBeforeSubmission) {
+    throw new Error("Privacy policy must require a hosted URL before Play submission.");
+  }
+  if (!appContent.appAccess?.restrictedFeatures || !appContent.appAccess.reviewAccessInstructions?.includes("Demo Mode")) {
+    throw new Error("App access instructions must document Demo Mode review access.");
+  }
+  requireArrayIncludes(
+    "Data safety not-collected list",
+    appContent.dataSafety?.notCollected ?? [],
+    ["Advertising ID", "Precise location", "Contacts", "Calendar", "SMS", "Call logs", "Photos and videos"],
+  );
+  const dataTypes = (appContent.dataSafety?.collectedData ?? []).map((entry) => entry.playType);
+  requireArrayIncludes("Data safety collected data types", dataTypes, ["Audio", "App activity", "App info and performance"]);
+}
+
+function verifyManifestAgainstAppContent(xml, appContent) {
+  const manifestTag = xml.match(/<manifest\b[^>]*>/u)?.[0];
+  if (!manifestTag) throw new Error("No <manifest> tag found in HUD manifest.");
+  const packageName = attr(manifestTag, "package");
+  if (packageName !== expectedPackage) throw new Error(`HUD manifest package is ${packageName}, expected ${expectedPackage}`);
+
+  const permissions = manifestPermissions(xml);
+  const servicePermissions = manifestServicePermissions(xml);
+  if (!servicePermissions.has("android.permission.BIND_NOTIFICATION_LISTENER_SERVICE")) {
+    throw new Error("HUD manifest must declare the notification-listener service permission.");
+  }
+  if (servicePermissions.has("android.permission.BIND_ACCESSIBILITY_SERVICE")) {
+    throw new Error("HUD manifest declares AccessibilityService but app-content marks it unsupported.");
+  }
+
+  for (const [group, groupPermissions] of Object.entries(forbiddenPermissionGroups)) {
+    const hasForbidden = groupPermissions.some((permission) => permissions.has(permission));
+    if (hasForbidden) throw new Error(`HUD manifest contains forbidden ${group} permission.`);
+    requireBoolean(appContent.sensitivePermissions?.[group], false, `Sensitive permission ${group}`);
+  }
+
+  for (const [group, groupPermissions] of Object.entries(requiredTruePermissionGroups)) {
+    const present = groupPermissions.some((permission) => permissions.has(permission));
+    if (!present) throw new Error(`HUD manifest is missing expected ${group} permission.`);
+    requireBoolean(appContent.sensitivePermissions?.[group], true, `Sensitive permission ${group}`);
+  }
+
+  return permissions.size;
+}
+
+async function verifyListing(listingDir) {
+  const files = ["title.txt", "short-description.txt", "full-description.txt", "release-notes.txt"];
+  for (const file of files) await requireFile(join(listingDir, file), `Listing ${file}`);
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const appContent = await readJson(args.appContent);
+  const manifestXml = await readText(args.manifest);
+  const privacyPolicy = await readText(args.privacyPolicy);
+  const dataSafetyNotes = await readText(args.dataSafetyNotes);
+  const consoleChecklist = await readText(args.consoleChecklist);
+
+  await verifyListing(args.listingDir);
+  verifyAppContentShape(appContent);
+  const permissionCount = verifyManifestAgainstAppContent(manifestXml, appContent);
+
+  requireIncludes("Privacy policy", privacyPolicy, [
+    "microphone",
+    "notification",
+    "gateway",
+    "encrypted storage",
+    "does not sell personal data",
+    "clear data",
+  ]);
+  requireIncludes("Data safety notes", dataSafetyNotes, [
+    "No advertising",
+    "Optional microphone",
+    "Optional notification-listener",
+    "Data is sent only to the OpenClaw gateway endpoint configured by the user",
+  ]);
+  requireIncludes("Console checklist", consoleChecklist, [
+    "Data safety",
+    "App access",
+    "Target audience",
+    "Data deletion",
+    "verify-play-submission-package",
+  ]);
+
+  console.log(`App-content package: ${appContent.packageName}`);
+  console.log(`Manifest permissions checked: ${permissionCount}`);
+  console.log(`Privacy policy: ${args.privacyPolicy}`);
+  console.log(`App-content answers: ${args.appContent}`);
+  console.log("Play submission package verifier passed.");
+}
+
+await main().catch((error) => {
+  console.error(error.message);
+  process.exit(1);
+});

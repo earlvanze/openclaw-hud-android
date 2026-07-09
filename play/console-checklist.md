@@ -11,6 +11,8 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 - Use the copy in `play/listings/en-US/` for the initial English listing.
 - Use `play/privacy-policy.md` as the hosted privacy-policy source.
 - Run `node scripts/verify-play-hud-release.mjs` before every Play upload.
+- Run `node scripts/verify-play-submission-package.mjs` before filling or
+  updating Play Console App content answers.
 - Upload `build/release-bundles/openclaw-2026.7.9-hud-release.aab` to the internal track first.
 - Keep the initial release status as `draft` until screenshots, policy forms, and tester access are verified.
 
@@ -26,6 +28,12 @@ Current local status:
 - `testHudDebugUnitTest` passes.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, and release notes character limits.
+- `play/app-content-answers.json` contains the draft App content answers for
+  Privacy policy, Ads, App access, Target audience, Content rating, Data
+  deletion, and Data safety. Keep it aligned with the final Play Console forms.
+- `node scripts/verify-play-submission-package.mjs` checks the App content
+  packet against the HUD manifest, privacy policy, data-safety notes, console
+  checklist, and English listing files.
 - The publish helper now patches the English Play listing and localized release
   notes during `--commit` unless `--skip-listing` or `--skip-release-notes` is
   supplied.
