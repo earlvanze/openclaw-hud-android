@@ -10,6 +10,7 @@ data class AirVisionDiagnosticsSnapshot(
     val version: Int = AirVisionDiagnosticsSnapshots.VERSION,
     val usb: AirVisionDiagnosticsUsb,
     val activeProfile: AirVisionBackupDisplayProfile,
+    val hudRuntime: AirVisionDiagnosticsHudRuntime,
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
 )
@@ -76,9 +77,19 @@ data class AirVisionDiagnosticsEndpoint(
     val interval: Int,
 )
 
+@Serializable
+data class AirVisionDiagnosticsHudRuntime(
+    val transcriptEntryCount: Int,
+    val captionEntryCount: Int,
+    val colorPreviewOverlaysEnabled: Boolean,
+    val brightnessDimmingEnabled: Boolean,
+    val ipdAdjustmentEnabled: Boolean,
+    val threeDModeAvailable: Boolean,
+)
+
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 2
+    const val VERSION = 3
 
     private val json =
         Json {
@@ -143,6 +154,20 @@ object AirVisionDiagnosticsSnapshots {
                         },
                 ),
             activeProfile = AirVisionProfileBackups.profileFromSettings(displaySettings),
+            hudRuntime =
+                AirVisionDiagnosticsHudRuntime(
+                    transcriptEntryCount = AirVisionDisplaySettings.hudTranscriptEntryCount(displaySettings.lightLoadModeEnabled),
+                    captionEntryCount = AirVisionDisplaySettings.hudCaptionEntryCount(displaySettings.lightLoadModeEnabled),
+                    colorPreviewOverlaysEnabled =
+                        AirVisionDisplaySettings.hudColorPreviewAlpha(
+                            alpha = 1f,
+                            lightLoadModeEnabled = displaySettings.lightLoadModeEnabled,
+                        ) > 0f,
+                    brightnessDimmingEnabled =
+                        AirVisionDisplaySettings.hudDimAlphaForBrightnessPercent(displaySettings.brightnessPercent) > 0f,
+                    ipdAdjustmentEnabled = displaySettings.ipdAdjustmentEnabled,
+                    threeDModeAvailable = displaySettings.threeDModeAvailable,
+                ),
             hudControls =
                 AirVisionBackupHudControls(
                     singleTapAction = hudControls.singleTapAction.rawValue,

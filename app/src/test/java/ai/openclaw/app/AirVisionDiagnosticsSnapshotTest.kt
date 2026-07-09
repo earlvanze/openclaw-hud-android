@@ -75,11 +75,12 @@ class AirVisionDiagnosticsSnapshotTest {
         val usb = root.getValue("usb").jsonObject
         val firmwareCapabilities = usb.getValue("firmwareCapabilities").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
+        val hudRuntime = root.getValue("hudRuntime").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("2", root.getValue("version").jsonPrimitive.content)
+        assertEquals("3", root.getValue("version").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)
@@ -93,6 +94,11 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("interrupt", firstEndpoint.getValue("typeLabel").jsonPrimitive.content)
         assertEquals("eye_care", activeProfile.getValue("splendidMode").jsonPrimitive.content)
         assertEquals("67", activeProfile.getValue("ipdMm").jsonPrimitive.content)
+        assertEquals("8", hudRuntime.getValue("transcriptEntryCount").jsonPrimitive.content)
+        assertEquals("5", hudRuntime.getValue("captionEntryCount").jsonPrimitive.content)
+        assertEquals("true", hudRuntime.getValue("colorPreviewOverlaysEnabled").jsonPrimitive.content)
+        assertEquals("true", hudRuntime.getValue("brightnessDimmingEnabled").jsonPrimitive.content)
+        assertEquals("true", hudRuntime.getValue("ipdAdjustmentEnabled").jsonPrimitive.content)
         assertEquals("es", root.getValue("appPreferences").jsonObject.getValue("language").jsonPrimitive.content)
         assertTrue(encoded.contains("ASUS AirVision M1"))
     }
@@ -122,5 +128,36 @@ class AirVisionDiagnosticsSnapshotTest {
 
         assertTrue(encoded.contains("\"serialStatus\": \"available\""))
         assertFalse(encoded.contains("private-device-serial"))
+    }
+
+    @Test
+    fun fromState_exportsDerivedLightLoadHudRuntime() {
+        val encoded =
+            AirVisionDiagnosticsSnapshots.encode(
+                AirVisionDiagnosticsSnapshots.fromState(
+                    usbState = AirVisionUsbState(),
+                    displaySettings =
+                        AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working).copy(
+                            lightLoadModeEnabled = true,
+                            threeDModeEnabled = true,
+                        ).normalized,
+                    hudControls = AirVisionHudControls(),
+                    appLanguage = AirVisionAppLanguage.System,
+                    startupDestination = AirVisionStartupDestination.Hud,
+                    hudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
+                    demoModeEnabled = false,
+                ),
+            )
+        val hudRuntime =
+            Json.parseToJsonElement(encoded)
+                .jsonObject
+                .getValue("hudRuntime")
+                .jsonObject
+
+        assertEquals("3", hudRuntime.getValue("transcriptEntryCount").jsonPrimitive.content)
+        assertEquals("2", hudRuntime.getValue("captionEntryCount").jsonPrimitive.content)
+        assertEquals("false", hudRuntime.getValue("colorPreviewOverlaysEnabled").jsonPrimitive.content)
+        assertEquals("false", hudRuntime.getValue("ipdAdjustmentEnabled").jsonPrimitive.content)
+        assertEquals("false", hudRuntime.getValue("threeDModeAvailable").jsonPrimitive.content)
     }
 }

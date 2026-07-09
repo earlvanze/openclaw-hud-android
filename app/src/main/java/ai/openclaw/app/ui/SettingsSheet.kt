@@ -733,7 +733,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Diagnostics Export", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                "Save current M1 USB readiness, descriptors, and active AirVision settings for protocol capture.",
+                                "Save current M1 USB readiness, descriptors, active AirVision settings, and derived HUD runtime state for protocol capture.",
                                 style = mobileCallout,
                             )
                         },
