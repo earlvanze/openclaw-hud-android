@@ -67,6 +67,65 @@ data class AirVisionDisplaySettings(
         const val MAX_IPD_MM = 78
         const val DEFAULT_IPD_MM = 67
 
+        fun defaultsForViewMode(mode: AirVisionViewMode): AirVisionDisplaySettings =
+            when (mode) {
+                AirVisionViewMode.Working ->
+                    AirVisionDisplaySettings(
+                        viewMode = mode,
+                        splendidMode = AirVisionSplendidMode.Standard,
+                        brightnessPercent = DEFAULT_BRIGHTNESS_PERCENT,
+                        blueLightFilterPercent = DEFAULT_BLUE_LIGHT_FILTER_PERCENT,
+                        distanceCm = DEFAULT_DISTANCE_CM,
+                        ipdMm = DEFAULT_IPD_MM,
+                        motionSyncEnabled = true,
+                        lightLoadModeEnabled = false,
+                    )
+                AirVisionViewMode.Gaming ->
+                    AirVisionDisplaySettings(
+                        viewMode = mode,
+                        splendidMode = AirVisionSplendidMode.Game,
+                        brightnessPercent = 100,
+                        blueLightFilterPercent = 0,
+                        distanceCm = 65,
+                        ipdMm = DEFAULT_IPD_MM,
+                        motionSyncEnabled = true,
+                        lightLoadModeEnabled = true,
+                    )
+                AirVisionViewMode.Infinity ->
+                    AirVisionDisplaySettings(
+                        viewMode = mode,
+                        splendidMode = AirVisionSplendidMode.Standard,
+                        brightnessPercent = 70,
+                        blueLightFilterPercent = 10,
+                        distanceCm = 120,
+                        ipdMm = DEFAULT_IPD_MM,
+                        motionSyncEnabled = true,
+                        lightLoadModeEnabled = true,
+                    )
+                AirVisionViewMode.Custom1 ->
+                    AirVisionDisplaySettings(
+                        viewMode = mode,
+                        splendidMode = AirVisionSplendidMode.Office,
+                        brightnessPercent = DEFAULT_BRIGHTNESS_PERCENT,
+                        blueLightFilterPercent = 15,
+                        distanceCm = 90,
+                        ipdMm = DEFAULT_IPD_MM,
+                        motionSyncEnabled = true,
+                        lightLoadModeEnabled = false,
+                    )
+                AirVisionViewMode.Custom2 ->
+                    AirVisionDisplaySettings(
+                        viewMode = mode,
+                        splendidMode = AirVisionSplendidMode.EyeCare,
+                        brightnessPercent = 75,
+                        blueLightFilterPercent = 30,
+                        distanceCm = 60,
+                        ipdMm = DEFAULT_IPD_MM,
+                        motionSyncEnabled = true,
+                        lightLoadModeEnabled = false,
+                    )
+            }.normalized
+
         fun normalizeBrightnessPercent(value: Int): Int = value.coerceIn(MIN_BRIGHTNESS_PERCENT, MAX_BRIGHTNESS_PERCENT)
 
         fun normalizeBlueLightFilterPercent(value: Int): Int = value.coerceIn(MIN_BLUE_LIGHT_FILTER_PERCENT, MAX_BLUE_LIGHT_FILTER_PERCENT)

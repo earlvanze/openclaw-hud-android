@@ -613,7 +613,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Viewing Mode", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                "Current: ${airVisionDisplaySettings.viewMode.label}. Applied to HUD scale/layout.",
+                                "Current: ${airVisionDisplaySettings.viewMode.label}. Each mode keeps its own saved HUD profile.",
                                 style = mobileCallout,
                             )
                         },
@@ -822,7 +822,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
             }
             item {
                 Text(
-                    "Android applies HUD brightness, Eye Care filtering, and virtual distance now. Hardware IPD, true Splendid panel presets, and multi-screen desktop layouts require ASUS AirVision HID report support after the firmware link is verified.",
+                    "Android applies HUD brightness, Eye Care filtering, virtual distance, and per-mode profile slots now. Hardware IPD, true Splendid panel presets, and multi-screen desktop layouts require ASUS AirVision HID report support after the firmware link is verified.",
                     style = mobileCallout,
                     color = mobileTextSecondary,
                 )

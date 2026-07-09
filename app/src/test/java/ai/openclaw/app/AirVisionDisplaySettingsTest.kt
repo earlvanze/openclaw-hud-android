@@ -49,4 +49,20 @@ class AirVisionDisplaySettingsTest {
             ) > 0.2f,
         )
     }
+
+    @Test
+    fun defaultsForViewMode_createDistinctProfileSlots() {
+        val working = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working)
+        val gaming = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Gaming)
+        val infinity = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Infinity)
+
+        assertEquals(AirVisionViewMode.Working, working.viewMode)
+        assertEquals(AirVisionSplendidMode.Standard, working.splendidMode)
+        assertEquals(AirVisionViewMode.Gaming, gaming.viewMode)
+        assertEquals(AirVisionSplendidMode.Game, gaming.splendidMode)
+        assertEquals(100, gaming.brightnessPercent)
+        assertEquals(AirVisionViewMode.Infinity, infinity.viewMode)
+        assertTrue(infinity.distanceCm > working.distanceCm)
+        assertTrue(infinity.lightLoadModeEnabled)
+    }
 }

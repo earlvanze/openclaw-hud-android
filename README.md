@@ -38,7 +38,7 @@ Current live target:
 - [x] HUD input: Enter sends, Shift+Enter inserts a newline
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
-- [x] AirVision M1 settings profile with viewing mode, Splendid mode, brightness,
+- [x] AirVision M1 per-mode settings profiles with viewing mode, Splendid mode, brightness,
   blue-light filter, distance, IPD, Motion Sync, and Light Load controls
 - [x] Optional AirVision M1 USB firmware-link detection and permission flow
 - [ ] Full end-to-end QA and release hardening
@@ -124,7 +124,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 
 | Windows AirVision feature | Android HUD status |
 | --- | --- |
-| Working / Gaming / Infinity / Custom modes | Implemented as HUD view-mode profiles that adjust scale/layout. |
+| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, scale/layout, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
 | Brightness | Implemented as software HUD dimming. Hardware brightness remains available from the M1 touch bar. |
 | Screen distance | Implemented as virtual HUD distance scaling. |
 | IPD | Stored as a calibration value, defaulting to 67 mm. Firmware-level apply still needs the ASUS HID protocol. |

@@ -542,45 +542,73 @@ class SecurePrefs(
 
     fun setAirVisionViewMode(mode: AirVisionViewMode) {
         plainPrefs.edit { putString(AIR_VISION_VIEW_MODE_KEY, mode.rawValue) }
-        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(viewMode = mode)
+        _airVisionDisplaySettings.value = loadAirVisionDisplaySettings(mode)
     }
 
     fun setAirVisionSplendidMode(mode: AirVisionSplendidMode) {
-        plainPrefs.edit { putString(AIR_VISION_SPLENDID_MODE_KEY, mode.rawValue) }
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putString(AIR_VISION_SPLENDID_MODE_KEY, mode.rawValue)
+            putString(airVisionProfileKey(AIR_VISION_SPLENDID_MODE_KEY, viewMode), mode.rawValue)
+        }
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(splendidMode = mode)
     }
 
     fun setAirVisionBrightnessPercent(value: Int) {
         val normalized = AirVisionDisplaySettings.normalizeBrightnessPercent(value)
-        plainPrefs.edit { putInt(AIR_VISION_BRIGHTNESS_PERCENT_KEY, normalized) }
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putInt(AIR_VISION_BRIGHTNESS_PERCENT_KEY, normalized)
+            putInt(airVisionProfileKey(AIR_VISION_BRIGHTNESS_PERCENT_KEY, viewMode), normalized)
+        }
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(brightnessPercent = normalized)
     }
 
     fun setAirVisionBlueLightFilterPercent(value: Int) {
         val normalized = AirVisionDisplaySettings.normalizeBlueLightFilterPercent(value)
-        plainPrefs.edit { putInt(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, normalized) }
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putInt(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, normalized)
+            putInt(airVisionProfileKey(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, viewMode), normalized)
+        }
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(blueLightFilterPercent = normalized)
     }
 
     fun setAirVisionDistanceCm(value: Int) {
         val normalized = AirVisionDisplaySettings.normalizeDistanceCm(value)
-        plainPrefs.edit { putInt(AIR_VISION_DISTANCE_CM_KEY, normalized) }
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putInt(AIR_VISION_DISTANCE_CM_KEY, normalized)
+            putInt(airVisionProfileKey(AIR_VISION_DISTANCE_CM_KEY, viewMode), normalized)
+        }
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(distanceCm = normalized)
     }
 
     fun setAirVisionIpdMm(value: Int) {
         val normalized = AirVisionDisplaySettings.normalizeIpdMm(value)
-        plainPrefs.edit { putInt(AIR_VISION_IPD_MM_KEY, normalized) }
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putInt(AIR_VISION_IPD_MM_KEY, normalized)
+            putInt(airVisionProfileKey(AIR_VISION_IPD_MM_KEY, viewMode), normalized)
+        }
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(ipdMm = normalized)
     }
 
     fun setAirVisionMotionSyncEnabled(value: Boolean) {
-        plainPrefs.edit { putBoolean(AIR_VISION_MOTION_SYNC_ENABLED_KEY, value) }
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putBoolean(AIR_VISION_MOTION_SYNC_ENABLED_KEY, value)
+            putBoolean(airVisionProfileKey(AIR_VISION_MOTION_SYNC_ENABLED_KEY, viewMode), value)
+        }
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(motionSyncEnabled = value)
     }
 
     fun setAirVisionLightLoadModeEnabled(value: Boolean) {
-        plainPrefs.edit { putBoolean(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, value) }
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putBoolean(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, value)
+            putBoolean(airVisionProfileKey(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, viewMode), value)
+        }
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(lightLoadModeEnabled = value)
     }
 
@@ -671,33 +699,132 @@ class SecurePrefs(
         return resolved
     }
 
-    private fun loadAirVisionDisplaySettings(): AirVisionDisplaySettings =
-        AirVisionDisplaySettings(
-            viewMode = AirVisionViewMode.fromRawValue(plainPrefs.getString(AIR_VISION_VIEW_MODE_KEY, null)),
-            splendidMode = AirVisionSplendidMode.fromRawValue(plainPrefs.getString(AIR_VISION_SPLENDID_MODE_KEY, null)),
+    private fun loadAirVisionDisplaySettings(
+        viewMode: AirVisionViewMode = AirVisionViewMode.fromRawValue(plainPrefs.getString(AIR_VISION_VIEW_MODE_KEY, null)),
+    ): AirVisionDisplaySettings {
+        val defaults = AirVisionDisplaySettings.defaultsForViewMode(viewMode)
+        val legacyViewMode = AirVisionViewMode.fromRawValue(plainPrefs.getString(AIR_VISION_VIEW_MODE_KEY, null))
+        val allowLegacyFallback = viewMode == legacyViewMode && !hasAnyAirVisionProfileValue()
+        return AirVisionDisplaySettings(
+            viewMode = viewMode,
+            splendidMode =
+                AirVisionSplendidMode.fromRawValue(
+                    getAirVisionProfileString(
+                        key = AIR_VISION_SPLENDID_MODE_KEY,
+                        mode = viewMode,
+                        allowLegacyFallback = allowLegacyFallback,
+                        defaultValue = defaults.splendidMode.rawValue,
+                    ),
+                ),
             brightnessPercent =
-                plainPrefs.getInt(
-                    AIR_VISION_BRIGHTNESS_PERCENT_KEY,
-                    AirVisionDisplaySettings.DEFAULT_BRIGHTNESS_PERCENT,
+                getAirVisionProfileInt(
+                    key = AIR_VISION_BRIGHTNESS_PERCENT_KEY,
+                    mode = viewMode,
+                    allowLegacyFallback = allowLegacyFallback,
+                    defaultValue = defaults.brightnessPercent,
                 ),
             blueLightFilterPercent =
-                plainPrefs.getInt(
-                    AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY,
-                    AirVisionDisplaySettings.DEFAULT_BLUE_LIGHT_FILTER_PERCENT,
+                getAirVisionProfileInt(
+                    key = AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY,
+                    mode = viewMode,
+                    allowLegacyFallback = allowLegacyFallback,
+                    defaultValue = defaults.blueLightFilterPercent,
                 ),
             distanceCm =
-                plainPrefs.getInt(
-                    AIR_VISION_DISTANCE_CM_KEY,
-                    AirVisionDisplaySettings.DEFAULT_DISTANCE_CM,
+                getAirVisionProfileInt(
+                    key = AIR_VISION_DISTANCE_CM_KEY,
+                    mode = viewMode,
+                    allowLegacyFallback = allowLegacyFallback,
+                    defaultValue = defaults.distanceCm,
                 ),
             ipdMm =
-                plainPrefs.getInt(
-                    AIR_VISION_IPD_MM_KEY,
-                    AirVisionDisplaySettings.DEFAULT_IPD_MM,
+                getAirVisionProfileInt(
+                    key = AIR_VISION_IPD_MM_KEY,
+                    mode = viewMode,
+                    allowLegacyFallback = allowLegacyFallback,
+                    defaultValue = defaults.ipdMm,
                 ),
-            motionSyncEnabled = plainPrefs.getBoolean(AIR_VISION_MOTION_SYNC_ENABLED_KEY, true),
-            lightLoadModeEnabled = plainPrefs.getBoolean(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, false),
+            motionSyncEnabled =
+                getAirVisionProfileBoolean(
+                    key = AIR_VISION_MOTION_SYNC_ENABLED_KEY,
+                    mode = viewMode,
+                    allowLegacyFallback = allowLegacyFallback,
+                    defaultValue = defaults.motionSyncEnabled,
+                ),
+            lightLoadModeEnabled =
+                getAirVisionProfileBoolean(
+                    key = AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY,
+                    mode = viewMode,
+                    allowLegacyFallback = allowLegacyFallback,
+                    defaultValue = defaults.lightLoadModeEnabled,
+                ),
         ).normalized
+    }
+
+    private fun airVisionProfileKey(
+        key: String,
+        mode: AirVisionViewMode,
+    ): String = "$key.${mode.rawValue}"
+
+    private fun hasAnyAirVisionProfileValue(): Boolean {
+        val keys =
+            listOf(
+                AIR_VISION_SPLENDID_MODE_KEY,
+                AIR_VISION_BRIGHTNESS_PERCENT_KEY,
+                AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY,
+                AIR_VISION_DISTANCE_CM_KEY,
+                AIR_VISION_IPD_MM_KEY,
+                AIR_VISION_MOTION_SYNC_ENABLED_KEY,
+                AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY,
+            )
+        return AirVisionViewMode.entries.any { mode ->
+            keys.any { key -> plainPrefs.contains(airVisionProfileKey(key, mode)) }
+        }
+    }
+
+    private fun getAirVisionProfileString(
+        key: String,
+        mode: AirVisionViewMode,
+        allowLegacyFallback: Boolean,
+        defaultValue: String,
+    ): String {
+        val profileKey = airVisionProfileKey(key, mode)
+        if (plainPrefs.contains(profileKey)) {
+            return plainPrefs.getString(profileKey, defaultValue) ?: defaultValue
+        }
+        if (allowLegacyFallback && plainPrefs.contains(key)) {
+            return plainPrefs.getString(key, defaultValue) ?: defaultValue
+        }
+        return defaultValue
+    }
+
+    private fun getAirVisionProfileInt(
+        key: String,
+        mode: AirVisionViewMode,
+        allowLegacyFallback: Boolean,
+        defaultValue: Int,
+    ): Int {
+        val profileKey = airVisionProfileKey(key, mode)
+        return when {
+            plainPrefs.contains(profileKey) -> plainPrefs.getInt(profileKey, defaultValue)
+            allowLegacyFallback && plainPrefs.contains(key) -> plainPrefs.getInt(key, defaultValue)
+            else -> defaultValue
+        }
+    }
+
+    private fun getAirVisionProfileBoolean(
+        key: String,
+        mode: AirVisionViewMode,
+        allowLegacyFallback: Boolean,
+        defaultValue: Boolean,
+    ): Boolean {
+        val profileKey = airVisionProfileKey(key, mode)
+        return when {
+            plainPrefs.contains(profileKey) -> plainPrefs.getBoolean(profileKey, defaultValue)
+            allowLegacyFallback && plainPrefs.contains(key) -> plainPrefs.getBoolean(key, defaultValue)
+            else -> defaultValue
+        }
+    }
 
     private fun loadAirVisionHudControls(): AirVisionHudControls =
         AirVisionHudControls(

@@ -91,6 +91,38 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun airVisionDisplaySettings_persistPerViewModeProfile() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionBrightnessPercent(42)
+        prefs.setAirVisionDistanceCm(88)
+        prefs.setAirVisionViewMode(AirVisionViewMode.Gaming)
+
+        assertEquals(AirVisionViewMode.Gaming, prefs.airVisionDisplaySettings.value.viewMode)
+        assertEquals(AirVisionSplendidMode.Game, prefs.airVisionDisplaySettings.value.splendidMode)
+        assertEquals(100, prefs.airVisionDisplaySettings.value.brightnessPercent)
+
+        prefs.setAirVisionBrightnessPercent(55)
+        prefs.setAirVisionDistanceCm(66)
+        prefs.setAirVisionSplendidMode(AirVisionSplendidMode.Theater)
+        prefs.setAirVisionViewMode(AirVisionViewMode.Working)
+
+        assertEquals(42, prefs.airVisionDisplaySettings.value.brightnessPercent)
+        assertEquals(88, prefs.airVisionDisplaySettings.value.distanceCm)
+
+        prefs.setAirVisionViewMode(AirVisionViewMode.Gaming)
+
+        val reloaded = SecurePrefs(context).airVisionDisplaySettings.value
+        assertEquals(AirVisionViewMode.Gaming, reloaded.viewMode)
+        assertEquals(AirVisionSplendidMode.Theater, reloaded.splendidMode)
+        assertEquals(55, reloaded.brightnessPercent)
+        assertEquals(66, reloaded.distanceCm)
+    }
+
+    @Test
     fun airVisionHudControls_persist() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
