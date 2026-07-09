@@ -85,6 +85,7 @@ function parseArgs(argv) {
           "Use --skip-listing or --skip-release-notes to upload only the bundle/track changes.",
           "",
           "Use --preflight to verify Play API package/access state without uploading a bundle.",
+          "Preflight does not require a local bundle unless --bundle is provided.",
           "Commit mode also runs `verify-play-submission-package.mjs --final` before any Play API upload.",
         ].join("\n"),
       );
@@ -338,8 +339,8 @@ function verifyFinalSubmissionReadinessBeforeUpload() {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const bundlePath = args.bundle ?? (await latestHudBundle());
-  if (!bundlePath) {
+  const bundlePath = args.bundle ?? (args.preflight ? null : await latestHudBundle());
+  if (!bundlePath && !args.preflight) {
     throw new Error(
       [
         `No HUD release bundle found in ${releaseOutputDir} or ${gradleHudBundlePath}.`,
@@ -347,14 +348,18 @@ async function main() {
       ].join(" "),
     );
   }
-  const bundleInfo = await stat(bundlePath);
+  const bundleInfo = bundlePath ? await stat(bundlePath) : null;
   const playListing = await loadPlayListing(args);
 
   console.log(`Package: ${args.packageName}`);
   console.log(`Track: ${args.track}`);
   console.log(`Release status: ${args.status}`);
   console.log(`Language: ${args.language}`);
-  console.log(`Bundle: ${bundlePath} (${bundleInfo.size} bytes)`);
+  if (bundlePath && bundleInfo) {
+    console.log(`Bundle: ${bundlePath} (${bundleInfo.size} bytes)`);
+  } else {
+    console.log("Bundle: not required for preflight");
+  }
   if (playListing.listing) {
     console.log(
       `Listing: title ${playListing.lengths.title}/30, short ${playListing.lengths.shortDescription}/80, full ${playListing.lengths.fullDescription}/4000`,

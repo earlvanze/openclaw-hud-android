@@ -268,7 +268,8 @@ Cloud account cannot publish the app; run `gcloud config set account <email>`
 before `--preflight` or `--commit`. Set `GOOGLE_PLAY_ALLOWED_ACCOUNTS` or pass
 `--allowed-account` only when a different authorized Play publisher should be
 accepted. Store listing and policy prep files live under `play/`. Use
-`--skip-listing` or `--skip-release-notes` for bundle-only edits. The Play
+`--preflight` to verify Play API package/auth access before building an AAB.
+Use `--skip-listing` or `--skip-release-notes` for bundle-only edits. The Play
 Console app must already exist for `ai.openclaw.app.hud`; follow
 `play/console-checklist.md` before the first commit.
 
