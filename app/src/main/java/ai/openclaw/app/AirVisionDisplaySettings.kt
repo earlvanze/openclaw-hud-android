@@ -125,6 +125,10 @@ data class AirVisionDisplaySettings(
         const val MIN_SAFE_AREA_PERCENT = 0
         const val MAX_SAFE_AREA_PERCENT = 20
         const val DEFAULT_SAFE_AREA_PERCENT = 5
+        const val HUD_TRANSCRIPT_ENTRY_COUNT = 8
+        const val HUD_CAPTION_ENTRY_COUNT = 5
+        const val LIGHT_LOAD_HUD_TRANSCRIPT_ENTRY_COUNT = 3
+        const val LIGHT_LOAD_HUD_CAPTION_ENTRY_COUNT = 2
 
         fun defaultsForViewMode(mode: AirVisionViewMode): AirVisionDisplaySettings =
             when (mode) {
@@ -234,6 +238,30 @@ data class AirVisionDisplaySettings(
             val normalized = normalizeBrightnessPercent(value)
             return ((100 - normalized).toFloat() / 100f * 0.72f).coerceIn(0f, 0.62f)
         }
+
+        fun hudTranscriptEntryCount(lightLoadModeEnabled: Boolean): Int =
+            if (lightLoadModeEnabled) {
+                LIGHT_LOAD_HUD_TRANSCRIPT_ENTRY_COUNT
+            } else {
+                HUD_TRANSCRIPT_ENTRY_COUNT
+            }
+
+        fun hudCaptionEntryCount(lightLoadModeEnabled: Boolean): Int =
+            if (lightLoadModeEnabled) {
+                LIGHT_LOAD_HUD_CAPTION_ENTRY_COUNT
+            } else {
+                HUD_CAPTION_ENTRY_COUNT
+            }
+
+        fun hudColorPreviewAlpha(
+            alpha: Float,
+            lightLoadModeEnabled: Boolean,
+        ): Float =
+            if (lightLoadModeEnabled) {
+                0f
+            } else {
+                alpha.coerceIn(0f, 1f)
+            }
 
         fun hudWarmOverlayAlpha(
             splendidMode: AirVisionSplendidMode,

@@ -239,10 +239,16 @@ fun HudScreen(viewModel: MainViewModel) {
         ).coerceIn(0.70f, 1.28f)
     val dimAlpha = AirVisionDisplaySettings.hudDimAlphaForBrightnessPercent(airVisionSettings.brightnessPercent)
     val splendidOverlayAlpha =
-        AirVisionDisplaySettings.hudSplendidOverlayAlpha(
-            splendidMode = airVisionSettings.splendidMode,
-            blueLightFilterPercent = airVisionSettings.blueLightFilterPercent,
+        AirVisionDisplaySettings.hudColorPreviewAlpha(
+            alpha =
+                AirVisionDisplaySettings.hudSplendidOverlayAlpha(
+                    splendidMode = airVisionSettings.splendidMode,
+                    blueLightFilterPercent = airVisionSettings.blueLightFilterPercent,
+                ),
+            lightLoadModeEnabled = airVisionSettings.lightLoadModeEnabled,
         )
+    val transcriptEntryCount = AirVisionDisplaySettings.hudTranscriptEntryCount(airVisionSettings.lightLoadModeEnabled)
+    val captionEntryCount = AirVisionDisplaySettings.hudCaptionEntryCount(airVisionSettings.lightLoadModeEnabled)
     val safePadding = (22 + airVisionSettings.safeAreaPercent * 3).dp
     val layoutSpec = hudLayoutSpec(airVisionSettings.hudPlacement)
 
@@ -346,7 +352,7 @@ fun HudScreen(viewModel: MainViewModel) {
 
                 if (airVisionDemoModeEnabled) {
                     HudChatTranscript(
-                        entries = demoHudChatTranscript,
+                        entries = demoHudChatTranscript.takeLast(transcriptEntryCount),
                         scrollState = chatScrollState,
                         modifier =
                             Modifier
@@ -358,6 +364,7 @@ fun HudScreen(viewModel: MainViewModel) {
                         conversation = micConversation,
                         liveTranscript = micLiveTranscript,
                         targetLanguageCode = translationCaptionTargetLanguage,
+                        entryCount = captionEntryCount,
                         modifier =
                             Modifier
                                 .fillMaxWidth()
@@ -365,7 +372,7 @@ fun HudScreen(viewModel: MainViewModel) {
                     )
                 } else if (chatTranscript.isNotEmpty()) {
                     HudChatTranscript(
-                        entries = chatTranscript,
+                        entries = chatTranscript.takeLast(transcriptEntryCount),
                         scrollState = chatScrollState,
                         modifier =
                             Modifier
@@ -687,9 +694,10 @@ private fun HudTranslationCaptions(
     conversation: List<VoiceConversationEntry>,
     liveTranscript: String?,
     targetLanguageCode: String,
+    entryCount: Int,
     modifier: Modifier = Modifier,
 ) {
-    val entries = hudCaptionEntries(conversation, liveTranscript)
+    val entries = hudCaptionEntries(conversation, liveTranscript, entryCount)
     val targetLanguageLabel = TranslationCaptionMode.languageFor(targetLanguageCode).label.lowercase()
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
@@ -966,6 +974,7 @@ private data class HudCaptionEntry(
 private fun hudCaptionEntries(
     conversation: List<VoiceConversationEntry>,
     liveTranscript: String?,
+    entryCount: Int = AirVisionDisplaySettings.HUD_CAPTION_ENTRY_COUNT,
 ): List<HudCaptionEntry> {
     val entries = mutableListOf<HudCaptionEntry>()
     var userTurnIndex = 0
@@ -989,7 +998,7 @@ private fun hudCaptionEntries(
         val speaker = TranslationCaptionMode.speakerLabelForTurn(userTurnIndex)
         entries += HudCaptionEntry(speaker = speaker, text = live, isLive = true)
     }
-    return entries.takeLast(HUD_CAPTION_ENTRY_COUNT)
+    return entries.takeLast(entryCount)
 }
 
 private fun hudChatTranscript(
@@ -1001,7 +1010,7 @@ private fun hudChatTranscript(
             .mapNotNull { message ->
                 val text = message.plainText(maxChars = HUD_TRANSCRIPT_ENTRY_MAX_CHARS) ?: return@mapNotNull null
                 HudChatTranscriptEntry(role = message.role, text = text)
-            }.takeLast(HUD_TRANSCRIPT_ENTRY_COUNT)
+            }.takeLast(AirVisionDisplaySettings.HUD_TRANSCRIPT_ENTRY_COUNT)
             .toMutableList()
 
     val streaming = streamingAssistantText?.trim()?.takeIf { it.isNotEmpty() }
@@ -1039,6 +1048,4 @@ private fun String.shortSessionLabel(): String {
         .take(18)
 }
 
-private const val HUD_TRANSCRIPT_ENTRY_COUNT = 8
 private const val HUD_TRANSCRIPT_ENTRY_MAX_CHARS = 360
-private const val HUD_CAPTION_ENTRY_COUNT = 5

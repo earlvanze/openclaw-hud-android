@@ -149,6 +149,28 @@ class AirVisionDisplaySettingsTest {
     }
 
     @Test
+    fun hudLightLoadMode_trimsLowPriorityHudRendering() {
+        assertEquals(
+            AirVisionDisplaySettings.HUD_TRANSCRIPT_ENTRY_COUNT,
+            AirVisionDisplaySettings.hudTranscriptEntryCount(lightLoadModeEnabled = false),
+        )
+        assertEquals(
+            AirVisionDisplaySettings.LIGHT_LOAD_HUD_TRANSCRIPT_ENTRY_COUNT,
+            AirVisionDisplaySettings.hudTranscriptEntryCount(lightLoadModeEnabled = true),
+        )
+        assertEquals(
+            AirVisionDisplaySettings.HUD_CAPTION_ENTRY_COUNT,
+            AirVisionDisplaySettings.hudCaptionEntryCount(lightLoadModeEnabled = false),
+        )
+        assertEquals(
+            AirVisionDisplaySettings.LIGHT_LOAD_HUD_CAPTION_ENTRY_COUNT,
+            AirVisionDisplaySettings.hudCaptionEntryCount(lightLoadModeEnabled = true),
+        )
+        assertEquals(0.20f, AirVisionDisplaySettings.hudColorPreviewAlpha(0.20f, lightLoadModeEnabled = false), 0.001f)
+        assertEquals(0f, AirVisionDisplaySettings.hudColorPreviewAlpha(0.20f, lightLoadModeEnabled = true), 0.001f)
+    }
+
+    @Test
     fun blueLightFilterAvailability_followsEyeCareMode() {
         assertEquals(false, AirVisionDisplaySettings(splendidMode = AirVisionSplendidMode.Standard).blueLightFilterAvailable)
         assertTrue(AirVisionDisplaySettings(splendidMode = AirVisionSplendidMode.EyeCare).blueLightFilterAvailable)

@@ -137,7 +137,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Blue Light Filter | Implemented as Android HUD warm filtering and available only in Eye Care mode, matching the ASUS app. |
 | Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
 | 3D Mode | Stored in the AirVision profile and disabled while Light Load Mode is enabled. Hardware apply needs HID support. |
-| Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation and locks IPD adjustment while enabled. |
+| Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation, trims transcript/caption history, skips nonessential color-preview overlays, and locks IPD/3D adjustment while enabled. |
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
 | App Preferences | Implemented with startup view, AirVision companion language preference with Android locale application, demo mode, JSON profile backup/import, software version/build display, EULA note, in-app privacy policy, official FAQ/tutorial, product registration, and ASUS support links. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, serial availability, and firmware protocol status. Actual firmware version still needs ASUS HID support. |

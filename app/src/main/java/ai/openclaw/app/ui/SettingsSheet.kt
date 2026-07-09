@@ -1100,7 +1100,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Light Load Mode", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                "Stores the Windows-style lower-overhead preference. IPD adjustment is locked while enabled.",
+                                "Uses a lower-overhead HUD by trimming history and color previews. IPD and 3D are locked while enabled.",
                                 style = mobileCallout,
                             )
                         },
