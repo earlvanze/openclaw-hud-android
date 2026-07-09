@@ -307,12 +307,43 @@ function latestHudInputCommit() {
   };
 }
 
+async function latestHudInputFileMtime() {
+  let latest = null;
+
+  async function visit(relativePath) {
+    const absolutePath = join(androidDir, relativePath);
+    const info = await stat(absolutePath).catch(() => null);
+    if (!info) return;
+    if (info.isFile()) {
+      if (latest === null || info.mtimeMs > latest.epochMs) {
+        latest = {
+          epochMs: info.mtimeMs,
+          label: relativePath,
+        };
+      }
+      return;
+    }
+    if (!info.isDirectory()) return;
+
+    const entries = await readdir(absolutePath, { withFileTypes: true });
+    for (const entry of entries) {
+      await visit(`${relativePath}/${entry.name}`);
+    }
+  }
+
+  for (const relativePath of hudBundleFreshnessPaths) {
+    await visit(relativePath);
+  }
+
+  return latest;
+}
+
 function hudInputStatusLines() {
   const output = gitOutput(["status", "--porcelain", "--", ...hudBundleFreshnessPaths]);
   return output.split("\n").map((line) => line.trim()).filter(Boolean);
 }
 
-function verifyHudBundleFreshness(bundlePath, bundleInfo) {
+async function verifyHudBundleFreshness(bundlePath, bundleInfo) {
   const dirtyInputs = hudInputStatusLines();
   if (dirtyInputs.length > 0) {
     throw new Error(
@@ -325,21 +356,39 @@ function verifyHudBundleFreshness(bundlePath, bundleInfo) {
   }
 
   const latestInput = latestHudInputCommit();
-  if (!latestInput) return;
+  const latestFileInput = await latestHudInputFileMtime();
+  const freshnessInputs = [];
+  if (latestInput) {
+    freshnessInputs.push({
+      epochMs: latestInput.epochMs,
+      label: `${latestInput.shortHash} ${latestInput.subject}`,
+      detail: "latest committed HUD source/build input",
+    });
+  }
+  if (latestFileInput) {
+    freshnessInputs.push({
+      epochMs: latestFileInput.epochMs,
+      label: latestFileInput.label,
+      detail: "latest HUD source/build file mtime",
+    });
+  }
+  freshnessInputs.sort((a, b) => b.epochMs - a.epochMs);
+  const freshnessInput = freshnessInputs[0];
+  if (!freshnessInput) return;
 
-  if (bundleInfo.mtimeMs + 1000 < latestInput.epochMs) {
+  if (bundleInfo.mtimeMs + 1000 < freshnessInput.epochMs) {
     throw new Error(
       [
         `Refusing Google Play publish flow because the HUD AAB is stale: ${bundlePath}`,
         `Bundle modified: ${formatUtc(bundleInfo.mtimeMs)}`,
-        `Latest HUD source/build input: ${latestInput.shortHash} ${latestInput.subject} at ${formatUtc(latestInput.epochMs)}`,
+        `Latest HUD source/build input: ${freshnessInput.label} at ${formatUtc(freshnessInput.epochMs)} (${freshnessInput.detail})`,
         "Rebuild with `./gradlew :app:bundleHudRelease` or `node scripts/build-release-aab.mjs --flavor hud`, then rerun the publish helper.",
       ].join("\n"),
     );
   }
 
   console.log(
-    `HUD bundle freshness verified against ${latestInput.shortHash} ${latestInput.subject} (${formatUtc(latestInput.epochMs)}).`,
+    `HUD bundle freshness verified against ${freshnessInput.label} (${formatUtc(freshnessInput.epochMs)}; ${freshnessInput.detail}).`,
   );
 }
 
@@ -535,7 +584,7 @@ async function main() {
   console.log(`Mode: ${args.authCheck ? "auth-check" : args.preflight ? "preflight" : args.commit ? "commit" : "dry-run"}`);
 
   if (bundlePath && bundleInfo) {
-    verifyHudBundleFreshness(bundlePath, bundleInfo);
+    await verifyHudBundleFreshness(bundlePath, bundleInfo);
   }
 
   if (!args.authCheck) {
