@@ -403,6 +403,10 @@ class MainViewModel(
         prefs.setAirVisionMotionSyncEnabled(enabled)
     }
 
+    fun setAirVisionThreeDModeEnabled(enabled: Boolean) {
+        prefs.setAirVisionThreeDModeEnabled(enabled)
+    }
+
     fun setAirVisionLightLoadModeEnabled(enabled: Boolean) {
         prefs.setAirVisionLightLoadModeEnabled(enabled)
     }

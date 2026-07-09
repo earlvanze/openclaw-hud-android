@@ -61,9 +61,13 @@ data class AirVisionDisplaySettings(
     val ipdMm: Int = DEFAULT_IPD_MM,
     val safeAreaPercent: Int = DEFAULT_SAFE_AREA_PERCENT,
     val motionSyncEnabled: Boolean = true,
+    val threeDModeEnabled: Boolean = false,
     val lightLoadModeEnabled: Boolean = false,
 ) {
     val ipdAdjustmentEnabled: Boolean
+        get() = !lightLoadModeEnabled
+
+    val threeDModeAvailable: Boolean
         get() = !lightLoadModeEnabled
 
     val normalized: AirVisionDisplaySettings
@@ -74,6 +78,7 @@ data class AirVisionDisplaySettings(
                 distanceCm = normalizeDistanceCm(distanceCm),
                 ipdMm = normalizeIpdMm(ipdMm),
                 safeAreaPercent = normalizeSafeAreaPercent(safeAreaPercent),
+                threeDModeEnabled = threeDModeEnabled && !lightLoadModeEnabled,
             )
 
     companion object {
@@ -106,6 +111,7 @@ data class AirVisionDisplaySettings(
                         ipdMm = DEFAULT_IPD_MM,
                         safeAreaPercent = DEFAULT_SAFE_AREA_PERCENT,
                         motionSyncEnabled = true,
+                        threeDModeEnabled = false,
                         lightLoadModeEnabled = false,
                     )
                 AirVisionViewMode.Gaming ->
@@ -119,6 +125,7 @@ data class AirVisionDisplaySettings(
                         ipdMm = DEFAULT_IPD_MM,
                         safeAreaPercent = 3,
                         motionSyncEnabled = true,
+                        threeDModeEnabled = false,
                         lightLoadModeEnabled = true,
                     )
                 AirVisionViewMode.Infinity ->
@@ -132,6 +139,7 @@ data class AirVisionDisplaySettings(
                         ipdMm = DEFAULT_IPD_MM,
                         safeAreaPercent = 8,
                         motionSyncEnabled = true,
+                        threeDModeEnabled = false,
                         lightLoadModeEnabled = true,
                     )
                 AirVisionViewMode.Custom1 ->
@@ -145,6 +153,7 @@ data class AirVisionDisplaySettings(
                         ipdMm = DEFAULT_IPD_MM,
                         safeAreaPercent = DEFAULT_SAFE_AREA_PERCENT,
                         motionSyncEnabled = true,
+                        threeDModeEnabled = false,
                         lightLoadModeEnabled = false,
                     )
                 AirVisionViewMode.Custom2 ->
@@ -158,6 +167,7 @@ data class AirVisionDisplaySettings(
                         ipdMm = DEFAULT_IPD_MM,
                         safeAreaPercent = 10,
                         motionSyncEnabled = true,
+                        threeDModeEnabled = false,
                         lightLoadModeEnabled = false,
                     )
             }.normalized

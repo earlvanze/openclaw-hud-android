@@ -40,7 +40,7 @@ Current live target:
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
 - [x] AirVision M1 per-mode settings profiles with viewing mode, HUD placement,
   safe area, Splendid mode, brightness, blue-light filter, distance, IPD,
-  Motion Sync, Light Load, and active-profile reset controls
+  Motion Sync, 3D Mode, Light Load, and active-profile reset controls
 - [x] Optional AirVision M1 USB firmware-link detection, permission flow, and
   interface/endpoint diagnostics
 - [ ] Full end-to-end QA and release hardening
@@ -133,6 +133,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Splendid Standard / Theater / Office / Game / Eye Care | Stored as profile settings. Eye Care adds a warm HUD overlay now; true panel presets need HID support. |
 | Blue Light Filter | Implemented as Android HUD warm filtering. |
 | Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
+| 3D Mode | Stored in the AirVision profile and disabled while Light Load Mode is enabled. Hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation and locks IPD adjustment while enabled. |
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll handling, and M1 media/tap key double-tap mic behavior. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, serial availability, and firmware protocol status. Actual firmware version still needs ASUS HID support. |

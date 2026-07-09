@@ -814,6 +814,32 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     )
                     HorizontalDivider(color = mobileBorder)
                     ListItem(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .alpha(if (airVisionDisplaySettings.threeDModeAvailable) 1f else 0.72f),
+                        colors = listItemColors,
+                        headlineContent = { Text("3D Mode", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                if (airVisionDisplaySettings.threeDModeAvailable) {
+                                    "Stores the SBS 3D preference. Firmware-level apply still needs ASUS HID protocol support."
+                                } else {
+                                    "Disabled while Light Load Mode is on, matching the ASUS AirVision app behavior."
+                                },
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = airVisionDisplaySettings.threeDModeEnabled,
+                                enabled = airVisionDisplaySettings.threeDModeAvailable,
+                                onCheckedChange = viewModel::setAirVisionThreeDModeEnabled,
+                            )
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
                         headlineContent = { Text("Light Load Mode", style = mobileHeadline) },

@@ -75,6 +75,7 @@ class SecurePrefsTest {
         prefs.setAirVisionDistanceCm(120)
         prefs.setAirVisionIpdMm(67)
         prefs.setAirVisionMotionSyncEnabled(false)
+        prefs.setAirVisionThreeDModeEnabled(true)
         prefs.setAirVisionLightLoadModeEnabled(true)
 
         val reloaded = SecurePrefs(context)
@@ -87,6 +88,7 @@ class SecurePrefsTest {
         assertEquals(120, settings.distanceCm)
         assertEquals(67, settings.ipdMm)
         assertEquals(false, settings.motionSyncEnabled)
+        assertEquals(false, settings.threeDModeEnabled)
         assertEquals(true, settings.lightLoadModeEnabled)
     }
 
@@ -113,6 +115,8 @@ class SecurePrefsTest {
         prefs.setAirVisionSplendidMode(AirVisionSplendidMode.Theater)
         prefs.setAirVisionHudPlacement(AirVisionHudPlacement.LowerCenter)
         prefs.setAirVisionSafeAreaPercent(7)
+        prefs.setAirVisionLightLoadModeEnabled(false)
+        prefs.setAirVisionThreeDModeEnabled(true)
         prefs.setAirVisionViewMode(AirVisionViewMode.Working)
 
         assertEquals(42, prefs.airVisionDisplaySettings.value.brightnessPercent)
@@ -129,6 +133,8 @@ class SecurePrefsTest {
         assertEquals(55, reloaded.brightnessPercent)
         assertEquals(66, reloaded.distanceCm)
         assertEquals(7, reloaded.safeAreaPercent)
+        assertEquals(false, reloaded.lightLoadModeEnabled)
+        assertEquals(true, reloaded.threeDModeEnabled)
     }
 
     @Test
@@ -172,6 +178,29 @@ class SecurePrefsTest {
         prefs.setAirVisionIpdMm(70)
 
         assertEquals(70, SecurePrefs(context).airVisionDisplaySettings.value.ipdMm)
+    }
+
+    @Test
+    fun airVisionThreeDMode_isLockedWhileLightLoadModeIsEnabled() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionViewMode(AirVisionViewMode.Working)
+        prefs.setAirVisionThreeDModeEnabled(true)
+
+        assertEquals(true, prefs.airVisionDisplaySettings.value.threeDModeEnabled)
+
+        prefs.setAirVisionLightLoadModeEnabled(true)
+        prefs.setAirVisionThreeDModeEnabled(true)
+
+        assertEquals(false, prefs.airVisionDisplaySettings.value.threeDModeEnabled)
+
+        prefs.setAirVisionLightLoadModeEnabled(false)
+        prefs.setAirVisionThreeDModeEnabled(true)
+
+        assertEquals(true, SecurePrefs(context).airVisionDisplaySettings.value.threeDModeEnabled)
     }
 
     @Test

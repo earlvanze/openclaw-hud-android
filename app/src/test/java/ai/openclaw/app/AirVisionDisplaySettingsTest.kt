@@ -76,4 +76,16 @@ class AirVisionDisplaySettingsTest {
         assertTrue(AirVisionDisplaySettings(lightLoadModeEnabled = false).ipdAdjustmentEnabled)
         assertEquals(false, AirVisionDisplaySettings(lightLoadModeEnabled = true).ipdAdjustmentEnabled)
     }
+
+    @Test
+    fun normalized_disablesThreeDModeWhenLightLoadModeIsEnabled() {
+        val settings =
+            AirVisionDisplaySettings(
+                threeDModeEnabled = true,
+                lightLoadModeEnabled = true,
+            ).normalized
+
+        assertEquals(false, settings.threeDModeEnabled)
+        assertEquals(false, settings.threeDModeAvailable)
+    }
 }

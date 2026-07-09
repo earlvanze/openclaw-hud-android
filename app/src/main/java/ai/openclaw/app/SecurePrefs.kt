@@ -46,6 +46,7 @@ class SecurePrefs(
         private const val AIR_VISION_IPD_MM_KEY = "airVision.ipdMm"
         private const val AIR_VISION_SAFE_AREA_PERCENT_KEY = "airVision.safeAreaPercent"
         private const val AIR_VISION_MOTION_SYNC_ENABLED_KEY = "airVision.motionSyncEnabled"
+        private const val AIR_VISION_THREE_D_MODE_ENABLED_KEY = "airVision.threeDModeEnabled"
         private const val AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY = "airVision.lightLoadModeEnabled"
         private const val AIR_VISION_HUD_SINGLE_TAP_ACTION_KEY = "airVision.hud.singleTapAction"
         private const val AIR_VISION_HUD_DOUBLE_TAP_ACTION_KEY = "airVision.hud.doubleTapAction"
@@ -560,6 +561,7 @@ class SecurePrefs(
             putInt(AIR_VISION_IPD_MM_KEY, defaults.ipdMm)
             putInt(AIR_VISION_SAFE_AREA_PERCENT_KEY, defaults.safeAreaPercent)
             putBoolean(AIR_VISION_MOTION_SYNC_ENABLED_KEY, defaults.motionSyncEnabled)
+            putBoolean(AIR_VISION_THREE_D_MODE_ENABLED_KEY, defaults.threeDModeEnabled)
             putBoolean(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, defaults.lightLoadModeEnabled)
             putString(airVisionProfileKey(AIR_VISION_SPLENDID_MODE_KEY, viewMode), defaults.splendidMode.rawValue)
             putString(airVisionProfileKey(AIR_VISION_HUD_PLACEMENT_KEY, viewMode), defaults.hudPlacement.rawValue)
@@ -572,6 +574,7 @@ class SecurePrefs(
             putInt(airVisionProfileKey(AIR_VISION_IPD_MM_KEY, viewMode), defaults.ipdMm)
             putInt(airVisionProfileKey(AIR_VISION_SAFE_AREA_PERCENT_KEY, viewMode), defaults.safeAreaPercent)
             putBoolean(airVisionProfileKey(AIR_VISION_MOTION_SYNC_ENABLED_KEY, viewMode), defaults.motionSyncEnabled)
+            putBoolean(airVisionProfileKey(AIR_VISION_THREE_D_MODE_ENABLED_KEY, viewMode), defaults.threeDModeEnabled)
             putBoolean(
                 airVisionProfileKey(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, viewMode),
                 defaults.lightLoadModeEnabled,
@@ -658,13 +661,33 @@ class SecurePrefs(
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(motionSyncEnabled = value)
     }
 
+    fun setAirVisionThreeDModeEnabled(value: Boolean) {
+        val current = _airVisionDisplaySettings.value
+        if (value && !current.threeDModeAvailable) return
+        val viewMode = current.viewMode
+        plainPrefs.edit {
+            putBoolean(AIR_VISION_THREE_D_MODE_ENABLED_KEY, value)
+            putBoolean(airVisionProfileKey(AIR_VISION_THREE_D_MODE_ENABLED_KEY, viewMode), value)
+        }
+        _airVisionDisplaySettings.value = current.copy(threeDModeEnabled = value).normalized
+    }
+
     fun setAirVisionLightLoadModeEnabled(value: Boolean) {
         val viewMode = _airVisionDisplaySettings.value.viewMode
         plainPrefs.edit {
             putBoolean(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, value)
             putBoolean(airVisionProfileKey(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, viewMode), value)
+            if (value) {
+                putBoolean(AIR_VISION_THREE_D_MODE_ENABLED_KEY, false)
+                putBoolean(airVisionProfileKey(AIR_VISION_THREE_D_MODE_ENABLED_KEY, viewMode), false)
+            }
         }
-        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(lightLoadModeEnabled = value)
+        _airVisionDisplaySettings.value =
+            _airVisionDisplaySettings.value
+                .copy(
+                    lightLoadModeEnabled = value,
+                    threeDModeEnabled = if (value) false else _airVisionDisplaySettings.value.threeDModeEnabled,
+                ).normalized
     }
 
     fun setAirVisionHudSingleTapAction(action: AirVisionHudTouchAction) {
@@ -822,6 +845,13 @@ class SecurePrefs(
                     allowLegacyFallback = allowLegacyFallback,
                     defaultValue = defaults.motionSyncEnabled,
                 ),
+            threeDModeEnabled =
+                getAirVisionProfileBoolean(
+                    key = AIR_VISION_THREE_D_MODE_ENABLED_KEY,
+                    mode = viewMode,
+                    allowLegacyFallback = allowLegacyFallback,
+                    defaultValue = defaults.threeDModeEnabled,
+                ),
             lightLoadModeEnabled =
                 getAirVisionProfileBoolean(
                     key = AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY,
@@ -848,6 +878,7 @@ class SecurePrefs(
                 AIR_VISION_IPD_MM_KEY,
                 AIR_VISION_SAFE_AREA_PERCENT_KEY,
                 AIR_VISION_MOTION_SYNC_ENABLED_KEY,
+                AIR_VISION_THREE_D_MODE_ENABLED_KEY,
                 AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY,
             )
         return AirVisionViewMode.entries.any { mode ->
