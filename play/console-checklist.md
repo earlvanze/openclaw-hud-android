@@ -27,10 +27,14 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 - Run `node scripts/verify-play-submission-package.mjs` before filling or
   updating Play Console App content answers.
 - Upload `build/release-bundles/openclaw-2026.7.9-hud-release.aab` to the internal track first.
-- Capture phone screenshots with `scripts/capture-play-screenshots.sh` or an
-  equivalent Play Console screenshot workflow. The local script normalizes
-  Android screencaps to Play-ready 24-bit PNG without alpha and writes
+- Capture phone screenshots with `scripts/capture-play-screenshots.sh`, or run
+  `node scripts/render-play-screenshots.mjs` when the Fold/M1 capture path is
+  offline. Both paths write Play-ready 24-bit PNG screenshots and
   `play/screenshots/phone/manifest.json`.
+- Use `play/console-handoff.md` as the generated copy/paste packet for Play
+  Console listing, App content, screenshots, app access, and remaining external
+  readiness flags. Keep it current with
+  `node scripts/render-play-console-handoff.mjs --check`.
 - Run `node scripts/test-play-screenshot-tools.mjs` after changes to screenshot
   capture, conversion, or final submission validation.
 - Keep the initial release status as `draft` until screenshots, policy forms, and tester access are verified.
@@ -56,6 +60,9 @@ Current local status:
   upload.
 - `node scripts/test-play-screenshot-tools.mjs` passes against the current
   screenshot converter and final submission verifier.
+- `node scripts/render-play-console-handoff.mjs --check` verifies the generated
+  Play Console handoff packet against the current listing copy, app-content
+  answers, privacy URL, and screenshot manifest.
 - `play/app-content-answers.json` contains the draft App content answers for
   Privacy policy, Ads, App access, Target audience, Content rating, Data
   deletion, and Data safety. Keep it aligned with the final Play Console forms.
