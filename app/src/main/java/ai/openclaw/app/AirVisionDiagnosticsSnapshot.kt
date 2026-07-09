@@ -85,11 +85,15 @@ data class AirVisionDiagnosticsHudRuntime(
     val brightnessDimmingEnabled: Boolean,
     val ipdAdjustmentEnabled: Boolean,
     val threeDModeAvailable: Boolean,
+    val presentationActive: Boolean,
+    val displayTarget: String,
+    val presentationDisplayCategoryPreferred: Boolean,
+    val nonDefaultDisplayFallbackEnabled: Boolean,
 )
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 3
+    const val VERSION = 4
 
     private val json =
         Json {
@@ -106,6 +110,7 @@ object AirVisionDiagnosticsSnapshots {
         appLanguage: AirVisionAppLanguage,
         startupDestination: AirVisionStartupDestination,
         hudDisplayTarget: AirVisionHudDisplayTarget,
+        hudPresentationActive: Boolean = false,
         demoModeEnabled: Boolean,
     ): AirVisionDiagnosticsSnapshot =
         AirVisionDiagnosticsSnapshot(
@@ -167,6 +172,10 @@ object AirVisionDiagnosticsSnapshots {
                         AirVisionDisplaySettings.hudDimAlphaForBrightnessPercent(displaySettings.brightnessPercent) > 0f,
                     ipdAdjustmentEnabled = displaySettings.ipdAdjustmentEnabled,
                     threeDModeAvailable = displaySettings.threeDModeAvailable,
+                    presentationActive = hudPresentationActive,
+                    displayTarget = hudDisplayTarget.rawValue,
+                    presentationDisplayCategoryPreferred = true,
+                    nonDefaultDisplayFallbackEnabled = true,
                 ),
             hudControls =
                 AirVisionBackupHudControls(

@@ -497,6 +497,7 @@ class MainViewModel(
                 appLanguage = airVisionAppLanguage.value,
                 startupDestination = airVisionStartupDestination.value,
                 hudDisplayTarget = airVisionHudDisplayTarget.value,
+                hudPresentationActive = airVisionHudPresentationActive.value,
                 demoModeEnabled = airVisionDemoModeEnabled.value,
             ),
         )

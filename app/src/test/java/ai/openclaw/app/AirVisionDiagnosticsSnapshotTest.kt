@@ -67,6 +67,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 appLanguage = AirVisionAppLanguage.Spanish,
                 startupDestination = AirVisionStartupDestination.Hud,
                 hudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
+                hudPresentationActive = true,
                 demoModeEnabled = true,
             )
 
@@ -80,7 +81,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("3", root.getValue("version").jsonPrimitive.content)
+        assertEquals("4", root.getValue("version").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)
@@ -99,6 +100,10 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", hudRuntime.getValue("colorPreviewOverlaysEnabled").jsonPrimitive.content)
         assertEquals("true", hudRuntime.getValue("brightnessDimmingEnabled").jsonPrimitive.content)
         assertEquals("true", hudRuntime.getValue("ipdAdjustmentEnabled").jsonPrimitive.content)
+        assertEquals("true", hudRuntime.getValue("presentationActive").jsonPrimitive.content)
+        assertEquals("airvision_preferred", hudRuntime.getValue("displayTarget").jsonPrimitive.content)
+        assertEquals("true", hudRuntime.getValue("presentationDisplayCategoryPreferred").jsonPrimitive.content)
+        assertEquals("true", hudRuntime.getValue("nonDefaultDisplayFallbackEnabled").jsonPrimitive.content)
         assertEquals("es", root.getValue("appPreferences").jsonObject.getValue("language").jsonPrimitive.content)
         assertTrue(encoded.contains("ASUS AirVision M1"))
     }
