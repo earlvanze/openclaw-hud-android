@@ -89,6 +89,7 @@ function parseArgs(argv) {
           "  --manifest     packaged hudRelease AndroidManifest.xml",
           "  --listing-dir  play/listings",
           "  --language     en-US",
+          "  --skip-signature  For CI-only unsigned release manifest/listing checks.",
         ].join("\n"),
       );
       process.exit(0);

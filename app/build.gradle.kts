@@ -17,6 +17,12 @@ val resolvedAndroidStoreFile =
 
 val hasAndroidReleaseSigning =
     listOf(resolvedAndroidStoreFile, androidStorePassword, androidKeyAlias, androidKeyPassword).all { it != null }
+val allowUnsignedReleaseBuild =
+    providers
+        .gradleProperty("OPENCLAW_ANDROID_ALLOW_UNSIGNED_RELEASE")
+        .orNull
+        ?.toBooleanStrictOrNull()
+        ?: false
 
 val wantsAndroidReleaseBuild =
     gradle.startParameter.taskNames.any { taskName ->
@@ -24,11 +30,12 @@ val wantsAndroidReleaseBuild =
             Regex("""(^|:)(bundle|assemble)$""").containsMatchIn(taskName)
     }
 
-if (wantsAndroidReleaseBuild && !hasAndroidReleaseSigning) {
+if (wantsAndroidReleaseBuild && !hasAndroidReleaseSigning && !allowUnsignedReleaseBuild) {
     error(
         "Missing Android release signing properties. Set OPENCLAW_ANDROID_STORE_FILE, " +
             "OPENCLAW_ANDROID_STORE_PASSWORD, OPENCLAW_ANDROID_KEY_ALIAS, and " +
-            "OPENCLAW_ANDROID_KEY_PASSWORD in ~/.gradle/gradle.properties.",
+            "OPENCLAW_ANDROID_KEY_PASSWORD in ~/.gradle/gradle.properties. " +
+            "Use -POPENCLAW_ANDROID_ALLOW_UNSIGNED_RELEASE=true only for CI manifest/listing verification.",
     )
 }
 

@@ -20,4 +20,13 @@ jobs:
       - uses: android-actions/setup-android@v4
 
       - name: Verify HUD build
-        run: ./gradlew --no-daemon --max-workers=1 :app:lintHudRelease :app:testHudDebugUnitTest :app:assembleHudDebug
+        run: |
+          ./gradlew --no-daemon --max-workers=1 \
+            :app:lintHudRelease \
+            :app:testHudDebugUnitTest \
+            :app:assembleHudDebug \
+            :app:bundleHudRelease \
+            -POPENCLAW_ANDROID_ALLOW_UNSIGNED_RELEASE=true
+          node scripts/verify-play-hud-release.mjs \
+            --bundle app/build/outputs/bundle/hudRelease/app-hud-release.aab \
+            --skip-signature

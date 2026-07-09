@@ -266,6 +266,11 @@ Play target. It verifies the newest signed HUD AAB, confirms the generated
 manifest package is `ai.openclaw.app.hud`, fails if restricted Play-risk
 permissions drift back into the HUD flavor, confirms the notification-listener
 service declaration, and checks the English listing/release-notes length limits.
+GitHub Actions also builds the HUD release bundle with
+`-POPENCLAW_ANDROID_ALLOW_UNSIGNED_RELEASE=true` and runs the verifier with
+`--skip-signature` so CI can validate the release manifest and listing without
+repo-stored signing keys. Publishing still requires the locally signed bundle
+from `scripts/build-release-aab.mjs`.
 
 ## Kotlin Lint + Format
 
