@@ -2,5 +2,6 @@ Initial AirVision M1 HUD release candidate:
 - Minimal green-on-black Samsung DeX presentation.
 - Compact chat, notification summaries, voice controls, and captions.
 - Per-mode M1 tuning profiles with labels, copy actions, JSON backup/import, brightness, distance, IPD, Eye Care, gestures, and hotkeys.
+- USB firmware-link diagnostics with HID report paths and feature readiness.
 - In-app privacy policy under App Preferences.
 - Play HUD build removes SMS and Call Log permissions.
