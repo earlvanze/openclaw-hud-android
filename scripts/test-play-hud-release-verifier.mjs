@@ -52,11 +52,11 @@ const validListingFiles = {
   "short-description.txt": "Minimal assistant HUD for Samsung DeX and Asus AirVision M1 displays.",
   "full-description.txt": [
     "OpenClaw HUD is optimized for Samsung DeX on Galaxy Fold 7 with AirVision M1.",
-    "It includes HID report-path summaries and per-feature firmware-apply readiness.",
+    "It includes HID report-path summaries, per-feature firmware-apply readiness, and protocol-capture targets.",
   ].join("\n"),
   "release-notes.txt": [
     "Initial AirVision M1 HUD release candidate:",
-    "- USB firmware-link diagnostics with HID report paths and feature readiness.",
+    "- USB firmware-link diagnostics with HID report paths, feature readiness, and protocol-capture targets.",
   ].join("\n"),
 };
 
