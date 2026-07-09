@@ -4,7 +4,7 @@
   "packageName": "ai.openclaw.app.hud",
   "privacyPolicy": {
     "sourceFile": "play/privacy-policy.md",
-    "inAppLocation": "Settings > AirVision M1 > App Preferences > EULA / Privacy note",
+    "inAppLocation": "Settings > AirVision M1 > App Preferences > Privacy Policy",
     "requiresHostedUrlBeforeSubmission": true
   },
   "ads": {

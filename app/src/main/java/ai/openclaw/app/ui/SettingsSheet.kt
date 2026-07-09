@@ -16,6 +16,7 @@ import ai.openclaw.app.BuildConfig
 import ai.openclaw.app.LocationMode
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.NotificationPackageFilterMode
+import ai.openclaw.app.PrivacyPolicyText
 import ai.openclaw.app.node.DeviceNotificationListenerService
 import ai.openclaw.app.normalizeLocalHourMinute
 import android.Manifest
@@ -182,6 +183,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
         }
     val appBuild = remember { BuildConfig.VERSION_CODE.toString() }
     var showAirVisionLegalNote by remember { mutableStateOf(false) }
+    var showPrivacyPolicy by remember { mutableStateOf(false) }
     var assistantRoleAvailable by remember(context) { mutableStateOf(isAssistantRoleAvailable(context)) }
     var assistantRoleHeld by remember(context) { mutableStateOf(isAssistantRoleHeld(context)) }
     val listItemColors =
@@ -210,6 +212,28 @@ fun SettingsSheet(viewModel: MainViewModel) {
             confirmButton = {
                 TextButton(onClick = { showAirVisionLegalNote = false }) {
                     Text("Understood", color = mobileAccent)
+                }
+            },
+        )
+    }
+
+    if (showPrivacyPolicy) {
+        AlertDialog(
+            onDismissRequest = { showPrivacyPolicy = false },
+            containerColor = mobileCardSurface,
+            title = {
+                Text(PrivacyPolicyText.TITLE, style = mobileTitle2, color = mobileText)
+            },
+            text = {
+                Text(
+                    PrivacyPolicyText.BODY,
+                    style = mobileCallout,
+                    color = mobileTextSecondary,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { showPrivacyPolicy = false }) {
+                    Text("Close", color = mobileAccent)
                 }
             },
         )
@@ -1273,6 +1297,13 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         supportingText = "Shows the Android companion legal note and ASUS EULA availability.",
                         buttonText = "View",
                         onClick = { showAirVisionLegalNote = true },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionLinkRow(
+                        title = "Privacy Policy",
+                        supportingText = "Shows how OpenClaw HUD handles microphone, notification, gateway, and local app data.",
+                        buttonText = "View",
+                        onClick = { showPrivacyPolicy = true },
                     )
                     HorizontalDivider(color = mobileBorder)
                     AirVisionLinkRow(

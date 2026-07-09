@@ -18,6 +18,8 @@ const defaultManifestPath = join(
 );
 const defaultAppContentPath = join(androidDir, "play", "app-content-answers.json");
 const defaultPrivacyPolicyPath = join(androidDir, "play", "privacy-policy.md");
+const defaultInAppPrivacyPolicyPath = join(androidDir, "app", "src", "main", "java", "ai", "openclaw", "app", "PrivacyPolicyText.kt");
+const defaultSettingsSheetPath = join(androidDir, "app", "src", "main", "java", "ai", "openclaw", "app", "ui", "SettingsSheet.kt");
 const defaultDataSafetyNotesPath = join(androidDir, "play", "data-safety-notes.md");
 const defaultConsoleChecklistPath = join(androidDir, "play", "console-checklist.md");
 const defaultListingDir = join(androidDir, "play", "listings", "en-US");
@@ -53,6 +55,8 @@ function parseArgs(argv) {
     manifest: defaultManifestPath,
     appContent: defaultAppContentPath,
     privacyPolicy: defaultPrivacyPolicyPath,
+    inAppPrivacyPolicy: defaultInAppPrivacyPolicyPath,
+    settingsSheet: defaultSettingsSheetPath,
     dataSafetyNotes: defaultDataSafetyNotesPath,
     consoleChecklist: defaultConsoleChecklistPath,
     listingDir: defaultListingDir,
@@ -63,6 +67,8 @@ function parseArgs(argv) {
     if (arg === "--manifest") args.manifest = resolve(argv[++index]);
     else if (arg === "--app-content") args.appContent = resolve(argv[++index]);
     else if (arg === "--privacy-policy") args.privacyPolicy = resolve(argv[++index]);
+    else if (arg === "--in-app-privacy-policy") args.inAppPrivacyPolicy = resolve(argv[++index]);
+    else if (arg === "--settings-sheet") args.settingsSheet = resolve(argv[++index]);
     else if (arg === "--data-safety-notes") args.dataSafetyNotes = resolve(argv[++index]);
     else if (arg === "--console-checklist") args.consoleChecklist = resolve(argv[++index]);
     else if (arg === "--listing-dir") args.listingDir = resolve(argv[++index]);
@@ -72,7 +78,7 @@ function parseArgs(argv) {
           "Usage: node scripts/verify-play-submission-package.mjs [--manifest path]",
           "",
           "Checks the local Google Play submission packet against the generated HUD manifest,",
-          "privacy policy, data-safety notes, console checklist, and English listing files.",
+          "privacy policy, in-app privacy policy, data-safety notes, console checklist, and English listing files.",
         ].join("\n"),
       );
       process.exit(0);
@@ -155,6 +161,9 @@ function verifyAppContentShape(appContent) {
   if (!appContent.privacyPolicy?.requiresHostedUrlBeforeSubmission) {
     throw new Error("Privacy policy must require a hosted URL before Play submission.");
   }
+  if (!appContent.privacyPolicy?.inAppLocation?.includes("Privacy Policy")) {
+    throw new Error("Privacy policy in-app location must point to the Privacy Policy row.");
+  }
   if (!appContent.appAccess?.restrictedFeatures || !appContent.appAccess.reviewAccessInstructions?.includes("Demo Mode")) {
     throw new Error("App access instructions must document Demo Mode review access.");
   }
@@ -207,6 +216,8 @@ async function main() {
   const appContent = await readJson(args.appContent);
   const manifestXml = await readText(args.manifest);
   const privacyPolicy = await readText(args.privacyPolicy);
+  const inAppPrivacyPolicy = await readText(args.inAppPrivacyPolicy);
+  const settingsSheet = await readText(args.settingsSheet);
   const dataSafetyNotes = await readText(args.dataSafetyNotes);
   const consoleChecklist = await readText(args.consoleChecklist);
 
@@ -215,12 +226,28 @@ async function main() {
   const permissionCount = verifyManifestAgainstAppContent(manifestXml, appContent);
 
   requireIncludes("Privacy policy", privacyPolicy, [
+    "OpenClaw HUD Privacy Policy",
     "microphone",
     "notification",
     "gateway",
     "encrypted storage",
     "does not sell personal data",
     "clear data",
+  ]);
+  requireIncludes("In-app privacy policy", inAppPrivacyPolicy, [
+    "OpenClaw HUD Privacy Policy",
+    "microphone",
+    "notification",
+    "gateway",
+    "encrypted storage",
+    "does not sell personal data",
+    "clear data",
+  ]);
+  requireIncludes("Settings privacy policy surface", settingsSheet, [
+    "PrivacyPolicyText",
+    "Privacy Policy",
+    "showPrivacyPolicy",
+    "handles microphone, notification, gateway, and local app data",
   ]);
   requireIncludes("Data safety notes", dataSafetyNotes, [
     "No advertising",
@@ -239,6 +266,7 @@ async function main() {
   console.log(`App-content package: ${appContent.packageName}`);
   console.log(`Manifest permissions checked: ${permissionCount}`);
   console.log(`Privacy policy: ${args.privacyPolicy}`);
+  console.log(`In-app privacy policy: ${args.inAppPrivacyPolicy}`);
   console.log(`App-content answers: ${args.appContent}`);
   console.log("Play submission package verifier passed.");
 }
