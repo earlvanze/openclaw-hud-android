@@ -98,6 +98,14 @@ class MainActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.airVisionHudDisplayTarget.collect {
+                    showHudPresentationIfAvailable()
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.runtimeInitialized.collect { ready ->
                     if (!ready || didAttachRuntimeUi) return@collect
                     viewModel.attachRuntimeUi(owner = this@MainActivity, permissionRequester = permissionRequester)
@@ -209,10 +217,15 @@ class MainActivity : ComponentActivity() {
             return
         }
         val displayManager = getSystemService(DisplayManager::class.java) ?: return
+        val externalDisplays =
+            displayManager.displays.filter { it.displayId != Display.DEFAULT_DISPLAY && it.isValid }
+        val targetCandidate =
+            AirVisionHudDisplayRouter.choose(
+                candidates = externalDisplays.map { it.toHudDisplayCandidate() },
+                target = viewModel.airVisionHudDisplayTarget.value,
+            )
         val targetDisplay =
-            displayManager.displays
-                .filter { it.displayId != Display.DEFAULT_DISPLAY && it.isValid }
-                .maxByOrNull { scoreHudDisplay(it) }
+            externalDisplays.firstOrNull { it.displayId == targetCandidate?.displayId }
                 ?: run {
                     hudPresentation?.dismiss()
                     hudPresentation = null
@@ -244,14 +257,13 @@ class MainActivity : ComponentActivity() {
             }
     }
 
-    private fun scoreHudDisplay(display: Display): Int {
-        val name = display.name.orEmpty()
-        var score = 1
-        if (name.contains("AirVision", ignoreCase = true)) score += 20
-        if (name.contains("ASUS", ignoreCase = true)) score += 10
-        if (name.contains("M1", ignoreCase = true)) score += 6
-        return score
-    }
+    private fun Display.toHudDisplayCandidate(): AirVisionHudDisplayCandidate =
+        AirVisionHudDisplayCandidate(
+            displayId = displayId,
+            name = name.orEmpty(),
+            widthPx = mode?.physicalWidth ?: 0,
+            heightPx = mode?.physicalHeight ?: 0,
+        )
 
     private fun setupHudMediaSession() {
         if (!BuildConfig.OPENCLAW_DEFAULT_HUD || hudMediaSession != null) return

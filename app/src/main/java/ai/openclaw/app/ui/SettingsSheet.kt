@@ -3,6 +3,7 @@ package ai.openclaw.app.ui
 import ai.openclaw.app.AirVisionAppLanguage
 import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionHudDoubleTapAction
+import ai.openclaw.app.AirVisionHudDisplayTarget
 import ai.openclaw.app.AirVisionHudKeyAction
 import ai.openclaw.app.AirVisionHudMediaKeyAction
 import ai.openclaw.app.AirVisionHudPlacement
@@ -110,6 +111,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
     val airVisionAppLanguage by viewModel.airVisionAppLanguage.collectAsState()
     val airVisionStartupDestination by viewModel.airVisionStartupDestination.collectAsState()
+    val airVisionHudDisplayTarget by viewModel.airVisionHudDisplayTarget.collectAsState()
     val airVisionPhysicalMainScreenVisible by viewModel.airVisionPhysicalMainScreenVisible.collectAsState()
     val airVisionDemoModeEnabled by viewModel.airVisionDemoModeEnabled.collectAsState()
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
@@ -641,6 +643,17 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 )
                             }
                         },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "HUD Display Target",
+                        currentLabel = airVisionHudDisplayTarget.label,
+                        supportingText = "Chooses which external display receives the Android Presentation HUD.",
+                        options = AirVisionHudDisplayTarget.entries.toList(),
+                        selected = airVisionHudDisplayTarget,
+                        optionLabel = { it.label },
+                        optionDescription = ::airVisionHudDisplayTargetDescription,
+                        onSelected = viewModel::setAirVisionHudDisplayTarget,
                     )
                     HorizontalDivider(color = mobileBorder)
                     ListItem(
@@ -1919,6 +1932,14 @@ private fun airVisionHudPlacementDescription(placement: AirVisionHudPlacement): 
         AirVisionHudPlacement.UpperRight -> "Moves content away from left-side app or DeX overlays."
         AirVisionHudPlacement.Center -> "Places content in the central view for focused seated use."
         AirVisionHudPlacement.LowerCenter -> "Drops content lower when top captions or system UI need space."
+    }
+
+private fun airVisionHudDisplayTargetDescription(target: AirVisionHudDisplayTarget): String =
+    when (target) {
+        AirVisionHudDisplayTarget.AirVisionPreferred -> "Prefer displays whose name looks like ASUS AirVision M1."
+        AirVisionHudDisplayTarget.LargestExternal -> "Use the largest external display Android exposes."
+        AirVisionHudDisplayTarget.FirstExternal -> "Use the lowest-numbered external display."
+        AirVisionHudDisplayTarget.LastExternal -> "Use the highest-numbered external display."
     }
 
 private fun airVisionTouchActionDescription(action: AirVisionHudTouchAction): String =

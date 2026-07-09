@@ -312,6 +312,20 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun airVisionHudDisplayTarget_persists() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        assertEquals(AirVisionHudDisplayTarget.AirVisionPreferred, prefs.airVisionHudDisplayTarget.value)
+
+        prefs.setAirVisionHudDisplayTarget(AirVisionHudDisplayTarget.LargestExternal)
+
+        assertEquals(AirVisionHudDisplayTarget.LargestExternal, SecurePrefs(context).airVisionHudDisplayTarget.value)
+    }
+
+    @Test
     fun airVisionDemoModeEnabled_persists() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)

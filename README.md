@@ -142,7 +142,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, serial availability, and firmware protocol status. Actual firmware version still needs ASUS HID support. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, and USB interface/endpoint diagnostics for protocol capture work. |
 | Identify | Implemented as a temporary `HUD 1` marker on the Android Presentation display. |
-| Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports per-mode placement, per-mode physical main screen visibility, and safe-area layout profiles for the M1 presentation. |
+| Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports configurable external-display targeting, per-mode placement, per-mode physical main screen visibility, and safe-area layout profiles for the M1 presentation. |
 
 Firmware controls are intentionally read-only/status-only for now. The app can
 detect the M1 USB HID control interface, request Android USB permission, and
@@ -170,6 +170,11 @@ Preferences. Startup view selects the default launch tab for HUD builds. Demo
 mode renders a deterministic navigation, chat, mic, speaker, and caption sample
 in the HUD so tutorials, screenshots, and fit checks can be performed without a
 live gateway or notification stream.
+
+HUD Display Target lives in Settings -> AirVision M1. AirVision Preferred keeps
+the default behavior of selecting displays named like ASUS AirVision M1. Largest
+External, First External, and Last External provide manual fallbacks for Samsung
+DeX or adapter setups where Android exposes multiple presentation displays.
 
 To pair on first launch, pass a setup code directly or from a local file:
 
