@@ -75,6 +75,7 @@ function parseArgs(argv) {
     consoleChecklist: defaultConsoleChecklistPath,
     listingDir: defaultListingDir,
     final: false,
+    skipHostedPrivacyUrlFetch: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -89,6 +90,7 @@ function parseArgs(argv) {
     else if (arg === "--console-checklist") args.consoleChecklist = resolve(argv[++index]);
     else if (arg === "--listing-dir") args.listingDir = resolve(argv[++index]);
     else if (arg === "--final") args.final = true;
+    else if (arg === "--skip-hosted-privacy-url-fetch") args.skipHostedPrivacyUrlFetch = true;
     else if (arg === "--help" || arg === "-h") {
       console.log(
         [
@@ -99,6 +101,7 @@ function parseArgs(argv) {
           "",
           "Add --final to require external Play Console readiness fields such as hosted privacy URL,",
           "phone screenshots, reviewer access, tester access, and app creation status.",
+          "Use --skip-hosted-privacy-url-fetch only for offline synthetic verifier tests.",
         ].join("\n"),
       );
       process.exit(0);
@@ -357,11 +360,17 @@ async function verifyScreenshotFile(screenshot, index, problems) {
   }
 }
 
-async function verifyFinalSubmissionReadiness(appContent, hostedPrivacyPolicyPage) {
+async function verifyFinalSubmissionReadiness(
+  appContent,
+  hostedPrivacyPolicyPage,
+  { skipHostedPrivacyUrlFetch = false } = {},
+) {
   const finalSubmission = appContent.finalSubmission ?? {};
   const problems = [];
   if (!isHttpsUrl(finalSubmission.hostedPrivacyPolicyUrl)) {
     problems.push("finalSubmission.hostedPrivacyPolicyUrl must be a public https:// URL.");
+  } else if (skipHostedPrivacyUrlFetch) {
+    requireIncludes("Local hosted privacy policy page parity", normalizeHtmlPolicyText(hostedPrivacyPolicyPage), corePrivacyDisclosures);
   } else {
     await verifyHostedPrivacyPolicyUrl(finalSubmission.hostedPrivacyPolicyUrl, hostedPrivacyPolicyPage, problems);
   }
@@ -488,7 +497,11 @@ async function main() {
 
   await verifyListing(args.listingDir);
   verifyAppContentShape(appContent);
-  if (args.final) await verifyFinalSubmissionReadiness(appContent, hostedPrivacyPolicyPage);
+  if (args.final) {
+    await verifyFinalSubmissionReadiness(appContent, hostedPrivacyPolicyPage, {
+      skipHostedPrivacyUrlFetch: args.skipHostedPrivacyUrlFetch,
+    });
+  }
   const permissionCount = verifyManifestAgainstAppContent(manifestXml, appContent);
 
   requireIncludes("Privacy policy", privacyPolicy, [

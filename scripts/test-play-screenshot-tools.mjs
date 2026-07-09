@@ -172,11 +172,26 @@ try {
   }
 
   await writeFinalAppContent(validAppContentPath, rgbPath);
-  runNode(["scripts/verify-play-submission-package.mjs", "--app-content", validAppContentPath, "--final"], "final verifier with converted screenshot");
+  runNode(
+    [
+      "scripts/verify-play-submission-package.mjs",
+      "--app-content",
+      validAppContentPath,
+      "--final",
+      "--skip-hosted-privacy-url-fetch",
+    ],
+    "final verifier with converted screenshot",
+  );
 
   await writeFinalAppContent(invalidAppContentPath, rgbaPath);
   const rejected = runNode(
-    ["scripts/verify-play-submission-package.mjs", "--app-content", invalidAppContentPath, "--final"],
+    [
+      "scripts/verify-play-submission-package.mjs",
+      "--app-content",
+      invalidAppContentPath,
+      "--final",
+      "--skip-hosted-privacy-url-fetch",
+    ],
     "final verifier with alpha screenshot",
     1,
   );
