@@ -30,6 +30,10 @@ function parseAccountList(value) {
     .filter(Boolean);
 }
 
+function normalizeAccount(value) {
+  return value?.trim().toLowerCase() || null;
+}
+
 function parseArgs(argv) {
   const args = {
     packageName: "ai.openclaw.app.hud",
@@ -44,6 +48,7 @@ function parseArgs(argv) {
     bundle: null,
     serviceAccount: process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_APPLICATION_CREDENTIALS || null,
     auth: process.env.GOOGLE_PLAY_AUTH || "auto",
+    gcloudAccount: normalizeAccount(process.env.GOOGLE_PLAY_GCLOUD_ACCOUNT),
     allowedAccounts:
       process.env.GOOGLE_PLAY_ALLOWED_ACCOUNTS !== undefined
         ? parseAccountList(process.env.GOOGLE_PLAY_ALLOWED_ACCOUNTS)
@@ -60,6 +65,7 @@ function parseArgs(argv) {
     else if (arg === "--bundle") args.bundle = argv[++index];
     else if (arg === "--service-account") args.serviceAccount = argv[++index];
     else if (arg === "--auth") args.auth = argv[++index];
+    else if (arg === "--gcloud-account") args.gcloudAccount = normalizeAccount(argv[++index]);
     else if (arg === "--allowed-account") args.allowedAccounts.push(...parseAccountList(argv[++index]));
     else if (arg === "--skip-listing") args.uploadListing = false;
     else if (arg === "--skip-release-notes") args.uploadReleaseNotes = false;
@@ -77,7 +83,9 @@ function parseArgs(argv) {
           "  --auth auto             Use service-account JSON when configured, otherwise gcloud.",
           "  --auth service-account  Require GOOGLE_PLAY_SERVICE_ACCOUNT_JSON, GOOGLE_APPLICATION_CREDENTIALS, or --service-account.",
           "  --auth gcloud           Use `gcloud auth print-access-token` from the active account.",
+          "  --gcloud-account email  Use this authenticated gcloud account without changing global gcloud config.",
           "  --allowed-account email Restrict gcloud OAuth publishing to an expected account. Repeat or comma-separate.",
+          "                          Env: GOOGLE_PLAY_GCLOUD_ACCOUNT.",
           "",
           `Default allowed gcloud OAuth accounts: ${defaultAllowedGcloudAccounts.join(", ")}`,
           "",
@@ -203,8 +211,11 @@ async function accessToken(serviceAccount) {
   return body.access_token;
 }
 
-function gcloudAccessToken() {
-  const result = spawnSync("gcloud", ["auth", "print-access-token", `--scopes=${androidPublisherScope}`], {
+function gcloudAccessToken(account) {
+  const commandArgs = ["auth", "print-access-token"];
+  if (account) commandArgs.push(account);
+  commandArgs.push(`--scopes=${androidPublisherScope}`);
+  const result = spawnSync("gcloud", commandArgs, {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -217,7 +228,9 @@ function gcloudAccessToken() {
   return token;
 }
 
-function gcloudActiveAccount() {
+function gcloudActiveAccount(preferredAccount) {
+  const normalizedPreferredAccount = normalizeAccount(preferredAccount);
+  if (normalizedPreferredAccount) return normalizedPreferredAccount;
   const result = spawnSync("gcloud", ["config", "get-value", "account"], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
@@ -226,19 +239,19 @@ function gcloudActiveAccount() {
     const detail = result.stderr.trim() || result.stdout.trim() || "gcloud config get-value account failed";
     throw new Error(`Unable to get active gcloud account: ${detail}`);
   }
-  const account = result.stdout.trim().toLowerCase();
+  const account = normalizeAccount(result.stdout);
   if (!account || account === "(unset)") throw new Error("No active gcloud account is configured.");
   return account;
 }
 
-function verifyAllowedGcloudAccount(activeAccount, allowedAccounts) {
+function verifyAllowedGcloudAccount(gcloudAccount, allowedAccounts) {
   const allowed = new Set(allowedAccounts.map((account) => account.trim().toLowerCase()).filter(Boolean));
   if (allowed.size === 0) return;
-  if (allowed.has(activeAccount)) return;
+  if (allowed.has(gcloudAccount)) return;
   throw new Error(
     [
-      `Active gcloud account is ${activeAccount}, but Play publishing is restricted to: ${[...allowed].join(", ")}.`,
-      "Run `gcloud auth login earlvanze@gmail.com` or `gcloud auth login earl@earlbnb.com`, then `gcloud config set account <email>`.",
+      `Selected gcloud account is ${gcloudAccount}, but Play publishing is restricted to: ${[...allowed].join(", ")}.`,
+      "Run `gcloud auth login earlvanze@gmail.com` or `gcloud auth login earl@earlbnb.com`, then either pass `--gcloud-account <email>` or run `gcloud config set account <email>`.",
       "For a different authorized publisher, set GOOGLE_PLAY_ALLOWED_ACCOUNTS or pass --allowed-account.",
     ].join("\n"),
   );
@@ -250,9 +263,9 @@ async function resolveAccessToken(args) {
     return { token: await accessToken(serviceAccount), source: "service-account" };
   }
   if (args.auth === "gcloud" || args.auth === "auto") {
-    const account = gcloudActiveAccount();
+    const account = gcloudActiveAccount(args.gcloudAccount);
     verifyAllowedGcloudAccount(account, args.allowedAccounts);
-    return { token: gcloudAccessToken(), source: `gcloud:${account}` };
+    return { token: gcloudAccessToken(account), source: `gcloud:${account}` };
   }
   throw new Error(`Unknown auth mode: ${args.auth}`);
 }
