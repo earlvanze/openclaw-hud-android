@@ -22,6 +22,16 @@ const gradleHudBundlePath = join(
 const defaultListingDir = join(androidDir, "play", "listings");
 const androidPublisherScope = "https://www.googleapis.com/auth/androidpublisher";
 const defaultAllowedGcloudAccounts = ["earlvanze@gmail.com", "earl@earlbnb.com"];
+const hudBundleFreshnessPaths = [
+  "app/src/main",
+  "app/src/hud",
+  "app/build.gradle.kts",
+  "build.gradle.kts",
+  "settings.gradle.kts",
+  "gradle.properties",
+  "gradle",
+  "gradlew",
+];
 
 function parseAccountList(value) {
   return value
@@ -268,6 +278,71 @@ function gcloudAuthenticatedAccounts() {
   }
 }
 
+function gitOutput(args) {
+  const result = spawnSync("git", args, {
+    cwd: androidDir,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (result.status !== 0) {
+    const detail = result.stderr.trim() || result.stdout.trim() || `git ${args.join(" ")} failed`;
+    throw new Error(`Unable to inspect git state: ${detail}`);
+  }
+  return result.stdout.trim();
+}
+
+function formatUtc(ms) {
+  return new Date(ms).toISOString();
+}
+
+function latestHudInputCommit() {
+  const output = gitOutput(["log", "-1", "--format=%ct %h %s", "--", ...hudBundleFreshnessPaths]);
+  if (!output) return null;
+  const match = output.match(/^(\d+)\s+([0-9a-f]+)\s*(.*)$/u);
+  if (!match) throw new Error(`Unable to parse latest HUD input commit: ${output}`);
+  return {
+    epochMs: Number.parseInt(match[1], 10) * 1000,
+    shortHash: match[2],
+    subject: match[3] ?? "",
+  };
+}
+
+function hudInputStatusLines() {
+  const output = gitOutput(["status", "--porcelain", "--", ...hudBundleFreshnessPaths]);
+  return output.split("\n").map((line) => line.trim()).filter(Boolean);
+}
+
+function verifyHudBundleFreshness(bundlePath, bundleInfo) {
+  const dirtyInputs = hudInputStatusLines();
+  if (dirtyInputs.length > 0) {
+    throw new Error(
+      [
+        "Refusing Google Play publish flow because HUD source/build inputs have uncommitted changes.",
+        ...dirtyInputs.map((line) => `- ${line}`),
+        "Commit or stash those changes, rebuild the HUD AAB, then rerun the publish helper.",
+      ].join("\n"),
+    );
+  }
+
+  const latestInput = latestHudInputCommit();
+  if (!latestInput) return;
+
+  if (bundleInfo.mtimeMs + 1000 < latestInput.epochMs) {
+    throw new Error(
+      [
+        `Refusing Google Play publish flow because the HUD AAB is stale: ${bundlePath}`,
+        `Bundle modified: ${formatUtc(bundleInfo.mtimeMs)}`,
+        `Latest HUD source/build input: ${latestInput.shortHash} ${latestInput.subject} at ${formatUtc(latestInput.epochMs)}`,
+        "Rebuild with `./gradlew :app:bundleHudRelease` or `node scripts/build-release-aab.mjs --flavor hud`, then rerun the publish helper.",
+      ].join("\n"),
+    );
+  }
+
+  console.log(
+    `HUD bundle freshness verified against ${latestInput.shortHash} ${latestInput.subject} (${formatUtc(latestInput.epochMs)}).`,
+  );
+}
+
 function formatAccountList(accounts) {
   return accounts?.length ? accounts.join(", ") : "(none)";
 }
@@ -458,6 +533,10 @@ async function main() {
     console.log("Release notes: skipped");
   }
   console.log(`Mode: ${args.authCheck ? "auth-check" : args.preflight ? "preflight" : args.commit ? "commit" : "dry-run"}`);
+
+  if (bundlePath && bundleInfo) {
+    verifyHudBundleFreshness(bundlePath, bundleInfo);
+  }
 
   if (!args.authCheck) {
     verifyLocalSubmissionPackageBeforePublish();

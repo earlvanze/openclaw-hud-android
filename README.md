@@ -276,9 +276,11 @@ release status `draft`, and the newest HUD AAB from either
 `app/build/outputs/bundle/hudRelease/app-hud-release.aab` output. It validates
 the English Play listing files and runs
 `node scripts/verify-play-submission-package.mjs` during dry-run, preflight, and
-commit flows. Commit mode creates a Play edit, uploads the AAB, patches the
-localized store listing, attaches localized release notes to the internal-track
-release, and refuses to upload until
+commit flows. When a HUD AAB is selected, it also refuses to continue if HUD
+source/build inputs are dirty or newer than the bundle, preventing stale local
+artifacts from being uploaded after app changes. Commit mode creates a Play
+edit, uploads the AAB, patches the localized store listing, attaches localized
+release notes to the internal-track release, and refuses to upload until
 `node scripts/verify-play-submission-package.mjs --final` passes, so
 screenshots, hosted privacy URL, tester setup, reviewer access, and app creation
 status must be recorded locally first. Auth can come from a Play

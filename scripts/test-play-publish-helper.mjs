@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, rm, utimes, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { delimiter } from "node:path";
 import { dirname, join } from "node:path";
@@ -89,8 +89,24 @@ exit 64
       GOOGLE_PLAY_AUTH: "gcloud",
     };
 
-    const dryRun = runPublish(["--dry-run"], env);
+    const staleBundle = join(tempDir, "stale-hud-release.aab");
+    await writeFile(staleBundle, "synthetic stale bundle");
+    await utimes(staleBundle, new Date(0), new Date(0));
+    const staleDryRun = runPublish(["--dry-run", "--bundle", staleBundle], env, 1);
+    const staleDryRunText = outputText(staleDryRun);
+    if (!staleDryRunText.includes("HUD AAB is stale")) {
+      throw new Error(`Dry-run did not reject a stale HUD bundle:\n${staleDryRunText}`);
+    }
+
+    const freshBundle = join(tempDir, "fresh-hud-release.aab");
+    await writeFile(freshBundle, "synthetic fresh bundle");
+    const future = new Date(Date.now() + 60_000);
+    await utimes(freshBundle, future, future);
+    const dryRun = runPublish(["--dry-run", "--bundle", freshBundle], env);
     const dryRunText = outputText(dryRun);
+    if (!dryRunText.includes("HUD bundle freshness verified")) {
+      throw new Error(`Dry-run did not verify HUD bundle freshness:\n${dryRunText}`);
+    }
     if (!dryRunText.includes("Local Play submission package verified.")) {
       throw new Error(`Dry-run did not verify the local Play submission package:\n${dryRunText}`);
     }
