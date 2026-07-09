@@ -133,7 +133,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Screen distance | Implemented as virtual HUD distance scaling. |
 | IPD | Stored as a calibration value, defaulting to 67 mm. Adjustment is locked while Light Load Mode is enabled, matching the ASUS app. Firmware-level apply still needs the ASUS HID protocol. |
 | Splendid Standard / Theater / Office / Game / Eye Care | Stored as profile settings. Eye Care adds a warm HUD overlay now; true panel presets need HID support. |
-| Blue Light Filter | Implemented as Android HUD warm filtering. |
+| Blue Light Filter | Implemented as Android HUD warm filtering and available only in Eye Care mode, matching the ASUS app. |
 | Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
 | 3D Mode | Stored in the AirVision profile and disabled while Light Load Mode is enabled. Hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation and locks IPD adjustment while enabled. |

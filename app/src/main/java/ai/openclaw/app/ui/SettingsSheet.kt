@@ -837,13 +837,24 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     HorizontalDivider(color = mobileBorder)
                     AirVisionSliderRow(
                         label = "Blue Light Filter",
-                        valueText = "${airVisionDisplaySettings.blueLightFilterPercent}%",
-                        supportingText = "Applies a warm overlay in the Android HUD presentation.",
+                        valueText =
+                            if (airVisionDisplaySettings.blueLightFilterAvailable) {
+                                "${airVisionDisplaySettings.blueLightFilterPercent}%"
+                            } else {
+                                "${airVisionDisplaySettings.blueLightFilterPercent}% locked"
+                            },
+                        supportingText =
+                            if (airVisionDisplaySettings.blueLightFilterAvailable) {
+                                "Applies a warm overlay in the Android HUD presentation."
+                            } else {
+                                "Available only in Eye Care mode, matching the ASUS AirVision app."
+                            },
                         value = airVisionDisplaySettings.blueLightFilterPercent.toFloat(),
                         valueRange =
                             AirVisionDisplaySettings.MIN_BLUE_LIGHT_FILTER_PERCENT
                                 .toFloat()
                                 .rangeTo(AirVisionDisplaySettings.MAX_BLUE_LIGHT_FILTER_PERCENT.toFloat()),
+                        enabled = airVisionDisplaySettings.blueLightFilterAvailable,
                         onValueChange = { viewModel.setAirVisionBlueLightFilterPercent(it.roundToInt()) },
                     )
                     HorizontalDivider(color = mobileBorder)

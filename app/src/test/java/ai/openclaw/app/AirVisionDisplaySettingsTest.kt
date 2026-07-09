@@ -40,7 +40,7 @@ class AirVisionDisplaySettingsTest {
             0f,
             AirVisionDisplaySettings.hudWarmOverlayAlpha(
                 splendidMode = AirVisionSplendidMode.Standard,
-                blueLightFilterPercent = 0,
+                blueLightFilterPercent = 80,
             ),
             0.001f,
         )
@@ -87,5 +87,11 @@ class AirVisionDisplaySettingsTest {
 
         assertEquals(false, settings.threeDModeEnabled)
         assertEquals(false, settings.threeDModeAvailable)
+    }
+
+    @Test
+    fun blueLightFilterAvailability_followsEyeCareMode() {
+        assertEquals(false, AirVisionDisplaySettings(splendidMode = AirVisionSplendidMode.Standard).blueLightFilterAvailable)
+        assertTrue(AirVisionDisplaySettings(splendidMode = AirVisionSplendidMode.EyeCare).blueLightFilterAvailable)
     }
 }

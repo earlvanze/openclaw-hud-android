@@ -635,6 +635,7 @@ class SecurePrefs(
     }
 
     fun setAirVisionBlueLightFilterPercent(value: Int) {
+        if (!_airVisionDisplaySettings.value.blueLightFilterAvailable) return
         val normalized = AirVisionDisplaySettings.normalizeBlueLightFilterPercent(value)
         val viewMode = _airVisionDisplaySettings.value.viewMode
         plainPrefs.edit {

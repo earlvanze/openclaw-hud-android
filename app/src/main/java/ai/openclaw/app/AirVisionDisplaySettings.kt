@@ -71,6 +71,9 @@ data class AirVisionDisplaySettings(
     val threeDModeAvailable: Boolean
         get() = !lightLoadModeEnabled
 
+    val blueLightFilterAvailable: Boolean
+        get() = splendidMode == AirVisionSplendidMode.EyeCare
+
     val normalized: AirVisionDisplaySettings
         get() =
             copy(
@@ -212,12 +215,11 @@ data class AirVisionDisplaySettings(
             splendidMode: AirVisionSplendidMode,
             blueLightFilterPercent: Int,
         ): Float {
+            if (splendidMode != AirVisionSplendidMode.EyeCare) {
+                return 0f
+            }
             val base =
-                if (splendidMode == AirVisionSplendidMode.EyeCare) {
-                    0.10f
-                } else {
-                    0f
-                }
+                0.10f
             val slider =
                 normalizeBlueLightFilterPercent(blueLightFilterPercent).toFloat() / 100f * 0.24f
             return (base + slider).coerceIn(0f, 0.34f)

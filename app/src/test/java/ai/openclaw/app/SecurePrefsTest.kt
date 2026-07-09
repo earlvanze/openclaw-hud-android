@@ -185,6 +185,24 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun airVisionBlueLightFilterChange_isLockedOutsideEyeCareMode() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionSplendidMode(AirVisionSplendidMode.Standard)
+        prefs.setAirVisionBlueLightFilterPercent(50)
+
+        assertEquals(0, prefs.airVisionDisplaySettings.value.blueLightFilterPercent)
+
+        prefs.setAirVisionSplendidMode(AirVisionSplendidMode.EyeCare)
+        prefs.setAirVisionBlueLightFilterPercent(50)
+
+        assertEquals(50, SecurePrefs(context).airVisionDisplaySettings.value.blueLightFilterPercent)
+    }
+
+    @Test
     fun airVisionThreeDMode_isLockedWhileLightLoadModeIsEnabled() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
