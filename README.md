@@ -237,6 +237,7 @@ Flavor-specific direct Gradle tasks:
 Google Play internal-track publishing helper:
 
 ```bash
+node scripts/verify-play-hud-release.mjs
 node scripts/publish-play-internal.mjs --dry-run
 node scripts/publish-play-internal.mjs --auth gcloud --preflight
 GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=/path/to/service-account.json \
@@ -255,6 +256,12 @@ account. Store listing and policy prep files live under `play/`. Use
 `--skip-listing` or `--skip-release-notes` for bundle-only edits. The Play
 Console app must already exist for `ai.openclaw.app.hud`; follow
 `play/console-checklist.md` before the first commit.
+
+`verify-play-hud-release.mjs` is the offline-safe local gate for the HUD/M1
+Play target. It verifies the newest signed HUD AAB, confirms the generated
+manifest package is `ai.openclaw.app.hud`, fails if restricted Play-risk
+permissions drift back into the HUD flavor, confirms the notification-listener
+service declaration, and checks the English listing/release-notes length limits.
 
 ## Kotlin Lint + Format
 

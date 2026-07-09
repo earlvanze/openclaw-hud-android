@@ -1,0 +1,304 @@
+#!/usr/bin/env node
+
+import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { access, readdir, readFile, stat } from "node:fs/promises";
+import { basename, dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const androidDir = join(scriptDir, "..");
+const releaseOutputDir = join(androidDir, "build", "release-bundles");
+const defaultManifestPath = join(
+  androidDir,
+  "app",
+  "build",
+  "intermediates",
+  "packaged_manifests",
+  "hudRelease",
+  "processHudReleaseManifestForPackage",
+  "AndroidManifest.xml",
+);
+const defaultListingDir = join(androidDir, "play", "listings");
+
+const expectedPackage = "ai.openclaw.app.hud";
+const expectedPermissions = [
+  "android.permission.INTERNET",
+  "android.permission.ACCESS_NETWORK_STATE",
+  "android.permission.FOREGROUND_SERVICE",
+  "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+  "android.permission.POST_NOTIFICATIONS",
+  "android.permission.NEARBY_WIFI_DEVICES",
+  "android.permission.RECORD_AUDIO",
+  "android.permission.MODIFY_AUDIO_SETTINGS",
+];
+const forbiddenPermissions = [
+  "android.permission.SEND_SMS",
+  "android.permission.READ_SMS",
+  "android.permission.READ_CALL_LOG",
+  "android.permission.ACCESS_FINE_LOCATION",
+  "android.permission.ACCESS_COARSE_LOCATION",
+  "android.permission.ACCESS_BACKGROUND_LOCATION",
+  "android.permission.CAMERA",
+  "android.permission.READ_MEDIA_IMAGES",
+  "android.permission.READ_MEDIA_VIDEO",
+  "android.permission.READ_MEDIA_AUDIO",
+  "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+  "android.permission.READ_EXTERNAL_STORAGE",
+  "android.permission.MANAGE_EXTERNAL_STORAGE",
+  "android.permission.READ_CONTACTS",
+  "android.permission.WRITE_CONTACTS",
+  "android.permission.READ_CALENDAR",
+  "android.permission.WRITE_CALENDAR",
+  "android.permission.ACTIVITY_RECOGNITION",
+  "android.permission.QUERY_ALL_PACKAGES",
+  "android.permission.REQUEST_INSTALL_PACKAGES",
+  "android.permission.SYSTEM_ALERT_WINDOW",
+  "android.permission.BIND_ACCESSIBILITY_SERVICE",
+];
+const forbiddenFeatures = [
+  "android.hardware.camera",
+  "android.hardware.camera.any",
+  "android.hardware.telephony",
+];
+
+function parseArgs(argv) {
+  const args = {
+    bundle: null,
+    manifest: defaultManifestPath,
+    listingDir: defaultListingDir,
+    language: "en-US",
+    skipSignature: false,
+  };
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--bundle") args.bundle = resolve(argv[++index]);
+    else if (arg === "--manifest") args.manifest = resolve(argv[++index]);
+    else if (arg === "--listing-dir") args.listingDir = resolve(argv[++index]);
+    else if (arg === "--language") args.language = argv[++index];
+    else if (arg === "--skip-signature") args.skipSignature = true;
+    else if (arg === "--help" || arg === "-h") {
+      console.log(
+        [
+          "Usage: node scripts/verify-play-hud-release.mjs [--bundle path] [--manifest path]",
+          "",
+          "Verifies the latest signed HUD AAB, packaged HUD manifest, and Play listing copy.",
+          "Defaults:",
+          "  --bundle       newest build/release-bundles/*-hud-release.aab",
+          "  --manifest     packaged hudRelease AndroidManifest.xml",
+          "  --listing-dir  play/listings",
+          "  --language     en-US",
+        ].join("\n"),
+      );
+      process.exit(0);
+    } else {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+  }
+
+  return args;
+}
+
+async function executableExists(path) {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function resolveExecutable(command, fallbackCandidates = []) {
+  const pathEntries = (process.env.PATH ?? "").split(":").filter(Boolean);
+  for (const entry of pathEntries) {
+    const candidate = join(entry, command);
+    if (await executableExists(candidate)) return candidate;
+  }
+  for (const candidate of fallbackCandidates) {
+    if (candidate && (await executableExists(candidate))) return candidate;
+  }
+  return command;
+}
+
+async function latestHudBundle() {
+  const files = await readdir(releaseOutputDir).catch(() => []);
+  const candidates = [];
+  for (const file of files) {
+    if (!file.endsWith("-hud-release.aab")) continue;
+    const path = join(releaseOutputDir, file);
+    const info = await stat(path);
+    candidates.push({ path, mtimeMs: info.mtimeMs });
+  }
+  candidates.sort((a, b) => b.mtimeMs - a.mtimeMs);
+  return candidates[0]?.path ?? null;
+}
+
+async function sha256Hex(path) {
+  return createHash("sha256").update(await readFile(path)).digest("hex");
+}
+
+function runChecked(command, args, label) {
+  const result = spawnSync(command, args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (result.status !== 0) {
+    const detail = result.stderr.trim() || result.stdout.trim() || `${command} ${args.join(" ")} failed`;
+    throw new Error(`${label}: ${detail}`);
+  }
+  return result.stdout;
+}
+
+async function verifyBundle(bundlePath, skipSignature) {
+  if (!bundlePath) throw new Error(`No HUD release bundle found in ${releaseOutputDir}`);
+  const info = await stat(bundlePath);
+  if (info.size <= 0) throw new Error(`HUD bundle is empty: ${bundlePath}`);
+  runChecked("unzip", ["-l", bundlePath, "base/manifest/AndroidManifest.xml"], "AAB manifest check");
+
+  if (!skipSignature) {
+    const jarsigner = await resolveExecutable("jarsigner", [
+      join(process.env.JAVA_HOME ?? "", "bin", "jarsigner"),
+      join(process.env.HOME ?? "", ".gradle", "jdks", "eclipse_adoptium-21-amd64-linux.2", "bin", "jarsigner"),
+    ]);
+    runChecked(jarsigner, ["-verify", bundlePath], "AAB signature verification");
+  }
+
+  return {
+    path: bundlePath,
+    size: info.size,
+    sha256: await sha256Hex(bundlePath),
+  };
+}
+
+function charCount(value) {
+  return Array.from(value).length;
+}
+
+function trimTrailingNewline(value) {
+  return value.replace(/\r\n/gu, "\n").replace(/\n+$/u, "");
+}
+
+async function readListingFile(path) {
+  return trimTrailingNewline(await readFile(path, "utf8"));
+}
+
+function requireLength(label, value, maxLength) {
+  const length = charCount(value);
+  if (length > maxLength) {
+    throw new Error(`${label} is ${length} characters; Google Play limit is ${maxLength}.`);
+  }
+  return length;
+}
+
+async function verifyListing(listingDir, language) {
+  const languageDir = join(listingDir, language);
+  const title = await readListingFile(join(languageDir, "title.txt"));
+  const shortDescription = await readListingFile(join(languageDir, "short-description.txt"));
+  const fullDescription = await readListingFile(join(languageDir, "full-description.txt"));
+  const releaseNotes = await readListingFile(join(languageDir, "release-notes.txt"));
+
+  return {
+    title: requireLength("Listing title", title, 30),
+    shortDescription: requireLength("Short description", shortDescription, 80),
+    fullDescription: requireLength("Full description", fullDescription, 4000),
+    releaseNotes: requireLength("Release notes", releaseNotes, 500),
+  };
+}
+
+function attr(element, attrName) {
+  const escaped = attrName.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  return element.match(new RegExp(`\\b${escaped}\\s*=\\s*"([^"]*)"`, "u"))?.[1] ?? null;
+}
+
+function openingTags(xml, tagName) {
+  return [...xml.matchAll(new RegExp(`<${tagName}\\b[^>]*>`, "gu"))].map((match) => match[0]);
+}
+
+function attributeValues(xml, tagName, attrName) {
+  return openingTags(xml, tagName)
+    .map((tag) => attr(tag, attrName))
+    .filter((value) => value !== null);
+}
+
+function verifyManifestXml(xml, manifestPath) {
+  const manifestTag = xml.match(/<manifest\b[^>]*>/u)?.[0];
+  if (!manifestTag) throw new Error(`No <manifest> tag found in ${manifestPath}`);
+
+  const packageName = attr(manifestTag, "package");
+  const versionCode = attr(manifestTag, "android:versionCode");
+  const versionName = attr(manifestTag, "android:versionName");
+  if (packageName !== expectedPackage) {
+    throw new Error(`HUD manifest package is ${packageName || "(missing)"}, expected ${expectedPackage}`);
+  }
+  if (!versionCode || !versionName) {
+    throw new Error(`HUD manifest is missing versionCode/versionName in ${manifestPath}`);
+  }
+
+  const permissions = new Set(attributeValues(xml, "uses-permission", "android:name"));
+  const missingPermissions = expectedPermissions.filter((permission) => !permissions.has(permission));
+  const presentForbiddenPermissions = forbiddenPermissions.filter((permission) => permissions.has(permission));
+  if (missingPermissions.length > 0) {
+    throw new Error(`HUD manifest missing expected permissions: ${missingPermissions.join(", ")}`);
+  }
+  if (presentForbiddenPermissions.length > 0) {
+    throw new Error(`HUD manifest requests forbidden permissions: ${presentForbiddenPermissions.join(", ")}`);
+  }
+
+  const featureTags = openingTags(xml, "uses-feature");
+  const presentForbiddenFeatures = featureTags
+    .map((tag) => ({
+      name: attr(tag, "android:name"),
+      required: attr(tag, "android:required"),
+    }))
+    .filter((feature) => feature.name && forbiddenFeatures.includes(feature.name) && feature.required !== "false");
+  if (presentForbiddenFeatures.length > 0) {
+    throw new Error(`HUD manifest declares forbidden required features: ${presentForbiddenFeatures.map((feature) => feature.name).join(", ")}`);
+  }
+
+  const servicePermissions = new Set(attributeValues(xml, "service", "android:permission"));
+  if (!servicePermissions.has("android.permission.BIND_NOTIFICATION_LISTENER_SERVICE")) {
+    throw new Error("HUD manifest is missing the notification-listener service permission");
+  }
+  if (servicePermissions.has("android.permission.BIND_ACCESSIBILITY_SERVICE")) {
+    throw new Error("HUD manifest declares an AccessibilityService, which is not Play-safe for this HUD build");
+  }
+
+  return {
+    packageName,
+    versionCode,
+    versionName,
+    permissions: permissions.size,
+    services: attributeValues(xml, "service", "android:name").length,
+  };
+}
+
+async function verifyManifest(manifestPath) {
+  const xml = await readFile(manifestPath, "utf8");
+  return verifyManifestXml(xml, manifestPath);
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const bundlePath = args.bundle ?? (await latestHudBundle());
+  const bundle = await verifyBundle(bundlePath, args.skipSignature);
+  const manifest = await verifyManifest(args.manifest);
+  const listing = await verifyListing(args.listingDir, args.language);
+
+  console.log(`Bundle: ${bundle.path} (${bundle.size} bytes)`);
+  console.log(`SHA-256: ${bundle.sha256}`);
+  console.log(`Manifest: ${args.manifest}`);
+  console.log(`Package: ${manifest.packageName}`);
+  console.log(`Version: ${manifest.versionName} (${manifest.versionCode})`);
+  console.log(`Permissions: ${manifest.permissions} requested; restricted HUD permissions absent`);
+  console.log(`Services: ${manifest.services}; notification listener declared`);
+  console.log(
+    `Listing ${args.language}: title ${listing.title}/30, short ${listing.shortDescription}/80, full ${listing.fullDescription}/4000, release notes ${listing.releaseNotes}/500`,
+  );
+  console.log("Play HUD release verifier passed.");
+}
+
+await main().catch((error) => {
+  console.error(error.message);
+  process.exit(1);
+});
