@@ -109,6 +109,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
     val airVisionAppLanguage by viewModel.airVisionAppLanguage.collectAsState()
     val airVisionPhysicalMainScreenVisible by viewModel.airVisionPhysicalMainScreenVisible.collectAsState()
+    val airVisionDemoModeEnabled by viewModel.airVisionDemoModeEnabled.collectAsState()
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
 
     var notificationQuietStartDraft by remember(notificationForwardingQuietStart) {
@@ -1021,6 +1022,24 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         optionLabel = { it.label },
                         optionDescription = ::airVisionAppLanguageDescription,
                         onSelected = viewModel::setAirVisionAppLanguage,
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Demo Mode", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Shows a deterministic AirVision HUD sample for tutorials, screenshots, and fit checks without a live gateway.",
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = airVisionDemoModeEnabled,
+                                onCheckedChange = viewModel::setAirVisionDemoModeEnabled,
+                            )
+                        },
                     )
                     HorizontalDivider(color = mobileBorder)
                     ListItem(

@@ -117,6 +117,7 @@ fun HudScreen(viewModel: MainViewModel) {
     val pendingTrust by viewModel.pendingGatewayTrust.collectAsState()
     val airVisionSettings by viewModel.airVisionDisplaySettings.collectAsState()
     val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
+    val airVisionDemoModeEnabled by viewModel.airVisionDemoModeEnabled.collectAsState()
     val airVisionIdentifyToken by viewModel.airVisionIdentifyToken.collectAsState()
     var prompt by rememberSaveable { mutableStateOf("") }
     var identifyVisible by remember { mutableStateOf(false) }
@@ -152,13 +153,27 @@ fun HudScreen(viewModel: MainViewModel) {
         )
     }
 
-    val notificationLine = selectHudNotification(notificationSnapshot.notifications)
-    val runningLine = hudRunningLine(pendingRunCount, pendingToolCalls.map { it.name })
+    val notificationLine =
+        if (airVisionDemoModeEnabled) {
+            demoHudNotificationLine
+        } else {
+            selectHudNotification(notificationSnapshot.notifications)
+        }
+    val runningLine =
+        if (airVisionDemoModeEnabled) {
+            null
+        } else {
+            hudRunningLine(pendingRunCount, pendingToolCalls.map { it.name })
+        }
     val latestAssistant = streamingAssistantText?.trim()?.takeIf { it.isNotEmpty() } ?: messages.latestAssistantText()
     val latestUser = messages.latestUserText()
     val chatTranscript =
-        remember(messages, streamingAssistantText) {
-            hudChatTranscript(messages = messages, streamingAssistantText = streamingAssistantText)
+        remember(messages, streamingAssistantText, airVisionDemoModeEnabled) {
+            if (airVisionDemoModeEnabled) {
+                demoHudChatTranscript
+            } else {
+                hudChatTranscript(messages = messages, streamingAssistantText = streamingAssistantText)
+            }
         }
     val chatScrollState = rememberScrollState()
     val gestureScope = rememberCoroutineScope()
@@ -181,29 +196,41 @@ fun HudScreen(viewModel: MainViewModel) {
         }
     }
     val primaryLine =
-        runningLine
-            ?: latestAssistant
-            ?: micLiveTranscript?.trim()?.takeIf { it.isNotEmpty() }
-            ?: latestUser
+        if (airVisionDemoModeEnabled) {
+            "Walking HUD ready"
+        } else {
+            runningLine
+                ?: latestAssistant
+                ?: micLiveTranscript?.trim()?.takeIf { it.isNotEmpty() }
+                ?: latestUser
+        }
     val secondaryLine =
-        chatError?.trim()?.takeIf { it.isNotEmpty() }
-            ?: micLiveTranscript?.trim()?.takeIf { it.isNotEmpty() }
-            ?: latestUser?.takeIf { latestAssistant != null && it != latestAssistant }
-            ?: listOfNotNull(serverName, remoteAddress)
-                .joinToString(" / ")
-                .takeIf { !isConnected && it.isNotBlank() }
-            ?: statusText.trim().takeIf { !isConnected && it.isNotBlank() }
-    val warning = chatError != null || (!isConnected && !isNodeConnected)
+        if (airVisionDemoModeEnabled) {
+            "Maps, captions, mic, and assistant status stay glanceable."
+        } else {
+            chatError?.trim()?.takeIf { it.isNotEmpty() }
+                ?: micLiveTranscript?.trim()?.takeIf { it.isNotEmpty() }
+                ?: latestUser?.takeIf { latestAssistant != null && it != latestAssistant }
+                ?: listOfNotNull(serverName, remoteAddress)
+                    .joinToString(" / ")
+                    .takeIf { !isConnected && it.isNotBlank() }
+                ?: statusText.trim().takeIf { !isConnected && it.isNotBlank() }
+        }
+    val warning = !airVisionDemoModeEnabled && (chatError != null || (!isConnected && !isNodeConnected))
     val sessionLine =
-        hudSessionText(
-            mainSessionKey = mainSessionKey,
-            pendingRunCount = pendingRunCount,
-            pendingToolCalls = pendingToolCalls.map { it.name },
-            healthOk = healthOk,
-            micStatusText = micStatusText,
-            micInputLevel = micInputLevel,
-            micEnabled = micEnabled,
-        )
+        if (airVisionDemoModeEnabled) {
+            "airvision demo / session hud / mic listening"
+        } else {
+            hudSessionText(
+                mainSessionKey = mainSessionKey,
+                pendingRunCount = pendingRunCount,
+                pendingToolCalls = pendingToolCalls.map { it.name },
+                healthOk = healthOk,
+                micStatusText = micStatusText,
+                micInputLevel = micInputLevel,
+                micEnabled = micEnabled,
+            )
+        }
     val hudScale =
         (
             AirVisionDisplaySettings.hudScaleForDistanceCm(airVisionSettings.distanceCm) *
@@ -255,14 +282,14 @@ fun HudScreen(viewModel: MainViewModel) {
     ) {
         HudSignalLights(
             modifier = Modifier.align(Alignment.TopEnd),
-            isConnected = isConnected,
-            micEnabled = micEnabled,
-            micInputLevel = micInputLevel,
-            speakerEnabled = speakerEnabled,
-            thinkingLevel = thinkingLevel,
-            translationCaptionsEnabled = translationCaptionsEnabled,
-            translationCaptionTargetLanguage = translationCaptionTargetLanguage,
-            nativeCaptionsEnabled = nativeCaptionsEnabled,
+            isConnected = if (airVisionDemoModeEnabled) true else isConnected,
+            micEnabled = if (airVisionDemoModeEnabled) true else micEnabled,
+            micInputLevel = if (airVisionDemoModeEnabled) 0.25f else micInputLevel,
+            speakerEnabled = if (airVisionDemoModeEnabled) true else speakerEnabled,
+            thinkingLevel = if (airVisionDemoModeEnabled) "off" else thinkingLevel,
+            translationCaptionsEnabled = if (airVisionDemoModeEnabled) true else translationCaptionsEnabled,
+            translationCaptionTargetLanguage = if (airVisionDemoModeEnabled) "es" else translationCaptionTargetLanguage,
+            nativeCaptionsEnabled = if (airVisionDemoModeEnabled) false else nativeCaptionsEnabled,
             onToggleThinking = { viewModel.setChatThinkingLevel(nextHudThinkingLevel(thinkingLevel)) },
             onToggleTranslationCaptions = {
                 val enabled = !nativeCaptionsEnabled
@@ -301,7 +328,16 @@ fun HudScreen(viewModel: MainViewModel) {
                     )
                 }
 
-                if (translationCaptionsEnabled) {
+                if (airVisionDemoModeEnabled) {
+                    HudChatTranscript(
+                        entries = demoHudChatTranscript,
+                        scrollState = chatScrollState,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .weight(1f, fill = false),
+                    )
+                } else if (translationCaptionsEnabled) {
                     HudTranslationCaptions(
                         conversation = micConversation,
                         liveTranscript = micLiveTranscript,
@@ -355,7 +391,7 @@ fun HudScreen(viewModel: MainViewModel) {
 
             HudChatInputBar(
                 prompt = prompt,
-                enabled = healthOk && pendingRunCount == 0,
+                enabled = !airVisionDemoModeEnabled && healthOk && pendingRunCount == 0,
                 onPromptChange = { prompt = it },
                 onSend = {
                     val text = prompt.trim()
@@ -875,6 +911,23 @@ private data class HudChatTranscriptEntry(
     val role: String,
     val text: String,
 )
+
+private val demoHudNotificationLine =
+    HudNotificationLine(
+        key = "airvision-demo-navigation",
+        source = "Maps",
+        primary = "Turn right on Madison St",
+        secondary = "0.2 mi, then continue toward the station",
+        kind = HudNotificationKind.Navigation,
+        isClearable = false,
+    )
+
+private val demoHudChatTranscript =
+    listOf(
+        HudChatTranscriptEntry(role = "assistant", text = "Route clear. Next turn in 0.2 mi."),
+        HudChatTranscriptEntry(role = "user", text = "Summarize the last notification."),
+        HudChatTranscriptEntry(role = "assistant", text = "Calendar moved to 3:30 PM. No action needed."),
+    )
 
 private data class HudCaptionEntry(
     val speaker: String,

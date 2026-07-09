@@ -298,6 +298,20 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun airVisionDemoModeEnabled_persists() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        assertEquals(false, prefs.airVisionDemoModeEnabled.value)
+
+        prefs.setAirVisionDemoModeEnabled(true)
+
+        assertEquals(true, SecurePrefs(context).airVisionDemoModeEnabled.value)
+    }
+
+    @Test
     fun airVisionPhysicalMainScreenVisible_persists() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)

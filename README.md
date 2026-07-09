@@ -138,7 +138,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | 3D Mode | Stored in the AirVision profile and disabled while Light Load Mode is enabled. Hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation and locks IPD adjustment while enabled. |
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
-| App Preferences | Implemented with AirVision companion language preference, software version/build display, EULA note, official FAQ/tutorial, product registration, and ASUS support links. |
+| App Preferences | Implemented with AirVision companion language preference, demo mode, software version/build display, EULA note, official FAQ/tutorial, product registration, and ASUS support links. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, serial availability, and firmware protocol status. Actual firmware version still needs ASUS HID support. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, and USB interface/endpoint diagnostics for protocol capture work. |
 | Identify | Implemented as a temporary `HUD 1` marker on the Android Presentation display. |
@@ -164,6 +164,11 @@ Italian, Portuguese, Japanese, Korean, and Chinese.
 Notification text is whitespace-cleaned and secret-shaped assignments such as
 `token=...`, `password=...`, and `accountSignatureKey=...` are redacted before
 being rendered in the HUD.
+
+AirVision demo mode lives in Settings -> AirVision M1 -> App Preferences. It
+renders a deterministic navigation, chat, mic, speaker, and caption sample in
+the HUD so tutorials, screenshots, and fit checks can be performed without a
+live gateway or notification stream.
 
 To pair on first launch, pass a setup code directly or from a local file:
 

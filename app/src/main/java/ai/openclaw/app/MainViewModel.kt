@@ -125,6 +125,7 @@ class MainViewModel(
     val airVisionHudControls: StateFlow<AirVisionHudControls> = prefs.airVisionHudControls
     val airVisionAppLanguage: StateFlow<AirVisionAppLanguage> = prefs.airVisionAppLanguage
     val airVisionPhysicalMainScreenVisible: StateFlow<Boolean> = prefs.airVisionPhysicalMainScreenVisible
+    val airVisionDemoModeEnabled: StateFlow<Boolean> = prefs.airVisionDemoModeEnabled
     val airVisionUsbState: StateFlow<AirVisionUsbState> = nodeApp.airVisionUsb.state
     private val _airVisionHudPresentationActive = MutableStateFlow(false)
     val airVisionHudPresentationActive: StateFlow<Boolean> = _airVisionHudPresentationActive
@@ -457,6 +458,10 @@ class MainViewModel(
 
     fun setAirVisionPhysicalMainScreenVisible(visible: Boolean) {
         prefs.setAirVisionPhysicalMainScreenVisible(visible)
+    }
+
+    fun setAirVisionDemoModeEnabled(enabled: Boolean) {
+        prefs.setAirVisionDemoModeEnabled(enabled)
     }
 
     fun setAirVisionHudPresentationActive(active: Boolean) {
