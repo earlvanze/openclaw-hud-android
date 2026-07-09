@@ -367,9 +367,10 @@ from `scripts/build-release-aab.mjs`.
 `verify-play-submission-package.mjs` checks the local Play App content packet in
 `play/app-content-answers.json` against the generated HUD manifest, privacy
 policy, in-app privacy policy source, data-safety notes, console checklist, and
-English listing files. It is a drift guard for Play Console form prep; the
-final hosted privacy-policy URL, screenshots, tester access, and any reviewer
-setup codes still belong in Play Console.
+English listing files. With the default repository paths it also verifies that
+the generated Play Console handoff packet is current. It is a drift guard for
+Play Console form prep; the final hosted privacy-policy URL, screenshots, tester
+access, and any reviewer setup codes still belong in Play Console.
 
 Use `node scripts/verify-play-submission-package.mjs --final` only when the
 external Play Console artifacts have been filled into

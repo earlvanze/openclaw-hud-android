@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { spawnSync } from "node:child_process";
 import { readFile, stat } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,6 +26,7 @@ const defaultSettingsSheetPath = join(androidDir, "app", "src", "main", "java", 
 const defaultDataSafetyNotesPath = join(androidDir, "play", "data-safety-notes.md");
 const defaultConsoleChecklistPath = join(androidDir, "play", "console-checklist.md");
 const defaultListingDir = join(androidDir, "play", "listings", "en-US");
+const renderConsoleHandoffScriptPath = join(scriptDir, "render-play-console-handoff.mjs");
 
 const expectedPackage = "ai.openclaw.app.hud";
 const expectedSchema = "openclaw.play.app-content";
@@ -199,6 +201,31 @@ function verifyHostedPrivacyPolicyPage(hostedPolicy, hostedPolicyPage) {
   ]);
   requireIncludes("Hosted privacy policy page parity", page, corePrivacyDisclosures);
   requireIncludes("Hosted privacy policy source parity", normalizePolicyText(hostedPolicy), corePrivacyDisclosures);
+}
+
+function isDefaultPath(
+  actual,
+  expected,
+) {
+  return resolve(actual) === resolve(expected);
+}
+
+function verifyGeneratedConsoleHandoff(args) {
+  const usesDefaultGeneratedInputs =
+    isDefaultPath(args.appContent, defaultAppContentPath) &&
+    isDefaultPath(args.listingDir, defaultListingDir);
+  if (!usesDefaultGeneratedInputs) return false;
+
+  const result = spawnSync(process.execPath, [renderConsoleHandoffScriptPath, "--check"], {
+    cwd: androidDir,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (result.status !== 0) {
+    const detail = result.stderr.trim() || result.stdout.trim() || "Play Console handoff check failed.";
+    throw new Error(`Generated Play Console handoff is stale or invalid: ${detail}`);
+  }
+  return true;
 }
 
 function requireArrayIncludes(label, values, expected) {
@@ -599,6 +626,7 @@ async function main() {
   const consoleChecklist = await readText(args.consoleChecklist);
 
   await verifyListing(args.listingDir);
+  const generatedConsoleHandoffVerified = verifyGeneratedConsoleHandoff(args);
   verifyAppContentShape(appContent);
   if (args.final) {
     await verifyFinalSubmissionReadiness(appContent, hostedPrivacyPolicyPage, {
@@ -656,6 +684,7 @@ async function main() {
   console.log(`Hosted privacy policy page: ${args.hostedPrivacyPolicyPage}`);
   console.log(`In-app privacy policy: ${args.inAppPrivacyPolicy}`);
   console.log(`App-content answers: ${args.appContent}`);
+  if (generatedConsoleHandoffVerified) console.log("Play Console handoff: verified");
   console.log(`Play submission package verifier passed (${args.final ? "final" : "draft"} mode).`);
 }
 

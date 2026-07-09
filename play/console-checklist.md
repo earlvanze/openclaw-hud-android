@@ -89,8 +89,8 @@ Current local status:
   and fails if the public page is missing, stale, or policy-incomplete.
 - `node scripts/verify-play-submission-package.mjs` checks the App content
   packet against the HUD manifest, hosted privacy policy source, in-app privacy
-  policy source, data-safety notes, console checklist, and English listing
-  files.
+  policy source, data-safety notes, console checklist, English listing files,
+  and the generated Play Console handoff packet when using default repo paths.
 - The publish helper now patches the English Play listing and localized release
   notes during `--commit` unless `--skip-listing` or `--skip-release-notes` is
   supplied.
