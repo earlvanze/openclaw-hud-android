@@ -67,6 +67,11 @@ const requiredTruePermissionGroups = {
   notifications: ["android.permission.POST_NOTIFICATIONS"],
   nearbyDevices: ["android.permission.NEARBY_WIFI_DEVICES"],
 };
+const knownSensitivePermissionGroups = [
+  ...Object.keys(forbiddenPermissionGroups),
+  ...Object.keys(requiredTruePermissionGroups),
+  "accessibilityService",
+];
 
 function parseArgs(argv) {
   const args = {
@@ -590,16 +595,24 @@ function verifyManifestAgainstAppContent(xml, appContent) {
     throw new Error("HUD manifest declares AccessibilityService but app-content marks it unsupported.");
   }
 
+  const sensitivePermissions = appContent.sensitivePermissions ?? {};
+  const unknownSensitiveGroups = Object.keys(sensitivePermissions)
+    .filter((group) => !knownSensitivePermissionGroups.includes(group));
+  if (unknownSensitiveGroups.length > 0) {
+    throw new Error(`App-content declares unknown sensitive permission groups: ${unknownSensitiveGroups.join(", ")}`);
+  }
+  requireBoolean(sensitivePermissions.accessibilityService, false, "Sensitive permission accessibilityService");
+
   for (const [group, groupPermissions] of Object.entries(forbiddenPermissionGroups)) {
     const hasForbidden = groupPermissions.some((permission) => permissions.has(permission));
     if (hasForbidden) throw new Error(`HUD manifest contains forbidden ${group} permission.`);
-    requireBoolean(appContent.sensitivePermissions?.[group], false, `Sensitive permission ${group}`);
+    requireBoolean(sensitivePermissions[group], false, `Sensitive permission ${group}`);
   }
 
   for (const [group, groupPermissions] of Object.entries(requiredTruePermissionGroups)) {
     const present = groupPermissions.some((permission) => permissions.has(permission));
     if (!present) throw new Error(`HUD manifest is missing expected ${group} permission.`);
-    requireBoolean(appContent.sensitivePermissions?.[group], true, `Sensitive permission ${group}`);
+    requireBoolean(sensitivePermissions[group], true, `Sensitive permission ${group}`);
   }
 
   return permissions.size;

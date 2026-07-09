@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
 const handoffPath = join(androidDir, "play", "console-handoff.md");
+const appContentPath = join(androidDir, "play", "app-content-answers.json");
 const verifierArgs = ["scripts/verify-play-submission-package.mjs"];
 
-function runVerifier() {
-  return spawnSync(process.execPath, verifierArgs, {
+function runVerifier(extraArgs = []) {
+  return spawnSync(process.execPath, [...verifierArgs, ...extraArgs], {
     cwd: androidDir,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
@@ -23,6 +25,8 @@ function outputText(result) {
 }
 
 const originalHandoff = await readFile(handoffPath, "utf8");
+const originalAppContent = await readFile(appContentPath, "utf8");
+const tempDir = await mkdtemp(join(tmpdir(), "openclaw-play-submission-verifier-"));
 
 try {
   const passing = runVerifier();
@@ -50,8 +54,33 @@ try {
       ].join("\n"),
     );
   }
+
+  await writeFile(handoffPath, originalHandoff);
+
+  const appContent = JSON.parse(originalAppContent);
+  appContent.sensitivePermissions = {
+    ...appContent.sensitivePermissions,
+    unsupportedFuturePermission: true,
+  };
+  const unsupportedAppContentPath = join(tempDir, "unsupported-app-content.json");
+  await writeFile(unsupportedAppContentPath, `${JSON.stringify(appContent, null, 2)}\n`);
+  const unknownSensitivePermission = runVerifier(["--app-content", unsupportedAppContentPath]);
+  if (
+    unknownSensitivePermission.status === 0 ||
+    !outputText(unknownSensitivePermission).includes("unknown sensitive permission groups")
+  ) {
+    throw new Error(
+      [
+        "Expected submission verifier to reject unknown sensitive permission groups.",
+        `status=${unknownSensitivePermission.status}`,
+        outputText(unknownSensitivePermission),
+      ].join("\n"),
+    );
+  }
 } finally {
   await writeFile(handoffPath, originalHandoff);
+  await writeFile(appContentPath, originalAppContent);
+  await rm(tempDir, { recursive: true, force: true });
 }
 
 const restored = runVerifier();
