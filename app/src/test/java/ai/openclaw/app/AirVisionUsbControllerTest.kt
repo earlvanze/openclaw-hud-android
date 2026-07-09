@@ -199,7 +199,17 @@ class AirVisionUsbControllerTest {
         assertEquals(32, capabilities.maxInputPacketSize)
         assertEquals(64, capabilities.maxOutputPacketSize)
         assertEquals(
-            "firmware reports: hid out if=2, hid in if=1, interrupt out=1, interrupt in=1, max out=64, max in=32",
+            listOf("in if=1 interrupt addr=0x81 max=32 int=4"),
+            capabilities.readableReportPaths.map { it.summary },
+        )
+        assertEquals(
+            listOf("out if=2 interrupt addr=0x2 max=64 int=1"),
+            capabilities.writableReportPaths.map { it.summary },
+        )
+        assertEquals(
+            """
+            firmware reports: readable: in if=1 interrupt addr=0x81 max=32 int=4, writable: out if=2 interrupt addr=0x2 max=64 int=1, interrupt out=1, interrupt in=1, max out=64, max in=32
+            """.trimIndent(),
             capabilities.summary,
         )
     }

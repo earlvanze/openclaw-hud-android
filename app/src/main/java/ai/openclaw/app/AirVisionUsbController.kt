@@ -74,6 +74,36 @@ data class AirVisionUsbInterfaceInfo(
     }
 }
 
+data class AirVisionFirmwareReportPath(
+    val interfaceId: Int,
+    val endpointAddress: Int,
+    val direction: Int,
+    val type: Int,
+    val maxPacketSize: Int,
+    val interval: Int,
+) {
+    val directionLabel: String
+        get() =
+            when (direction) {
+                UsbConstants.USB_DIR_IN -> "in"
+                UsbConstants.USB_DIR_OUT -> "out"
+                else -> "0x${direction.toString(16)}"
+            }
+
+    val typeLabel: String
+        get() =
+            when (type) {
+                UsbConstants.USB_ENDPOINT_XFER_CONTROL -> "control"
+                UsbConstants.USB_ENDPOINT_XFER_ISOC -> "isoc"
+                UsbConstants.USB_ENDPOINT_XFER_BULK -> "bulk"
+                UsbConstants.USB_ENDPOINT_XFER_INT -> "interrupt"
+                else -> "type-$type"
+            }
+
+    val summary: String
+        get() = "$directionLabel if=$interfaceId $typeLabel addr=0x${endpointAddress.toString(16)} max=$maxPacketSize int=$interval"
+}
+
 data class AirVisionFirmwareCapabilities(
     val hidInputInterfaceIds: List<Int> = emptyList(),
     val hidOutputInterfaceIds: List<Int> = emptyList(),
@@ -81,12 +111,14 @@ data class AirVisionFirmwareCapabilities(
     val interruptOutputEndpoints: Int = 0,
     val maxInputPacketSize: Int? = null,
     val maxOutputPacketSize: Int? = null,
+    val readableReportPaths: List<AirVisionFirmwareReportPath> = emptyList(),
+    val writableReportPaths: List<AirVisionFirmwareReportPath> = emptyList(),
 ) {
     val hasReadableHidReports: Boolean
-        get() = hidInputInterfaceIds.isNotEmpty()
+        get() = readableReportPaths.isNotEmpty()
 
     val hasWritableHidReports: Boolean
-        get() = hidOutputInterfaceIds.isNotEmpty()
+        get() = writableReportPaths.isNotEmpty()
 
     val hasInterruptReportPath: Boolean
         get() = interruptInputEndpoints > 0 || interruptOutputEndpoints > 0
@@ -99,8 +131,8 @@ data class AirVisionFirmwareCapabilities(
             if (!protocolCaptureReady) return "firmware reports: no HID report endpoints exposed"
             val parts =
                 listOfNotNull(
-                    hidOutputInterfaceIds.takeIf { it.isNotEmpty() }?.joinToString(prefix = "hid out if=", separator = "/"),
-                    hidInputInterfaceIds.takeIf { it.isNotEmpty() }?.joinToString(prefix = "hid in if=", separator = "/"),
+                    readableReportPaths.takeIf { it.isNotEmpty() }?.joinToString(prefix = "readable: ") { it.summary },
+                    writableReportPaths.takeIf { it.isNotEmpty() }?.joinToString(prefix = "writable: ") { it.summary },
                     interruptOutputEndpoints.takeIf { it > 0 }?.let { "interrupt out=$it" },
                     interruptInputEndpoints.takeIf { it > 0 }?.let { "interrupt in=$it" },
                     maxOutputPacketSize?.let { "max out=$it" },
@@ -378,22 +410,32 @@ private fun UsbEndpoint.airVisionEndpointInfo(): AirVisionUsbEndpointInfo =
 
 fun List<AirVisionUsbInterfaceInfo>.airVisionFirmwareCapabilities(): AirVisionFirmwareCapabilities {
     val hidInterfaces = filter { it.interfaceClass == UsbConstants.USB_CLASS_HID }
-    val inputInterfaces =
-        hidInterfaces.filter { usbInterface ->
-            usbInterface.endpoints.any { it.direction == UsbConstants.USB_DIR_IN }
-        }
-    val outputInterfaces =
-        hidInterfaces.filter { usbInterface ->
-            usbInterface.endpoints.any { it.direction == UsbConstants.USB_DIR_OUT }
-        }
-    val inputEndpoints = inputInterfaces.flatMap { it.endpoints }.filter { it.direction == UsbConstants.USB_DIR_IN }
-    val outputEndpoints = outputInterfaces.flatMap { it.endpoints }.filter { it.direction == UsbConstants.USB_DIR_OUT }
+    val inputPaths = hidInterfaces.reportPathsFor(direction = UsbConstants.USB_DIR_IN)
+    val outputPaths = hidInterfaces.reportPathsFor(direction = UsbConstants.USB_DIR_OUT)
     return AirVisionFirmwareCapabilities(
-        hidInputInterfaceIds = inputInterfaces.map { it.id },
-        hidOutputInterfaceIds = outputInterfaces.map { it.id },
-        interruptInputEndpoints = inputEndpoints.count { it.type == UsbConstants.USB_ENDPOINT_XFER_INT },
-        interruptOutputEndpoints = outputEndpoints.count { it.type == UsbConstants.USB_ENDPOINT_XFER_INT },
-        maxInputPacketSize = inputEndpoints.maxOfOrNull { it.maxPacketSize },
-        maxOutputPacketSize = outputEndpoints.maxOfOrNull { it.maxPacketSize },
+        hidInputInterfaceIds = inputPaths.map { it.interfaceId }.distinct(),
+        hidOutputInterfaceIds = outputPaths.map { it.interfaceId }.distinct(),
+        interruptInputEndpoints = inputPaths.count { it.type == UsbConstants.USB_ENDPOINT_XFER_INT },
+        interruptOutputEndpoints = outputPaths.count { it.type == UsbConstants.USB_ENDPOINT_XFER_INT },
+        maxInputPacketSize = inputPaths.maxOfOrNull { it.maxPacketSize },
+        maxOutputPacketSize = outputPaths.maxOfOrNull { it.maxPacketSize },
+        readableReportPaths = inputPaths,
+        writableReportPaths = outputPaths,
     )
 }
+
+private fun List<AirVisionUsbInterfaceInfo>.reportPathsFor(direction: Int): List<AirVisionFirmwareReportPath> =
+    flatMap { usbInterface ->
+        usbInterface.endpoints
+            .filter { it.direction == direction }
+            .map { endpoint ->
+                AirVisionFirmwareReportPath(
+                    interfaceId = usbInterface.id,
+                    endpointAddress = endpoint.address,
+                    direction = endpoint.direction,
+                    type = endpoint.type,
+                    maxPacketSize = endpoint.maxPacketSize,
+                    interval = endpoint.interval,
+                )
+            }
+    }

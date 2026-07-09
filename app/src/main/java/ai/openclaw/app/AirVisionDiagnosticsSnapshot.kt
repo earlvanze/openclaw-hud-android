@@ -39,10 +39,25 @@ data class AirVisionDiagnosticsFirmwareCapabilities(
     val interruptOutputEndpoints: Int,
     val maxInputPacketSize: Int?,
     val maxOutputPacketSize: Int?,
+    val readableReportPaths: List<AirVisionDiagnosticsFirmwareReportPath>,
+    val writableReportPaths: List<AirVisionDiagnosticsFirmwareReportPath>,
     val hasReadableHidReports: Boolean,
     val hasWritableHidReports: Boolean,
     val hasInterruptReportPath: Boolean,
     val protocolCaptureReady: Boolean,
+    val summary: String,
+)
+
+@Serializable
+data class AirVisionDiagnosticsFirmwareReportPath(
+    val interfaceId: Int,
+    val endpointAddress: Int,
+    val direction: Int,
+    val directionLabel: String,
+    val type: Int,
+    val typeLabel: String,
+    val maxPacketSize: Int,
+    val interval: Int,
     val summary: String,
 )
 
@@ -102,7 +117,7 @@ data class AirVisionDiagnosticsHudRuntime(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 5
+    const val VERSION = 6
 
     private val json =
         Json {
@@ -221,10 +236,25 @@ object AirVisionDiagnosticsSnapshots {
             interruptOutputEndpoints = interruptOutputEndpoints,
             maxInputPacketSize = maxInputPacketSize,
             maxOutputPacketSize = maxOutputPacketSize,
+            readableReportPaths = readableReportPaths.map { it.toDiagnostics() },
+            writableReportPaths = writableReportPaths.map { it.toDiagnostics() },
             hasReadableHidReports = hasReadableHidReports,
             hasWritableHidReports = hasWritableHidReports,
             hasInterruptReportPath = hasInterruptReportPath,
             protocolCaptureReady = protocolCaptureReady,
+            summary = summary,
+        )
+
+    private fun AirVisionFirmwareReportPath.toDiagnostics(): AirVisionDiagnosticsFirmwareReportPath =
+        AirVisionDiagnosticsFirmwareReportPath(
+            interfaceId = interfaceId,
+            endpointAddress = endpointAddress,
+            direction = direction,
+            directionLabel = directionLabel,
+            type = type,
+            typeLabel = typeLabel,
+            maxPacketSize = maxPacketSize,
+            interval = interval,
             summary = summary,
         )
 }

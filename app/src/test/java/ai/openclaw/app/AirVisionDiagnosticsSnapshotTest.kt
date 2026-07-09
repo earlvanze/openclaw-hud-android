@@ -94,15 +94,24 @@ class AirVisionDiagnosticsSnapshotTest {
         val hudRuntime = root.getValue("hudRuntime").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
+        val writableReportPath = firmwareCapabilities.getValue("writableReportPaths").jsonArray.first().jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("5", root.getValue("version").jsonPrimitive.content)
+        assertEquals("6", root.getValue("version").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)
         assertEquals("64", firmwareCapabilities.getValue("maxOutputPacketSize").jsonPrimitive.content)
+        assertEquals("2", writableReportPath.getValue("interfaceId").jsonPrimitive.content)
+        assertEquals("1", writableReportPath.getValue("endpointAddress").jsonPrimitive.content)
+        assertEquals("out", writableReportPath.getValue("directionLabel").jsonPrimitive.content)
+        assertEquals("interrupt", writableReportPath.getValue("typeLabel").jsonPrimitive.content)
         assertEquals(
-            "firmware reports: hid out if=2, interrupt out=1, max out=64",
+            "out if=2 interrupt addr=0x1 max=64 int=1",
+            writableReportPath.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals(
+            "firmware reports: writable: out if=2 interrupt addr=0x1 max=64 int=1, interrupt out=1, max out=64",
             firmwareCapabilities.getValue("summary").jsonPrimitive.content,
         )
         assertEquals("hid", firstInterface.getValue("classLabel").jsonPrimitive.content)
