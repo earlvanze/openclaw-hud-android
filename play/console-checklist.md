@@ -68,6 +68,8 @@ Current local status:
   Keep it current with `node scripts/render-privacy-policy-site.mjs --check`;
   do not copy the candidate URL into `finalSubmission.hostedPrivacyPolicyUrl`
   until it is actually reachable.
+- Final submission verification fetches `finalSubmission.hostedPrivacyPolicyUrl`
+  and fails if the public page is missing, stale, or policy-incomplete.
 - `node scripts/verify-play-submission-package.mjs` checks the App content
   packet against the HUD manifest, hosted privacy policy source, in-app privacy
   policy source, data-safety notes, console checklist, and English listing

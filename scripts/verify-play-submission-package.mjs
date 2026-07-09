@@ -30,6 +30,7 @@ const expectedSchema = "openclaw.play.app-content";
 const maxScreenshotBytes = 8 * 1024 * 1024;
 const screenshotMinDimension = 320;
 const screenshotMaxDimension = 3840;
+const hostedPolicyFetchTimeoutMs = 15_000;
 const pngSignature = Buffer.from("89504e470d0a1a0a", "hex");
 const corePrivacyDisclosures = [
   "OpenClaw HUD connects your Android device to an OpenClaw gateway that you configure",
@@ -212,6 +213,39 @@ function isHttpsUrl(value) {
   }
 }
 
+async function fetchText(url, timeoutMs) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: { "user-agent": "openclaw-play-submission-verifier" },
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.text();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function verifyHostedPrivacyPolicyUrl(hostedUrl, localHostedPage, problems) {
+  try {
+    const remotePage = await fetchText(hostedUrl, hostedPolicyFetchTimeoutMs);
+    requireIncludes("Hosted privacy policy URL response", remotePage, [
+      "<!doctype html>",
+      "<title>OpenClaw HUD Privacy Policy</title>",
+      "<meta name=\"viewport\"",
+    ]);
+    requireIncludes("Hosted privacy policy URL parity", normalizeHtmlPolicyText(remotePage), corePrivacyDisclosures);
+
+    if (normalizeHtmlPolicyText(remotePage) !== normalizeHtmlPolicyText(localHostedPage)) {
+      problems.push("finalSubmission.hostedPrivacyPolicyUrl content must match docs/privacy-policy.html.");
+    }
+  } catch (error) {
+    problems.push(`finalSubmission.hostedPrivacyPolicyUrl must be reachable and policy-complete: ${error.message}`);
+  }
+}
+
 function resolveScreenshotPath(value) {
   const trimmed = value.trim();
   if (isHttpsUrl(trimmed)) return null;
@@ -323,11 +357,13 @@ async function verifyScreenshotFile(screenshot, index, problems) {
   }
 }
 
-async function verifyFinalSubmissionReadiness(appContent) {
+async function verifyFinalSubmissionReadiness(appContent, hostedPrivacyPolicyPage) {
   const finalSubmission = appContent.finalSubmission ?? {};
   const problems = [];
   if (!isHttpsUrl(finalSubmission.hostedPrivacyPolicyUrl)) {
     problems.push("finalSubmission.hostedPrivacyPolicyUrl must be a public https:// URL.");
+  } else {
+    await verifyHostedPrivacyPolicyUrl(finalSubmission.hostedPrivacyPolicyUrl, hostedPrivacyPolicyPage, problems);
   }
   if (finalSubmission.appCreatedInPlayConsole !== true) {
     problems.push("finalSubmission.appCreatedInPlayConsole must be true after ai.openclaw.app.hud exists in Play Console.");
@@ -452,7 +488,7 @@ async function main() {
 
   await verifyListing(args.listingDir);
   verifyAppContentShape(appContent);
-  if (args.final) await verifyFinalSubmissionReadiness(appContent);
+  if (args.final) await verifyFinalSubmissionReadiness(appContent, hostedPrivacyPolicyPage);
   const permissionCount = verifyManifestAgainstAppContent(manifestXml, appContent);
 
   requireIncludes("Privacy policy", privacyPolicy, [

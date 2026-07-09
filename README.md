@@ -284,7 +284,9 @@ is configured to GitHub Actions. The prepared candidate URL is
 `https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html`. Keep
 `play/app-content-answers.json` `finalSubmission.hostedPrivacyPolicyUrl` empty
 until that exact URL is reachable, then fill it and run
-`node scripts/verify-play-submission-package.mjs --final`.
+`node scripts/verify-play-submission-package.mjs --final`. Final verification
+fetches the public URL and confirms it still matches the generated local policy
+page before any Play upload can start.
 
 Play phone screenshots can be captured from the HUD build without a live M1 by
 using the app's review/demo launch action:
@@ -332,12 +334,13 @@ external Play Console artifacts have been filled into
 the local draft gate; `--final` is expected to fail until the Play app exists,
 the hosted privacy policy URL is public, at least two phone screenshots are
 recorded, internal testers are configured, and reviewer access instructions have
-been entered in Play Console. When screenshot entries are local paths, `--final`
-also validates that the files are JPEG or 24-bit PNG without alpha, no larger
-than 8 MiB, at least 320 px on the shortest side, no larger than 3840 px on the
-longest side, and no more than 2:1 in either orientation. The publish helper
-runs this final verifier automatically in `--commit` mode before contacting the
-Google Play edit/upload API.
+been entered in Play Console. The final verifier also fetches the public
+privacy URL and checks that it matches the generated policy page. When
+screenshot entries are local paths, `--final` also validates that the files are
+JPEG or 24-bit PNG without alpha, no larger than 8 MiB, at least 320 px on the
+shortest side, no larger than 3840 px on the longest side, and no more than 2:1
+in either orientation. The publish helper runs this final verifier automatically
+in `--commit` mode before contacting the Google Play edit/upload API.
 
 ## Kotlin Lint + Format
 
