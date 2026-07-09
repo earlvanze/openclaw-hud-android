@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
     private var hudMediaSession: MediaSession? = null
     private var hudPresentation: HudPresentation? = null
     private var hudDisplayListenerRegistered = false
-    private var lastHudMicTapUptimeMs = 0L
+    private val hudKeyInputController = AirVisionHudKeyInputController()
     private val hudSystemBarsHandler = Handler(Looper.getMainLooper())
     private val hudDisplayListener =
         object : DisplayManager.DisplayListener {
@@ -285,22 +285,15 @@ class MainActivity : ComponentActivity() {
                             if (event.keyCode != KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
                                 return false
                             }
-                            if (event.action == KeyEvent.ACTION_DOWN) {
-                                return true
-                            }
-                            if (event.action != KeyEvent.ACTION_UP) {
-                                return false
-                            }
-                            handleHudMicTap(event.eventTime, source = "media-button")
-                            return true
+                            return handleHudKeyEvent(event, source = "media-button")
                         }
 
                         override fun onPlay() {
-                            handleHudMicTap(SystemClock.uptimeMillis(), source = "media-play")
+                            handleHudMicTap(source = "media-play")
                         }
 
                         override fun onPause() {
-                            handleHudMicTap(SystemClock.uptimeMillis(), source = "media-pause")
+                            handleHudMicTap(source = "media-pause")
                         }
                     },
                 )
@@ -341,79 +334,72 @@ class MainActivity : ComponentActivity() {
             ).build()
 
     internal fun handleHudKeyEvent(event: KeyEvent): Boolean {
-        if (!BuildConfig.OPENCLAW_DEFAULT_HUD) return false
-        val hudControls = viewModel.airVisionHudControls.value
-        val scrollDelta = hudScrollKeyDeltas[event.keyCode]
-        if (scrollDelta != null) {
-            when (hudControls.brightnessKeyAction) {
-                AirVisionHudKeyAction.None -> return false
-                AirVisionHudKeyAction.ScrollChat -> {
-                    if (event.action == KeyEvent.ACTION_DOWN) {
-                        viewModel.requestHudScroll(scrollDelta)
-                        Log.d(TAG, "M1/brightness key scrolled HUD keyCode=${event.keyCode} delta=$scrollDelta")
-                    }
-                }
-                AirVisionHudKeyAction.AdjustBrightness -> {
-                    val brightnessDelta = hudBrightnessKeyDeltas[event.keyCode] ?: 0
-                    if (event.action == KeyEvent.ACTION_DOWN && brightnessDelta != 0) {
-                        viewModel.adjustAirVisionBrightnessPercent(brightnessDelta)
-                        Log.d(
-                            TAG,
-                            "M1/brightness key adjusted HUD brightness keyCode=${event.keyCode} delta=$brightnessDelta",
-                        )
-                    }
-                }
-                AirVisionHudKeyAction.AdjustDistance -> {
-                    val distanceDelta = hudDistanceKeyDeltas[event.keyCode] ?: 0
-                    if (event.action == KeyEvent.ACTION_DOWN && distanceDelta != 0) {
-                        viewModel.adjustAirVisionDistanceCm(distanceDelta)
-                        Log.d(TAG, "M1/brightness key adjusted distance keyCode=${event.keyCode} deltaCm=$distanceDelta")
-                    }
-                }
-            }
-            return event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
-        }
-
-        val isHudMediaKey = hudMicToggleKeys.contains(event.keyCode)
-        if (!isHudMediaKey || (!event.isAirVisionM1Event() && event.keyCode !in hudGlobalMicToggleKeys)) {
-            if (event.action == KeyEvent.ACTION_UP && event.isAirVisionM1Event()) {
-                Log.d(TAG, "unhandled M1 key keyCode=${event.keyCode} scanCode=${event.scanCode}")
-            }
-            return false
-        }
-
-        if (hudControls.mediaKeyAction != AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
-            return false
-        }
-
-        if (event.action == KeyEvent.ACTION_DOWN) {
-            return true
-        }
-        if (event.action != KeyEvent.ACTION_UP) {
-            return false
-        }
-
-        handleHudMicTap(event.eventTime, source = "key")
-        return true
+        return handleHudKeyEvent(event, source = "key")
     }
 
-    private fun handleHudMicTap(
-        eventTimeMs: Long,
+    private fun handleHudKeyEvent(
+        event: KeyEvent,
         source: String,
-    ) {
-        val now = eventTimeMs.takeIf { it > 0L } ?: SystemClock.uptimeMillis()
-        val elapsedMs = now - lastHudMicTapUptimeMs
-        if (elapsedMs in 1..HUD_MIC_DOUBLE_TAP_TIMEOUT_MS) {
-            lastHudMicTapUptimeMs = 0L
-            toggleMicFromHudInput()
-            Log.d(TAG, "M1 $source double-tap toggled mic enabled=${viewModel.micEnabled.value}")
-            refreshHudMediaSessionState()
-            applyPhoneSystemBars()
+    ): Boolean {
+        if (!BuildConfig.OPENCLAW_DEFAULT_HUD) return false
+        val decision =
+            hudKeyInputController.handleKeyEvent(
+                keyCode = event.keyCode,
+                action = event.action,
+                eventTimeMs = event.eventTime.takeIf { it > 0L } ?: SystemClock.uptimeMillis(),
+                isAirVisionM1Event = event.isAirVisionM1Event(),
+                controls = viewModel.airVisionHudControls.value,
+            )
+        handleHudKeyCommand(decision.command, event = event, source = source)
+        return decision.consume
+    }
+
+    private fun handleHudMicTap(source: String) {
+        if (viewModel.airVisionHudControls.value.mediaKeyAction != AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
             return
         }
+        handleHudKeyCommand(
+            command = hudKeyInputController.handleMicTap(SystemClock.uptimeMillis()),
+            event = null,
+            source = source,
+        )
+    }
 
-        lastHudMicTapUptimeMs = now
-        Log.d(TAG, "M1 $source tap armed mic double-tap")
+    private fun handleHudKeyCommand(
+        command: AirVisionHudKeyCommand?,
+        event: KeyEvent?,
+        source: String,
+    ) {
+        when (command) {
+            is AirVisionHudKeyCommand.ScrollChat -> {
+                viewModel.requestHudScroll(command.deltaPx)
+                Log.d(TAG, "M1/brightness key scrolled HUD keyCode=${event?.keyCode} delta=${command.deltaPx}")
+            }
+            is AirVisionHudKeyCommand.AdjustBrightness -> {
+                viewModel.adjustAirVisionBrightnessPercent(command.deltaPercent)
+                Log.d(
+                    TAG,
+                    "M1/brightness key adjusted HUD brightness keyCode=${event?.keyCode} delta=${command.deltaPercent}",
+                )
+            }
+            is AirVisionHudKeyCommand.AdjustDistance -> {
+                viewModel.adjustAirVisionDistanceCm(command.deltaCm)
+                Log.d(TAG, "M1/brightness key adjusted distance keyCode=${event?.keyCode} deltaCm=${command.deltaCm}")
+            }
+            AirVisionHudKeyCommand.ToggleMic -> {
+                toggleMicFromHudInput()
+                Log.d(TAG, "M1 $source double-tap toggled mic enabled=${viewModel.micEnabled.value}")
+                refreshHudMediaSessionState()
+                applyPhoneSystemBars()
+            }
+            AirVisionHudKeyCommand.ArmMicDoubleTap -> {
+                Log.d(TAG, "M1 $source tap armed mic double-tap")
+            }
+            AirVisionHudKeyCommand.LogUnhandledM1Key -> {
+                Log.d(TAG, "unhandled M1 key keyCode=${event?.keyCode} scanCode=${event?.scanCode}")
+            }
+            null -> Unit
+        }
     }
 
     private fun toggleMicFromHudInput() {
@@ -470,42 +456,5 @@ class MainActivity : ComponentActivity() {
         private const val TAG = "MainActivity"
         private const val ASUS_VENDOR_ID = 0x0b05
         private const val AIRVISION_M1_PRODUCT_ID = 0x1b3c
-
-        private val hudMicToggleKeys =
-            setOf(
-                KeyEvent.KEYCODE_DPAD_CENTER,
-                KeyEvent.KEYCODE_ENTER,
-                KeyEvent.KEYCODE_NUMPAD_ENTER,
-                KeyEvent.KEYCODE_BUTTON_A,
-                KeyEvent.KEYCODE_BUTTON_SELECT,
-                KeyEvent.KEYCODE_HEADSETHOOK,
-                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                KeyEvent.KEYCODE_ASSIST,
-                KeyEvent.KEYCODE_VOICE_ASSIST,
-            )
-        private val hudGlobalMicToggleKeys =
-            setOf(
-                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                KeyEvent.KEYCODE_HEADSETHOOK,
-            )
-        private val hudScrollKeyDeltas =
-            mapOf(
-                KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_SCROLL_PIXELS,
-                KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_SCROLL_PIXELS,
-            )
-        private val hudBrightnessKeyDeltas =
-            mapOf(
-                KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_BRIGHTNESS_STEP_PERCENT,
-                KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_BRIGHTNESS_STEP_PERCENT,
-            )
-        private val hudDistanceKeyDeltas =
-            mapOf(
-                KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_DISTANCE_STEP_CM,
-                KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_DISTANCE_STEP_CM,
-            )
-        private const val HUD_KEY_SCROLL_PIXELS = 160f
-        private const val HUD_KEY_BRIGHTNESS_STEP_PERCENT = 5
-        private const val HUD_KEY_DISTANCE_STEP_CM = 5
-        private const val HUD_MIC_DOUBLE_TAP_TIMEOUT_MS = 500L
     }
 }

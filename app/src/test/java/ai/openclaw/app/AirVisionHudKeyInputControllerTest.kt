@@ -1,0 +1,199 @@
+package ai.openclaw.app
+
+import android.view.KeyEvent
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class AirVisionHudKeyInputControllerTest {
+    @Test
+    fun brightnessKeysDefaultToScrollChatAndConsumeUpEvents() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.ScrollChat(-160f),
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BRIGHTNESS_DOWN,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isAirVisionM1Event = true,
+                controls = AirVisionHudControls(),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(consume = true),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BRIGHTNESS_DOWN,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_010L,
+                isAirVisionM1Event = true,
+                controls = AirVisionHudControls(),
+            ),
+        )
+    }
+
+    @Test
+    fun brightnessKeysCanBeDisabledOrMappedToHudAdjustments() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(consume = false),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BRIGHTNESS_UP,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isAirVisionM1Event = true,
+                controls = AirVisionHudControls(brightnessKeyAction = AirVisionHudKeyAction.None),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.AdjustBrightness(5),
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BRIGHTNESS_UP,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_100L,
+                isAirVisionM1Event = true,
+                controls = AirVisionHudControls(brightnessKeyAction = AirVisionHudKeyAction.AdjustBrightness),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.AdjustDistance(-5),
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BRIGHTNESS_DOWN,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_200L,
+                isAirVisionM1Event = true,
+                controls = AirVisionHudControls(brightnessKeyAction = AirVisionHudKeyAction.AdjustDistance),
+            ),
+        )
+    }
+
+    @Test
+    fun firstMediaTapOnlyArmsDoubleTapEvenNearBoot() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(AirVisionHudKeyCommand.ArmMicDoubleTap, controller.handleMicTap(100L))
+        assertEquals(AirVisionHudKeyCommand.ToggleMic, controller.handleMicTap(300L))
+    }
+
+    @Test
+    fun mediaDoubleTapRespectsTimeout() {
+        val controller = AirVisionHudKeyInputController(doubleTapTimeoutMs = 500L)
+
+        assertEquals(AirVisionHudKeyCommand.ArmMicDoubleTap, controller.handleMicTap(1_000L))
+        assertEquals(AirVisionHudKeyCommand.ArmMicDoubleTap, controller.handleMicTap(1_700L))
+        assertEquals(AirVisionHudKeyCommand.ToggleMic, controller.handleMicTap(2_000L))
+    }
+
+    @Test
+    fun m1CenterKeyRequiresDoubleTapButNonM1CenterKeyPassesThrough() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(consume = false),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_DPAD_CENTER,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_000L,
+                isAirVisionM1Event = false,
+                controls = AirVisionHudControls(),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.ArmMicDoubleTap,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_DPAD_CENTER,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_000L,
+                isAirVisionM1Event = true,
+                controls = AirVisionHudControls(),
+            ),
+        )
+    }
+
+    @Test
+    fun globalMediaKeyDoubleTapWorksWithoutM1DeviceIdentity() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(consume = true),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isAirVisionM1Event = false,
+                controls = AirVisionHudControls(),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.ArmMicDoubleTap,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_010L,
+                isAirVisionM1Event = false,
+                controls = AirVisionHudControls(),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.ToggleMic,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_300L,
+                isAirVisionM1Event = false,
+                controls = AirVisionHudControls(),
+            ),
+        )
+    }
+
+    @Test
+    fun unhandledM1KeyIsLoggedButNotConsumed() {
+        val controller = AirVisionHudKeyInputController()
+        val decision =
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_A,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_000L,
+                isAirVisionM1Event = true,
+                controls = AirVisionHudControls(),
+            )
+
+        assertEquals(false, decision.consume)
+        assertEquals(AirVisionHudKeyCommand.LogUnhandledM1Key, decision.command)
+    }
+
+    @Test
+    fun disabledMediaActionPassesThrough() {
+        val controller = AirVisionHudKeyInputController()
+        val decision =
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_000L,
+                isAirVisionM1Event = false,
+                controls = AirVisionHudControls(mediaKeyAction = AirVisionHudMediaKeyAction.None),
+            )
+
+        assertEquals(false, decision.consume)
+        assertNull(decision.command)
+    }
+}
