@@ -53,6 +53,46 @@ class AirVisionDisplaySettingsTest {
     }
 
     @Test
+    fun splendidOverlayAlpha_previewsNonStandardSplendidModes() {
+        assertEquals(
+            0f,
+            AirVisionDisplaySettings.hudSplendidOverlayAlpha(
+                splendidMode = AirVisionSplendidMode.Standard,
+                blueLightFilterPercent = 100,
+            ),
+            0.001f,
+        )
+        assertTrue(
+            AirVisionDisplaySettings.hudSplendidOverlayAlpha(
+                splendidMode = AirVisionSplendidMode.Theater,
+                blueLightFilterPercent = 0,
+            ) > 0f,
+        )
+        assertTrue(
+            AirVisionDisplaySettings.hudSplendidOverlayAlpha(
+                splendidMode = AirVisionSplendidMode.Office,
+                blueLightFilterPercent = 0,
+            ) > 0f,
+        )
+        assertTrue(
+            AirVisionDisplaySettings.hudSplendidOverlayAlpha(
+                splendidMode = AirVisionSplendidMode.Game,
+                blueLightFilterPercent = 0,
+            ) > 0f,
+        )
+        assertTrue(
+            AirVisionDisplaySettings.hudSplendidOverlayAlpha(
+                splendidMode = AirVisionSplendidMode.EyeCare,
+                blueLightFilterPercent = 100,
+            ) >
+                AirVisionDisplaySettings.hudSplendidOverlayAlpha(
+                    splendidMode = AirVisionSplendidMode.EyeCare,
+                    blueLightFilterPercent = 0,
+                ),
+        )
+    }
+
+    @Test
     fun defaultsForViewMode_createDistinctProfileSlots() {
         val working = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working)
         val gaming = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Gaming)

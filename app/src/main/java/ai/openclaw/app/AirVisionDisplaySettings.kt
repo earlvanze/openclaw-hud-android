@@ -239,14 +239,25 @@ data class AirVisionDisplaySettings(
             splendidMode: AirVisionSplendidMode,
             blueLightFilterPercent: Int,
         ): Float {
-            if (splendidMode != AirVisionSplendidMode.EyeCare) {
-                return 0f
+            return hudSplendidOverlayAlpha(splendidMode, blueLightFilterPercent)
+        }
+
+        fun hudSplendidOverlayAlpha(
+            splendidMode: AirVisionSplendidMode,
+            blueLightFilterPercent: Int,
+        ): Float {
+            return when (splendidMode) {
+                AirVisionSplendidMode.Standard -> 0f
+                AirVisionSplendidMode.Theater -> 0.08f
+                AirVisionSplendidMode.Office -> 0.05f
+                AirVisionSplendidMode.Game -> 0.06f
+                AirVisionSplendidMode.EyeCare -> {
+                    val base = 0.10f
+                    val slider =
+                        normalizeBlueLightFilterPercent(blueLightFilterPercent).toFloat() / 100f * 0.24f
+                    (base + slider).coerceIn(0f, 0.34f)
+                }
             }
-            val base =
-                0.10f
-            val slider =
-                normalizeBlueLightFilterPercent(blueLightFilterPercent).toFloat() / 100f * 0.24f
-            return (base + slider).coerceIn(0f, 0.34f)
         }
     }
 }

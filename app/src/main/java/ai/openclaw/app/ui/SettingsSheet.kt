@@ -1004,7 +1004,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Splendid Mode", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                "Current: ${airVisionDisplaySettings.splendidMode.label}. Eye Care adds warm HUD filtering.",
+                                "Current: ${airVisionDisplaySettings.splendidMode.label}. Non-standard modes add subtle HUD color previews.",
                                 style = mobileCallout,
                             )
                         },
@@ -2142,10 +2142,10 @@ private fun airVisionViewModeDescription(mode: AirVisionViewMode): String =
 private fun airVisionSplendidModeDescription(mode: AirVisionSplendidMode): String =
     when (mode) {
         AirVisionSplendidMode.Standard -> "Neutral HUD color."
-        AirVisionSplendidMode.Theater -> "Stored Windows-style profile; panel-level color needs HID support."
-        AirVisionSplendidMode.Office -> "Stored Windows-style profile for document work."
-        AirVisionSplendidMode.Game -> "Stored Windows-style profile for low-latency visual preference."
-        AirVisionSplendidMode.EyeCare -> "Adds a warm Android HUD overlay."
+        AirVisionSplendidMode.Theater -> "Adds a subtle warm theater preview while panel presets need HID support."
+        AirVisionSplendidMode.Office -> "Adds a subtle cool office preview for document work."
+        AirVisionSplendidMode.Game -> "Adds a subtle cool game preview for high-motion sessions."
+        AirVisionSplendidMode.EyeCare -> "Adds a warm Android HUD overlay and enables blue-light filtering."
     }
 
 private fun airVisionHudPlacementDescription(placement: AirVisionHudPlacement): String =

@@ -7,6 +7,7 @@ import ai.openclaw.app.AirVisionHudDoubleTapAction
 import ai.openclaw.app.AirVisionHudPlacement
 import ai.openclaw.app.AirVisionHudSwipeAction
 import ai.openclaw.app.AirVisionHudTouchAction
+import ai.openclaw.app.AirVisionSplendidMode
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.TranslationCaptionMode
 import ai.openclaw.app.chat.ChatMessage
@@ -237,8 +238,8 @@ fun HudScreen(viewModel: MainViewModel) {
                 AirVisionDisplaySettings.hudScaleMultiplierForViewMode(airVisionSettings.viewMode)
         ).coerceIn(0.70f, 1.28f)
     val dimAlpha = AirVisionDisplaySettings.hudDimAlphaForBrightnessPercent(airVisionSettings.brightnessPercent)
-    val warmAlpha =
-        AirVisionDisplaySettings.hudWarmOverlayAlpha(
+    val splendidOverlayAlpha =
+        AirVisionDisplaySettings.hudSplendidOverlayAlpha(
             splendidMode = airVisionSettings.splendidMode,
             blueLightFilterPercent = airVisionSettings.blueLightFilterPercent,
         )
@@ -427,12 +428,15 @@ fun HudScreen(viewModel: MainViewModel) {
             )
         }
 
-        if (warmAlpha > 0f) {
+        if (splendidOverlayAlpha > 0f) {
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(Color(0xFFFFB15C).copy(alpha = warmAlpha)),
+                        .background(
+                            hudSplendidOverlayColor(airVisionSettings.splendidMode)
+                                .copy(alpha = splendidOverlayAlpha),
+                        ),
             )
         }
         if (dimAlpha > 0f) {
@@ -506,6 +510,15 @@ private data class HudLayoutSpec(
     val trailingPadding: Dp,
     val transformOrigin: TransformOrigin,
 )
+
+private fun hudSplendidOverlayColor(mode: AirVisionSplendidMode): Color =
+    when (mode) {
+        AirVisionSplendidMode.Standard -> Color.Transparent
+        AirVisionSplendidMode.Theater -> Color(0xFFFF9E4A)
+        AirVisionSplendidMode.Office -> Color(0xFFEAF7FF)
+        AirVisionSplendidMode.Game -> Color(0xFF5CB2FF)
+        AirVisionSplendidMode.EyeCare -> Color(0xFFFFB15C)
+    }
 
 private fun hudLayoutSpec(placement: AirVisionHudPlacement): HudLayoutSpec =
     when (placement) {
