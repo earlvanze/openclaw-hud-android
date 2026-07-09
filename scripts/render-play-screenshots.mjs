@@ -3,7 +3,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { deflateSync } from "node:zlib";
+import { deflateSync, inflateSync } from "node:zlib";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
@@ -197,6 +197,61 @@ function makePng(pixels) {
   ]);
 }
 
+function pngPixels(png, path) {
+  if (!png.subarray(0, pngSignature.length).equals(pngSignature)) {
+    throw new Error(`Generated Play screenshot artifact is not a PNG: ${path}`);
+  }
+
+  let offset = pngSignature.length;
+  let seenIhdr = false;
+  const idatChunks = [];
+
+  while (offset < png.length) {
+    if (offset + 12 > png.length) throw new Error(`PNG chunk is truncated: ${path}`);
+    const length = png.readUInt32BE(offset);
+    const type = png.toString("ascii", offset + 4, offset + 8);
+    const dataStart = offset + 8;
+    const dataEnd = dataStart + length;
+    const crcEnd = dataEnd + 4;
+    if (crcEnd > png.length) throw new Error(`PNG chunk data is truncated: ${path}`);
+
+    const data = png.subarray(dataStart, dataEnd);
+    if (type === "IHDR") {
+      seenIhdr = true;
+      const actualWidth = data.readUInt32BE(0);
+      const actualHeight = data.readUInt32BE(4);
+      const bitDepth = data[8];
+      const colorType = data[9];
+      const interlace = data[12];
+      if (
+        actualWidth !== width ||
+        actualHeight !== height ||
+        bitDepth !== 8 ||
+        colorType !== 2 ||
+        interlace !== 0
+      ) {
+        throw new Error(`PNG must be ${width}x${height} 8-bit RGB without interlace: ${path}`);
+      }
+    } else if (type === "IDAT") {
+      idatChunks.push(data);
+    } else if (type === "IEND") {
+      break;
+    }
+    offset = crcEnd;
+  }
+
+  if (!seenIhdr || idatChunks.length === 0) {
+    throw new Error(`PNG is missing required chunks: ${path}`);
+  }
+
+  const pixels = inflateSync(Buffer.concat(idatChunks));
+  const expectedLength = height * (width * 3 + 1);
+  if (pixels.length !== expectedLength) {
+    throw new Error(`PNG has unexpected pixel data length: ${path}`);
+  }
+  return pixels;
+}
+
 function renderHudDemo() {
   const pixels = makeCanvas();
   circle(pixels, 968, 72, 14, green);
@@ -267,7 +322,10 @@ async function writeIfChanged(path, data, check) {
   if (check) {
     const existing = await readFile(path).catch(() => null);
     const expected = Buffer.isBuffer(data) ? data : Buffer.from(data);
-    if (!existing || !existing.equals(expected)) {
+    const matches = Buffer.isBuffer(data)
+      ? existing && pngPixels(existing, path).equals(pngPixels(expected, path))
+      : existing && existing.equals(expected);
+    if (!matches) {
       throw new Error(`Generated Play screenshot artifact is stale: ${path}`);
     }
     return;
