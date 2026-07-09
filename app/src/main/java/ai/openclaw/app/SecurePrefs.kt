@@ -203,7 +203,7 @@ class SecurePrefs(
     val airVisionAppLanguage: StateFlow<AirVisionAppLanguage> = _airVisionAppLanguage
 
     private val _airVisionPhysicalMainScreenVisible =
-        MutableStateFlow(plainPrefs.getBoolean(AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY, true))
+        MutableStateFlow(_airVisionDisplaySettings.value.physicalMainScreenVisible)
     val airVisionPhysicalMainScreenVisible: StateFlow<Boolean> = _airVisionPhysicalMainScreenVisible
 
     private val _translationCaptionSourceLanguage =
@@ -557,7 +557,9 @@ class SecurePrefs(
 
     fun setAirVisionViewMode(mode: AirVisionViewMode) {
         plainPrefs.edit { putString(AIR_VISION_VIEW_MODE_KEY, mode.rawValue) }
-        _airVisionDisplaySettings.value = loadAirVisionDisplaySettings(mode)
+        val settings = loadAirVisionDisplaySettings(mode)
+        _airVisionDisplaySettings.value = settings
+        _airVisionPhysicalMainScreenVisible.value = settings.physicalMainScreenVisible
     }
 
     fun resetActiveAirVisionProfile() {
@@ -585,6 +587,10 @@ class SecurePrefs(
             putInt(airVisionProfileKey(AIR_VISION_DISTANCE_CM_KEY, viewMode), defaults.distanceCm)
             putInt(airVisionProfileKey(AIR_VISION_IPD_MM_KEY, viewMode), defaults.ipdMm)
             putInt(airVisionProfileKey(AIR_VISION_SAFE_AREA_PERCENT_KEY, viewMode), defaults.safeAreaPercent)
+            putBoolean(
+                airVisionProfileKey(AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY, viewMode),
+                defaults.physicalMainScreenVisible,
+            )
             putBoolean(airVisionProfileKey(AIR_VISION_MOTION_SYNC_ENABLED_KEY, viewMode), defaults.motionSyncEnabled)
             putBoolean(airVisionProfileKey(AIR_VISION_THREE_D_MODE_ENABLED_KEY, viewMode), defaults.threeDModeEnabled)
             putBoolean(
@@ -593,6 +599,7 @@ class SecurePrefs(
             )
         }
         _airVisionDisplaySettings.value = defaults
+        _airVisionPhysicalMainScreenVisible.value = defaults.physicalMainScreenVisible
     }
 
     fun setAirVisionSplendidMode(mode: AirVisionSplendidMode) {
@@ -741,7 +748,11 @@ class SecurePrefs(
     }
 
     fun setAirVisionPhysicalMainScreenVisible(visible: Boolean) {
-        plainPrefs.edit { putBoolean(AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY, visible) }
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putBoolean(airVisionProfileKey(AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY, viewMode), visible)
+        }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(physicalMainScreenVisible = visible)
         _airVisionPhysicalMainScreenVisible.value = visible
     }
 
@@ -868,6 +879,13 @@ class SecurePrefs(
                     allowLegacyFallback = allowLegacyFallback,
                     defaultValue = defaults.safeAreaPercent,
                 ),
+            physicalMainScreenVisible =
+                getAirVisionProfileBoolean(
+                    key = AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY,
+                    mode = viewMode,
+                    allowLegacyFallback = allowLegacyFallback || plainPrefs.contains(AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY),
+                    defaultValue = defaults.physicalMainScreenVisible,
+                ),
             motionSyncEnabled =
                 getAirVisionProfileBoolean(
                     key = AIR_VISION_MOTION_SYNC_ENABLED_KEY,
@@ -907,6 +925,7 @@ class SecurePrefs(
                 AIR_VISION_DISTANCE_CM_KEY,
                 AIR_VISION_IPD_MM_KEY,
                 AIR_VISION_SAFE_AREA_PERCENT_KEY,
+                AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY,
                 AIR_VISION_MOTION_SYNC_ENABLED_KEY,
                 AIR_VISION_THREE_D_MODE_ENABLED_KEY,
                 AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY,

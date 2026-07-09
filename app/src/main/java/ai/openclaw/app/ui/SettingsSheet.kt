@@ -697,9 +697,9 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         supportingContent = {
                             Text(
                                 if (airVisionPhysicalMainScreenVisible) {
-                                    "Phone controls stay visible while the M1 presentation is active."
+                                    "Phone controls stay visible while the M1 presentation is active. Saved with this viewing mode."
                                 } else {
-                                    "When the M1 presentation is active, the phone view switches to a black restore screen."
+                                    "When the M1 presentation is active, this viewing mode switches the phone to a black restore screen."
                                 },
                                 style = mobileCallout,
                             )

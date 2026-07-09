@@ -115,6 +115,7 @@ class SecurePrefsTest {
         prefs.setAirVisionSplendidMode(AirVisionSplendidMode.Theater)
         prefs.setAirVisionHudPlacement(AirVisionHudPlacement.LowerCenter)
         prefs.setAirVisionSafeAreaPercent(7)
+        prefs.setAirVisionPhysicalMainScreenVisible(false)
         prefs.setAirVisionLightLoadModeEnabled(false)
         prefs.setAirVisionThreeDModeEnabled(true)
         prefs.setAirVisionViewMode(AirVisionViewMode.Working)
@@ -123,6 +124,8 @@ class SecurePrefsTest {
         assertEquals(88, prefs.airVisionDisplaySettings.value.distanceCm)
         assertEquals(AirVisionHudPlacement.UpperRight, prefs.airVisionDisplaySettings.value.hudPlacement)
         assertEquals(12, prefs.airVisionDisplaySettings.value.safeAreaPercent)
+        assertEquals(true, prefs.airVisionDisplaySettings.value.physicalMainScreenVisible)
+        assertEquals(true, prefs.airVisionPhysicalMainScreenVisible.value)
 
         prefs.setAirVisionViewMode(AirVisionViewMode.Gaming)
 
@@ -133,6 +136,7 @@ class SecurePrefsTest {
         assertEquals(55, reloaded.brightnessPercent)
         assertEquals(66, reloaded.distanceCm)
         assertEquals(7, reloaded.safeAreaPercent)
+        assertEquals(false, reloaded.physicalMainScreenVisible)
         assertEquals(false, reloaded.lightLoadModeEnabled)
         assertEquals(true, reloaded.threeDModeEnabled)
     }
@@ -283,9 +287,37 @@ class SecurePrefsTest {
 
         val prefs = SecurePrefs(context)
         assertEquals(true, prefs.airVisionPhysicalMainScreenVisible.value)
+        assertEquals(true, prefs.airVisionDisplaySettings.value.physicalMainScreenVisible)
 
         prefs.setAirVisionPhysicalMainScreenVisible(false)
 
         assertEquals(false, SecurePrefs(context).airVisionPhysicalMainScreenVisible.value)
+        assertEquals(false, SecurePrefs(context).airVisionDisplaySettings.value.physicalMainScreenVisible)
+    }
+
+    @Test
+    fun airVisionPhysicalMainScreenVisible_migratesLegacyGlobalValueAcrossProfiles() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs
+            .edit()
+            .clear()
+            .putString("airVision.viewMode", AirVisionViewMode.Working.rawValue)
+            .putString("airVision.hudPlacement.working", AirVisionHudPlacement.UpperCenter.rawValue)
+            .putBoolean("airVision.physicalMainScreenVisible", false)
+            .commit()
+
+        val prefs = SecurePrefs(context)
+        assertEquals(false, prefs.airVisionPhysicalMainScreenVisible.value)
+
+        prefs.setAirVisionViewMode(AirVisionViewMode.Gaming)
+        assertEquals(false, prefs.airVisionPhysicalMainScreenVisible.value)
+
+        prefs.setAirVisionPhysicalMainScreenVisible(true)
+        prefs.setAirVisionViewMode(AirVisionViewMode.Working)
+        assertEquals(false, prefs.airVisionPhysicalMainScreenVisible.value)
+
+        prefs.setAirVisionViewMode(AirVisionViewMode.Gaming)
+        assertEquals(true, SecurePrefs(context).airVisionPhysicalMainScreenVisible.value)
     }
 }
