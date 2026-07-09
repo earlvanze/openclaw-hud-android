@@ -65,9 +65,10 @@ Current local status:
   configured. Local screenshot paths are validated by the final submission
   verifier before commit publishing.
 - `docs/privacy-policy.html` is the generated GitHub Pages privacy-policy page.
-  Keep it current with `node scripts/render-privacy-policy-site.mjs --check`;
-  do not copy the candidate URL into `finalSubmission.hostedPrivacyPolicyUrl`
-  until it is actually reachable.
+  It is published at
+  `https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html` and
+  recorded in `finalSubmission.hostedPrivacyPolicyUrl`. Keep it current with
+  `node scripts/render-privacy-policy-site.mjs --check`.
 - Final submission verification fetches `finalSubmission.hostedPrivacyPolicyUrl`
   and fails if the public page is missing, stale, or policy-incomplete.
 - `node scripts/verify-play-submission-package.mjs` checks the App content

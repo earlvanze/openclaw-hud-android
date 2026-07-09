@@ -92,7 +92,7 @@
     "demoMode": "Settings > AirVision M1 > App Preferences > Demo Mode"
   },
   "finalSubmission": {
-    "hostedPrivacyPolicyUrl": null,
+    "hostedPrivacyPolicyUrl": "https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html",
     "appCreatedInPlayConsole": false,
     "internalTestersConfiguredInPlayConsole": false,
     "reviewerAccessConfiguredInPlayConsole": false,
