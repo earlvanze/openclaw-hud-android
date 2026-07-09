@@ -41,11 +41,13 @@ data class AirVisionDiagnosticsFirmwareCapabilities(
     val maxOutputPacketSize: Int?,
     val readableReportPaths: List<AirVisionDiagnosticsFirmwareReportPath>,
     val writableReportPaths: List<AirVisionDiagnosticsFirmwareReportPath>,
+    val featureReadiness: List<AirVisionDiagnosticsFirmwareFeatureReadiness>,
     val hasReadableHidReports: Boolean,
     val hasWritableHidReports: Boolean,
     val hasInterruptReportPath: Boolean,
     val protocolCaptureReady: Boolean,
     val summary: String,
+    val featureReadinessSummary: String,
 )
 
 @Serializable
@@ -58,6 +60,17 @@ data class AirVisionDiagnosticsFirmwareReportPath(
     val typeLabel: String,
     val maxPacketSize: Int,
     val interval: Int,
+    val summary: String,
+)
+
+@Serializable
+data class AirVisionDiagnosticsFirmwareFeatureReadiness(
+    val feature: String,
+    val label: String,
+    val androidStatus: String,
+    val firmwareApplyReady: Boolean,
+    val firmwareApplyStatus: String,
+    val detail: String,
     val summary: String,
 )
 
@@ -117,7 +130,7 @@ data class AirVisionDiagnosticsHudRuntime(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 6
+    const val VERSION = 7
 
     private val json =
         Json {
@@ -238,11 +251,13 @@ object AirVisionDiagnosticsSnapshots {
             maxOutputPacketSize = maxOutputPacketSize,
             readableReportPaths = readableReportPaths.map { it.toDiagnostics() },
             writableReportPaths = writableReportPaths.map { it.toDiagnostics() },
+            featureReadiness = featureReadiness.map { it.toDiagnostics() },
             hasReadableHidReports = hasReadableHidReports,
             hasWritableHidReports = hasWritableHidReports,
             hasInterruptReportPath = hasInterruptReportPath,
             protocolCaptureReady = protocolCaptureReady,
             summary = summary,
+            featureReadinessSummary = featureReadinessSummary,
         )
 
     private fun AirVisionFirmwareReportPath.toDiagnostics(): AirVisionDiagnosticsFirmwareReportPath =
@@ -255,6 +270,17 @@ object AirVisionDiagnosticsSnapshots {
             typeLabel = typeLabel,
             maxPacketSize = maxPacketSize,
             interval = interval,
+            summary = summary,
+        )
+
+    private fun AirVisionFirmwareFeatureReadiness.toDiagnostics(): AirVisionDiagnosticsFirmwareFeatureReadiness =
+        AirVisionDiagnosticsFirmwareFeatureReadiness(
+            feature = feature.rawValue,
+            label = feature.label,
+            androidStatus = androidStatus,
+            firmwareApplyReady = firmwareApplyReady,
+            firmwareApplyStatus = firmwareApplyStatus,
+            detail = detail,
             summary = summary,
         )
 }

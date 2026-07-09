@@ -104,6 +104,60 @@ data class AirVisionFirmwareReportPath(
         get() = "$directionLabel if=$interfaceId $typeLabel addr=0x${endpointAddress.toString(16)} max=$maxPacketSize int=$interval"
 }
 
+enum class AirVisionFirmwareFeature(
+    val rawValue: String,
+    val label: String,
+    val androidStatus: String,
+    val requiresWritableHid: Boolean = true,
+) {
+    Brightness(
+        rawValue = "brightness",
+        label = "Brightness",
+        androidStatus = "software HUD dimming active",
+    ),
+    ScreenDistance(
+        rawValue = "screen_distance",
+        label = "Screen distance",
+        androidStatus = "virtual HUD distance scaling active",
+    ),
+    Ipd(
+        rawValue = "ipd",
+        label = "IPD",
+        androidStatus = "profile calibration stored",
+    ),
+    Splendid(
+        rawValue = "splendid",
+        label = "Splendid",
+        androidStatus = "HUD color preview active",
+    ),
+    BlueLightFilter(
+        rawValue = "blue_light_filter",
+        label = "Blue Light Filter",
+        androidStatus = "Eye Care warm overlay active",
+    ),
+    MotionSync(
+        rawValue = "motion_sync",
+        label = "Motion Sync",
+        androidStatus = "profile preference stored",
+    ),
+    ThreeDMode(
+        rawValue = "3d_mode",
+        label = "3D Mode",
+        androidStatus = "profile preference stored",
+    ),
+}
+
+data class AirVisionFirmwareFeatureReadiness(
+    val feature: AirVisionFirmwareFeature,
+    val androidStatus: String,
+    val firmwareApplyReady: Boolean,
+    val firmwareApplyStatus: String,
+    val detail: String,
+) {
+    val summary: String
+        get() = "${feature.label}: $firmwareApplyStatus"
+}
+
 data class AirVisionFirmwareCapabilities(
     val hidInputInterfaceIds: List<Int> = emptyList(),
     val hidOutputInterfaceIds: List<Int> = emptyList(),
@@ -126,6 +180,12 @@ data class AirVisionFirmwareCapabilities(
     val protocolCaptureReady: Boolean
         get() = hasReadableHidReports || hasWritableHidReports
 
+    val featureReadiness: List<AirVisionFirmwareFeatureReadiness>
+        get() = AirVisionFirmwareFeature.entries.map { it.readinessFor(this) }
+
+    val featureReadinessSummary: String
+        get() = "firmware apply: ${featureReadiness.joinToString("; ") { it.summary }}"
+
     val summary: String
         get() {
             if (!protocolCaptureReady) return "firmware reports: no HID report endpoints exposed"
@@ -140,6 +200,30 @@ data class AirVisionFirmwareCapabilities(
                 )
             return "firmware reports: ${parts.joinToString(", ")}"
         }
+}
+
+private fun AirVisionFirmwareFeature.readinessFor(capabilities: AirVisionFirmwareCapabilities): AirVisionFirmwareFeatureReadiness {
+    val firmwareApplyStatus =
+        when {
+            !requiresWritableHid -> "not required"
+            capabilities.hasWritableHidReports -> "ASUS HID protocol capture pending"
+            else -> "waiting for writable HID report path"
+        }
+    val detail =
+        when {
+            !requiresWritableHid -> "$androidStatus; no firmware write path required."
+            capabilities.hasWritableHidReports ->
+                "$androidStatus; writable HID path detected, but ASUS vendor report payload is not validated yet."
+            else ->
+                "$androidStatus; no writable HID report path has been exposed to Android yet."
+        }
+    return AirVisionFirmwareFeatureReadiness(
+        feature = this,
+        androidStatus = androidStatus,
+        firmwareApplyReady = false,
+        firmwareApplyStatus = firmwareApplyStatus,
+        detail = detail,
+    )
 }
 
 data class AirVisionUsbDeviceInfo(

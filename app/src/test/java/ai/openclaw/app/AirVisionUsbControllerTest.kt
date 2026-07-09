@@ -212,6 +212,23 @@ class AirVisionUsbControllerTest {
             """.trimIndent(),
             capabilities.summary,
         )
+        assertEquals(AirVisionFirmwareFeature.entries.size, capabilities.featureReadiness.size)
+        assertEquals(
+            "Brightness: ASUS HID protocol capture pending",
+            capabilities.featureReadiness.first().summary,
+        )
+        assertTrue(capabilities.featureReadiness.all { !it.firmwareApplyReady })
+        assertTrue(capabilities.featureReadiness.all { it.detail.contains("writable HID path detected") })
+        assertEquals(
+            "firmware apply: Brightness: ASUS HID protocol capture pending; " +
+                "Screen distance: ASUS HID protocol capture pending; " +
+                "IPD: ASUS HID protocol capture pending; " +
+                "Splendid: ASUS HID protocol capture pending; " +
+                "Blue Light Filter: ASUS HID protocol capture pending; " +
+                "Motion Sync: ASUS HID protocol capture pending; " +
+                "3D Mode: ASUS HID protocol capture pending",
+            capabilities.featureReadinessSummary,
+        )
     }
 
     @Test
@@ -232,5 +249,10 @@ class AirVisionUsbControllerTest {
 
         assertFalse(state.firmwareCapabilities.protocolCaptureReady)
         assertEquals("firmware reports: no HID report endpoints exposed", state.firmwareCapabilities.summary)
+        assertTrue(
+            state.firmwareCapabilities.featureReadiness.all {
+                it.firmwareApplyStatus == "waiting for writable HID report path"
+            },
+        )
     }
 }

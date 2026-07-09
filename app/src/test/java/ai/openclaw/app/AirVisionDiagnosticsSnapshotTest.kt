@@ -95,9 +95,10 @@ class AirVisionDiagnosticsSnapshotTest {
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
         val writableReportPath = firmwareCapabilities.getValue("writableReportPaths").jsonArray.first().jsonObject
+        val firstFeatureReadiness = firmwareCapabilities.getValue("featureReadiness").jsonArray.first().jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("6", root.getValue("version").jsonPrimitive.content)
+        assertEquals("7", root.getValue("version").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)
@@ -113,6 +114,28 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals(
             "firmware reports: writable: out if=2 interrupt addr=0x1 max=64 int=1, interrupt out=1, max out=64",
             firmwareCapabilities.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals("brightness", firstFeatureReadiness.getValue("feature").jsonPrimitive.content)
+        assertEquals("Brightness", firstFeatureReadiness.getValue("label").jsonPrimitive.content)
+        assertEquals("software HUD dimming active", firstFeatureReadiness.getValue("androidStatus").jsonPrimitive.content)
+        assertEquals("false", firstFeatureReadiness.getValue("firmwareApplyReady").jsonPrimitive.content)
+        assertEquals(
+            "ASUS HID protocol capture pending",
+            firstFeatureReadiness.getValue("firmwareApplyStatus").jsonPrimitive.content,
+        )
+        assertEquals(
+            "Brightness: ASUS HID protocol capture pending",
+            firstFeatureReadiness.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals(
+            "firmware apply: Brightness: ASUS HID protocol capture pending; " +
+                "Screen distance: ASUS HID protocol capture pending; " +
+                "IPD: ASUS HID protocol capture pending; " +
+                "Splendid: ASUS HID protocol capture pending; " +
+                "Blue Light Filter: ASUS HID protocol capture pending; " +
+                "Motion Sync: ASUS HID protocol capture pending; " +
+                "3D Mode: ASUS HID protocol capture pending",
+            firmwareCapabilities.getValue("featureReadinessSummary").jsonPrimitive.content,
         )
         assertEquals("hid", firstInterface.getValue("classLabel").jsonPrimitive.content)
         assertEquals("out", firstEndpoint.getValue("directionLabel").jsonPrimitive.content)
