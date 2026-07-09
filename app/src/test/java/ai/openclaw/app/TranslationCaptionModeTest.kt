@@ -11,6 +11,8 @@ class TranslationCaptionModeTest {
         assertEquals("auto", TranslationCaptionMode.normalizeLanguageCode("unknown", "auto"))
         assertEquals("es", TranslationCaptionMode.normalizeLanguageCode("", "es"))
         assertEquals("fr", TranslationCaptionMode.normalizeLanguageCode(" FR ", "es"))
+        assertEquals("pt", TranslationCaptionMode.normalizeLanguageCode("pt-BR", "es"))
+        assertEquals("zh", TranslationCaptionMode.normalizeLanguageCode("zh_Hans", "es"))
     }
 
     @Test
@@ -47,6 +49,13 @@ class TranslationCaptionModeTest {
             )
 
         assertEquals("sage-router/fast", model)
+    }
+
+    @Test
+    fun languageMenuIncludesExpandedCaptionTargets() {
+        val codes = TranslationCaptionMode.languages.map { it.code }
+
+        assertTrue(codes.containsAll(listOf("ar", "hi", "nl", "pl", "ru", "th", "tr", "uk", "vi")))
     }
 
     @Test

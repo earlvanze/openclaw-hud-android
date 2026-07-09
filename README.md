@@ -168,8 +168,11 @@ context. It forces thinking `off`, prefers the
 `sage-router/fast` model profile, suppresses spoken assistant replies while
 captions are active, and labels alternating turns as `S1` / `S2`. The default
 OpenClaw target language is Spanish. Source and target language selection live
-in the Voice tab and currently support Auto, English, Spanish, French, German,
-Italian, Portuguese, Japanese, Korean, and Chinese.
+in the Voice tab and support Auto plus common caption targets including
+English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian,
+Ukrainian, Turkish, Arabic, Hebrew, Hindi, Indonesian, Thai, Vietnamese,
+Japanese, Korean, and Chinese. Stored locale tags such as `pt-BR` and
+`zh-Hans` normalize to the matching caption language.
 
 Notification text is whitespace-cleaned and secret-shaped assignments such as
 `token=...`, `password=...`, and `accountSignatureKey=...` are redacted before

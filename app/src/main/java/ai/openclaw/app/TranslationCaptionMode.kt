@@ -22,6 +22,17 @@ object TranslationCaptionMode {
             TranslationCaptionLanguage("de", "German", "German"),
             TranslationCaptionLanguage("it", "Italian", "Italian"),
             TranslationCaptionLanguage("pt", "Portuguese", "Portuguese"),
+            TranslationCaptionLanguage("nl", "Dutch", "Dutch"),
+            TranslationCaptionLanguage("pl", "Polish", "Polish"),
+            TranslationCaptionLanguage("ru", "Russian", "Russian"),
+            TranslationCaptionLanguage("uk", "Ukrainian", "Ukrainian"),
+            TranslationCaptionLanguage("tr", "Turkish", "Turkish"),
+            TranslationCaptionLanguage("ar", "Arabic", "Arabic"),
+            TranslationCaptionLanguage("he", "Hebrew", "Hebrew"),
+            TranslationCaptionLanguage("hi", "Hindi", "Hindi"),
+            TranslationCaptionLanguage("id", "Indonesian", "Indonesian"),
+            TranslationCaptionLanguage("th", "Thai", "Thai"),
+            TranslationCaptionLanguage("vi", "Vietnamese", "Vietnamese"),
             TranslationCaptionLanguage("ja", "Japanese", "Japanese"),
             TranslationCaptionLanguage("ko", "Korean", "Korean"),
             TranslationCaptionLanguage("zh", "Chinese", "Chinese"),
@@ -31,8 +42,12 @@ object TranslationCaptionMode {
         raw: String?,
         defaultCode: String,
     ): String {
-        val code = raw?.trim()?.lowercase().orEmpty()
+        val code = raw?.trim()?.lowercase()?.replace('_', '-').orEmpty()
+        val primaryCode = code.substringBefore("-")
         return languages.firstOrNull { it.code == code }?.code ?: defaultCode
+            .takeUnless { code.startsWith("zh-") }
+            ?.let { languages.firstOrNull { it.code == primaryCode }?.code ?: it }
+            ?: "zh"
     }
 
     fun languageFor(code: String): TranslationCaptionLanguage =
