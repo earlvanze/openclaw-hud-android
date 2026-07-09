@@ -54,6 +54,7 @@ class SecurePrefs(
         private const val AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY = "airVision.hud.brightnessKeyAction"
         private const val AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY = "airVision.hud.mediaKeyAction"
         private const val AIR_VISION_APP_LANGUAGE_KEY = "airVision.app.language"
+        private const val AIR_VISION_STARTUP_DESTINATION_KEY = "airVision.app.startupDestination"
         private const val AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY = "airVision.physicalMainScreenVisible"
         private const val AIR_VISION_DEMO_MODE_ENABLED_KEY = "airVision.demoModeEnabled"
     }
@@ -202,6 +203,14 @@ class SecurePrefs(
             AirVisionAppLanguage.fromRawValue(plainPrefs.getString(AIR_VISION_APP_LANGUAGE_KEY, null)),
         )
     val airVisionAppLanguage: StateFlow<AirVisionAppLanguage> = _airVisionAppLanguage
+
+    private val _airVisionStartupDestination =
+        MutableStateFlow(
+            AirVisionStartupDestination.fromRawValue(
+                plainPrefs.getString(AIR_VISION_STARTUP_DESTINATION_KEY, null),
+            ),
+        )
+    val airVisionStartupDestination: StateFlow<AirVisionStartupDestination> = _airVisionStartupDestination
 
     private val _airVisionPhysicalMainScreenVisible =
         MutableStateFlow(_airVisionDisplaySettings.value.physicalMainScreenVisible)
@@ -751,6 +760,11 @@ class SecurePrefs(
     fun setAirVisionAppLanguage(language: AirVisionAppLanguage) {
         plainPrefs.edit { putString(AIR_VISION_APP_LANGUAGE_KEY, language.rawValue) }
         _airVisionAppLanguage.value = language
+    }
+
+    fun setAirVisionStartupDestination(destination: AirVisionStartupDestination) {
+        plainPrefs.edit { putString(AIR_VISION_STARTUP_DESTINATION_KEY, destination.rawValue) }
+        _airVisionStartupDestination.value = destination
     }
 
     fun setAirVisionPhysicalMainScreenVisible(visible: Boolean) {

@@ -20,3 +20,20 @@ enum class AirVisionAppLanguage(
             entries.firstOrNull { it.rawValue == rawValue?.trim()?.lowercase() } ?: System
     }
 }
+
+enum class AirVisionStartupDestination(
+    val rawValue: String,
+    val label: String,
+) {
+    Hud("hud", "HUD"),
+    Chat("chat", "Chat"),
+    Voice("voice", "Voice"),
+    Agents("agents", "Agents"),
+    Settings("settings", "Settings"),
+    ;
+
+    companion object {
+        fun fromRawValue(rawValue: String?): AirVisionStartupDestination =
+            entries.firstOrNull { it.rawValue == rawValue?.trim()?.lowercase() } ?: Hud
+    }
+}

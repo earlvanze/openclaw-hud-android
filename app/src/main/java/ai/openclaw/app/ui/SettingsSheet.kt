@@ -9,6 +9,7 @@ import ai.openclaw.app.AirVisionHudPlacement
 import ai.openclaw.app.AirVisionHudSwipeAction
 import ai.openclaw.app.AirVisionHudTouchAction
 import ai.openclaw.app.AirVisionSplendidMode
+import ai.openclaw.app.AirVisionStartupDestination
 import ai.openclaw.app.AirVisionViewMode
 import ai.openclaw.app.BuildConfig
 import ai.openclaw.app.LocationMode
@@ -108,6 +109,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionDisplaySettings by viewModel.airVisionDisplaySettings.collectAsState()
     val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
     val airVisionAppLanguage by viewModel.airVisionAppLanguage.collectAsState()
+    val airVisionStartupDestination by viewModel.airVisionStartupDestination.collectAsState()
     val airVisionPhysicalMainScreenVisible by viewModel.airVisionPhysicalMainScreenVisible.collectAsState()
     val airVisionDemoModeEnabled by viewModel.airVisionDemoModeEnabled.collectAsState()
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
@@ -1011,6 +1013,17 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 style = mobileCallout,
                             )
                         },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "Startup View",
+                        currentLabel = airVisionStartupDestination.label,
+                        supportingText = "Selects the default view when OpenClaw HUD launches.",
+                        options = AirVisionStartupDestination.entries.toList(),
+                        selected = airVisionStartupDestination,
+                        optionLabel = { it.label },
+                        optionDescription = ::airVisionStartupDestinationDescription,
+                        onSelected = viewModel::setAirVisionStartupDestination,
                     )
                     HorizontalDivider(color = mobileBorder)
                     AirVisionOptionGroup(
@@ -1940,6 +1953,15 @@ private fun airVisionAppLanguageDescription(language: AirVisionAppLanguage): Str
     when (language) {
         AirVisionAppLanguage.System -> "Follow the Android system language."
         else -> "Store ${language.label} as the AirVision companion language preference."
+    }
+
+private fun airVisionStartupDestinationDescription(destination: AirVisionStartupDestination): String =
+    when (destination) {
+        AirVisionStartupDestination.Hud -> "Launch directly into the external-display HUD."
+        AirVisionStartupDestination.Chat -> "Launch with assistant chat ready above the input bar."
+        AirVisionStartupDestination.Voice -> "Launch with microphone and caption controls visible."
+        AirVisionStartupDestination.Agents -> "Launch with the agent picker and model controls visible."
+        AirVisionStartupDestination.Settings -> "Launch into settings for setup and display tuning."
     }
 
 private fun airVisionMediaKeyActionDescription(action: AirVisionHudMediaKeyAction): String =

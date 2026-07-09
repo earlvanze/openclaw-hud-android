@@ -298,6 +298,20 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun airVisionStartupDestination_persists() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        assertEquals(AirVisionStartupDestination.Hud, prefs.airVisionStartupDestination.value)
+
+        prefs.setAirVisionStartupDestination(AirVisionStartupDestination.Agents)
+
+        assertEquals(AirVisionStartupDestination.Agents, SecurePrefs(context).airVisionStartupDestination.value)
+    }
+
+    @Test
     fun airVisionDemoModeEnabled_persists() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)

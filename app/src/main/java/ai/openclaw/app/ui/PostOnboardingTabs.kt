@@ -1,5 +1,6 @@
 package ai.openclaw.app.ui
 
+import ai.openclaw.app.AirVisionStartupDestination
 import ai.openclaw.app.BuildConfig
 import ai.openclaw.app.GatewayAgentSummary
 import ai.openclaw.app.HomeDestination
@@ -89,13 +90,29 @@ private enum class StatusVisual {
     Offline,
 }
 
+private fun defaultStartupHomeTab(viewModel: MainViewModel): HomeTab =
+    if (BuildConfig.OPENCLAW_DEFAULT_HUD) {
+        viewModel.airVisionStartupDestination.value.toHomeTab()
+    } else {
+        HomeTab.Settings
+    }
+
+private fun AirVisionStartupDestination.toHomeTab(): HomeTab =
+    when (this) {
+        AirVisionStartupDestination.Hud -> HomeTab.Hud
+        AirVisionStartupDestination.Chat -> HomeTab.Chat
+        AirVisionStartupDestination.Voice -> HomeTab.Voice
+        AirVisionStartupDestination.Agents -> HomeTab.Agents
+        AirVisionStartupDestination.Settings -> HomeTab.Settings
+    }
+
 @Composable
 fun PostOnboardingTabs(
     viewModel: MainViewModel,
     modifier: Modifier = Modifier,
 ) {
     var activeTab by rememberSaveable {
-        mutableStateOf(if (BuildConfig.OPENCLAW_DEFAULT_HUD) HomeTab.Hud else HomeTab.Settings)
+        mutableStateOf(defaultStartupHomeTab(viewModel))
     }
     var userSelectedTab by rememberSaveable { mutableStateOf(false) }
     var chatTabStarted by rememberSaveable { mutableStateOf(false) }

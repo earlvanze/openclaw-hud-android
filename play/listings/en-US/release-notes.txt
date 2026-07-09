@@ -6,7 +6,7 @@ Initial M1 HUD release candidate.
 - Added AirVision demo mode for tutorials, screenshots, and HUD fit checks without a live gateway.
 - AirVision HUD per-mode profile controls for view mode, placement, safe area, software brightness, virtual distance, IPD calibration, Eye Care filtering, gestures, hotkeys, Motion Sync, Light Load, and profile reset.
 - M1 brightness-key handling can now be configured for chat scrolling, Android HUD brightness, or virtual-distance stepping.
-- Added AirVision app preferences with language, version, legal note, FAQ/tutorial, registration, and support links.
+- Added AirVision app preferences with startup view, language, version, legal note, FAQ/tutorial, registration, and support links.
 - AirVision 3D Mode is now stored per profile and disabled while Light Load Mode is on.
 - Light Load Mode now locks IPD adjustment to mirror the ASUS AirVision app behavior.
 - AirVision firmware link now shows USB device identity and firmware protocol status.
