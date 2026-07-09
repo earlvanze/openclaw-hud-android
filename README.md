@@ -128,7 +128,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 
 | Windows AirVision feature | Android HUD status |
 | --- | --- |
-| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, user-named Custom 1 / Custom 2 labels, active-profile reset, HUD placement, physical main screen behavior, safe area, scale/layout, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
+| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, user-named Custom 1 / Custom 2 labels, copy-current-to-custom actions, active-profile reset, HUD placement, physical main screen behavior, safe area, scale/layout, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
 | Brightness | Implemented as software HUD dimming. Hardware brightness remains available from the M1 touch bar. |
 | Screen distance | Implemented as virtual HUD distance scaling. |
 | IPD | Stored as a calibration value, defaulting to 67 mm. Adjustment is locked while Light Load Mode is enabled, matching the ASUS app. Firmware-level apply still needs the ASUS HID protocol. |
@@ -176,9 +176,10 @@ the default behavior of selecting displays named like ASUS AirVision M1. Largest
 External, First External, and Last External provide manual fallbacks for Samsung
 DeX or adapter setups where Android exposes multiple presentation displays.
 
-Custom profile names live under Viewing Mode in Settings -> AirVision M1. The
-labels rename the saved Custom 1 and Custom 2 profile slots without changing
-their stored display settings.
+Custom profile names and copy-current-to-custom actions live under Viewing Mode
+in Settings -> AirVision M1. The labels rename the saved Custom 1 and Custom 2
+profile slots without changing their stored display settings; the copy actions
+duplicate the active profile settings into a custom slot.
 
 To pair on first launch, pass a setup code directly or from a local file:
 

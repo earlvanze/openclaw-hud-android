@@ -806,6 +806,21 @@ class SecurePrefs(
             }
     }
 
+    fun copyActiveAirVisionProfileTo(targetMode: AirVisionViewMode): Boolean {
+        if (targetMode != AirVisionViewMode.Custom1 && targetMode != AirVisionViewMode.Custom2) {
+            return false
+        }
+        val copied = _airVisionDisplaySettings.value.copy(viewMode = targetMode).normalized
+        plainPrefs.edit {
+            putAirVisionProfileSettings(copied)
+        }
+        if (_airVisionDisplaySettings.value.viewMode == targetMode) {
+            _airVisionDisplaySettings.value = copied
+            _airVisionPhysicalMainScreenVisible.value = copied.physicalMainScreenVisible
+        }
+        return true
+    }
+
     fun setAirVisionPhysicalMainScreenVisible(visible: Boolean) {
         val viewMode = _airVisionDisplaySettings.value.viewMode
         plainPrefs.edit {
@@ -997,6 +1012,24 @@ class SecurePrefs(
         return AirVisionViewMode.entries.any { mode ->
             keys.any { key -> plainPrefs.contains(airVisionProfileKey(key, mode)) }
         }
+    }
+
+    private fun SharedPreferences.Editor.putAirVisionProfileSettings(settings: AirVisionDisplaySettings) {
+        val viewMode = settings.viewMode
+        putString(airVisionProfileKey(AIR_VISION_SPLENDID_MODE_KEY, viewMode), settings.splendidMode.rawValue)
+        putString(airVisionProfileKey(AIR_VISION_HUD_PLACEMENT_KEY, viewMode), settings.hudPlacement.rawValue)
+        putInt(airVisionProfileKey(AIR_VISION_BRIGHTNESS_PERCENT_KEY, viewMode), settings.brightnessPercent)
+        putInt(airVisionProfileKey(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, viewMode), settings.blueLightFilterPercent)
+        putInt(airVisionProfileKey(AIR_VISION_DISTANCE_CM_KEY, viewMode), settings.distanceCm)
+        putInt(airVisionProfileKey(AIR_VISION_IPD_MM_KEY, viewMode), settings.ipdMm)
+        putInt(airVisionProfileKey(AIR_VISION_SAFE_AREA_PERCENT_KEY, viewMode), settings.safeAreaPercent)
+        putBoolean(
+            airVisionProfileKey(AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY, viewMode),
+            settings.physicalMainScreenVisible,
+        )
+        putBoolean(airVisionProfileKey(AIR_VISION_MOTION_SYNC_ENABLED_KEY, viewMode), settings.motionSyncEnabled)
+        putBoolean(airVisionProfileKey(AIR_VISION_THREE_D_MODE_ENABLED_KEY, viewMode), settings.threeDModeEnabled)
+        putBoolean(airVisionProfileKey(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, viewMode), settings.lightLoadModeEnabled)
     }
 
     private fun getAirVisionProfileString(

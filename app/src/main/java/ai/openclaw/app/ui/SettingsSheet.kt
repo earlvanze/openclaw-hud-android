@@ -79,6 +79,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -716,6 +717,42 @@ fun SettingsSheet(viewModel: MainViewModel) {
                             colors = settingsTextFieldColors(),
                             singleLine = true,
                         )
+                        Text(
+                            "Copy the active profile settings into a custom slot.",
+                            style = mobileCallout,
+                            color = mobileTextSecondary,
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            Button(
+                                onClick = { viewModel.copyActiveAirVisionProfileTo(AirVisionViewMode.Custom1) },
+                                modifier = Modifier.weight(1f),
+                                colors = settingsPrimaryButtonColors(),
+                                shape = RoundedCornerShape(14.dp),
+                            ) {
+                                Text(
+                                    "To ${airVisionCustomProfileLabels.labelFor(AirVisionViewMode.Custom1)}",
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = mobileCallout.copy(fontWeight = FontWeight.Bold),
+                                )
+                            }
+                            Button(
+                                onClick = { viewModel.copyActiveAirVisionProfileTo(AirVisionViewMode.Custom2) },
+                                modifier = Modifier.weight(1f),
+                                colors = settingsPrimaryButtonColors(),
+                                shape = RoundedCornerShape(14.dp),
+                            ) {
+                                Text(
+                                    "To ${airVisionCustomProfileLabels.labelFor(AirVisionViewMode.Custom2)}",
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = mobileCallout.copy(fontWeight = FontWeight.Bold),
+                                )
+                            }
+                        }
                     }
                     HorizontalDivider(color = mobileBorder)
                     ListItem(

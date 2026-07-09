@@ -165,6 +165,47 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun copyActiveAirVisionProfileTo_persistsSettingsIntoCustomSlot() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionViewMode(AirVisionViewMode.Working)
+        prefs.setAirVisionSplendidMode(AirVisionSplendidMode.EyeCare)
+        prefs.setAirVisionBlueLightFilterPercent(44)
+        prefs.setAirVisionBrightnessPercent(55)
+        prefs.setAirVisionDistanceCm(66)
+        prefs.setAirVisionIpdMm(68)
+        prefs.setAirVisionHudPlacement(AirVisionHudPlacement.LowerCenter)
+        prefs.setAirVisionSafeAreaPercent(9)
+        prefs.setAirVisionPhysicalMainScreenVisible(false)
+        prefs.setAirVisionMotionSyncEnabled(false)
+        prefs.setAirVisionThreeDModeEnabled(true)
+        prefs.setAirVisionLightLoadModeEnabled(false)
+
+        assertEquals(true, prefs.copyActiveAirVisionProfileTo(AirVisionViewMode.Custom1))
+        assertEquals(false, prefs.copyActiveAirVisionProfileTo(AirVisionViewMode.Gaming))
+
+        val reloaded = SecurePrefs(context)
+        reloaded.setAirVisionViewMode(AirVisionViewMode.Custom1)
+        val copied = reloaded.airVisionDisplaySettings.value
+
+        assertEquals(AirVisionViewMode.Custom1, copied.viewMode)
+        assertEquals(AirVisionSplendidMode.EyeCare, copied.splendidMode)
+        assertEquals(44, copied.blueLightFilterPercent)
+        assertEquals(55, copied.brightnessPercent)
+        assertEquals(66, copied.distanceCm)
+        assertEquals(68, copied.ipdMm)
+        assertEquals(AirVisionHudPlacement.LowerCenter, copied.hudPlacement)
+        assertEquals(9, copied.safeAreaPercent)
+        assertEquals(false, copied.physicalMainScreenVisible)
+        assertEquals(false, copied.motionSyncEnabled)
+        assertEquals(true, copied.threeDModeEnabled)
+        assertEquals(false, copied.lightLoadModeEnabled)
+    }
+
+    @Test
     fun airVisionIpdChange_isLockedWhileLightLoadModeIsEnabled() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)

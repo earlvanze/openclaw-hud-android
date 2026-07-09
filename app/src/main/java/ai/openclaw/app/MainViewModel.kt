@@ -474,6 +474,12 @@ class MainViewModel(
         prefs.setAirVisionCustomProfileLabel(mode, label)
     }
 
+    fun copyActiveAirVisionProfileTo(targetMode: AirVisionViewMode) {
+        if (prefs.copyActiveAirVisionProfileTo(targetMode)) {
+            showHudTransientMessage("Saved current profile to ${airVisionCustomProfileLabels.value.labelFor(targetMode)}")
+        }
+    }
+
     fun setAirVisionPhysicalMainScreenVisible(visible: Boolean) {
         prefs.setAirVisionPhysicalMainScreenVisible(visible)
     }
