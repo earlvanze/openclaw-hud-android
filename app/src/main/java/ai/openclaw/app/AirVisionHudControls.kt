@@ -50,6 +50,7 @@ enum class AirVisionHudKeyAction(
 ) {
     None("none", "None"),
     ScrollChat("scroll_chat", "Scroll chat"),
+    AdjustDistance("adjust_distance", "Adjust distance"),
     ;
 
     companion object {

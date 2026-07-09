@@ -908,7 +908,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     AirVisionOptionGroup(
                         title = "M1 Brightness Keys",
                         currentLabel = airVisionHudControls.brightnessKeyAction.label,
-                        supportingText = "Scroll chat consumes M1 brightness key events while HUD is focused.",
+                        supportingText = "Controls brightness key handling while the HUD is focused.",
                         options = AirVisionHudKeyAction.entries.toList(),
                         selected = airVisionHudControls.brightnessKeyAction,
                         optionLabel = { it.label },
@@ -1756,6 +1756,7 @@ private fun airVisionBrightnessKeyActionDescription(action: AirVisionHudKeyActio
     when (action) {
         AirVisionHudKeyAction.None -> "Let Android or M1 firmware handle brightness keys."
         AirVisionHudKeyAction.ScrollChat -> "Use brightness key events as chat scroll controls."
+        AirVisionHudKeyAction.AdjustDistance -> "Use brightness up and down to step virtual distance farther or closer."
     }
 
 private fun airVisionMediaKeyActionDescription(action: AirVisionHudMediaKeyAction): String =

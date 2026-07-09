@@ -204,6 +204,22 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun adjustAirVisionDistanceCm_clampsAndPersists() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionDistanceCm(AirVisionDisplaySettings.MIN_DISTANCE_CM)
+        prefs.adjustAirVisionDistanceCm(-5)
+        assertEquals(AirVisionDisplaySettings.MIN_DISTANCE_CM, prefs.airVisionDisplaySettings.value.distanceCm)
+
+        prefs.setAirVisionDistanceCm(AirVisionDisplaySettings.MAX_DISTANCE_CM)
+        prefs.adjustAirVisionDistanceCm(5)
+        assertEquals(AirVisionDisplaySettings.MAX_DISTANCE_CM, SecurePrefs(context).airVisionDisplaySettings.value.distanceCm)
+    }
+
+    @Test
     fun airVisionHudControls_persist() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
@@ -213,7 +229,7 @@ class SecurePrefsTest {
         prefs.setAirVisionHudSingleTapAction(AirVisionHudTouchAction.ToggleMic)
         prefs.setAirVisionHudDoubleTapAction(AirVisionHudDoubleTapAction.DismissNotification)
         prefs.setAirVisionHudSwipeAction(AirVisionHudSwipeAction.None)
-        prefs.setAirVisionHudBrightnessKeyAction(AirVisionHudKeyAction.None)
+        prefs.setAirVisionHudBrightnessKeyAction(AirVisionHudKeyAction.AdjustDistance)
         prefs.setAirVisionHudMediaKeyAction(AirVisionHudMediaKeyAction.None)
 
         val reloaded = SecurePrefs(context)
@@ -222,7 +238,7 @@ class SecurePrefsTest {
         assertEquals(AirVisionHudTouchAction.ToggleMic, controls.singleTapAction)
         assertEquals(AirVisionHudDoubleTapAction.DismissNotification, controls.doubleTapAction)
         assertEquals(AirVisionHudSwipeAction.None, controls.swipeAction)
-        assertEquals(AirVisionHudKeyAction.None, controls.brightnessKeyAction)
+        assertEquals(AirVisionHudKeyAction.AdjustDistance, controls.brightnessKeyAction)
         assertEquals(AirVisionHudMediaKeyAction.None, controls.mediaKeyAction)
     }
 }

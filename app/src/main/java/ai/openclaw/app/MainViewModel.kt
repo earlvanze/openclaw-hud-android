@@ -391,6 +391,10 @@ class MainViewModel(
         prefs.setAirVisionDistanceCm(value)
     }
 
+    fun adjustAirVisionDistanceCm(delta: Int) {
+        prefs.adjustAirVisionDistanceCm(delta)
+    }
+
     fun setAirVisionIpdMm(value: Int) {
         prefs.setAirVisionIpdMm(value)
     }

@@ -2,6 +2,7 @@ Initial M1 HUD release candidate.
 
 - Minimal green-on-black HUD presentation for AirVision M1 and Samsung DeX.
 - AirVision HUD per-mode profile controls for view mode, placement, safe area, software brightness, virtual distance, IPD calibration, Eye Care filtering, gestures, hotkeys, Motion Sync, Light Load, and profile reset.
+- M1 brightness-key handling can now be configured for chat scrolling or virtual-distance stepping.
 - AirVision 3D Mode is now stored per profile and disabled while Light Load Mode is on.
 - Light Load Mode now locks IPD adjustment to mirror the ASUS AirVision app behavior.
 - AirVision firmware link now shows USB device identity and firmware protocol status.

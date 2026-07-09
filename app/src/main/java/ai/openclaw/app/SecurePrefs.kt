@@ -631,6 +631,10 @@ class SecurePrefs(
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(distanceCm = normalized)
     }
 
+    fun adjustAirVisionDistanceCm(delta: Int) {
+        setAirVisionDistanceCm(_airVisionDisplaySettings.value.distanceCm + delta)
+    }
+
     fun setAirVisionIpdMm(value: Int) {
         if (!_airVisionDisplaySettings.value.ipdAdjustmentEnabled) return
         val normalized = AirVisionDisplaySettings.normalizeIpdMm(value)

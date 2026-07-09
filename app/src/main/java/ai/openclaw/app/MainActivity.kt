@@ -318,12 +318,21 @@ class MainActivity : ComponentActivity() {
         val hudControls = viewModel.airVisionHudControls.value
         val scrollDelta = hudScrollKeyDeltas[event.keyCode]
         if (scrollDelta != null) {
-            if (hudControls.brightnessKeyAction != AirVisionHudKeyAction.ScrollChat) {
-                return false
-            }
-            if (event.action == KeyEvent.ACTION_DOWN) {
-                viewModel.requestHudScroll(scrollDelta)
-                Log.d(TAG, "M1/brightness key scrolled HUD keyCode=${event.keyCode} delta=$scrollDelta")
+            when (hudControls.brightnessKeyAction) {
+                AirVisionHudKeyAction.None -> return false
+                AirVisionHudKeyAction.ScrollChat -> {
+                    if (event.action == KeyEvent.ACTION_DOWN) {
+                        viewModel.requestHudScroll(scrollDelta)
+                        Log.d(TAG, "M1/brightness key scrolled HUD keyCode=${event.keyCode} delta=$scrollDelta")
+                    }
+                }
+                AirVisionHudKeyAction.AdjustDistance -> {
+                    val distanceDelta = hudDistanceKeyDeltas[event.keyCode] ?: 0
+                    if (event.action == KeyEvent.ACTION_DOWN && distanceDelta != 0) {
+                        viewModel.adjustAirVisionDistanceCm(distanceDelta)
+                        Log.d(TAG, "M1/brightness key adjusted distance keyCode=${event.keyCode} deltaCm=$distanceDelta")
+                    }
+                }
             }
             return event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
         }
@@ -447,7 +456,13 @@ class MainActivity : ComponentActivity() {
                 KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_SCROLL_PIXELS,
                 KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_SCROLL_PIXELS,
             )
+        private val hudDistanceKeyDeltas =
+            mapOf(
+                KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_DISTANCE_STEP_CM,
+                KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_DISTANCE_STEP_CM,
+            )
         private const val HUD_KEY_SCROLL_PIXELS = 160f
+        private const val HUD_KEY_DISTANCE_STEP_CM = 5
         private const val HUD_MIC_DOUBLE_TAP_TIMEOUT_MS = 500L
     }
 }
