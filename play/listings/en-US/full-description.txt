@@ -10,6 +10,7 @@ Key features:
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - Speaker routing support for AirVision M1 audio devices
+- AirVision HUD profile controls for view mode, software brightness, virtual distance, IPD calibration, Eye Care filtering, and low-overhead preferences
 - Agent and provider/model controls for OpenClaw sessions
 
 OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does not use AccessibilityService, overlay windows, SMS, or Call Log permissions in the Play/HUD build. Notification access is optional and is used only after the user grants Android notification-listener access.

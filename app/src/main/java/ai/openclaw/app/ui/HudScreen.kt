@@ -2,6 +2,7 @@
 
 package ai.openclaw.app.ui
 
+import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.TranslationCaptionMode
 import ai.openclaw.app.chat.ChatMessage
@@ -51,6 +52,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isShiftPressed
@@ -104,6 +107,7 @@ fun HudScreen(viewModel: MainViewModel) {
     val nativeCaptionsEnabled by viewModel.nativeCaptionsEnabled.collectAsState()
     val notificationSnapshot by viewModel.notificationSnapshot.collectAsState()
     val pendingTrust by viewModel.pendingGatewayTrust.collectAsState()
+    val airVisionSettings by viewModel.airVisionDisplaySettings.collectAsState()
     var prompt by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(mainSessionKey) {
@@ -175,6 +179,17 @@ fun HudScreen(viewModel: MainViewModel) {
             micInputLevel = micInputLevel,
             micEnabled = micEnabled,
         )
+    val hudScale =
+        (
+            AirVisionDisplaySettings.hudScaleForDistanceCm(airVisionSettings.distanceCm) *
+                AirVisionDisplaySettings.hudScaleMultiplierForViewMode(airVisionSettings.viewMode)
+        ).coerceIn(0.70f, 1.28f)
+    val dimAlpha = AirVisionDisplaySettings.hudDimAlphaForBrightnessPercent(airVisionSettings.brightnessPercent)
+    val warmAlpha =
+        AirVisionDisplaySettings.hudWarmOverlayAlpha(
+            splendidMode = airVisionSettings.splendidMode,
+            blueLightFilterPercent = airVisionSettings.blueLightFilterPercent,
+        )
 
     Box(
         modifier =
@@ -229,6 +244,11 @@ fun HudScreen(viewModel: MainViewModel) {
                     Modifier
                         .fillMaxWidth()
                         .weight(1f)
+                        .graphicsLayer {
+                            scaleX = hudScale
+                            scaleY = hudScale
+                            transformOrigin = TransformOrigin(0f, 0f)
+                        }
                         .padding(top = 34.dp)
                         .padding(end = 48.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -312,6 +332,23 @@ fun HudScreen(viewModel: MainViewModel) {
                         .fillMaxWidth()
                         .imePadding()
                         .padding(end = 48.dp),
+            )
+        }
+
+        if (warmAlpha > 0f) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFFFFB15C).copy(alpha = warmAlpha)),
+            )
+        }
+        if (dimAlpha > 0f) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = dimAlpha)),
             )
         }
     }

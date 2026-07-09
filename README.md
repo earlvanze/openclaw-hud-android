@@ -37,6 +37,8 @@ Current live target:
 - [x] HUD input: Enter sends, Shift+Enter inserts a newline
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
+- [x] AirVision M1 settings profile with viewing mode, Splendid mode, brightness,
+  blue-light filter, distance, IPD, Motion Sync, and Light Load controls
 - [ ] Full end-to-end QA and release hardening
 
 ## Open in Android Studio
@@ -102,13 +104,27 @@ interface.
 
 HUD controls:
 
-- Tap the mic status area/touch surface to toggle mic capture when available.
+- Single-tap a clearable notification to dismiss it.
+- Double-tap the HUD/touch surface to toggle mic capture when available.
 - Swipe vertically to scroll the compact chat transcript.
-- Double-tap a clearable notification to dismiss it.
 - Tap the thinking-level text in the status lights to cycle thinking level.
 - Tap `cc` in the HUD status lights to toggle Samsung/native captions.
 - Press Enter on a hardware keyboard to send the chat input.
 - Press Shift+Enter for a newline.
+
+AirVision M1 companion settings live in Settings -> AirVision M1:
+
+| Windows AirVision feature | Android HUD status |
+| --- | --- |
+| Working / Gaming / Infinity / Custom modes | Implemented as HUD view-mode profiles that adjust scale/layout. |
+| Brightness | Implemented as software HUD dimming. Hardware brightness remains available from the M1 touch bar. |
+| Screen distance | Implemented as virtual HUD distance scaling. |
+| IPD | Stored as a calibration value, defaulting to 67 mm. Firmware-level apply still needs the ASUS HID protocol. |
+| Splendid Standard / Theater / Office / Game / Eye Care | Stored as profile settings. Eye Care adds a warm HUD overlay now; true panel presets need HID support. |
+| Blue Light Filter | Implemented as Android HUD warm filtering. |
+| Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
+| Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation. |
+| Multi-screen desktop layouts | Not implemented on Android. Samsung DeX and Android Presentation own the external display topology. |
 
 Captions default to Samsung/Android native captioning so the system floating
 caption window can sit over the minimal HUD. The Voice tab exposes the provider

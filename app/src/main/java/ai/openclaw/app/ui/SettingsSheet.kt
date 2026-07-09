@@ -1,5 +1,8 @@
 package ai.openclaw.app.ui
 
+import ai.openclaw.app.AirVisionDisplaySettings
+import ai.openclaw.app.AirVisionSplendidMode
+import ai.openclaw.app.AirVisionViewMode
 import ai.openclaw.app.BuildConfig
 import ai.openclaw.app.LocationMode
 import ai.openclaw.app.MainViewModel
@@ -49,6 +52,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,6 +74,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlin.math.roundToInt
 
 @Composable
 fun SettingsSheet(viewModel: MainViewModel) {
@@ -90,6 +95,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val notificationForwardingQuietEnd by viewModel.notificationForwardingQuietEnd.collectAsState()
     val notificationForwardingMaxEventsPerMinute by viewModel.notificationForwardingMaxEventsPerMinute.collectAsState()
     val notificationForwardingSessionKey by viewModel.notificationForwardingSessionKey.collectAsState()
+    val airVisionDisplaySettings by viewModel.airVisionDisplaySettings.collectAsState()
 
     var notificationQuietStartDraft by remember(notificationForwardingQuietStart) {
         mutableStateOf(notificationForwardingQuietStart)
@@ -540,6 +546,167 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         )
                     }
                 }
+            }
+
+            // -- AirVision M1 --
+            item {
+                Text(
+                    "AIRVISION M1",
+                    style = mobileCaption1.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
+                    color = mobileAccent,
+                )
+            }
+            item {
+                Column(modifier = Modifier.settingsRowModifier()) {
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Viewing Mode", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Current: ${airVisionDisplaySettings.viewMode.label}. Applied to HUD scale/layout.",
+                                style = mobileCallout,
+                            )
+                        },
+                    )
+                    AirVisionViewMode.entries.forEach { mode ->
+                        HorizontalDivider(color = mobileBorder)
+                        ListItem(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = listItemColors,
+                            headlineContent = { Text(mode.label, style = mobileHeadline) },
+                            supportingContent = {
+                                Text(airVisionViewModeDescription(mode), style = mobileCallout)
+                            },
+                            trailingContent = {
+                                RadioButton(
+                                    selected = airVisionDisplaySettings.viewMode == mode,
+                                    onClick = { viewModel.setAirVisionViewMode(mode) },
+                                )
+                            },
+                        )
+                    }
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionSliderRow(
+                        label = "Brightness",
+                        valueText = "${airVisionDisplaySettings.brightnessPercent}%",
+                        supportingText = "Software HUD dimming while firmware brightness remains controlled by the M1 touch bar.",
+                        value = airVisionDisplaySettings.brightnessPercent.toFloat(),
+                        valueRange =
+                            AirVisionDisplaySettings.MIN_BRIGHTNESS_PERCENT
+                                .toFloat()
+                                .rangeTo(AirVisionDisplaySettings.MAX_BRIGHTNESS_PERCENT.toFloat()),
+                        onValueChange = { viewModel.setAirVisionBrightnessPercent(it.roundToInt()) },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionSliderRow(
+                        label = "Virtual Distance",
+                        valueText = "${airVisionDisplaySettings.distanceCm} cm",
+                        supportingText = "Scales the HUD content to mimic closer or farther projection distance.",
+                        value = airVisionDisplaySettings.distanceCm.toFloat(),
+                        valueRange =
+                            AirVisionDisplaySettings.MIN_DISTANCE_CM
+                                .toFloat()
+                                .rangeTo(AirVisionDisplaySettings.MAX_DISTANCE_CM.toFloat()),
+                        onValueChange = { viewModel.setAirVisionDistanceCm(it.roundToInt()) },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionSliderRow(
+                        label = "IPD",
+                        valueText = "${airVisionDisplaySettings.ipdMm} mm",
+                        supportingText = "Stored for calibration. Firmware-level IPD apply still needs ASUS HID protocol support.",
+                        value = airVisionDisplaySettings.ipdMm.toFloat(),
+                        valueRange =
+                            AirVisionDisplaySettings.MIN_IPD_MM
+                                .toFloat()
+                                .rangeTo(AirVisionDisplaySettings.MAX_IPD_MM.toFloat()),
+                        onValueChange = { viewModel.setAirVisionIpdMm(it.roundToInt()) },
+                    )
+                }
+            }
+            item {
+                Column(modifier = Modifier.settingsRowModifier()) {
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Splendid Mode", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Current: ${airVisionDisplaySettings.splendidMode.label}. Eye Care adds warm HUD filtering.",
+                                style = mobileCallout,
+                            )
+                        },
+                    )
+                    AirVisionSplendidMode.entries.forEach { mode ->
+                        HorizontalDivider(color = mobileBorder)
+                        ListItem(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = listItemColors,
+                            headlineContent = { Text(mode.label, style = mobileHeadline) },
+                            supportingContent = {
+                                Text(airVisionSplendidModeDescription(mode), style = mobileCallout)
+                            },
+                            trailingContent = {
+                                RadioButton(
+                                    selected = airVisionDisplaySettings.splendidMode == mode,
+                                    onClick = { viewModel.setAirVisionSplendidMode(mode) },
+                                )
+                            },
+                        )
+                    }
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionSliderRow(
+                        label = "Blue Light Filter",
+                        valueText = "${airVisionDisplaySettings.blueLightFilterPercent}%",
+                        supportingText = "Applies a warm overlay in the Android HUD presentation.",
+                        value = airVisionDisplaySettings.blueLightFilterPercent.toFloat(),
+                        valueRange =
+                            AirVisionDisplaySettings.MIN_BLUE_LIGHT_FILTER_PERCENT
+                                .toFloat()
+                                .rangeTo(AirVisionDisplaySettings.MAX_BLUE_LIGHT_FILTER_PERCENT.toFloat()),
+                        onValueChange = { viewModel.setAirVisionBlueLightFilterPercent(it.roundToInt()) },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Motion Sync", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Stored with the AirVision profile while Android protocol support is being hardened.",
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = airVisionDisplaySettings.motionSyncEnabled,
+                                onCheckedChange = viewModel::setAirVisionMotionSyncEnabled,
+                            )
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Light Load Mode", style = mobileHeadline) },
+                        supportingContent = {
+                            Text("Stores the Windows-style preference for lower overhead HUD operation.", style = mobileCallout)
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = airVisionDisplaySettings.lightLoadModeEnabled,
+                                onCheckedChange = viewModel::setAirVisionLightLoadModeEnabled,
+                            )
+                        },
+                    )
+                }
+            }
+            item {
+                Text(
+                    "Android applies HUD brightness, Eye Care filtering, and virtual distance now. Hardware IPD, true Splendid panel presets, and multi-screen desktop layouts require ASUS AirVision HID protocol support.",
+                    style = mobileCallout,
+                    color = mobileTextSecondary,
+                )
             }
 
             // ── Media ──
@@ -1222,6 +1389,53 @@ fun SettingsSheet(viewModel: MainViewModel) {
         }
     }
 }
+
+@Composable
+private fun AirVisionSliderRow(
+    label: String,
+    valueText: String,
+    supportingText: String,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    onValueChange: (Float) -> Unit,
+) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(label, style = mobileHeadline, color = mobileText)
+            Text(valueText, style = mobileCallout.copy(fontWeight = FontWeight.Bold), color = mobileAccent)
+        }
+        Text(supportingText, style = mobileCallout, color = mobileTextSecondary)
+        Slider(
+            value = value.coerceIn(valueRange.start, valueRange.endInclusive),
+            onValueChange = onValueChange,
+            valueRange = valueRange,
+        )
+    }
+}
+
+private fun airVisionViewModeDescription(mode: AirVisionViewMode): String =
+    when (mode) {
+        AirVisionViewMode.Working -> "Balanced text scale for walking and workstation HUD use."
+        AirVisionViewMode.Gaming -> "Larger HUD content for glanceable, high-motion sessions."
+        AirVisionViewMode.Infinity -> "Smaller, farther-feeling content for less intrusive overlays."
+        AirVisionViewMode.Custom1 -> "Compact custom profile."
+        AirVisionViewMode.Custom2 -> "Large custom profile."
+    }
+
+private fun airVisionSplendidModeDescription(mode: AirVisionSplendidMode): String =
+    when (mode) {
+        AirVisionSplendidMode.Standard -> "Neutral HUD color."
+        AirVisionSplendidMode.Theater -> "Stored Windows-style profile; panel-level color needs HID support."
+        AirVisionSplendidMode.Office -> "Stored Windows-style profile for document work."
+        AirVisionSplendidMode.Game -> "Stored Windows-style profile for low-latency visual preference."
+        AirVisionSplendidMode.EyeCare -> "Adds a warm Android HUD overlay."
+    }
 
 data class InstalledApp(
     val label: String,

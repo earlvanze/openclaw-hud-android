@@ -60,4 +60,33 @@ class SecurePrefsTest {
         assertNull(prefs.loadGatewayBootstrapToken())
         assertNull(prefs.loadGatewayPassword())
     }
+
+    @Test
+    fun airVisionDisplaySettings_persistAndClamp() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionViewMode(AirVisionViewMode.Infinity)
+        prefs.setAirVisionSplendidMode(AirVisionSplendidMode.EyeCare)
+        prefs.setAirVisionBrightnessPercent(3)
+        prefs.setAirVisionBlueLightFilterPercent(125)
+        prefs.setAirVisionDistanceCm(120)
+        prefs.setAirVisionIpdMm(67)
+        prefs.setAirVisionMotionSyncEnabled(false)
+        prefs.setAirVisionLightLoadModeEnabled(true)
+
+        val reloaded = SecurePrefs(context)
+        val settings = reloaded.airVisionDisplaySettings.value
+
+        assertEquals(AirVisionViewMode.Infinity, settings.viewMode)
+        assertEquals(AirVisionSplendidMode.EyeCare, settings.splendidMode)
+        assertEquals(AirVisionDisplaySettings.MIN_BRIGHTNESS_PERCENT, settings.brightnessPercent)
+        assertEquals(AirVisionDisplaySettings.MAX_BLUE_LIGHT_FILTER_PERCENT, settings.blueLightFilterPercent)
+        assertEquals(120, settings.distanceCm)
+        assertEquals(67, settings.ipdMm)
+        assertEquals(false, settings.motionSyncEnabled)
+        assertEquals(true, settings.lightLoadModeEnabled)
+    }
 }

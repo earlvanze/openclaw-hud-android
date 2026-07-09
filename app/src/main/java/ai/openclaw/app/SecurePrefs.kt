@@ -37,6 +37,14 @@ class SecurePrefs(
         private const val notificationsForwardingMaxEventsPerMinuteKey =
             "notifications.forwarding.maxEventsPerMinute"
         private const val notificationsForwardingSessionKeyKey = "notifications.forwarding.sessionKey"
+        private const val AIR_VISION_VIEW_MODE_KEY = "airVision.viewMode"
+        private const val AIR_VISION_SPLENDID_MODE_KEY = "airVision.splendidMode"
+        private const val AIR_VISION_BRIGHTNESS_PERCENT_KEY = "airVision.brightnessPercent"
+        private const val AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY = "airVision.blueLightFilterPercent"
+        private const val AIR_VISION_DISTANCE_CM_KEY = "airVision.distanceCm"
+        private const val AIR_VISION_IPD_MM_KEY = "airVision.ipdMm"
+        private const val AIR_VISION_MOTION_SYNC_ENABLED_KEY = "airVision.motionSyncEnabled"
+        private const val AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY = "airVision.lightLoadModeEnabled"
     }
 
     private val appContext = context.applicationContext
@@ -171,6 +179,9 @@ class SecurePrefs(
 
     private val _nativeCaptionsEnabled = MutableStateFlow(plainPrefs.getBoolean("nativeCaptions.enabled", false))
     val nativeCaptionsEnabled: StateFlow<Boolean> = _nativeCaptionsEnabled
+
+    private val _airVisionDisplaySettings = MutableStateFlow(loadAirVisionDisplaySettings())
+    val airVisionDisplaySettings: StateFlow<AirVisionDisplaySettings> = _airVisionDisplaySettings
 
     private val _translationCaptionSourceLanguage =
         MutableStateFlow(
@@ -521,6 +532,50 @@ class SecurePrefs(
         _nativeCaptionsEnabled.value = value
     }
 
+    fun setAirVisionViewMode(mode: AirVisionViewMode) {
+        plainPrefs.edit { putString(AIR_VISION_VIEW_MODE_KEY, mode.rawValue) }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(viewMode = mode)
+    }
+
+    fun setAirVisionSplendidMode(mode: AirVisionSplendidMode) {
+        plainPrefs.edit { putString(AIR_VISION_SPLENDID_MODE_KEY, mode.rawValue) }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(splendidMode = mode)
+    }
+
+    fun setAirVisionBrightnessPercent(value: Int) {
+        val normalized = AirVisionDisplaySettings.normalizeBrightnessPercent(value)
+        plainPrefs.edit { putInt(AIR_VISION_BRIGHTNESS_PERCENT_KEY, normalized) }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(brightnessPercent = normalized)
+    }
+
+    fun setAirVisionBlueLightFilterPercent(value: Int) {
+        val normalized = AirVisionDisplaySettings.normalizeBlueLightFilterPercent(value)
+        plainPrefs.edit { putInt(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, normalized) }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(blueLightFilterPercent = normalized)
+    }
+
+    fun setAirVisionDistanceCm(value: Int) {
+        val normalized = AirVisionDisplaySettings.normalizeDistanceCm(value)
+        plainPrefs.edit { putInt(AIR_VISION_DISTANCE_CM_KEY, normalized) }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(distanceCm = normalized)
+    }
+
+    fun setAirVisionIpdMm(value: Int) {
+        val normalized = AirVisionDisplaySettings.normalizeIpdMm(value)
+        plainPrefs.edit { putInt(AIR_VISION_IPD_MM_KEY, normalized) }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(ipdMm = normalized)
+    }
+
+    fun setAirVisionMotionSyncEnabled(value: Boolean) {
+        plainPrefs.edit { putBoolean(AIR_VISION_MOTION_SYNC_ENABLED_KEY, value) }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(motionSyncEnabled = value)
+    }
+
+    fun setAirVisionLightLoadModeEnabled(value: Boolean) {
+        plainPrefs.edit { putBoolean(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, value) }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(lightLoadModeEnabled = value)
+    }
+
     fun setTranslationCaptionSourceLanguage(value: String) {
         val normalized =
             TranslationCaptionMode.normalizeLanguageCode(
@@ -582,6 +637,34 @@ class SecurePrefs(
         }
         return resolved
     }
+
+    private fun loadAirVisionDisplaySettings(): AirVisionDisplaySettings =
+        AirVisionDisplaySettings(
+            viewMode = AirVisionViewMode.fromRawValue(plainPrefs.getString(AIR_VISION_VIEW_MODE_KEY, null)),
+            splendidMode = AirVisionSplendidMode.fromRawValue(plainPrefs.getString(AIR_VISION_SPLENDID_MODE_KEY, null)),
+            brightnessPercent =
+                plainPrefs.getInt(
+                    AIR_VISION_BRIGHTNESS_PERCENT_KEY,
+                    AirVisionDisplaySettings.DEFAULT_BRIGHTNESS_PERCENT,
+                ),
+            blueLightFilterPercent =
+                plainPrefs.getInt(
+                    AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY,
+                    AirVisionDisplaySettings.DEFAULT_BLUE_LIGHT_FILTER_PERCENT,
+                ),
+            distanceCm =
+                plainPrefs.getInt(
+                    AIR_VISION_DISTANCE_CM_KEY,
+                    AirVisionDisplaySettings.DEFAULT_DISTANCE_CM,
+                ),
+            ipdMm =
+                plainPrefs.getInt(
+                    AIR_VISION_IPD_MM_KEY,
+                    AirVisionDisplaySettings.DEFAULT_IPD_MM,
+                ),
+            motionSyncEnabled = plainPrefs.getBoolean(AIR_VISION_MOTION_SYNC_ENABLED_KEY, true),
+            lightLoadModeEnabled = plainPrefs.getBoolean(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, false),
+        ).normalized
 
     private fun loadWakeWords(): List<String> {
         val raw = plainPrefs.getString("voiceWake.triggerWords", null)?.trim()

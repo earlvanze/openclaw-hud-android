@@ -117,6 +117,7 @@ class MainViewModel(
     val speakerEnabled: StateFlow<Boolean> = prefs.speakerEnabled
     val micEnabled: StateFlow<Boolean> = prefs.talkEnabled
     val nativeCaptionsEnabled: StateFlow<Boolean> = prefs.nativeCaptionsEnabled
+    val airVisionDisplaySettings: StateFlow<AirVisionDisplaySettings> = prefs.airVisionDisplaySettings
 
     val micCooldown: StateFlow<Boolean> = runtimeState(initial = false) { it.micCooldown }
     val micStatusText: StateFlow<String> = runtimeState(initial = "Mic off") { it.micStatusText }
@@ -351,6 +352,38 @@ class MainViewModel(
         if (enabled) {
             ensureRuntime().setTranslationCaptionsEnabled(false)
         }
+    }
+
+    fun setAirVisionViewMode(mode: AirVisionViewMode) {
+        prefs.setAirVisionViewMode(mode)
+    }
+
+    fun setAirVisionSplendidMode(mode: AirVisionSplendidMode) {
+        prefs.setAirVisionSplendidMode(mode)
+    }
+
+    fun setAirVisionBrightnessPercent(value: Int) {
+        prefs.setAirVisionBrightnessPercent(value)
+    }
+
+    fun setAirVisionBlueLightFilterPercent(value: Int) {
+        prefs.setAirVisionBlueLightFilterPercent(value)
+    }
+
+    fun setAirVisionDistanceCm(value: Int) {
+        prefs.setAirVisionDistanceCm(value)
+    }
+
+    fun setAirVisionIpdMm(value: Int) {
+        prefs.setAirVisionIpdMm(value)
+    }
+
+    fun setAirVisionMotionSyncEnabled(enabled: Boolean) {
+        prefs.setAirVisionMotionSyncEnabled(enabled)
+    }
+
+    fun setAirVisionLightLoadModeEnabled(enabled: Boolean) {
+        prefs.setAirVisionLightLoadModeEnabled(enabled)
     }
 
     fun setTranslationCaptionsEnabled(enabled: Boolean) {
