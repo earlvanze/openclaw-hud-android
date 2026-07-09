@@ -40,6 +40,7 @@ jobs:
           node scripts/verify-play-hud-release.mjs \
             --bundle app/build/outputs/bundle/hudRelease/app-hud-release.aab \
             --skip-signature
+          node scripts/test-play-hud-release-verifier.mjs
           bash -n scripts/capture-play-screenshots.sh
           node scripts/test-play-screenshot-tools.mjs
           node scripts/render-play-screenshots.mjs --check

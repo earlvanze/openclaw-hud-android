@@ -29,18 +29,22 @@ const defaultManifestPath = join(
   "AndroidManifest.xml",
 );
 const defaultListingDir = join(androidDir, "play", "listings");
-const gradleBuildPath = join(androidDir, "app", "build.gradle.kts");
-const airVisionAppLocalePath = join(
-  androidDir,
-  "app",
-  "src",
-  "main",
-  "java",
-  "ai",
-  "openclaw",
-  "app",
-  "AirVisionAppLocale.kt",
-);
+const gradleBuildPath =
+  process.env.OPENCLAW_ANDROID_GRADLE_BUILD_PATH?.trim() ||
+  join(androidDir, "app", "build.gradle.kts");
+const airVisionAppLocalePath =
+  process.env.OPENCLAW_ANDROID_AIRVISION_APP_LOCALE_PATH?.trim() ||
+  join(
+    androidDir,
+    "app",
+    "src",
+    "main",
+    "java",
+    "ai",
+    "openclaw",
+    "app",
+    "AirVisionAppLocale.kt",
+  );
 
 const expectedPackage = "ai.openclaw.app.hud";
 const expectedPermissions = [

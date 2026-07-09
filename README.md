@@ -337,7 +337,9 @@ service declaration, checks the English listing/release-notes length limits, and
 confirms App Bundle language splits stay disabled while the app uses runtime
 AirVision language switching. The language split setting is intentional: Play
 can otherwise deliver only the install-time language resources, which breaks the
-in-app AirVision companion language menu.
+in-app AirVision companion language menu. Run
+`node scripts/test-play-hud-release-verifier.mjs` after changing the release
+verifier; it covers the language-split regression path with temporary sources.
 GitHub Actions also builds the HUD release bundle with
 `-POPENCLAW_ANDROID_ALLOW_UNSIGNED_RELEASE=true` and runs the verifier with
 `--skip-signature` so CI can validate the release manifest and listing without
