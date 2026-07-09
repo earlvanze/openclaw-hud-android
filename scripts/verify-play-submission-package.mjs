@@ -209,6 +209,10 @@ function verifyManifestAgainstAppContent(xml, appContent) {
 async function verifyListing(listingDir) {
   const files = ["title.txt", "short-description.txt", "full-description.txt", "release-notes.txt"];
   for (const file of files) await requireFile(join(listingDir, file), `Listing ${file}`);
+  const fullDescription = await readText(join(listingDir, "full-description.txt"));
+  const releaseNotes = await readText(join(listingDir, "release-notes.txt"));
+  requireIncludes("Listing full description", fullDescription, ["in-app privacy policy"]);
+  requireIncludes("Listing release notes", releaseNotes, ["In-app privacy policy"]);
 }
 
 async function main() {
@@ -260,6 +264,7 @@ async function main() {
     "App access",
     "Target audience",
     "Data deletion",
+    "in-app privacy",
     "verify-play-submission-package",
   ]);
 

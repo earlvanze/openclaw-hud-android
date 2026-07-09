@@ -9,7 +9,9 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 - Grant the publishing service account access in Play Console.
 - Complete App content forms, including Data safety, Ads, App access, Content rating, Target audience, and Data deletion.
 - Use the copy in `play/listings/en-US/` for the initial English listing.
-- Use `play/privacy-policy.md` as the hosted privacy-policy source.
+- Use `play/privacy-policy.md` as the hosted privacy-policy source; the same
+  disclosure is available in-app at Settings -> AirVision M1 -> App Preferences
+  -> Privacy Policy.
 - Run `node scripts/verify-play-hud-release.mjs` before every Play upload.
 - Run `node scripts/verify-play-submission-package.mjs` before filling or
   updating Play Console App content answers.
@@ -32,8 +34,9 @@ Current local status:
   Privacy policy, Ads, App access, Target audience, Content rating, Data
   deletion, and Data safety. Keep it aligned with the final Play Console forms.
 - `node scripts/verify-play-submission-package.mjs` checks the App content
-  packet against the HUD manifest, privacy policy, data-safety notes, console
-  checklist, and English listing files.
+  packet against the HUD manifest, hosted privacy policy source, in-app privacy
+  policy source, data-safety notes, console checklist, and English listing
+  files.
 - The publish helper now patches the English Play listing and localized release
   notes during `--commit` unless `--skip-listing` or `--skip-release-notes` is
   supplied.
