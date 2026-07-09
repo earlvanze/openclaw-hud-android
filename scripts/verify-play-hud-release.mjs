@@ -314,12 +314,32 @@ function requireLength(label, value, maxLength) {
   return length;
 }
 
+function requireIncludes(label, value, requiredTerms) {
+  const missing = requiredTerms.filter((term) => !value.includes(term));
+  if (missing.length > 0) {
+    throw new Error(`${label} is missing required Play listing text: ${missing.join(", ")}`);
+  }
+}
+
 async function verifyListing(listingDir, language) {
   const languageDir = join(listingDir, language);
   const title = await readListingFile(join(languageDir, "title.txt"));
   const shortDescription = await readListingFile(join(languageDir, "short-description.txt"));
   const fullDescription = await readListingFile(join(languageDir, "full-description.txt"));
   const releaseNotes = await readListingFile(join(languageDir, "release-notes.txt"));
+  requireIncludes("Short description", shortDescription, ["Samsung DeX", "Asus AirVision M1"]);
+  requireIncludes("Full description", fullDescription, [
+    "Samsung DeX",
+    "Galaxy Fold 7",
+    "AirVision M1",
+    "HID report-path summaries",
+    "per-feature firmware-apply readiness",
+  ]);
+  requireIncludes("Release notes", releaseNotes, [
+    "USB firmware-link diagnostics",
+    "HID report paths",
+    "feature readiness",
+  ]);
 
   return {
     title: requireLength("Listing title", title, 30),
