@@ -111,6 +111,31 @@ function rgbaPng(width, height) {
   ]);
 }
 
+function solidRgbPng(width, height, red, green, blue) {
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 8;
+  ihdr[9] = 2;
+  ihdr[10] = 0;
+  ihdr[11] = 0;
+  ihdr[12] = 0;
+
+  const pixels = Buffer.alloc(width * height * 3);
+  for (let offset = 0; offset < pixels.length; offset += 3) {
+    pixels[offset] = red;
+    pixels[offset + 1] = green;
+    pixels[offset + 2] = blue;
+  }
+
+  return Buffer.concat([
+    pngSignature,
+    chunk("IHDR", ihdr),
+    chunk("IDAT", deflateSync(encodeFilteredScanlines(pixels, width, height, 3), { level: 9 })),
+    chunk("IEND"),
+  ]);
+}
+
 function pngInfo(buffer) {
   if (!buffer.subarray(0, pngSignature.length).equals(pngSignature)) throw new Error("Not a PNG.");
   if (buffer.toString("ascii", 12, 16) !== "IHDR") throw new Error("Missing IHDR.");
@@ -160,10 +185,13 @@ const workDir = await mkdtemp(join(tmpdir(), "openclaw-play-screenshots-"));
 try {
   const rgbaPath = join(workDir, "rgba.png");
   const rgbPath = join(workDir, "rgb.png");
+  const blankPath = join(workDir, "blank.png");
   const validAppContentPath = join(workDir, "app-content-valid.json");
   const invalidAppContentPath = join(workDir, "app-content-invalid.json");
+  const blankAppContentPath = join(workDir, "app-content-blank.json");
 
   await writeFile(rgbaPath, rgbaPng(320, 640));
+  await writeFile(blankPath, solidRgbPng(320, 640, 0, 0, 0));
   runNode(["scripts/convert-play-screenshot.mjs", rgbaPath, rgbPath], "convert-play-screenshot");
 
   const convertedInfo = pngInfo(await readFile(rgbPath));
@@ -198,6 +226,23 @@ try {
   const rejectionText = `${rejected.stdout}\n${rejected.stderr}`;
   if (!rejectionText.includes("PNG must be 24-bit RGB without alpha")) {
     throw new Error(`Final verifier rejected alpha PNG for the wrong reason:\n${rejectionText}`);
+  }
+
+  await writeFinalAppContent(blankAppContentPath, blankPath);
+  const blankRejected = runNode(
+    [
+      "scripts/verify-play-submission-package.mjs",
+      "--app-content",
+      blankAppContentPath,
+      "--final",
+      "--skip-hosted-privacy-url-fetch",
+    ],
+    "final verifier with blank screenshot",
+    1,
+  );
+  const blankRejectionText = `${blankRejected.stdout}\n${blankRejected.stderr}`;
+  if (!blankRejectionText.includes("appears blank or captured from an off display")) {
+    throw new Error(`Final verifier rejected blank PNG for the wrong reason:\n${blankRejectionText}`);
   }
 
   console.log("Play screenshot tool regression tests passed.");

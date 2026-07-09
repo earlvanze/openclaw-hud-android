@@ -3,6 +3,7 @@
 import { readFile, stat } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { inflateSync } from "node:zlib";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
@@ -30,6 +31,8 @@ const expectedSchema = "openclaw.play.app-content";
 const maxScreenshotBytes = 8 * 1024 * 1024;
 const screenshotMinDimension = 320;
 const screenshotMaxDimension = 3840;
+const screenshotMinVisiblePixelRatio = 0.002;
+const screenshotMinGreenAccentPixelRatio = 0.0002;
 const hostedPolicyFetchTimeoutMs = 15_000;
 const pngSignature = Buffer.from("89504e470d0a1a0a", "hex");
 const corePrivacyDisclosures = [
@@ -269,6 +272,92 @@ function readPngInfo(buffer) {
   };
 }
 
+function readPngChunks(buffer) {
+  if (!buffer.subarray(0, pngSignature.length).equals(pngSignature)) return null;
+  const chunks = [];
+  let offset = pngSignature.length;
+  while (offset < buffer.length) {
+    if (offset + 8 > buffer.length) throw new Error("PNG chunk header is truncated.");
+    const length = buffer.readUInt32BE(offset);
+    const type = buffer.toString("ascii", offset + 4, offset + 8);
+    const dataStart = offset + 8;
+    const dataEnd = dataStart + length;
+    if (dataEnd + 4 > buffer.length) throw new Error(`PNG ${type} chunk is truncated.`);
+    chunks.push({ type, data: buffer.subarray(dataStart, dataEnd) });
+    offset = dataEnd + 4;
+    if (type === "IEND") break;
+  }
+  return chunks;
+}
+
+function paethPredictor(left, above, upperLeft) {
+  const estimate = left + above - upperLeft;
+  const leftDistance = Math.abs(estimate - left);
+  const aboveDistance = Math.abs(estimate - above);
+  const upperLeftDistance = Math.abs(estimate - upperLeft);
+  if (leftDistance <= aboveDistance && leftDistance <= upperLeftDistance) return left;
+  if (aboveDistance <= upperLeftDistance) return above;
+  return upperLeft;
+}
+
+function unfilterPngScanlines(raw, width, height, bytesPerPixel) {
+  const stride = width * bytesPerPixel;
+  const expectedSize = height * (stride + 1);
+  if (raw.length !== expectedSize) {
+    throw new Error(`Unexpected PNG scanline size: ${raw.length}, expected ${expectedSize}.`);
+  }
+
+  const decoded = Buffer.alloc(height * stride);
+  for (let row = 0; row < height; row += 1) {
+    const filter = raw[row * (stride + 1)];
+    const sourceOffset = row * (stride + 1) + 1;
+    const targetOffset = row * stride;
+    const previousOffset = targetOffset - stride;
+
+    for (let column = 0; column < stride; column += 1) {
+      const current = raw[sourceOffset + column];
+      const left = column >= bytesPerPixel ? decoded[targetOffset + column - bytesPerPixel] : 0;
+      const above = row > 0 ? decoded[previousOffset + column] : 0;
+      const upperLeft = row > 0 && column >= bytesPerPixel ? decoded[previousOffset + column - bytesPerPixel] : 0;
+      let value;
+
+      if (filter === 0) value = current;
+      else if (filter === 1) value = current + left;
+      else if (filter === 2) value = current + above;
+      else if (filter === 3) value = current + Math.floor((left + above) / 2);
+      else if (filter === 4) value = current + paethPredictor(left, above, upperLeft);
+      else throw new Error(`Unsupported PNG filter type: ${filter}.`);
+
+      decoded[targetOffset + column] = value & 0xff;
+    }
+  }
+  return decoded;
+}
+
+function analyzeRgbPngContent(buffer, info) {
+  if (info.type !== "PNG" || info.bitDepth !== 8 || info.colorType !== 2) return null;
+  const chunks = readPngChunks(buffer);
+  const idat = Buffer.concat(chunks.filter((entry) => entry.type === "IDAT").map((entry) => entry.data));
+  const pixels = unfilterPngScanlines(inflateSync(idat), info.width, info.height, 3);
+  let visiblePixels = 0;
+  let greenAccentPixels = 0;
+  const pixelCount = info.width * info.height;
+
+  for (let offset = 0; offset < pixels.length; offset += 3) {
+    const red = pixels[offset];
+    const green = pixels[offset + 1];
+    const blue = pixels[offset + 2];
+    const luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722;
+    if (luminance >= 12) visiblePixels += 1;
+    if (green >= 48 && green > red + 20 && green > blue + 20) greenAccentPixels += 1;
+  }
+
+  return {
+    visiblePixelRatio: visiblePixels / pixelCount,
+    greenAccentPixelRatio: greenAccentPixels / pixelCount,
+  };
+}
+
 function isJpegStartOfFrame(marker) {
   return (
     (marker >= 0xc0 && marker <= 0xc3) ||
@@ -353,6 +442,20 @@ async function verifyScreenshotFile(screenshot, index, problems) {
     }
     if (info.type === "PNG" && (info.bitDepth !== 8 || info.colorType !== 2)) {
       problems.push(`${label} PNG must be 24-bit RGB without alpha; got bit depth ${info.bitDepth}, color type ${info.colorType}.`);
+    } else if (info.type === "PNG") {
+      const content = analyzeRgbPngContent(bytes, info);
+      if (content) {
+        if (content.visiblePixelRatio < screenshotMinVisiblePixelRatio) {
+          problems.push(
+            `${label} appears blank or captured from an off display: ${(content.visiblePixelRatio * 100).toFixed(3)}% visible pixels.`,
+          );
+        }
+        if (content.greenAccentPixelRatio < screenshotMinGreenAccentPixelRatio) {
+          problems.push(
+            `${label} does not appear to include the OpenClaw green HUD accent: ${(content.greenAccentPixelRatio * 100).toFixed(3)}% green accent pixels.`,
+          );
+        }
+      }
     }
     verifyScreenshotDimensions(info, label, problems);
   } catch (error) {

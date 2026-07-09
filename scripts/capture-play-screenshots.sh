@@ -9,6 +9,9 @@ OUT_DIR="$ROOT_DIR/play/screenshots/phone"
 SERIAL="${ANDROID_SERIAL:-}"
 INSTALL_APK="true"
 WAIT_SECONDS="3"
+SCREENSHOT_DISPLAY_ID="${OPENCLAW_PLAY_SCREENSHOT_DISPLAY_ID:-}"
+ACTIVITY_DISPLAY_ID="${OPENCLAW_PLAY_ACTIVITY_DISPLAY_ID:-0}"
+RESTORE_SCREEN_OFF_POCKET=""
 ACTION_PLAY_REVIEW_DEMO="ai.openclaw.app.action.PLAY_REVIEW_DEMO"
 DESTINATION_EXTRA="destination"
 
@@ -23,7 +26,7 @@ fi
 
 usage() {
     cat <<'USAGE'
-Usage: scripts/capture-play-screenshots.sh [--serial SERIAL] [--apk APK] [--out DIR] [--skip-install] [--wait SECONDS]
+Usage: scripts/capture-play-screenshots.sh [--serial SERIAL] [--apk APK] [--out DIR] [--skip-install] [--wait SECONDS] [--display-id DISPLAY_ID] [--activity-display DISPLAY_ID]
 
 Captures deterministic Google Play phone screenshots from the HUD build by
 launching OpenClaw HUD in review/demo mode. The script captures:
@@ -33,8 +36,20 @@ launching OpenClaw HUD in review/demo mode. The script captures:
 
 The M1 display is not required; screenshots are captured from the phone display.
 Captured screenshots are normalized to 24-bit PNG without alpha for Google Play.
+On foldables, the script passes an explicit screencap display id to avoid
+Samsung's multiple-display warning from corrupting PNG stdout.
+On Samsung devices, the script temporarily disables screen_off_pocket while it
+captures screenshots and restores the original value before exit.
 USAGE
 }
+
+cleanup() {
+    if [[ -n "$RESTORE_SCREEN_OFF_POCKET" ]]; then
+        "$ADB_BIN" -s "$SERIAL" shell settings put system screen_off_pocket "$RESTORE_SCREEN_OFF_POCKET" >/dev/null 2>&1 || true
+    fi
+}
+
+trap cleanup EXIT
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -58,6 +73,14 @@ while [[ $# -gt 0 ]]; do
             WAIT_SECONDS="${2:?missing seconds}"
             shift 2
             ;;
+        --display-id)
+            SCREENSHOT_DISPLAY_ID="${2:?missing display id}"
+            shift 2
+            ;;
+        --activity-display)
+            ACTIVITY_DISPLAY_ID="${2:?missing display id}"
+            shift 2
+            ;;
         -h|--help)
             usage
             exit 0
@@ -78,6 +101,22 @@ if [[ -z "$SERIAL" ]]; then
     echo "No authorized ADB device found. Set ANDROID_SERIAL or pass --serial." >&2
     "$ADB_BIN" devices -l >&2 || true
     exit 1
+fi
+
+restore_value="$("$ADB_BIN" -s "$SERIAL" shell settings get system screen_off_pocket 2>/dev/null | tr -d '\r' || true)"
+if [[ "$restore_value" != "null" && -n "$restore_value" ]]; then
+    RESTORE_SCREEN_OFF_POCKET="$restore_value"
+    "$ADB_BIN" -s "$SERIAL" shell settings put system screen_off_pocket 0 >/dev/null 2>&1 || true
+fi
+
+if [[ -z "$SCREENSHOT_DISPLAY_ID" ]]; then
+    screencap_help="$("$ADB_BIN" -s "$SERIAL" shell screencap -h 2>&1 || true)"
+    SCREENSHOT_DISPLAY_ID="$(
+        printf '%s\n' "$screencap_help" |
+            sed -nE 's/.*defaults to ([0-9]+).*/\1/p' |
+            head -n 1 |
+            tr -d '\r'
+    )"
 fi
 
 if [[ "$INSTALL_APK" == "true" && -z "$APK_PATH" ]]; then
@@ -117,14 +156,33 @@ capture_destination() {
     trap 'rm -f "$raw_path"' RETURN
 
     echo "Launching demo destination: $destination"
+    "$ADB_BIN" -s "$SERIAL" shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
+    "$ADB_BIN" -s "$SERIAL" shell wm dismiss-keyguard >/dev/null 2>&1 || true
+    "$ADB_BIN" -s "$SERIAL" shell cmd statusbar collapse >/dev/null 2>&1 || true
+    "$ADB_BIN" -s "$SERIAL" shell input swipe 540 2200 540 600 500 >/dev/null 2>&1 || true
     "$ADB_BIN" -s "$SERIAL" shell am force-stop "$PACKAGE_NAME" || true
-    "$ADB_BIN" -s "$SERIAL" shell am start \
-        --display 0 \
+    if ! "$ADB_BIN" -s "$SERIAL" shell am start \
+        --display "$ACTIVITY_DISPLAY_ID" \
         -a "$ACTION_PLAY_REVIEW_DEMO" \
         -n "$COMPONENT" \
-        --es "$DESTINATION_EXTRA" "$destination" >/dev/null
+        --es "$DESTINATION_EXTRA" "$destination" >/dev/null; then
+        if [[ "$ACTIVITY_DISPLAY_ID" != "0" ]]; then
+            echo "Launch on display $ACTIVITY_DISPLAY_ID failed; retrying display 0." >&2
+            "$ADB_BIN" -s "$SERIAL" shell am start \
+                --display 0 \
+                -a "$ACTION_PLAY_REVIEW_DEMO" \
+                -n "$COMPONENT" \
+                --es "$DESTINATION_EXTRA" "$destination" >/dev/null
+        else
+            exit 1
+        fi
+    fi
     sleep "$WAIT_SECONDS"
-    "$ADB_BIN" -s "$SERIAL" exec-out screencap -p > "$raw_path"
+    if [[ -n "$SCREENSHOT_DISPLAY_ID" ]]; then
+        "$ADB_BIN" -s "$SERIAL" exec-out screencap -p -d "$SCREENSHOT_DISPLAY_ID" > "$raw_path"
+    else
+        "$ADB_BIN" -s "$SERIAL" exec-out screencap -p > "$raw_path"
+    fi
     node "$ROOT_DIR/scripts/convert-play-screenshot.mjs" "$raw_path" "$output_path"
     if [[ ! -s "$output_path" ]]; then
         echo "Screenshot is empty: $output_path" >&2
