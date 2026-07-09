@@ -9,6 +9,15 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
 const releaseOutputDir = join(androidDir, "build", "release-bundles");
+const gradleHudBundlePath = join(
+  androidDir,
+  "app",
+  "build",
+  "outputs",
+  "bundle",
+  "hudRelease",
+  "app-hud-release.aab",
+);
 const defaultManifestPath = join(
   androidDir,
   "app",
@@ -85,7 +94,7 @@ function parseArgs(argv) {
           "",
           "Verifies the latest signed HUD AAB, packaged HUD manifest, and Play listing copy.",
           "Defaults:",
-          "  --bundle       newest build/release-bundles/*-hud-release.aab",
+          "  --bundle       newest build/release-bundles/*-hud-release.aab or Gradle's direct hudRelease output",
           "  --manifest     packaged hudRelease AndroidManifest.xml",
           "  --listing-dir  play/listings",
           "  --language     en-US",
@@ -131,6 +140,11 @@ async function latestHudBundle() {
     const info = await stat(path);
     candidates.push({ path, mtimeMs: info.mtimeMs });
   }
+  await stat(gradleHudBundlePath)
+    .then((info) => {
+      if (info.isFile()) candidates.push({ path: gradleHudBundlePath, mtimeMs: info.mtimeMs });
+    })
+    .catch(() => {});
   candidates.sort((a, b) => b.mtimeMs - a.mtimeMs);
   return candidates[0]?.path ?? null;
 }
@@ -152,7 +166,14 @@ function runChecked(command, args, label) {
 }
 
 async function verifyBundle(bundlePath, skipSignature) {
-  if (!bundlePath) throw new Error(`No HUD release bundle found in ${releaseOutputDir}`);
+  if (!bundlePath) {
+    throw new Error(
+      [
+        `No HUD release bundle found in ${releaseOutputDir} or ${gradleHudBundlePath}.`,
+        "Run ./gradlew :app:bundleHudRelease or node scripts/build-release-aab.mjs --flavor hud.",
+      ].join(" "),
+    );
+  }
   const info = await stat(bundlePath);
   if (info.size <= 0) throw new Error(`HUD bundle is empty: ${bundlePath}`);
   runChecked("unzip", ["-l", bundlePath, "base/manifest/AndroidManifest.xml"], "AAB manifest check");

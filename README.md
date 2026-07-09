@@ -252,8 +252,9 @@ node scripts/publish-play-internal.mjs --auth gcloud --commit
 ```
 
 The publish helper defaults to package `ai.openclaw.app.hud`, track `internal`,
-release status `draft`, and the newest
-`build/release-bundles/*-hud-release.aab`. It validates the English Play
+release status `draft`, and the newest HUD AAB from either
+`build/release-bundles/*-hud-release.aab` or Gradle's direct
+`app/build/outputs/bundle/hudRelease/app-hud-release.aab` output. It validates the English Play
 listing files, creates a Play edit, uploads the AAB, patches the localized
 store listing, attaches localized release notes to the internal-track release,
 and commits only when `--commit` is supplied. Commit mode refuses to create a

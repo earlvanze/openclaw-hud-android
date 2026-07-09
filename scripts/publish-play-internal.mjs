@@ -10,6 +10,15 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
 const releaseOutputDir = join(androidDir, "build", "release-bundles");
+const gradleHudBundlePath = join(
+  androidDir,
+  "app",
+  "build",
+  "outputs",
+  "bundle",
+  "hudRelease",
+  "app-hud-release.aab",
+);
 const defaultListingDir = join(androidDir, "play", "listings");
 const androidPublisherScope = "https://www.googleapis.com/auth/androidpublisher";
 const defaultAllowedGcloudAccounts = ["earlvanze@gmail.com", "earl@earlbnb.com"];
@@ -62,7 +71,8 @@ function parseArgs(argv) {
         [
           "Usage: node scripts/publish-play-internal.mjs [--commit] [--bundle path] [--package ai.openclaw.app.hud]",
           "",
-          "Defaults to a dry-run for the latest HUD AAB in build/release-bundles.",
+          "Defaults to a dry-run for the latest HUD AAB in build/release-bundles",
+          "or Gradle's direct hudRelease output.",
           "Auth modes:",
           "  --auth auto             Use service-account JSON when configured, otherwise gcloud.",
           "  --auth service-account  Require GOOGLE_PLAY_SERVICE_ACCOUNT_JSON, GOOGLE_APPLICATION_CREDENTIALS, or --service-account.",
@@ -100,6 +110,11 @@ async function latestHudBundle() {
     const info = await stat(path);
     candidates.push({ path, mtimeMs: info.mtimeMs });
   }
+  await stat(gradleHudBundlePath)
+    .then((info) => {
+      if (info.isFile()) candidates.push({ path: gradleHudBundlePath, mtimeMs: info.mtimeMs });
+    })
+    .catch(() => {});
   candidates.sort((a, b) => b.mtimeMs - a.mtimeMs);
   return candidates[0]?.path ?? null;
 }
@@ -324,7 +339,14 @@ function verifyFinalSubmissionReadinessBeforeUpload() {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const bundlePath = args.bundle ?? (await latestHudBundle());
-  if (!bundlePath) throw new Error(`No HUD release bundle found in ${releaseOutputDir}`);
+  if (!bundlePath) {
+    throw new Error(
+      [
+        `No HUD release bundle found in ${releaseOutputDir} or ${gradleHudBundlePath}.`,
+        "Run ./gradlew :app:bundleHudRelease or node scripts/build-release-aab.mjs --flavor hud.",
+      ].join(" "),
+    );
+  }
   const bundleInfo = await stat(bundlePath);
   const playListing = await loadPlayListing(args);
 
