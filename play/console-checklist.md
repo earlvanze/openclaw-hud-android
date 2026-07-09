@@ -7,6 +7,9 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 - Create the app in Google Play Console with package name `ai.openclaw.app.hud`.
 - Enable Google Play Android Developer API for the linked Google Cloud project.
 - Grant the publishing service account access in Play Console.
+- For OAuth publishing, run `gcloud config set account earlvanze@gmail.com` or
+  `gcloud config set account earl@earlbnb.com` before preflight/commit. The
+  publish helper rejects other active gcloud accounts by default.
 - Complete App content forms, including Data safety, Ads, App access, Content rating, Target audience, and Data deletion.
 - Use the copy in `play/listings/en-US/` for the initial English listing.
 - Use `play/privacy-policy.md` as the hosted privacy-policy source; the same
@@ -44,7 +47,8 @@ Current local status:
   SMS, Call Log, camera, location, contacts, calendar, or media-library
   permissions.
 - Google Play Android Developer API is enabled for the active gcloud project.
-- API preflight reaches Google Play with gcloud auth, but returns
+- With an authorized OAuth account active, API preflight should reach Google
+  Play but still return
   `Package not found: ai.openclaw.app.hud`.
 - API publishing cannot proceed until the Play Console app exists for
   `ai.openclaw.app.hud`. The Android Publisher API can create edits and upload

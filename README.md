@@ -257,7 +257,12 @@ listing files, creates a Play edit, uploads the AAB, patches the localized
 store listing, attaches localized release notes to the internal-track release,
 and commits only when `--commit` is supplied. Auth can come from a Play Console
 service-account JSON file or the active `gcloud auth print-access-token`
-account. Store listing and policy prep files live under `play/`. Use
+account. For `--auth gcloud`, the helper restricts publishing to
+`earlvanze@gmail.com` or `earl@earlbnb.com` by default so an accidental active
+Cloud account cannot publish the app; run `gcloud config set account <email>`
+before `--preflight` or `--commit`. Set `GOOGLE_PLAY_ALLOWED_ACCOUNTS` or pass
+`--allowed-account` only when a different authorized Play publisher should be
+accepted. Store listing and policy prep files live under `play/`. Use
 `--skip-listing` or `--skip-release-notes` for bundle-only edits. The Play
 Console app must already exist for `ai.openclaw.app.hud`; follow
 `play/console-checklist.md` before the first commit.
