@@ -298,6 +298,11 @@ ANDROID_HOME=/home/digit/android-sdk ANDROID_SDK_ROOT=/home/digit/android-sdk \
 node scripts/test-play-screenshot-tools.mjs
 ```
 
+On Samsung foldables, pass `--display-id <physical-display-id>` if plain
+`screencap` prints a multiple-display warning. The capture script also accepts
+`--activity-display <logical-display-id>` and temporarily disables Samsung
+`screen_off_pocket` while capturing, restoring the original setting on exit.
+
 The script installs the HUD debug APK, marks the app ready for review/demo mode,
 launches deterministic HUD and Settings states on the phone display, normalizes
 Android screencaps to 24-bit PNG without alpha, and writes
@@ -308,7 +313,11 @@ Console, record their local paths, names, or URLs in
 `play/app-content-answers.json` `finalSubmission.phoneScreenshots`.
 `test-play-screenshot-tools.mjs` is the offline regression gate for this path:
 it converts a synthetic alpha PNG, verifies the converted asset passes the final
-submission checker, and verifies the checker rejects unconverted alpha PNGs.
+submission checker, verifies the checker rejects unconverted alpha PNGs, and
+confirms blank/off-display captures are rejected. In final mode, local PNG
+screenshots must be Play-sized, 24-bit RGB, visibly nonblank, and include the
+green OpenClaw HUD accent so Samsung lock/protection overlays do not pass as
+release screenshots.
 
 `verify-play-hud-release.mjs` is the offline-safe local gate for the HUD/M1
 Play target. It verifies the newest signed HUD AAB, confirms the generated
