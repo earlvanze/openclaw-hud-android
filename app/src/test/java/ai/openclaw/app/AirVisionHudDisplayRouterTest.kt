@@ -80,4 +80,54 @@ class AirVisionHudDisplayRouterTest {
             AirVisionHudDisplayTarget.fromRawValue("unknown"),
         )
     }
+
+    @Test
+    fun choose_prefersPresentationEligibleDisplays() {
+        val candidates =
+            listOf(
+                AirVisionHudDisplayCandidate(
+                    displayId = 9,
+                    name = "ASUS AirVision M1 mirrored desktop",
+                    widthPx = 3840,
+                    heightPx = 2160,
+                    isPresentation = false,
+                ),
+                AirVisionHudDisplayCandidate(
+                    displayId = 2,
+                    name = "Samsung DeX Presentation",
+                    widthPx = 1920,
+                    heightPx = 1080,
+                    isPresentation = true,
+                ),
+            )
+
+        val selected = AirVisionHudDisplayRouter.choose(candidates, AirVisionHudDisplayTarget.AirVisionPreferred)
+
+        assertEquals(2, selected?.displayId)
+    }
+
+    @Test
+    fun choose_fallsBackWhenNoPresentationEligibleDisplaysExist() {
+        val candidates =
+            listOf(
+                AirVisionHudDisplayCandidate(
+                    displayId = 9,
+                    name = "ASUS AirVision M1",
+                    widthPx = 1920,
+                    heightPx = 1080,
+                    isPresentation = false,
+                ),
+                AirVisionHudDisplayCandidate(
+                    displayId = 2,
+                    name = "Generic HDMI",
+                    widthPx = 3840,
+                    heightPx = 2160,
+                    isPresentation = false,
+                ),
+            )
+
+        val selected = AirVisionHudDisplayRouter.choose(candidates, AirVisionHudDisplayTarget.AirVisionPreferred)
+
+        assertEquals(9, selected?.displayId)
+    }
 }

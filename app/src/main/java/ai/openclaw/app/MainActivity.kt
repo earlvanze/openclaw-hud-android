@@ -243,11 +243,16 @@ class MainActivity : ComponentActivity() {
             return
         }
         val displayManager = getSystemService(DisplayManager::class.java) ?: return
+        val presentationDisplayIds =
+            displayManager
+                .getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
+                .map { it.displayId }
+                .toSet()
         val externalDisplays =
             displayManager.displays.filter { it.displayId != Display.DEFAULT_DISPLAY && it.isValid }
         val targetCandidate =
             AirVisionHudDisplayRouter.choose(
-                candidates = externalDisplays.map { it.toHudDisplayCandidate() },
+                candidates = externalDisplays.map { it.toHudDisplayCandidate(presentationDisplayIds) },
                 target = viewModel.airVisionHudDisplayTarget.value,
             )
         val targetDisplay =
@@ -283,12 +288,13 @@ class MainActivity : ComponentActivity() {
             }
     }
 
-    private fun Display.toHudDisplayCandidate(): AirVisionHudDisplayCandidate =
+    private fun Display.toHudDisplayCandidate(presentationDisplayIds: Set<Int>): AirVisionHudDisplayCandidate =
         AirVisionHudDisplayCandidate(
             displayId = displayId,
             name = name.orEmpty(),
             widthPx = mode?.physicalWidth ?: 0,
             heightPx = mode?.physicalHeight ?: 0,
+            isPresentation = displayId in presentationDisplayIds,
         )
 
     private fun setupHudMediaSession() {

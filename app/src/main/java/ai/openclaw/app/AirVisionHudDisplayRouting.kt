@@ -21,6 +21,7 @@ data class AirVisionHudDisplayCandidate(
     val name: String,
     val widthPx: Int = 0,
     val heightPx: Int = 0,
+    val isPresentation: Boolean = true,
 ) {
     val areaPx: Long
         get() = widthPx.coerceAtLeast(0).toLong() * heightPx.coerceAtLeast(0).toLong()
@@ -32,21 +33,22 @@ object AirVisionHudDisplayRouter {
         target: AirVisionHudDisplayTarget,
     ): AirVisionHudDisplayCandidate? {
         if (candidates.isEmpty()) return null
+        val eligibleCandidates = candidates.filter { it.isPresentation }.ifEmpty { candidates }
         return when (target) {
             AirVisionHudDisplayTarget.AirVisionPreferred ->
-                candidates.maxWithOrNull(
+                eligibleCandidates.maxWithOrNull(
                     compareBy<AirVisionHudDisplayCandidate> { scoreAirVisionPreferred(it) }
                         .thenBy { it.areaPx }
                         .thenBy { it.displayId },
                 )
             AirVisionHudDisplayTarget.LargestExternal ->
-                candidates.maxWithOrNull(
+                eligibleCandidates.maxWithOrNull(
                     compareBy<AirVisionHudDisplayCandidate> { it.areaPx }
                         .thenBy { scoreAirVisionPreferred(it) }
                         .thenBy { it.displayId },
                 )
-            AirVisionHudDisplayTarget.FirstExternal -> candidates.minByOrNull { it.displayId }
-            AirVisionHudDisplayTarget.LastExternal -> candidates.maxByOrNull { it.displayId }
+            AirVisionHudDisplayTarget.FirstExternal -> eligibleCandidates.minByOrNull { it.displayId }
+            AirVisionHudDisplayTarget.LastExternal -> eligibleCandidates.maxByOrNull { it.displayId }
         }
     }
 

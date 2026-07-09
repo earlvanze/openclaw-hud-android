@@ -178,10 +178,14 @@ mode renders a deterministic navigation, chat, mic, speaker, and caption sample
 in the HUD so tutorials, screenshots, and fit checks can be performed without a
 live gateway or notification stream.
 
-HUD Display Target lives in Settings -> AirVision M1. AirVision Preferred keeps
-the default behavior of selecting displays named like ASUS AirVision M1. Largest
-External, First External, and Last External provide manual fallbacks for Samsung
-DeX or adapter setups where Android exposes multiple presentation displays.
+HUD Display Target lives in Settings -> AirVision M1. The app now prefers
+Android displays exposed through `DISPLAY_CATEGORY_PRESENTATION`, which keeps
+the phone controls on display 0 while the HUD owns the M1 presentation. AirVision
+Preferred keeps the default behavior of selecting presentation displays named
+like ASUS AirVision M1. Largest External, First External, and Last External
+provide manual fallbacks for Samsung DeX or adapter setups where Android exposes
+multiple presentation displays. If Android does not expose any presentation
+targets, the router falls back to the older non-default display list.
 
 Custom profile names and copy-current-to-custom actions live under Viewing Mode
 in Settings -> AirVision M1. The labels rename the saved Custom 1 and Custom 2
