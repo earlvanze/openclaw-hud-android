@@ -243,6 +243,7 @@ Google Play internal-track publishing helper:
 ```bash
 node scripts/verify-play-hud-release.mjs
 node scripts/verify-play-submission-package.mjs
+node scripts/verify-play-submission-package.mjs --final
 node scripts/publish-play-internal.mjs --dry-run
 node scripts/publish-play-internal.mjs --auth gcloud --preflight
 GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=/path/to/service-account.json \
@@ -284,6 +285,14 @@ policy, in-app privacy policy source, data-safety notes, console checklist, and
 English listing files. It is a drift guard for Play Console form prep; the
 final hosted privacy-policy URL, screenshots, tester access, and any reviewer
 setup codes still belong in Play Console.
+
+Use `node scripts/verify-play-submission-package.mjs --final` only when the
+external Play Console artifacts have been filled into
+`play/app-content-answers.json` under `finalSubmission`. The normal verifier is
+the local draft gate; `--final` is expected to fail until the Play app exists,
+the hosted privacy policy URL is public, at least two phone screenshots are
+recorded, internal testers are configured, and reviewer access instructions have
+been entered in Play Console.
 
 ## Kotlin Lint + Format
 

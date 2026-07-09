@@ -60,6 +60,7 @@ function parseArgs(argv) {
     dataSafetyNotes: defaultDataSafetyNotesPath,
     consoleChecklist: defaultConsoleChecklistPath,
     listingDir: defaultListingDir,
+    final: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -72,6 +73,7 @@ function parseArgs(argv) {
     else if (arg === "--data-safety-notes") args.dataSafetyNotes = resolve(argv[++index]);
     else if (arg === "--console-checklist") args.consoleChecklist = resolve(argv[++index]);
     else if (arg === "--listing-dir") args.listingDir = resolve(argv[++index]);
+    else if (arg === "--final") args.final = true;
     else if (arg === "--help" || arg === "-h") {
       console.log(
         [
@@ -79,6 +81,9 @@ function parseArgs(argv) {
           "",
           "Checks the local Google Play submission packet against the generated HUD manifest,",
           "privacy policy, in-app privacy policy, data-safety notes, console checklist, and English listing files.",
+          "",
+          "Add --final to require external Play Console readiness fields such as hosted privacy URL,",
+          "phone screenshots, reviewer access, tester access, and app creation status.",
         ].join("\n"),
       );
       process.exit(0);
@@ -167,6 +172,45 @@ function requireBoolean(value, expected, label) {
   if (value !== expected) throw new Error(`${label} expected ${expected}, got ${value}`);
 }
 
+function isHttpsUrl(value) {
+  if (typeof value !== "string" || value.trim() === "") return false;
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function verifyFinalSubmissionReadiness(appContent) {
+  const finalSubmission = appContent.finalSubmission ?? {};
+  const problems = [];
+  if (!isHttpsUrl(finalSubmission.hostedPrivacyPolicyUrl)) {
+    problems.push("finalSubmission.hostedPrivacyPolicyUrl must be a public https:// URL.");
+  }
+  if (finalSubmission.appCreatedInPlayConsole !== true) {
+    problems.push("finalSubmission.appCreatedInPlayConsole must be true after ai.openclaw.app.hud exists in Play Console.");
+  }
+  if (finalSubmission.internalTestersConfiguredInPlayConsole !== true) {
+    problems.push("finalSubmission.internalTestersConfiguredInPlayConsole must be true before internal-track release.");
+  }
+  if (finalSubmission.reviewerAccessConfiguredInPlayConsole !== true) {
+    problems.push("finalSubmission.reviewerAccessConfiguredInPlayConsole must be true after App access review instructions/codes are entered in Play Console.");
+  }
+  const phoneScreenshots = Array.isArray(finalSubmission.phoneScreenshots) ? finalSubmission.phoneScreenshots : [];
+  if (phoneScreenshots.length < 2) {
+    problems.push("finalSubmission.phoneScreenshots must list at least two Play Console phone screenshots.");
+  }
+  for (const screenshot of phoneScreenshots) {
+    if (typeof screenshot !== "string" || screenshot.trim() === "") {
+      problems.push("finalSubmission.phoneScreenshots entries must be non-empty strings.");
+      break;
+    }
+  }
+  if (problems.length > 0) {
+    throw new Error(["Final Play submission readiness failed:", ...problems.map((problem) => `- ${problem}`)].join("\n"));
+  }
+}
+
 function verifyAppContentShape(appContent) {
   if (appContent.schema !== expectedSchema) throw new Error(`Unsupported app-content schema: ${appContent.schema}`);
   if (appContent.version !== 1) throw new Error(`Unsupported app-content version: ${appContent.version}`);
@@ -250,6 +294,7 @@ async function main() {
 
   await verifyListing(args.listingDir);
   verifyAppContentShape(appContent);
+  if (args.final) verifyFinalSubmissionReadiness(appContent);
   const permissionCount = verifyManifestAgainstAppContent(manifestXml, appContent);
 
   requireIncludes("Privacy policy", privacyPolicy, [
@@ -297,7 +342,7 @@ async function main() {
   console.log(`Privacy policy: ${args.privacyPolicy}`);
   console.log(`In-app privacy policy: ${args.inAppPrivacyPolicy}`);
   console.log(`App-content answers: ${args.appContent}`);
-  console.log("Play submission package verifier passed.");
+  console.log(`Play submission package verifier passed (${args.final ? "final" : "draft"} mode).`);
 }
 
 await main().catch((error) => {

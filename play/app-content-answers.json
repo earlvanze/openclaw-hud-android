@@ -87,5 +87,13 @@
     "submissionVerifier": "node scripts/verify-play-submission-package.mjs",
     "ciWorkflow": ".github/workflows/android-hud.yml",
     "demoMode": "Settings > AirVision M1 > App Preferences > Demo Mode"
+  },
+  "finalSubmission": {
+    "hostedPrivacyPolicyUrl": null,
+    "appCreatedInPlayConsole": false,
+    "internalTestersConfiguredInPlayConsole": false,
+    "reviewerAccessConfiguredInPlayConsole": false,
+    "phoneScreenshots": [],
+    "notes": "Fill these external Play Console artifacts before running scripts/verify-play-submission-package.mjs --final and publish-play-internal.mjs --commit."
   }
 }

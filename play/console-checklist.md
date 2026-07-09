@@ -20,6 +20,9 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
   updating Play Console App content answers.
 - Upload `build/release-bundles/openclaw-2026.7.9-hud-release.aab` to the internal track first.
 - Keep the initial release status as `draft` until screenshots, policy forms, and tester access are verified.
+- Fill `play/app-content-answers.json` `finalSubmission` fields, then run
+  `node scripts/verify-play-submission-package.mjs --final` before the first
+  `--commit`.
 
 Current local status:
 
@@ -36,6 +39,10 @@ Current local status:
 - `play/app-content-answers.json` contains the draft App content answers for
   Privacy policy, Ads, App access, Target audience, Content rating, Data
   deletion, and Data safety. Keep it aligned with the final Play Console forms.
+- `play/app-content-answers.json` also tracks final external readiness fields
+  for hosted privacy URL, app creation, internal testers, reviewer access, and
+  phone screenshots. These are intentionally incomplete until Play Console is
+  configured.
 - `node scripts/verify-play-submission-package.mjs` checks the App content
   packet against the HUD manifest, hosted privacy policy source, in-app privacy
   policy source, data-safety notes, console checklist, and English listing
