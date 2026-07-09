@@ -246,13 +246,15 @@ node scripts/publish-play-internal.mjs --auth gcloud --commit
 
 The publish helper defaults to package `ai.openclaw.app.hud`, track `internal`,
 release status `draft`, and the newest
-`build/release-bundles/*-hud-release.aab`. It creates a Play edit, uploads the
-AAB, assigns the internal track, and commits only when `--commit` is supplied.
-Auth can come from a Play Console service-account JSON file or the active
-`gcloud auth print-access-token` account. Store listing and policy prep files
-live under `play/`. The Play Console app must already exist for
-`ai.openclaw.app.hud`; follow `play/console-checklist.md` before the first
-commit.
+`build/release-bundles/*-hud-release.aab`. It validates the English Play
+listing files, creates a Play edit, uploads the AAB, patches the localized
+store listing, attaches localized release notes to the internal-track release,
+and commits only when `--commit` is supplied. Auth can come from a Play Console
+service-account JSON file or the active `gcloud auth print-access-token`
+account. Store listing and policy prep files live under `play/`. Use
+`--skip-listing` or `--skip-release-notes` for bundle-only edits. The Play
+Console app must already exist for `ai.openclaw.app.hud`; follow
+`play/console-checklist.md` before the first commit.
 
 ## Kotlin Lint + Format
 

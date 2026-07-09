@@ -21,6 +21,11 @@ Current local status:
   `5e8a395313cb50614ed8f6da06733ad1cfb1d040af613b488b5644cd7674066e`
 - `lintHudRelease` passes.
 - `testHudDebugUnitTest` passes.
+- `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
+  English listing copy, and release notes character limits.
+- The publish helper now patches the English Play listing and localized release
+  notes during `--commit` unless `--skip-listing` or `--skip-release-notes` is
+  supplied.
 - HUD release manifest package is `ai.openclaw.app.hud` and does not request
   SMS, Call Log, camera, location, contacts, calendar, or media-library
   permissions.

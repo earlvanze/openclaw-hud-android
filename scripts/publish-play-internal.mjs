@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
 const releaseOutputDir = join(androidDir, "build", "release-bundles");
+const defaultListingDir = join(androidDir, "play", "listings");
 const androidPublisherScope = "https://www.googleapis.com/auth/androidpublisher";
 
 function parseArgs(argv) {
@@ -17,6 +18,10 @@ function parseArgs(argv) {
     packageName: "ai.openclaw.app.hud",
     track: "internal",
     status: "draft",
+    language: "en-US",
+    listingDir: defaultListingDir,
+    uploadListing: true,
+    uploadReleaseNotes: true,
     commit: false,
     preflight: false,
     bundle: null,
@@ -29,9 +34,13 @@ function parseArgs(argv) {
     if (arg === "--package") args.packageName = argv[++index];
     else if (arg === "--track") args.track = argv[++index];
     else if (arg === "--status") args.status = argv[++index];
+    else if (arg === "--language") args.language = argv[++index];
+    else if (arg === "--listing-dir") args.listingDir = argv[++index];
     else if (arg === "--bundle") args.bundle = argv[++index];
     else if (arg === "--service-account") args.serviceAccount = argv[++index];
     else if (arg === "--auth") args.auth = argv[++index];
+    else if (arg === "--skip-listing") args.uploadListing = false;
+    else if (arg === "--skip-release-notes") args.uploadReleaseNotes = false;
     else if (arg === "--commit") args.commit = true;
     else if (arg === "--preflight") args.preflight = true;
     else if (arg === "--dry-run") args.commit = false;
@@ -45,6 +54,9 @@ function parseArgs(argv) {
           "  --auth auto             Use service-account JSON when configured, otherwise gcloud.",
           "  --auth service-account  Require GOOGLE_PLAY_SERVICE_ACCOUNT_JSON, GOOGLE_APPLICATION_CREDENTIALS, or --service-account.",
           "  --auth gcloud           Use `gcloud auth print-access-token` from the active account.",
+          "",
+          "Listing files default to play/listings/en-US/{title,short-description,full-description,release-notes}.txt.",
+          "Use --skip-listing or --skip-release-notes to upload only the bundle/track changes.",
           "",
           "Use --preflight to verify Play API package/access state without uploading a bundle.",
         ].join("\n"),
@@ -73,6 +85,51 @@ async function latestHudBundle() {
   }
   candidates.sort((a, b) => b.mtimeMs - a.mtimeMs);
   return candidates[0]?.path ?? null;
+}
+
+function charCount(value) {
+  return Array.from(value).length;
+}
+
+function trimTrailingNewline(value) {
+  return value.replace(/\r\n/gu, "\n").replace(/\n+$/u, "");
+}
+
+async function readTextIfEnabled(path, enabled) {
+  if (!enabled) return null;
+  return trimTrailingNewline(await readFile(path, "utf8"));
+}
+
+function requireLength(label, value, maxLength) {
+  const length = charCount(value);
+  if (length > maxLength) {
+    throw new Error(`${label} is ${length} characters; Google Play limit is ${maxLength}.`);
+  }
+  return length;
+}
+
+async function loadPlayListing(args) {
+  const languageDir = join(args.listingDir, args.language);
+  const listing =
+    args.uploadListing
+      ? {
+          title: await readTextIfEnabled(join(languageDir, "title.txt"), true),
+          shortDescription: await readTextIfEnabled(join(languageDir, "short-description.txt"), true),
+          fullDescription: await readTextIfEnabled(join(languageDir, "full-description.txt"), true),
+        }
+      : null;
+  const releaseNotes = await readTextIfEnabled(join(languageDir, "release-notes.txt"), args.uploadReleaseNotes);
+
+  const lengths = {};
+  if (listing) {
+    lengths.title = requireLength("Listing title", listing.title, 30);
+    lengths.shortDescription = requireLength("Short description", listing.shortDescription, 80);
+    lengths.fullDescription = requireLength("Full description", listing.fullDescription, 4000);
+  }
+  if (releaseNotes !== null) {
+    lengths.releaseNotes = requireLength("Release notes", releaseNotes, 500);
+  }
+  return { listing, releaseNotes, lengths };
 }
 
 async function loadServiceAccount(path) {
@@ -182,6 +239,17 @@ async function uploadBundle(token, packageName, editId, bundlePath) {
   return response.json();
 }
 
+async function patchListing(token, baseUrl, editId, language, listing) {
+  return googleJson(
+    token,
+    `${baseUrl}/edits/${encodeURIComponent(editId)}/listings/${encodeURIComponent(language)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(listing),
+    },
+  );
+}
+
 async function deleteEdit(token, baseUrl, editId) {
   await googleJson(token, `${baseUrl}/edits/${encodeURIComponent(editId)}:delete`, { method: "DELETE" }).catch(() => {});
 }
@@ -191,11 +259,25 @@ async function main() {
   const bundlePath = args.bundle ?? (await latestHudBundle());
   if (!bundlePath) throw new Error(`No HUD release bundle found in ${releaseOutputDir}`);
   const bundleInfo = await stat(bundlePath);
+  const playListing = await loadPlayListing(args);
 
   console.log(`Package: ${args.packageName}`);
   console.log(`Track: ${args.track}`);
   console.log(`Release status: ${args.status}`);
+  console.log(`Language: ${args.language}`);
   console.log(`Bundle: ${bundlePath} (${bundleInfo.size} bytes)`);
+  if (playListing.listing) {
+    console.log(
+      `Listing: title ${playListing.lengths.title}/30, short ${playListing.lengths.shortDescription}/80, full ${playListing.lengths.fullDescription}/4000`,
+    );
+  } else {
+    console.log("Listing: skipped");
+  }
+  if (playListing.releaseNotes !== null) {
+    console.log(`Release notes: ${playListing.lengths.releaseNotes}/500`);
+  } else {
+    console.log("Release notes: skipped");
+  }
   console.log(`Mode: ${args.preflight ? "preflight" : args.commit ? "commit" : "dry-run"}`);
 
   if (!args.commit && !args.preflight) {
@@ -221,17 +303,30 @@ async function main() {
     if (!versionCode) throw new Error(`Bundle upload did not return versionCode for ${basename(bundlePath)}`);
     console.log(`Uploaded bundle versionCode: ${versionCode}`);
 
+    if (playListing.listing) {
+      await patchListing(token, baseUrl, edit.id, args.language, playListing.listing);
+      console.log(`Patched ${args.language} store listing`);
+    }
+
+    const release = {
+      name: basename(bundlePath).replace(/\.aab$/u, ""),
+      versionCodes: [String(versionCode)],
+      status: args.status,
+    };
+    if (playListing.releaseNotes !== null) {
+      release.releaseNotes = [
+        {
+          language: args.language,
+          text: playListing.releaseNotes,
+        },
+      ];
+    }
+
     await googleJson(token, `${baseUrl}/edits/${encodeURIComponent(edit.id)}/tracks/${encodeURIComponent(args.track)}`, {
       method: "PUT",
       body: JSON.stringify({
         track: args.track,
-        releases: [
-          {
-            name: basename(bundlePath).replace(/\.aab$/u, ""),
-            versionCodes: [String(versionCode)],
-            status: args.status,
-          },
-        ],
+        releases: [release],
       }),
     });
     await googleJson(token, `${baseUrl}/edits/${encodeURIComponent(edit.id)}:commit`, { method: "POST", body: "{}" });
