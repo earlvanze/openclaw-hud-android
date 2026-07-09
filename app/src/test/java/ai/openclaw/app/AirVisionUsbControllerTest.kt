@@ -1,5 +1,6 @@
 package ai.openclaw.app
 
+import android.hardware.usb.UsbConstants
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -60,6 +61,32 @@ class AirVisionUsbControllerTest {
                 hidControlInterface = true,
             ).statusText,
         )
+        assertEquals(
+            "M1 HID input reports detected. Writable firmware controls still need ASUS protocol support.",
+            AirVisionUsbState(
+                connected = true,
+                permissionGranted = true,
+                interfaces =
+                    listOf(
+                        AirVisionUsbInterfaceInfo(
+                            id = 2,
+                            interfaceClass = UsbConstants.USB_CLASS_HID,
+                            interfaceSubclass = 0,
+                            interfaceProtocol = 0,
+                            endpoints =
+                                listOf(
+                                    AirVisionUsbEndpointInfo(
+                                        address = 0x81,
+                                        direction = UsbConstants.USB_DIR_IN,
+                                        type = UsbConstants.USB_ENDPOINT_XFER_INT,
+                                        maxPacketSize = 32,
+                                        interval = 8,
+                                    ),
+                                ),
+                        ),
+                    ),
+            ).statusText,
+        )
     }
 
     @Test
@@ -118,5 +145,82 @@ class AirVisionUsbControllerTest {
             """.trimIndent(),
             state.deviceInfoText,
         )
+    }
+
+    @Test
+    fun firmwareCapabilities_summarizeReadableAndWritableHidReportPaths() {
+        val state =
+            AirVisionUsbState(
+                interfaces =
+                    listOf(
+                        AirVisionUsbInterfaceInfo(
+                            id = 1,
+                            interfaceClass = UsbConstants.USB_CLASS_HID,
+                            interfaceSubclass = 0,
+                            interfaceProtocol = 0,
+                            endpoints =
+                                listOf(
+                                    AirVisionUsbEndpointInfo(
+                                        address = 0x81,
+                                        direction = UsbConstants.USB_DIR_IN,
+                                        type = UsbConstants.USB_ENDPOINT_XFER_INT,
+                                        maxPacketSize = 32,
+                                        interval = 4,
+                                    ),
+                                ),
+                        ),
+                        AirVisionUsbInterfaceInfo(
+                            id = 2,
+                            interfaceClass = UsbConstants.USB_CLASS_HID,
+                            interfaceSubclass = 0,
+                            interfaceProtocol = 0,
+                            endpoints =
+                                listOf(
+                                    AirVisionUsbEndpointInfo(
+                                        address = 0x02,
+                                        direction = UsbConstants.USB_DIR_OUT,
+                                        type = UsbConstants.USB_ENDPOINT_XFER_INT,
+                                        maxPacketSize = 64,
+                                        interval = 1,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        val capabilities = state.firmwareCapabilities
+
+        assertTrue(capabilities.hasReadableHidReports)
+        assertTrue(capabilities.hasWritableHidReports)
+        assertTrue(capabilities.hasInterruptReportPath)
+        assertTrue(capabilities.protocolCaptureReady)
+        assertEquals(listOf(1), capabilities.hidInputInterfaceIds)
+        assertEquals(listOf(2), capabilities.hidOutputInterfaceIds)
+        assertEquals(32, capabilities.maxInputPacketSize)
+        assertEquals(64, capabilities.maxOutputPacketSize)
+        assertEquals(
+            "firmware reports: hid out if=2, hid in if=1, interrupt out=1, interrupt in=1, max out=64, max in=32",
+            capabilities.summary,
+        )
+    }
+
+    @Test
+    fun firmwareCapabilities_reportNoHidReportEndpoints() {
+        val state =
+            AirVisionUsbState(
+                interfaces =
+                    listOf(
+                        AirVisionUsbInterfaceInfo(
+                            id = 3,
+                            interfaceClass = UsbConstants.USB_CLASS_AUDIO,
+                            interfaceSubclass = 1,
+                            interfaceProtocol = 0,
+                            endpoints = emptyList(),
+                        ),
+                    ),
+            )
+
+        assertFalse(state.firmwareCapabilities.protocolCaptureReady)
+        assertEquals("firmware reports: no HID report endpoints exposed", state.firmwareCapabilities.summary)
     }
 }

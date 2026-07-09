@@ -73,12 +73,21 @@ class AirVisionDiagnosticsSnapshotTest {
         val encoded = AirVisionDiagnosticsSnapshots.encode(snapshot)
         val root = Json.parseToJsonElement(encoded).jsonObject
         val usb = root.getValue("usb").jsonObject
+        val firmwareCapabilities = usb.getValue("firmwareCapabilities").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
+        assertEquals("2", root.getValue("version").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
+        assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
+        assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)
+        assertEquals("64", firmwareCapabilities.getValue("maxOutputPacketSize").jsonPrimitive.content)
+        assertEquals(
+            "firmware reports: hid out if=2, interrupt out=1, max out=64",
+            firmwareCapabilities.getValue("summary").jsonPrimitive.content,
+        )
         assertEquals("hid", firstInterface.getValue("classLabel").jsonPrimitive.content)
         assertEquals("out", firstEndpoint.getValue("directionLabel").jsonPrimitive.content)
         assertEquals("interrupt", firstEndpoint.getValue("typeLabel").jsonPrimitive.content)

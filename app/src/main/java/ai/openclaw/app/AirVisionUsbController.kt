@@ -71,6 +71,42 @@ data class AirVisionUsbInterfaceInfo(
                     ?.joinToString("; ") { it.summary }
                     ?: "no endpoints"
             return "if$id $classLabel sub=$interfaceSubclass proto=$interfaceProtocol: $endpointText"
+    }
+}
+
+data class AirVisionFirmwareCapabilities(
+    val hidInputInterfaceIds: List<Int> = emptyList(),
+    val hidOutputInterfaceIds: List<Int> = emptyList(),
+    val interruptInputEndpoints: Int = 0,
+    val interruptOutputEndpoints: Int = 0,
+    val maxInputPacketSize: Int? = null,
+    val maxOutputPacketSize: Int? = null,
+) {
+    val hasReadableHidReports: Boolean
+        get() = hidInputInterfaceIds.isNotEmpty()
+
+    val hasWritableHidReports: Boolean
+        get() = hidOutputInterfaceIds.isNotEmpty()
+
+    val hasInterruptReportPath: Boolean
+        get() = interruptInputEndpoints > 0 || interruptOutputEndpoints > 0
+
+    val protocolCaptureReady: Boolean
+        get() = hasReadableHidReports || hasWritableHidReports
+
+    val summary: String
+        get() {
+            if (!protocolCaptureReady) return "firmware reports: no HID report endpoints exposed"
+            val parts =
+                listOfNotNull(
+                    hidOutputInterfaceIds.takeIf { it.isNotEmpty() }?.joinToString(prefix = "hid out if=", separator = "/"),
+                    hidInputInterfaceIds.takeIf { it.isNotEmpty() }?.joinToString(prefix = "hid in if=", separator = "/"),
+                    interruptOutputEndpoints.takeIf { it > 0 }?.let { "interrupt out=$it" },
+                    interruptInputEndpoints.takeIf { it > 0 }?.let { "interrupt in=$it" },
+                    maxOutputPacketSize?.let { "max out=$it" },
+                    maxInputPacketSize?.let { "max in=$it" },
+                )
+            return "firmware reports: ${parts.joinToString(", ")}"
         }
 }
 
@@ -111,12 +147,16 @@ data class AirVisionUsbState(
     val firmwareControlReady: Boolean
         get() = connected && permissionGranted && hidControlInterface
 
+    val firmwareCapabilities: AirVisionFirmwareCapabilities
+        get() = interfaces.airVisionFirmwareCapabilities()
+
     val statusText: String
         get() =
             when {
                 !connected -> "M1 USB device not detected."
                 !permissionGranted -> "M1 detected; grant USB access to inspect firmware controls."
                 hidControlInterface -> "M1 HID control interface detected. ASUS report protocol still pending."
+                firmwareCapabilities.hasReadableHidReports -> "M1 HID input reports detected. Writable firmware controls still need ASUS protocol support."
                 else -> "M1 detected, but no writable HID control interface was exposed."
             }
 
@@ -335,3 +375,25 @@ private fun UsbEndpoint.airVisionEndpointInfo(): AirVisionUsbEndpointInfo =
         maxPacketSize = maxPacketSize,
         interval = interval,
     )
+
+fun List<AirVisionUsbInterfaceInfo>.airVisionFirmwareCapabilities(): AirVisionFirmwareCapabilities {
+    val hidInterfaces = filter { it.interfaceClass == UsbConstants.USB_CLASS_HID }
+    val inputInterfaces =
+        hidInterfaces.filter { usbInterface ->
+            usbInterface.endpoints.any { it.direction == UsbConstants.USB_DIR_IN }
+        }
+    val outputInterfaces =
+        hidInterfaces.filter { usbInterface ->
+            usbInterface.endpoints.any { it.direction == UsbConstants.USB_DIR_OUT }
+        }
+    val inputEndpoints = inputInterfaces.flatMap { it.endpoints }.filter { it.direction == UsbConstants.USB_DIR_IN }
+    val outputEndpoints = outputInterfaces.flatMap { it.endpoints }.filter { it.direction == UsbConstants.USB_DIR_OUT }
+    return AirVisionFirmwareCapabilities(
+        hidInputInterfaceIds = inputInterfaces.map { it.id },
+        hidOutputInterfaceIds = outputInterfaces.map { it.id },
+        interruptInputEndpoints = inputEndpoints.count { it.type == UsbConstants.USB_ENDPOINT_XFER_INT },
+        interruptOutputEndpoints = outputEndpoints.count { it.type == UsbConstants.USB_ENDPOINT_XFER_INT },
+        maxInputPacketSize = inputEndpoints.maxOfOrNull { it.maxPacketSize },
+        maxOutputPacketSize = outputEndpoints.maxOfOrNull { it.maxPacketSize },
+    )
+}

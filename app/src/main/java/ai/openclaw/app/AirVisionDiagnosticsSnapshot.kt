@@ -25,8 +25,24 @@ data class AirVisionDiagnosticsUsb(
     val audioInterface: Boolean,
     val inputInterface: Boolean,
     val statusText: String,
+    val firmwareCapabilities: AirVisionDiagnosticsFirmwareCapabilities,
     val deviceInfo: AirVisionDiagnosticsDeviceInfo,
     val interfaces: List<AirVisionDiagnosticsInterface>,
+)
+
+@Serializable
+data class AirVisionDiagnosticsFirmwareCapabilities(
+    val hidInputInterfaceIds: List<Int>,
+    val hidOutputInterfaceIds: List<Int>,
+    val interruptInputEndpoints: Int,
+    val interruptOutputEndpoints: Int,
+    val maxInputPacketSize: Int?,
+    val maxOutputPacketSize: Int?,
+    val hasReadableHidReports: Boolean,
+    val hasWritableHidReports: Boolean,
+    val hasInterruptReportPath: Boolean,
+    val protocolCaptureReady: Boolean,
+    val summary: String,
 )
 
 @Serializable
@@ -62,7 +78,7 @@ data class AirVisionDiagnosticsEndpoint(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 1
+    const val VERSION = 2
 
     private val json =
         Json {
@@ -93,6 +109,7 @@ object AirVisionDiagnosticsSnapshots {
                     audioInterface = usbState.audioInterface,
                     inputInterface = usbState.inputInterface,
                     statusText = usbState.statusText,
+                    firmwareCapabilities = usbState.firmwareCapabilities.toDiagnostics(),
                     deviceInfo =
                         AirVisionDiagnosticsDeviceInfo(
                             manufacturerName = usbState.deviceInfo.manufacturerName,
@@ -141,5 +158,20 @@ object AirVisionDiagnosticsSnapshots {
                     hudDisplayTarget = hudDisplayTarget.rawValue,
                     demoModeEnabled = demoModeEnabled,
                 ),
+        )
+
+    private fun AirVisionFirmwareCapabilities.toDiagnostics(): AirVisionDiagnosticsFirmwareCapabilities =
+        AirVisionDiagnosticsFirmwareCapabilities(
+            hidInputInterfaceIds = hidInputInterfaceIds,
+            hidOutputInterfaceIds = hidOutputInterfaceIds,
+            interruptInputEndpoints = interruptInputEndpoints,
+            interruptOutputEndpoints = interruptOutputEndpoints,
+            maxInputPacketSize = maxInputPacketSize,
+            maxOutputPacketSize = maxOutputPacketSize,
+            hasReadableHidReports = hasReadableHidReports,
+            hasWritableHidReports = hasWritableHidReports,
+            hasInterruptReportPath = hasInterruptReportPath,
+            protocolCaptureReady = protocolCaptureReady,
+            summary = summary,
         )
 }

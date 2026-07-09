@@ -697,6 +697,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                     hidControlInterface = airVisionUsbState.hidControlInterface,
                                     audioInterface = airVisionUsbState.audioInterface,
                                     inputInterface = airVisionUsbState.inputInterface,
+                                    firmwareCapabilitySummary = airVisionUsbState.firmwareCapabilities.summary,
                                     diagnosticsText = airVisionUsbState.diagnosticsText,
                                 ),
                                 style = mobileCallout,
@@ -2221,6 +2222,7 @@ private fun airVisionUsbStatusText(
     hidControlInterface: Boolean,
     audioInterface: Boolean,
     inputInterface: Boolean,
+    firmwareCapabilitySummary: String,
     diagnosticsText: String,
 ): String {
     val interfaces =
@@ -2233,6 +2235,7 @@ private fun airVisionUsbStatusText(
         statusText,
         deviceInfoText.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
         interfaces.takeIf { it.isNotBlank() }?.let { "interfaces: $it" },
+        firmwareCapabilitySummary.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
         diagnosticsText.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
     ).joinToString("\n")
 }
