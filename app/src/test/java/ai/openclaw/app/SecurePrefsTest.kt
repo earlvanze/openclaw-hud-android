@@ -155,6 +155,26 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun airVisionIpdChange_isLockedWhileLightLoadModeIsEnabled() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionViewMode(AirVisionViewMode.Working)
+        prefs.setAirVisionIpdMm(64)
+        prefs.setAirVisionLightLoadModeEnabled(true)
+        prefs.setAirVisionIpdMm(70)
+
+        assertEquals(64, prefs.airVisionDisplaySettings.value.ipdMm)
+
+        prefs.setAirVisionLightLoadModeEnabled(false)
+        prefs.setAirVisionIpdMm(70)
+
+        assertEquals(70, SecurePrefs(context).airVisionDisplaySettings.value.ipdMm)
+    }
+
+    @Test
     fun airVisionHudControls_persist() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)

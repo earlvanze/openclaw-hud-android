@@ -63,6 +63,9 @@ data class AirVisionDisplaySettings(
     val motionSyncEnabled: Boolean = true,
     val lightLoadModeEnabled: Boolean = false,
 ) {
+    val ipdAdjustmentEnabled: Boolean
+        get() = !lightLoadModeEnabled
+
     val normalized: AirVisionDisplaySettings
         get() =
             copy(

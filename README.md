@@ -129,11 +129,11 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, active-profile reset, HUD placement, safe area, scale/layout, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
 | Brightness | Implemented as software HUD dimming. Hardware brightness remains available from the M1 touch bar. |
 | Screen distance | Implemented as virtual HUD distance scaling. |
-| IPD | Stored as a calibration value, defaulting to 67 mm. Firmware-level apply still needs the ASUS HID protocol. |
+| IPD | Stored as a calibration value, defaulting to 67 mm. Adjustment is locked while Light Load Mode is enabled, matching the ASUS app. Firmware-level apply still needs the ASUS HID protocol. |
 | Splendid Standard / Theater / Office / Game / Eye Care | Stored as profile settings. Eye Care adds a warm HUD overlay now; true panel presets need HID support. |
 | Blue Light Filter | Implemented as Android HUD warm filtering. |
 | Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
-| Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation. |
+| Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation and locks IPD adjustment while enabled. |
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll handling, and M1 media/tap key double-tap mic behavior. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, and USB interface/endpoint diagnostics for protocol capture work. |
 | Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports per-mode placement and safe-area layout profiles for the M1 presentation. |

@@ -70,4 +70,10 @@ class AirVisionDisplaySettingsTest {
         assertTrue(infinity.distanceCm > working.distanceCm)
         assertTrue(infinity.lightLoadModeEnabled)
     }
+
+    @Test
+    fun ipdAdjustmentEnabled_followsLightLoadMode() {
+        assertTrue(AirVisionDisplaySettings(lightLoadModeEnabled = false).ipdAdjustmentEnabled)
+        assertEquals(false, AirVisionDisplaySettings(lightLoadModeEnabled = true).ipdAdjustmentEnabled)
+    }
 }

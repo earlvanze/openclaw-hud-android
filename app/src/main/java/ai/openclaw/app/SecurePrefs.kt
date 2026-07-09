@@ -629,6 +629,7 @@ class SecurePrefs(
     }
 
     fun setAirVisionIpdMm(value: Int) {
+        if (!_airVisionDisplaySettings.value.ipdAdjustmentEnabled) return
         val normalized = AirVisionDisplaySettings.normalizeIpdMm(value)
         val viewMode = _airVisionDisplaySettings.value.viewMode
         plainPrefs.edit {

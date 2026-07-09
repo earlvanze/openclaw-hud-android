@@ -687,13 +687,24 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     HorizontalDivider(color = mobileBorder)
                     AirVisionSliderRow(
                         label = "IPD",
-                        valueText = "${airVisionDisplaySettings.ipdMm} mm",
-                        supportingText = "Stored for calibration. Firmware-level IPD apply still needs ASUS HID protocol support.",
+                        valueText =
+                            if (airVisionDisplaySettings.ipdAdjustmentEnabled) {
+                                "${airVisionDisplaySettings.ipdMm} mm"
+                            } else {
+                                "${airVisionDisplaySettings.ipdMm} mm locked"
+                            },
+                        supportingText =
+                            if (airVisionDisplaySettings.ipdAdjustmentEnabled) {
+                                "Stored for calibration. Firmware-level IPD apply still needs ASUS HID protocol support."
+                            } else {
+                                "Disabled while Light Load Mode is on, matching the ASUS AirVision app behavior."
+                            },
                         value = airVisionDisplaySettings.ipdMm.toFloat(),
                         valueRange =
                             AirVisionDisplaySettings.MIN_IPD_MM
                                 .toFloat()
                                 .rangeTo(AirVisionDisplaySettings.MAX_IPD_MM.toFloat()),
+                        enabled = airVisionDisplaySettings.ipdAdjustmentEnabled,
                         onValueChange = { viewModel.setAirVisionIpdMm(it.roundToInt()) },
                     )
                     HorizontalDivider(color = mobileBorder)
@@ -785,7 +796,10 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         colors = listItemColors,
                         headlineContent = { Text("Light Load Mode", style = mobileHeadline) },
                         supportingContent = {
-                            Text("Stores the Windows-style preference for lower overhead HUD operation.", style = mobileCallout)
+                            Text(
+                                "Stores the Windows-style lower-overhead preference. IPD adjustment is locked while enabled.",
+                                style = mobileCallout,
+                            )
                         },
                         trailingContent = {
                             Switch(
@@ -1616,10 +1630,14 @@ private fun AirVisionSliderRow(
     supportingText: String,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float>,
+    enabled: Boolean = true,
     onValueChange: (Float) -> Unit,
 ) {
     Column(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier =
+            Modifier
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .alpha(if (enabled) 1f else 0.72f),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Row(
@@ -1634,6 +1652,7 @@ private fun AirVisionSliderRow(
             value = value.coerceIn(valueRange.start, valueRange.endInclusive),
             onValueChange = onValueChange,
             valueRange = valueRange,
+            enabled = enabled,
         )
     }
 }
