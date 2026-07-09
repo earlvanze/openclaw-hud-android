@@ -42,12 +42,14 @@ data class AirVisionDiagnosticsFirmwareCapabilities(
     val readableReportPaths: List<AirVisionDiagnosticsFirmwareReportPath>,
     val writableReportPaths: List<AirVisionDiagnosticsFirmwareReportPath>,
     val featureReadiness: List<AirVisionDiagnosticsFirmwareFeatureReadiness>,
+    val captureTargets: List<AirVisionDiagnosticsFirmwareCaptureTarget>,
     val hasReadableHidReports: Boolean,
     val hasWritableHidReports: Boolean,
     val hasInterruptReportPath: Boolean,
     val protocolCaptureReady: Boolean,
     val summary: String,
     val featureReadinessSummary: String,
+    val capturePlanSummary: String,
 )
 
 @Serializable
@@ -71,6 +73,18 @@ data class AirVisionDiagnosticsFirmwareFeatureReadiness(
     val firmwareApplyReady: Boolean,
     val firmwareApplyStatus: String,
     val detail: String,
+    val summary: String,
+)
+
+@Serializable
+data class AirVisionDiagnosticsFirmwareCaptureTarget(
+    val feature: String,
+    val label: String,
+    val captureReady: Boolean,
+    val writeReportPathSummaries: List<String>,
+    val readReportPathSummaries: List<String>,
+    val suggestedProbeValues: List<String>,
+    val instruction: String,
     val summary: String,
 )
 
@@ -130,7 +144,7 @@ data class AirVisionDiagnosticsHudRuntime(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 8
+    const val VERSION = 9
 
     private val json =
         Json {
@@ -268,12 +282,14 @@ object AirVisionDiagnosticsSnapshots {
             readableReportPaths = readableReportPaths.map { it.toDiagnostics() },
             writableReportPaths = writableReportPaths.map { it.toDiagnostics() },
             featureReadiness = featureReadiness.map { it.toDiagnostics() },
+            captureTargets = captureTargets.map { it.toDiagnostics() },
             hasReadableHidReports = hasReadableHidReports,
             hasWritableHidReports = hasWritableHidReports,
             hasInterruptReportPath = hasInterruptReportPath,
             protocolCaptureReady = protocolCaptureReady,
             summary = summary,
             featureReadinessSummary = featureReadinessSummary,
+            capturePlanSummary = capturePlanSummary,
         )
 
     private fun AirVisionFirmwareReportPath.toDiagnostics(): AirVisionDiagnosticsFirmwareReportPath =
@@ -297,6 +313,18 @@ object AirVisionDiagnosticsSnapshots {
             firmwareApplyReady = firmwareApplyReady,
             firmwareApplyStatus = firmwareApplyStatus,
             detail = detail,
+            summary = summary,
+        )
+
+    private fun AirVisionFirmwareCaptureTarget.toDiagnostics(): AirVisionDiagnosticsFirmwareCaptureTarget =
+        AirVisionDiagnosticsFirmwareCaptureTarget(
+            feature = feature.rawValue,
+            label = feature.label,
+            captureReady = captureReady,
+            writeReportPathSummaries = writeReportPathSummaries,
+            readReportPathSummaries = readReportPathSummaries,
+            suggestedProbeValues = suggestedProbeValues,
+            instruction = instruction,
             summary = summary,
         )
 }

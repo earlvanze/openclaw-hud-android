@@ -141,7 +141,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
 | App Preferences | Implemented with startup view, AirVision companion language preference with Android locale application, speaker state, Samsung/native captions preference, OpenClaw translation caption source/target languages, demo mode, JSON profile backup/import, software version/build display, EULA note, in-app privacy policy, official FAQ/tutorial, product registration, and ASUS support links. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, serial availability, and firmware protocol status. Actual firmware version still needs ASUS HID support. |
-| Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, derived readable/writable HID report-path capability summaries with endpoint packet sizes, per-feature firmware-apply readiness for Windows-style controls, USB interface/endpoint diagnostics for protocol capture work, and a JSON diagnostics export that omits raw USB serial values. |
+| Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, derived readable/writable HID report-path capability summaries with endpoint packet sizes, per-feature firmware-apply readiness for Windows-style controls, per-feature Windows protocol-capture targets for brightness/distance/IPD/Splendid/Eye Care/Motion Sync/3D Mode, USB interface/endpoint diagnostics for protocol capture work, and a JSON diagnostics export that omits raw USB serial values. |
 | Identify | Implemented as a temporary `HUD 1` marker on the Android Presentation display. |
 | Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports configurable external-display targeting, per-mode placement, per-mode physical main screen visibility, and safe-area layout profiles for the M1 presentation. |
 
@@ -152,7 +152,8 @@ future ASUS protocol capture work. Firmware Link can also export an AirVision
 diagnostics JSON snapshot containing current USB readiness, descriptor summaries,
 derived readable/writable HID report paths with endpoint addresses and packet
 sizes, per-feature firmware-apply readiness for Windows-style AirVision
-controls, the active HUD profile, derived HUD runtime state, Android
+controls, per-feature capture targets and probe values for future ASUS HID
+protocol validation, the active HUD profile, derived HUD runtime state, Android
 Presentation routing state, display candidate counts, selected display identity,
 gesture settings, and AirVision app preferences without gateway endpoints, auth
 tokens, chat history, or raw USB serial values.

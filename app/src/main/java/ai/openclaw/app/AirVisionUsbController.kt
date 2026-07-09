@@ -71,7 +71,7 @@ data class AirVisionUsbInterfaceInfo(
                     ?.joinToString("; ") { it.summary }
                     ?: "no endpoints"
             return "if$id $classLabel sub=$interfaceSubclass proto=$interfaceProtocol: $endpointText"
-    }
+        }
 }
 
 data class AirVisionFirmwareReportPath(
@@ -108,42 +108,50 @@ enum class AirVisionFirmwareFeature(
     val rawValue: String,
     val label: String,
     val androidStatus: String,
+    val captureProbeValues: List<String>,
     val requiresWritableHid: Boolean = true,
 ) {
     Brightness(
         rawValue = "brightness",
         label = "Brightness",
         androidStatus = "software HUD dimming active",
+        captureProbeValues = listOf("20%", "50%", "80%"),
     ),
     ScreenDistance(
         rawValue = "screen_distance",
         label = "Screen distance",
         androidStatus = "virtual HUD distance scaling active",
+        captureProbeValues = listOf("50 cm", "100 cm", "150 cm"),
     ),
     Ipd(
         rawValue = "ipd",
         label = "IPD",
         androidStatus = "profile calibration stored",
+        captureProbeValues = listOf("60 mm", "67 mm", "72 mm"),
     ),
     Splendid(
         rawValue = "splendid",
         label = "Splendid",
         androidStatus = "HUD color preview active",
+        captureProbeValues = listOf("standard", "theater", "eye_care"),
     ),
     BlueLightFilter(
         rawValue = "blue_light_filter",
         label = "Blue Light Filter",
         androidStatus = "Eye Care warm overlay active",
+        captureProbeValues = listOf("0%", "50%", "100%"),
     ),
     MotionSync(
         rawValue = "motion_sync",
         label = "Motion Sync",
         androidStatus = "profile preference stored",
+        captureProbeValues = listOf("off", "on"),
     ),
     ThreeDMode(
         rawValue = "3d_mode",
         label = "3D Mode",
         androidStatus = "profile preference stored",
+        captureProbeValues = listOf("off", "on"),
     ),
 }
 
@@ -156,6 +164,23 @@ data class AirVisionFirmwareFeatureReadiness(
 ) {
     val summary: String
         get() = "${feature.label}: $firmwareApplyStatus"
+}
+
+data class AirVisionFirmwareCaptureTarget(
+    val feature: AirVisionFirmwareFeature,
+    val captureReady: Boolean,
+    val writeReportPathSummaries: List<String>,
+    val readReportPathSummaries: List<String>,
+    val suggestedProbeValues: List<String>,
+    val instruction: String,
+) {
+    val summary: String
+        get() =
+            if (captureReady) {
+                "${feature.label}: capture ${suggestedProbeValues.joinToString(" -> ")} on ${writeReportPathSummaries.joinToString()}"
+            } else {
+                "${feature.label}: waiting for writable HID report path"
+            }
 }
 
 data class AirVisionFirmwareCapabilities(
@@ -186,6 +211,12 @@ data class AirVisionFirmwareCapabilities(
     val featureReadinessSummary: String
         get() = "firmware apply: ${featureReadiness.joinToString("; ") { it.summary }}"
 
+    val captureTargets: List<AirVisionFirmwareCaptureTarget>
+        get() = AirVisionFirmwareFeature.entries.map { it.captureTargetFor(this) }
+
+    val capturePlanSummary: String
+        get() = "firmware capture: ${captureTargets.joinToString("; ") { it.summary }}"
+
     val summary: String
         get() {
             if (!protocolCaptureReady) return "firmware reports: no HID report endpoints exposed"
@@ -200,6 +231,27 @@ data class AirVisionFirmwareCapabilities(
                 )
             return "firmware reports: ${parts.joinToString(", ")}"
         }
+}
+
+private fun AirVisionFirmwareFeature.captureTargetFor(capabilities: AirVisionFirmwareCapabilities): AirVisionFirmwareCaptureTarget {
+    val writePaths = capabilities.writableReportPaths.map { it.summary }
+    val readPaths = capabilities.readableReportPaths.map { it.summary }
+    val captureReady = capabilities.hasWritableHidReports
+    val instruction =
+        if (captureReady) {
+            "Capture Windows AirVision USB traffic while changing $label through ${captureProbeValues.joinToString(" -> ")}. " +
+                "Keep Android read-only until the vendor report payload and checksum behavior are validated."
+        } else {
+            "Reconnect the AirVision M1 over USB and grant permission until Android exposes a writable HID report path."
+        }
+    return AirVisionFirmwareCaptureTarget(
+        feature = this,
+        captureReady = captureReady,
+        writeReportPathSummaries = writePaths,
+        readReportPathSummaries = readPaths,
+        suggestedProbeValues = captureProbeValues,
+        instruction = instruction,
+    )
 }
 
 private fun AirVisionFirmwareFeature.readinessFor(capabilities: AirVisionFirmwareCapabilities): AirVisionFirmwareFeatureReadiness {
@@ -272,7 +324,8 @@ data class AirVisionUsbState(
                 !connected -> "M1 USB device not detected."
                 !permissionGranted -> "M1 detected; grant USB access to inspect firmware controls."
                 hidControlInterface -> "M1 HID control interface detected. ASUS report protocol still pending."
-                firmwareCapabilities.hasReadableHidReports -> "M1 HID input reports detected. Writable firmware controls still need ASUS protocol support."
+                firmwareCapabilities.hasReadableHidReports ->
+                    "M1 HID input reports detected. Writable firmware controls still need ASUS protocol support."
                 else -> "M1 detected, but no writable HID control interface was exposed."
             }
 
@@ -449,8 +502,7 @@ private fun UsbDevice.airVisionDeviceInfo(permissionGranted: Boolean): AirVision
     )
 }
 
-private fun UsbDevice.hasInterfaceClass(interfaceClass: Int): Boolean =
-    interfaces().any { it.interfaceClass == interfaceClass }
+private fun UsbDevice.hasInterfaceClass(interfaceClass: Int): Boolean = interfaces().any { it.interfaceClass == interfaceClass }
 
 private fun UsbDevice.hasHidControlInterface(): Boolean =
     interfaces().any { usbInterface ->
@@ -465,11 +517,9 @@ private fun UsbDevice.hasInputOnlyHidInterface(): Boolean =
             usbInterface.endpoints().none { it.direction == UsbConstants.USB_DIR_OUT }
     }
 
-private fun UsbDevice.interfaces(): Sequence<UsbInterface> =
-    (0 until interfaceCount).asSequence().map { getInterface(it) }
+private fun UsbDevice.interfaces(): Sequence<UsbInterface> = (0 until interfaceCount).asSequence().map { getInterface(it) }
 
-private fun UsbInterface.endpoints() =
-    (0 until endpointCount).asSequence().map { getEndpoint(it) }
+private fun UsbInterface.endpoints() = (0 until endpointCount).asSequence().map { getEndpoint(it) }
 
 private fun UsbDevice.airVisionInterfaceInfo(): List<AirVisionUsbInterfaceInfo> =
     interfaces()

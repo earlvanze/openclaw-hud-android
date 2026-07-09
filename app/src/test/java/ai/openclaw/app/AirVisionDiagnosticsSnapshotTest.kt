@@ -101,9 +101,15 @@ class AirVisionDiagnosticsSnapshotTest {
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
         val writableReportPath = firmwareCapabilities.getValue("writableReportPaths").jsonArray.first().jsonObject
         val firstFeatureReadiness = firmwareCapabilities.getValue("featureReadiness").jsonArray.first().jsonObject
+        val captureTargets = firmwareCapabilities.getValue("captureTargets").jsonArray
+        val firstCaptureTarget = captureTargets.first().jsonObject
+        val ipdCaptureTarget =
+            captureTargets
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "ipd" }
+                .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("8", root.getValue("version").jsonPrimitive.content)
+        assertEquals("9", root.getValue("version").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)
@@ -132,6 +138,25 @@ class AirVisionDiagnosticsSnapshotTest {
             "Brightness: ASUS HID protocol capture pending",
             firstFeatureReadiness.getValue("summary").jsonPrimitive.content,
         )
+        assertEquals("brightness", firstCaptureTarget.getValue("feature").jsonPrimitive.content)
+        assertEquals("Brightness", firstCaptureTarget.getValue("label").jsonPrimitive.content)
+        assertEquals("true", firstCaptureTarget.getValue("captureReady").jsonPrimitive.content)
+        assertEquals(
+            listOf("20%", "50%", "80%"),
+            firstCaptureTarget.getValue("suggestedProbeValues").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            listOf("out if=2 interrupt addr=0x1 max=64 int=1"),
+            firstCaptureTarget.getValue("writeReportPathSummaries").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            "Brightness: capture 20% -> 50% -> 80% on out if=2 interrupt addr=0x1 max=64 int=1",
+            firstCaptureTarget.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals(
+            "IPD: capture 60 mm -> 67 mm -> 72 mm on out if=2 interrupt addr=0x1 max=64 int=1",
+            ipdCaptureTarget.getValue("summary").jsonPrimitive.content,
+        )
         assertEquals(
             "firmware apply: Brightness: ASUS HID protocol capture pending; " +
                 "Screen distance: ASUS HID protocol capture pending; " +
@@ -141,6 +166,16 @@ class AirVisionDiagnosticsSnapshotTest {
                 "Motion Sync: ASUS HID protocol capture pending; " +
                 "3D Mode: ASUS HID protocol capture pending",
             firmwareCapabilities.getValue("featureReadinessSummary").jsonPrimitive.content,
+        )
+        assertEquals(
+            "firmware capture: Brightness: capture 20% -> 50% -> 80% on out if=2 interrupt addr=0x1 max=64 int=1; " +
+                "Screen distance: capture 50 cm -> 100 cm -> 150 cm on out if=2 interrupt addr=0x1 max=64 int=1; " +
+                "IPD: capture 60 mm -> 67 mm -> 72 mm on out if=2 interrupt addr=0x1 max=64 int=1; " +
+                "Splendid: capture standard -> theater -> eye_care on out if=2 interrupt addr=0x1 max=64 int=1; " +
+                "Blue Light Filter: capture 0% -> 50% -> 100% on out if=2 interrupt addr=0x1 max=64 int=1; " +
+                "Motion Sync: capture off -> on on out if=2 interrupt addr=0x1 max=64 int=1; " +
+                "3D Mode: capture off -> on on out if=2 interrupt addr=0x1 max=64 int=1",
+            firmwareCapabilities.getValue("capturePlanSummary").jsonPrimitive.content,
         )
         assertEquals("hid", firstInterface.getValue("classLabel").jsonPrimitive.content)
         assertEquals("out", firstEndpoint.getValue("directionLabel").jsonPrimitive.content)

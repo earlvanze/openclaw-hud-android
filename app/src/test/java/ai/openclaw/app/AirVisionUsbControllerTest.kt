@@ -217,6 +217,24 @@ class AirVisionUsbControllerTest {
             "Brightness: ASUS HID protocol capture pending",
             capabilities.featureReadiness.first().summary,
         )
+        assertEquals(AirVisionFirmwareFeature.entries.size, capabilities.captureTargets.size)
+        assertTrue(capabilities.captureTargets.all { it.captureReady })
+        assertEquals(
+            listOf("20%", "50%", "80%"),
+            capabilities.captureTargets.first().suggestedProbeValues,
+        )
+        assertEquals(
+            listOf("out if=2 interrupt addr=0x2 max=64 int=1"),
+            capabilities.captureTargets.first().writeReportPathSummaries,
+        )
+        assertEquals(
+            "Brightness: capture 20% -> 50% -> 80% on out if=2 interrupt addr=0x2 max=64 int=1",
+            capabilities.captureTargets.first().summary,
+        )
+        assertEquals(
+            "IPD: capture 60 mm -> 67 mm -> 72 mm on out if=2 interrupt addr=0x2 max=64 int=1",
+            capabilities.captureTargets.first { it.feature == AirVisionFirmwareFeature.Ipd }.summary,
+        )
         assertTrue(capabilities.featureReadiness.all { !it.firmwareApplyReady })
         assertTrue(capabilities.featureReadiness.all { it.detail.contains("writable HID path detected") })
         assertEquals(
@@ -229,6 +247,8 @@ class AirVisionUsbControllerTest {
                 "3D Mode: ASUS HID protocol capture pending",
             capabilities.featureReadinessSummary,
         )
+        assertTrue(capabilities.capturePlanSummary.startsWith("firmware capture: Brightness: capture"))
+        assertTrue(capabilities.capturePlanSummary.contains("IPD: capture 60 mm -> 67 mm -> 72 mm"))
     }
 
     @Test
@@ -249,6 +269,11 @@ class AirVisionUsbControllerTest {
 
         assertFalse(state.firmwareCapabilities.protocolCaptureReady)
         assertEquals("firmware reports: no HID report endpoints exposed", state.firmwareCapabilities.summary)
+        assertTrue(state.firmwareCapabilities.captureTargets.all { !it.captureReady })
+        assertEquals(
+            "Brightness: waiting for writable HID report path",
+            state.firmwareCapabilities.captureTargets.first().summary,
+        )
         assertTrue(
             state.firmwareCapabilities.featureReadiness.all {
                 it.firmwareApplyStatus == "waiting for writable HID report path"
