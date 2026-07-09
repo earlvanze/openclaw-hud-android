@@ -444,6 +444,22 @@ fun SettingsSheet(viewModel: MainViewModel) {
             }
         }
 
+    val airVisionFirmwareCapturePlanExportLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/markdown")) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            runCatching {
+                context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { writer ->
+                    writer.write(viewModel.exportAirVisionFirmwareCapturePlan())
+                } ?: error("Unable to open firmware capture plan file.")
+            }.onSuccess {
+                Toast.makeText(context, "Exported AirVision capture plan", Toast.LENGTH_SHORT).show()
+                viewModel.showHudTransientMessage("Exported AirVision capture plan")
+            }.onFailure { error ->
+                Toast.makeText(context, "AirVision capture plan export failed", Toast.LENGTH_SHORT).show()
+                viewModel.showHudTransientMessage("AirVision capture plan export failed: ${error.message.orEmpty()}")
+            }
+        }
+
     val airVisionProfileImportLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
@@ -725,6 +741,31 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                     },
                                     style = mobileCallout.copy(fontWeight = FontWeight.Bold),
                                 )
+                            }
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Firmware Capture Plan", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Save a Windows/Cyber USB capture worksheet with current Android HID report-path status and AirVision probe values.",
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Button(
+                                onClick = {
+                                    airVisionFirmwareCapturePlanExportLauncher.launch(
+                                        "openclaw-airvision-m1-firmware-capture-plan.md",
+                                    )
+                                },
+                                colors = settingsPrimaryButtonColors(),
+                                shape = RoundedCornerShape(14.dp),
+                            ) {
+                                Text("Export", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
                             }
                         },
                     )

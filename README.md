@@ -164,7 +164,10 @@ captured and validated.
 the next Windows/Cyber capture session. It is derived from the app's canonical
 AirVision firmware feature list and records probe sequences for brightness,
 screen distance, IPD, Splendid, blue-light filter, Motion Sync, and 3D Mode.
-Regenerate or verify it with:
+The Android app can also export a live copy from Settings -> AirVision M1 ->
+Firmware Capture Plan, including the phone's current readable/writable HID
+report-path status when the M1 is connected. Regenerate or verify the tracked
+offline worksheet with:
 
 ```bash
 node scripts/render-airvision-firmware-capture-plan.mjs
