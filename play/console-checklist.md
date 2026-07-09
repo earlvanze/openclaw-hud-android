@@ -15,6 +15,14 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 - Use `play/privacy-policy.md` as the hosted privacy-policy source; the same
   disclosure is available in-app at Settings -> AirVision M1 -> App Preferences
   -> Privacy Policy.
+- Run `node scripts/render-privacy-policy-site.mjs --check` to verify
+  `docs/privacy-policy.html` matches `play/privacy-policy.md`.
+- Configure the GitHub repository's Pages source to GitHub Actions and verify
+  the Pages workflow has deployed `docs/privacy-policy.html`.
+- After the page is reachable, enter
+  `https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html` in
+  Play Console and set `play/app-content-answers.json`
+  `finalSubmission.hostedPrivacyPolicyUrl` to that URL.
 - Run `node scripts/verify-play-hud-release.mjs` before every Play upload.
 - Run `node scripts/verify-play-submission-package.mjs` before filling or
   updating Play Console App content answers.
@@ -56,6 +64,10 @@ Current local status:
   phone screenshots. These are intentionally incomplete until Play Console is
   configured. Local screenshot paths are validated by the final submission
   verifier before commit publishing.
+- `docs/privacy-policy.html` is the generated GitHub Pages privacy-policy page.
+  Keep it current with `node scripts/render-privacy-policy-site.mjs --check`;
+  do not copy the candidate URL into `finalSubmission.hostedPrivacyPolicyUrl`
+  until it is actually reachable.
 - `node scripts/verify-play-submission-package.mjs` checks the App content
   packet against the HUD manifest, hosted privacy policy source, in-app privacy
   policy source, data-safety notes, console checklist, and English listing

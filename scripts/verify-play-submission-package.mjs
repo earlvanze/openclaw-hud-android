@@ -18,6 +18,7 @@ const defaultManifestPath = join(
 );
 const defaultAppContentPath = join(androidDir, "play", "app-content-answers.json");
 const defaultPrivacyPolicyPath = join(androidDir, "play", "privacy-policy.md");
+const defaultHostedPrivacyPolicyPagePath = join(androidDir, "docs", "privacy-policy.html");
 const defaultInAppPrivacyPolicyPath = join(androidDir, "app", "src", "main", "java", "ai", "openclaw", "app", "PrivacyPolicyText.kt");
 const defaultSettingsSheetPath = join(androidDir, "app", "src", "main", "java", "ai", "openclaw", "app", "ui", "SettingsSheet.kt");
 const defaultDataSafetyNotesPath = join(androidDir, "play", "data-safety-notes.md");
@@ -30,6 +31,13 @@ const maxScreenshotBytes = 8 * 1024 * 1024;
 const screenshotMinDimension = 320;
 const screenshotMaxDimension = 3840;
 const pngSignature = Buffer.from("89504e470d0a1a0a", "hex");
+const corePrivacyDisclosures = [
+  "OpenClaw HUD connects your Android device to an OpenClaw gateway that you configure",
+  "The Google Play HUD build may request microphone, notification, nearby-device, network, foreground-service, and audio-routing permissions",
+  "Notification access is optional",
+  "Voice and caption features may send microphone transcripts, caption text, chat text, assistant status, and selected AirVision HUD settings",
+  "OpenClaw HUD does not sell personal data and does not include advertising",
+];
 
 const forbiddenPermissionGroups = {
   sms: ["android.permission.SEND_SMS", "android.permission.READ_SMS"],
@@ -59,6 +67,7 @@ function parseArgs(argv) {
     manifest: defaultManifestPath,
     appContent: defaultAppContentPath,
     privacyPolicy: defaultPrivacyPolicyPath,
+    hostedPrivacyPolicyPage: defaultHostedPrivacyPolicyPagePath,
     inAppPrivacyPolicy: defaultInAppPrivacyPolicyPath,
     settingsSheet: defaultSettingsSheetPath,
     dataSafetyNotes: defaultDataSafetyNotesPath,
@@ -72,6 +81,7 @@ function parseArgs(argv) {
     if (arg === "--manifest") args.manifest = resolve(argv[++index]);
     else if (arg === "--app-content") args.appContent = resolve(argv[++index]);
     else if (arg === "--privacy-policy") args.privacyPolicy = resolve(argv[++index]);
+    else if (arg === "--hosted-privacy-policy-page") args.hostedPrivacyPolicyPage = resolve(argv[++index]);
     else if (arg === "--in-app-privacy-policy") args.inAppPrivacyPolicy = resolve(argv[++index]);
     else if (arg === "--settings-sheet") args.settingsSheet = resolve(argv[++index]);
     else if (arg === "--data-safety-notes") args.dataSafetyNotes = resolve(argv[++index]);
@@ -84,7 +94,7 @@ function parseArgs(argv) {
           "Usage: node scripts/verify-play-submission-package.mjs [--manifest path]",
           "",
           "Checks the local Google Play submission packet against the generated HUD manifest,",
-          "privacy policy, in-app privacy policy, data-safety notes, console checklist, and English listing files.",
+          "privacy policy, hosted privacy page, in-app privacy policy, data-safety notes, console checklist, and English listing files.",
           "",
           "Add --final to require external Play Console readiness fields such as hosted privacy URL,",
           "phone screenshots, reviewer access, tester access, and app creation status.",
@@ -152,19 +162,36 @@ function normalizePolicyText(text) {
     .trim();
 }
 
+function normalizeHtmlPolicyText(text) {
+  return text
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/giu, " ")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/giu, " ")
+    .replace(/<[^>]+>/gu, " ")
+    .replace(/&gt;/gu, ">")
+    .replace(/&lt;/gu, "<")
+    .replace(/&quot;/gu, '"')
+    .replace(/&amp;/gu, "&")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
 function verifyInAppPolicyMirrorsHostedPolicy(hostedPolicy, inAppPolicy) {
   const hosted = normalizePolicyText(hostedPolicy);
   const inApp = normalizePolicyText(inAppPolicy);
-  const coreDisclosures = [
-    "OpenClaw HUD connects your Android device to an OpenClaw gateway that you configure",
-    "The Google Play HUD build may request microphone, notification, nearby-device, network, foreground-service, and audio-routing permissions",
-    "Notification access is optional",
-    "Voice and caption features may send microphone transcripts, caption text, chat text, assistant status, and selected AirVision HUD settings",
-    "OpenClaw HUD does not sell personal data and does not include advertising",
-  ];
 
-  requireIncludes("Hosted privacy policy parity", hosted, coreDisclosures);
-  requireIncludes("In-app privacy policy parity", inApp, coreDisclosures);
+  requireIncludes("Hosted privacy policy parity", hosted, corePrivacyDisclosures);
+  requireIncludes("In-app privacy policy parity", inApp, corePrivacyDisclosures);
+}
+
+function verifyHostedPrivacyPolicyPage(hostedPolicy, hostedPolicyPage) {
+  const page = normalizeHtmlPolicyText(hostedPolicyPage);
+  requireIncludes("Hosted privacy policy page", hostedPolicyPage, [
+    "<!doctype html>",
+    "<title>OpenClaw HUD Privacy Policy</title>",
+    "<meta name=\"viewport\"",
+  ]);
+  requireIncludes("Hosted privacy policy page parity", page, corePrivacyDisclosures);
+  requireIncludes("Hosted privacy policy source parity", normalizePolicyText(hostedPolicy), corePrivacyDisclosures);
 }
 
 function requireArrayIncludes(label, values, expected) {
@@ -349,6 +376,15 @@ function verifyAppContentShape(appContent) {
   if (!appContent.privacyPolicy?.requiresHostedUrlBeforeSubmission) {
     throw new Error("Privacy policy must require a hosted URL before Play submission.");
   }
+  if (appContent.privacyPolicy?.sourceFile !== "play/privacy-policy.md") {
+    throw new Error("Privacy policy sourceFile must point to play/privacy-policy.md.");
+  }
+  if (appContent.privacyPolicy?.hostedPageSource !== "docs/privacy-policy.html") {
+    throw new Error("Privacy policy hostedPageSource must point to docs/privacy-policy.html.");
+  }
+  if (!isHttpsUrl(appContent.privacyPolicy?.hostedUrlCandidate)) {
+    throw new Error("Privacy policy hostedUrlCandidate must be a public https:// URL candidate.");
+  }
   if (!appContent.privacyPolicy?.inAppLocation?.includes("Privacy Policy")) {
     throw new Error("Privacy policy in-app location must point to the Privacy Policy row.");
   }
@@ -408,6 +444,7 @@ async function main() {
   const appContent = await readJson(args.appContent);
   const manifestXml = await readText(args.manifest);
   const privacyPolicy = await readText(args.privacyPolicy);
+  const hostedPrivacyPolicyPage = await readText(args.hostedPrivacyPolicyPage);
   const inAppPrivacyPolicy = await readText(args.inAppPrivacyPolicy);
   const settingsSheet = await readText(args.settingsSheet);
   const dataSafetyNotes = await readText(args.dataSafetyNotes);
@@ -437,6 +474,7 @@ async function main() {
     "clear data",
   ]);
   verifyInAppPolicyMirrorsHostedPolicy(privacyPolicy, inAppPrivacyPolicy);
+  verifyHostedPrivacyPolicyPage(privacyPolicy, hostedPrivacyPolicyPage);
   requireIncludes("Settings privacy policy surface", settingsSheet, [
     "PrivacyPolicyText",
     "Privacy Policy",
@@ -456,12 +494,14 @@ async function main() {
     "Data deletion",
     "in-app privacy",
     "capture-play-screenshots",
+    "render-privacy-policy-site",
     "verify-play-submission-package",
   ]);
 
   console.log(`App-content package: ${appContent.packageName}`);
   console.log(`Manifest permissions checked: ${permissionCount}`);
   console.log(`Privacy policy: ${args.privacyPolicy}`);
+  console.log(`Hosted privacy policy page: ${args.hostedPrivacyPolicyPage}`);
   console.log(`In-app privacy policy: ${args.inAppPrivacyPolicy}`);
   console.log(`App-content answers: ${args.appContent}`);
   console.log(`Play submission package verifier passed (${args.final ? "final" : "draft"} mode).`);

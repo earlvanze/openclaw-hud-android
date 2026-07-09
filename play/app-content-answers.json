@@ -4,6 +4,8 @@
   "packageName": "ai.openclaw.app.hud",
   "privacyPolicy": {
     "sourceFile": "play/privacy-policy.md",
+    "hostedPageSource": "docs/privacy-policy.html",
+    "hostedUrlCandidate": "https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html",
     "inAppLocation": "Settings > AirVision M1 > App Preferences > Privacy Policy",
     "requiresHostedUrlBeforeSubmission": true
   },

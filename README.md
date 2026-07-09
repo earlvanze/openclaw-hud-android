@@ -271,6 +271,21 @@ accepted. Store listing and policy prep files live under `play/`. Use
 Console app must already exist for `ai.openclaw.app.hud`; follow
 `play/console-checklist.md` before the first commit.
 
+The hosted privacy-policy page is generated from `play/privacy-policy.md` into
+`docs/privacy-policy.html`:
+
+```bash
+node scripts/render-privacy-policy-site.mjs
+node scripts/render-privacy-policy-site.mjs --check
+```
+
+The Pages workflow publishes `docs/` when the GitHub repository's Pages source
+is configured to GitHub Actions. The prepared candidate URL is
+`https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html`. Keep
+`play/app-content-answers.json` `finalSubmission.hostedPrivacyPolicyUrl` empty
+until that exact URL is reachable, then fill it and run
+`node scripts/verify-play-submission-package.mjs --final`.
+
 Play phone screenshots can be captured from the HUD build without a live M1 by
 using the app's review/demo launch action:
 

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <title>OpenClaw HUD Privacy Policy</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      background: Canvas;
+      color: CanvasText;
+    }
+    main {
+      width: min(72ch, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0;
+    }
+    h1 {
+      line-height: 1.15;
+      margin: 0 0 24px;
+    }
+    p {
+      margin: 0 0 18px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>OpenClaw HUD Privacy Policy</h1>
+    <p>OpenClaw HUD connects your Android device to an OpenClaw gateway that you configure. The app stores gateway connection details locally on your device using Android encrypted storage.</p>
+    <p>The Google Play HUD build may request microphone, notification, nearby-device, network, foreground-service, and audio-routing permissions depending on the features you enable. It does not request SMS, Call Log, camera, location, contacts, calendar, or media-library permissions.</p>
+    <p>Notification access is optional. If enabled, notification text may be summarized locally in the app UI and sent to your configured OpenClaw gateway so your assistant can display glanceable context. Secret-shaped fields such as tokens and passwords are redacted before HUD display.</p>
+    <p>Voice and caption features may send microphone transcripts, caption text, chat text, assistant status, and selected AirVision HUD settings to your configured OpenClaw gateway and its selected model provider for app functionality. Public gateway URLs require <code>wss://</code> or Tailscale Serve. Developer/self-hosted connections may use local, private LAN, Tailnet, or emulator <code>ws://</code> endpoints that you configure.</p>
+    <p>OpenClaw HUD does not sell personal data and does not include advertising. The app does not create an OpenClaw cloud account. To delete app data stored on this Android device, use Android Settings &gt; Apps &gt; OpenClaw HUD &gt; Storage &gt; Clear data, or uninstall the app. Gateway-side accounts, logs, model-provider data, and backups are controlled by the gateway or provider you configured.</p>
+  </main>
+</body>
+</html>
