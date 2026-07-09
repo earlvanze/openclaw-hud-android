@@ -275,6 +275,7 @@ using the app's review/demo launch action:
 ANDROID_HOME=/home/digit/android-sdk ANDROID_SDK_ROOT=/home/digit/android-sdk \
   ./gradlew :app:assembleHudDebug
 ./scripts/capture-play-screenshots.sh --serial <adb-serial>
+node scripts/test-play-screenshot-tools.mjs
 ```
 
 The script installs the HUD debug APK, marks the app ready for review/demo mode,
@@ -285,6 +286,9 @@ Android screencaps to 24-bit PNG without alpha, and writes
 `play/screenshots/phone/manifest.json`. After uploading screenshots in Play
 Console, record their local paths, names, or URLs in
 `play/app-content-answers.json` `finalSubmission.phoneScreenshots`.
+`test-play-screenshot-tools.mjs` is the offline regression gate for this path:
+it converts a synthetic alpha PNG, verifies the converted asset passes the final
+submission checker, and verifies the checker rejects unconverted alpha PNGs.
 
 `verify-play-hud-release.mjs` is the offline-safe local gate for the HUD/M1
 Play target. It verifies the newest signed HUD AAB, confirms the generated

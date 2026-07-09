@@ -23,6 +23,8 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
   equivalent Play Console screenshot workflow. The local script normalizes
   Android screencaps to Play-ready 24-bit PNG without alpha and writes
   `play/screenshots/phone/manifest.json`.
+- Run `node scripts/test-play-screenshot-tools.mjs` after changes to screenshot
+  capture, conversion, or final submission validation.
 - Keep the initial release status as `draft` until screenshots, policy forms, and tester access are verified.
 - Fill `play/app-content-answers.json` `finalSubmission` fields, then run
   `node scripts/verify-play-submission-package.mjs --final` before the first
@@ -40,6 +42,8 @@ Current local status:
 - `testHudDebugUnitTest` passes.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, and release notes character limits.
+- `node scripts/test-play-screenshot-tools.mjs` passes against the current
+  screenshot converter and final submission verifier.
 - `play/app-content-answers.json` contains the draft App content answers for
   Privacy policy, Ads, App access, Target audience, Content rating, Data
   deletion, and Data safety. Keep it aligned with the final Play Console forms.
