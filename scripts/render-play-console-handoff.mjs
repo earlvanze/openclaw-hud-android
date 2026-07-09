@@ -117,6 +117,7 @@ async function render() {
     "",
     "## Local Gates",
     "",
+    "- `node scripts/render-airvision-firmware-capture-plan.mjs --check`",
     "- `node scripts/render-play-screenshots.mjs --check`",
     "- `node scripts/test-play-screenshot-tools.mjs`",
     "- `node scripts/test-play-publish-helper.mjs`",

@@ -45,6 +45,7 @@ const airVisionAppLocalePath =
     "app",
     "AirVisionAppLocale.kt",
   );
+const airVisionFirmwareCapturePlanScript = join(scriptDir, "render-airvision-firmware-capture-plan.mjs");
 
 const expectedPackage = "ai.openclaw.app.hud";
 const expectedPermissions = [
@@ -450,6 +451,14 @@ async function verifyRuntimeLocaleBundleConfig() {
   return { usesRuntimeLocale: true, languageSplitsDisabled };
 }
 
+function verifyGeneratedAirVisionFirmwareCapturePlan() {
+  runChecked(
+    process.execPath,
+    [airVisionFirmwareCapturePlanScript, "--check"],
+    "AirVision firmware capture plan check",
+  );
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const bundlePath = args.bundle ?? (await latestHudBundle());
@@ -457,6 +466,7 @@ async function main() {
   const manifest = await verifyManifest(args.manifest);
   const listing = await verifyListing(args.listingDir, args.language);
   const localeBundleConfig = await verifyRuntimeLocaleBundleConfig();
+  verifyGeneratedAirVisionFirmwareCapturePlan();
 
   console.log(`Bundle: ${bundle.path} (${bundle.size} bytes)`);
   console.log(`SHA-256: ${bundle.sha256}`);
@@ -471,6 +481,7 @@ async function main() {
   if (localeBundleConfig.usesRuntimeLocale) {
     console.log("Runtime locale delivery: App Bundle language splits disabled");
   }
+  console.log("AirVision firmware capture plan: current");
   console.log("Play HUD release verifier passed.");
 }
 

@@ -160,6 +160,17 @@ tokens, chat history, or raw USB serial values.
 The app does not send ASUS vendor reports until the Windows app protocol is
 captured and validated.
 
+`play/airvision-firmware-capture-plan.md` is a generated offline worksheet for
+the next Windows/Cyber capture session. It is derived from the app's canonical
+AirVision firmware feature list and records probe sequences for brightness,
+screen distance, IPD, Splendid, blue-light filter, Motion Sync, and 3D Mode.
+Regenerate or verify it with:
+
+```bash
+node scripts/render-airvision-firmware-capture-plan.mjs
+node scripts/render-airvision-firmware-capture-plan.mjs --check
+```
+
 Captions default to Samsung/Android native captioning so the system floating
 caption window can sit over the minimal HUD. The HUD `cc` status light cycles
 between Samsung, OpenClaw, and Off; the Voice tab exposes the same providers as
@@ -365,7 +376,9 @@ manifest package is `ai.openclaw.app.hud`, fails if restricted Play-risk
 permissions drift back into the HUD flavor, confirms the notification-listener
 service declaration, checks the English listing/release-notes length limits, and
 confirms App Bundle language splits stay disabled while the app uses runtime
-AirVision language switching. The language split setting is intentional: Play
+AirVision language switching. It also verifies that the generated AirVision
+firmware capture worksheet is current. The language split setting is
+intentional: Play
 can otherwise deliver only the install-time language resources, which breaks the
 in-app AirVision companion language menu. Run
 `node scripts/test-play-hud-release-verifier.mjs` after changing the release
