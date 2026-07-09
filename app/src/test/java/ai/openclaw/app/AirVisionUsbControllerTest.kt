@@ -92,4 +92,31 @@ class AirVisionUsbControllerTest {
             state.diagnosticsText,
         )
     }
+
+    @Test
+    fun deviceInfoText_summarizesUsbIdentityAndFirmwareProtocolStatus() {
+        val state =
+            AirVisionUsbState(
+                deviceInfo =
+                    AirVisionUsbDeviceInfo(
+                        manufacturerName = "ASUS",
+                        productName = "AirVision M1",
+                        deviceName = "/dev/bus/usb/001/002",
+                        vendorProduct = "0x0b05:0x1b3c",
+                        serialStatus = "grant USB access",
+                    ),
+            )
+
+        assertEquals(
+            """
+            manufacturer: ASUS
+            product: AirVision M1
+            usb id: 0x0b05:0x1b3c
+            device path: /dev/bus/usb/001/002
+            serial: grant USB access
+            firmware: pending ASUS HID protocol
+            """.trimIndent(),
+            state.deviceInfoText,
+        )
+    }
 }

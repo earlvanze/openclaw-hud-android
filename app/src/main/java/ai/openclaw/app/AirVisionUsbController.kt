@@ -74,11 +74,34 @@ data class AirVisionUsbInterfaceInfo(
         }
 }
 
+data class AirVisionUsbDeviceInfo(
+    val manufacturerName: String? = null,
+    val productName: String? = null,
+    val deviceName: String? = null,
+    val vendorProduct: String? = null,
+    val serialNumber: String? = null,
+    val serialStatus: String? = null,
+    val firmwareVersion: String? = null,
+) {
+    val summary: String
+        get() =
+            listOfNotNull(
+                manufacturerName?.takeIf { it.isNotBlank() }?.let { "manufacturer: $it" },
+                productName?.takeIf { it.isNotBlank() }?.let { "product: $it" },
+                vendorProduct?.takeIf { it.isNotBlank() }?.let { "usb id: $it" },
+                deviceName?.takeIf { it.isNotBlank() }?.let { "device path: $it" },
+                serialNumber?.takeIf { it.isNotBlank() }?.let { "serial: $it" }
+                    ?: serialStatus?.takeIf { it.isNotBlank() }?.let { "serial: $it" },
+                "firmware: ${firmwareVersion?.takeIf { it.isNotBlank() } ?: "pending ASUS HID protocol"}",
+            ).joinToString("\n")
+}
+
 data class AirVisionUsbState(
     val connected: Boolean = false,
     val permissionGranted: Boolean = false,
     val deviceLabel: String? = null,
     val vendorProduct: String? = null,
+    val deviceInfo: AirVisionUsbDeviceInfo = AirVisionUsbDeviceInfo(),
     val hidControlInterface: Boolean = false,
     val audioInterface: Boolean = false,
     val inputInterface: Boolean = false,
@@ -103,6 +126,12 @@ data class AirVisionUsbState(
                 .takeIf { it.isNotEmpty() }
                 ?.joinToString("\n") { it.summary }
                 ?: "No USB interface descriptors captured."
+
+    val deviceInfoText: String
+        get() =
+            deviceInfo.summary
+                .takeIf { it.isNotBlank() }
+                ?: "No USB device information captured."
 }
 
 class AirVisionUsbController(
@@ -183,6 +212,7 @@ class AirVisionUsbController(
                 permissionGranted = permissionGranted,
                 deviceLabel = device.bestLabel(),
                 vendorProduct = device.vendorProductLabel(),
+                deviceInfo = device.airVisionDeviceInfo(permissionGranted),
                 hidControlInterface = device.hasHidControlInterface(),
                 audioInterface = device.hasInterfaceClass(UsbConstants.USB_CLASS_AUDIO),
                 inputInterface = device.hasInputOnlyHidInterface(),
@@ -239,6 +269,29 @@ private fun UsbDevice.bestLabel(): String =
 
 private fun UsbDevice.vendorProductLabel(): String =
     "0x${vendorId.toString(16).padStart(4, '0')}:0x${productId.toString(16).padStart(4, '0')}"
+
+private fun UsbDevice.airVisionDeviceInfo(permissionGranted: Boolean): AirVisionUsbDeviceInfo {
+    val serialNumber =
+        if (permissionGranted) {
+            runCatching { serialNumber?.trim()?.takeIf { it.isNotEmpty() } }.getOrNull()
+        } else {
+            null
+        }
+    val serialStatus =
+        when {
+            serialNumber != null -> null
+            permissionGranted -> "not exposed"
+            else -> "grant USB access"
+        }
+    return AirVisionUsbDeviceInfo(
+        manufacturerName = manufacturerName,
+        productName = productName,
+        deviceName = deviceName,
+        vendorProduct = vendorProductLabel(),
+        serialNumber = serialNumber,
+        serialStatus = serialStatus,
+    )
+}
 
 private fun UsbDevice.hasInterfaceClass(interfaceClass: Int): Boolean =
     interfaces().any { it.interfaceClass == interfaceClass }

@@ -577,6 +577,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                     statusText = airVisionUsbState.statusText,
                                     deviceLabel = airVisionUsbState.deviceLabel,
                                     vendorProduct = airVisionUsbState.vendorProduct,
+                                    deviceInfoText = airVisionUsbState.deviceInfoText,
                                     hidControlInterface = airVisionUsbState.hidControlInterface,
                                     audioInterface = airVisionUsbState.audioInterface,
                                     inputInterface = airVisionUsbState.inputInterface,
@@ -1720,6 +1721,7 @@ private fun airVisionUsbStatusText(
     statusText: String,
     deviceLabel: String?,
     vendorProduct: String?,
+    deviceInfoText: String,
     hidControlInterface: Boolean,
     audioInterface: Boolean,
     inputInterface: Boolean,
@@ -1733,8 +1735,7 @@ private fun airVisionUsbStatusText(
         ).joinToString(", ")
     return listOfNotNull(
         statusText,
-        deviceLabel?.takeIf { it.isNotBlank() },
-        vendorProduct?.takeIf { it.isNotBlank() },
+        deviceInfoText.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
         interfaces.takeIf { it.isNotBlank() }?.let { "interfaces: $it" },
         diagnosticsText.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
     ).joinToString("\n")
