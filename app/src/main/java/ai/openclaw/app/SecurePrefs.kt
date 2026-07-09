@@ -845,6 +845,10 @@ class SecurePrefs(
                         hudDisplayTarget = _airVisionHudDisplayTarget.value.rawValue,
                         demoModeEnabled = _airVisionDemoModeEnabled.value,
                     ),
+                runtimeProfiles =
+                    AirVisionViewMode.entries.map { mode ->
+                        AirVisionProfileBackups.runtimeProfileFromSettings(loadAirVisionDisplaySettings(mode))
+                    },
                 profiles =
                     AirVisionViewMode.entries.map { mode ->
                         AirVisionProfileBackups.profileFromSettings(loadAirVisionDisplaySettings(mode))

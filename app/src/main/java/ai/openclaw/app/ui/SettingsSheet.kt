@@ -1250,7 +1250,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Profile Backup", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                "Export or import AirVision M1 tuning profiles, labels, gestures, and app preferences as JSON.",
+                                "Export or import AirVision M1 tuning profiles, labels, gestures, app preferences, and runtime metadata as JSON.",
                                 style = mobileCallout,
                             )
                         },

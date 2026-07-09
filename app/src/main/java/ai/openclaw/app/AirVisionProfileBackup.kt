@@ -13,6 +13,7 @@ data class AirVisionProfileBackup(
     val customLabels: AirVisionBackupCustomLabels,
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
+    val runtimeProfiles: List<AirVisionBackupRuntimeProfile> = emptyList(),
     val profiles: List<AirVisionBackupDisplayProfile>,
 )
 
@@ -55,9 +56,22 @@ data class AirVisionBackupDisplayProfile(
     val lightLoadModeEnabled: Boolean,
 )
 
+@Serializable
+data class AirVisionBackupRuntimeProfile(
+    val viewMode: String,
+    val ipdAdjustmentEnabled: Boolean,
+    val threeDModeAvailable: Boolean,
+    val blueLightFilterAvailable: Boolean,
+    val hudTranscriptEntryCount: Int,
+    val hudCaptionEntryCount: Int,
+    val colorPreviewOverlaysEnabled: Boolean,
+    val brightnessDimmingEnabled: Boolean,
+)
+
 object AirVisionProfileBackups {
     const val SCHEMA = "openclaw.airvision.m1.profile-backup"
-    const val VERSION = 1
+    const val VERSION = 2
+    private val SUPPORTED_VERSIONS = setOf(1, VERSION)
 
     private val json =
         Json {
@@ -74,10 +88,10 @@ object AirVisionProfileBackups {
                 json.decodeFromString<AirVisionProfileBackup>(raw)
             } catch (error: IllegalArgumentException) {
                 throw IllegalArgumentException("Profile backup is not valid JSON.", error)
-            }
+        }
 
         require(backup.schema == SCHEMA) { "Profile backup schema is not supported." }
-        require(backup.version == VERSION) { "Profile backup version is not supported." }
+        require(backup.version in SUPPORTED_VERSIONS) { "Profile backup version is not supported." }
         require(backup.profiles.isNotEmpty()) { "Profile backup does not include any display profiles." }
         return backup
     }
@@ -96,6 +110,23 @@ object AirVisionProfileBackups {
             motionSyncEnabled = settings.motionSyncEnabled,
             threeDModeEnabled = settings.threeDModeEnabled,
             lightLoadModeEnabled = settings.lightLoadModeEnabled,
+        )
+
+    fun runtimeProfileFromSettings(settings: AirVisionDisplaySettings): AirVisionBackupRuntimeProfile =
+        AirVisionBackupRuntimeProfile(
+            viewMode = settings.viewMode.rawValue,
+            ipdAdjustmentEnabled = settings.ipdAdjustmentEnabled,
+            threeDModeAvailable = settings.threeDModeAvailable,
+            blueLightFilterAvailable = settings.blueLightFilterAvailable,
+            hudTranscriptEntryCount = AirVisionDisplaySettings.hudTranscriptEntryCount(settings.lightLoadModeEnabled),
+            hudCaptionEntryCount = AirVisionDisplaySettings.hudCaptionEntryCount(settings.lightLoadModeEnabled),
+            colorPreviewOverlaysEnabled =
+                AirVisionDisplaySettings.hudColorPreviewAlpha(
+                    alpha = 1f,
+                    lightLoadModeEnabled = settings.lightLoadModeEnabled,
+                ) > 0f,
+            brightnessDimmingEnabled =
+                AirVisionDisplaySettings.hudDimAlphaForBrightnessPercent(settings.brightnessPercent) > 0f,
         )
 
     fun settingsFromProfile(profile: AirVisionBackupDisplayProfile): AirVisionDisplaySettings =

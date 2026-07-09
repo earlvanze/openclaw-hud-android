@@ -191,9 +191,11 @@ duplicate the active profile settings into a custom slot.
 Profile Backup lives under Settings -> AirVision M1 -> App Preferences. Export
 writes a JSON file containing AirVision M1 tuning profiles, custom labels,
 gesture/hotkey settings, display targeting, startup view, language preference,
-and demo mode. Import validates the same AirVision-only schema, requires every
-viewing-mode profile slot exactly once, and never includes gateway endpoints,
-auth tokens, accounts, chat history, or other OpenClaw runtime state.
+demo mode, and derived HUD runtime metadata such as Light Load limits and
+locked control availability. Import validates the same AirVision-only schema,
+accepts legacy v1 backups, requires every viewing-mode profile slot exactly
+once, and never includes gateway endpoints, auth tokens, accounts, chat history,
+or other OpenClaw runtime state.
 
 To pair on first launch, pass a setup code directly or from a local file:
 

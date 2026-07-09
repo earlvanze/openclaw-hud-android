@@ -1,6 +1,12 @@
 package ai.openclaw.app
 
 import android.content.Context
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
@@ -243,6 +249,26 @@ class SecurePrefsTest {
         prefs.setAirVisionThreeDModeEnabled(true)
 
         val backup = prefs.exportAirVisionProfileBackup()
+        val backupRoot = Json.parseToJsonElement(backup).jsonObject
+        val runtimeProfiles = backupRoot.getValue("runtimeProfiles").jsonArray
+        val infinityRuntime =
+            runtimeProfiles
+                .first { it.jsonObject.getValue("viewMode").jsonPrimitive.content == AirVisionViewMode.Infinity.rawValue }
+                .jsonObject
+
+        assertEquals("2", backupRoot.getValue("version").jsonPrimitive.content)
+        assertEquals(AirVisionViewMode.entries.size, runtimeProfiles.size)
+        assertEquals(
+            AirVisionDisplaySettings.LIGHT_LOAD_HUD_TRANSCRIPT_ENTRY_COUNT,
+            infinityRuntime.getValue("hudTranscriptEntryCount").jsonPrimitive.int,
+        )
+        assertEquals(
+            AirVisionDisplaySettings.LIGHT_LOAD_HUD_CAPTION_ENTRY_COUNT,
+            infinityRuntime.getValue("hudCaptionEntryCount").jsonPrimitive.int,
+        )
+        assertEquals(false, infinityRuntime.getValue("ipdAdjustmentEnabled").jsonPrimitive.boolean)
+        assertEquals(false, infinityRuntime.getValue("threeDModeAvailable").jsonPrimitive.boolean)
+        assertEquals(false, infinityRuntime.getValue("colorPreviewOverlaysEnabled").jsonPrimitive.boolean)
 
         plainPrefs.edit().clear().commit()
         val importedPrefs = SecurePrefs(context)
@@ -277,6 +303,51 @@ class SecurePrefsTest {
         assertEquals(111, importedPrefs.airVisionDisplaySettings.value.distanceCm)
         assertEquals(AirVisionHudPlacement.UpperRight, importedPrefs.airVisionDisplaySettings.value.hudPlacement)
         assertEquals(false, importedPrefs.airVisionDisplaySettings.value.physicalMainScreenVisible)
+    }
+
+    @Test
+    fun importAirVisionProfileBackup_acceptsVersionOneBackupsWithoutRuntimeProfiles() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        val legacyBackup =
+            """
+            {
+              "schema": "openclaw.airvision.m1.profile-backup",
+              "version": 1,
+              "activeViewMode": "custom1",
+              "customLabels": { "custom1": "Walk HUD", "custom2": "Desk HUD" },
+              "hudControls": {
+                "singleTapAction": "dismiss_notification",
+                "doubleTapAction": "toggle_mic",
+                "swipeAction": "scroll_chat",
+                "brightnessKeyAction": "scroll_chat",
+                "mediaKeyAction": "double_tap_toggle_mic"
+              },
+              "appPreferences": {
+                "language": "system",
+                "startupDestination": "hud",
+                "hudDisplayTarget": "airvision_preferred",
+                "demoModeEnabled": false
+              },
+              "profiles": [
+                ${backupProfileJson("working")},
+                ${backupProfileJson("gaming")},
+                ${backupProfileJson("infinity")},
+                ${backupProfileJson("custom1", brightnessPercent = 44, distanceCm = 92)},
+                ${backupProfileJson("custom2")}
+              ]
+            }
+            """.trimIndent()
+
+        prefs.importAirVisionProfileBackup(legacyBackup)
+
+        assertEquals(AirVisionViewMode.Custom1, prefs.airVisionDisplaySettings.value.viewMode)
+        assertEquals(44, prefs.airVisionDisplaySettings.value.brightnessPercent)
+        assertEquals(92, prefs.airVisionDisplaySettings.value.distanceCm)
+        assertEquals("Walk HUD", prefs.airVisionCustomProfileLabels.value.custom1)
     }
 
     @Test
@@ -598,15 +669,19 @@ class SecurePrefsTest {
     }
 }
 
-private fun backupProfileJson(viewMode: String): String =
+private fun backupProfileJson(
+    viewMode: String,
+    brightnessPercent: Int = 80,
+    distanceCm: Int = 75,
+): String =
     """
     {
       "viewMode": "$viewMode",
       "splendidMode": "standard",
       "hudPlacement": "upper_left",
-      "brightnessPercent": 80,
+      "brightnessPercent": $brightnessPercent,
       "blueLightFilterPercent": 0,
-      "distanceCm": 75,
+      "distanceCm": $distanceCm,
       "ipdMm": 67,
       "safeAreaPercent": 5,
       "physicalMainScreenVisible": true,
