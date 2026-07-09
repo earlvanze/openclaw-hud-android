@@ -11,6 +11,7 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
 const publishScript = join("scripts", "publish-play-internal.mjs");
 const allowedAccount = "earlvanze@gmail.com";
+const secondaryAllowedAccount = "earl@earlbnb.com";
 const serviceAccount = "rclone@sacred-result-442018-v2.iam.gserviceaccount.com";
 
 function runPublish(args, env, expectedStatus = 0) {
@@ -50,11 +51,14 @@ async function main() {
 set -euo pipefail
 scenario="\${OPENCLAW_FAKE_GCLOUD_SCENARIO:-missing-allowed}"
 allowed="${allowedAccount}"
+secondary="${secondaryAllowedAccount}"
 service="${serviceAccount}"
 
 if [[ "$1 $2" == "auth list" ]]; then
   if [[ "$scenario" == "allowed-authenticated" ]]; then
     printf '[{"account":"%s","status":"ACTIVE"}]\\n' "$allowed"
+  elif [[ "$scenario" == "secondary-allowed-authenticated" ]]; then
+    printf '[{"account":"%s","status":"ACTIVE"}]\\n' "$secondary"
   else
     printf '[{"account":"%s","status":"ACTIVE"}]\\n' "$service"
   fi
@@ -108,6 +112,18 @@ exit 64
     }
     if (!allowedText.includes("no Play API request was made")) {
       throw new Error(`Auth-check did not stop before Play API access:\n${allowedText}`);
+    }
+
+    const secondaryAllowed = runPublish(
+      ["--auth", "gcloud", "--gcloud-account", secondaryAllowedAccount, "--auth-check"],
+      { ...env, OPENCLAW_FAKE_GCLOUD_SCENARIO: "secondary-allowed-authenticated" },
+    );
+    const secondaryAllowedText = outputText(secondaryAllowed);
+    if (!secondaryAllowedText.includes(`Auth: gcloud:${secondaryAllowedAccount}`)) {
+      throw new Error(`Auth-check did not use the requested secondary allowed account:\n${secondaryAllowedText}`);
+    }
+    if (!secondaryAllowedText.includes("no Play API request was made")) {
+      throw new Error(`Secondary auth-check did not stop before Play API access:\n${secondaryAllowedText}`);
     }
 
     const disallowedActive = runPublish(["--auth", "gcloud", "--auth-check"], env, 1);
