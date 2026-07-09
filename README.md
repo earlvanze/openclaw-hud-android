@@ -139,7 +139,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | 3D Mode | Stored in the AirVision profile and disabled while Light Load Mode is enabled. Hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation, trims transcript/caption history, skips nonessential color-preview overlays, and locks IPD/3D adjustment while enabled. |
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
-| App Preferences | Implemented with startup view, AirVision companion language preference with Android locale application, demo mode, JSON profile backup/import, software version/build display, EULA note, in-app privacy policy, official FAQ/tutorial, product registration, and ASUS support links. |
+| App Preferences | Implemented with startup view, AirVision companion language preference with Android locale application, speaker state, Samsung/native captions preference, OpenClaw translation caption source/target languages, demo mode, JSON profile backup/import, software version/build display, EULA note, in-app privacy policy, official FAQ/tutorial, product registration, and ASUS support links. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, serial availability, and firmware protocol status. Actual firmware version still needs ASUS HID support. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, derived readable/writable HID report-path capability summaries with endpoint packet sizes, per-feature firmware-apply readiness for Windows-style controls, USB interface/endpoint diagnostics for protocol capture work, and a JSON diagnostics export that omits raw USB serial values. |
 | Identify | Implemented as a temporary `HUD 1` marker on the Android Presentation display. |
@@ -203,9 +203,10 @@ duplicate the active profile settings into a custom slot.
 Profile Backup lives under Settings -> AirVision M1 -> App Preferences. Export
 writes a JSON file containing AirVision M1 tuning profiles, custom labels,
 gesture/hotkey settings, display targeting, startup view, language preference,
-demo mode, and derived HUD runtime metadata such as Light Load limits and
+speaker state, Samsung/native captions preference, OpenClaw translation caption
+source/target languages, demo mode, and derived HUD runtime metadata such as Light Load limits and
 locked control availability. Import validates the same AirVision-only schema,
-accepts legacy v1 backups, requires every viewing-mode profile slot exactly
+accepts legacy v1/v2 backups, requires every viewing-mode profile slot exactly
 once, and never includes gateway endpoints, auth tokens, accounts, chat history,
 or other OpenClaw runtime state.
 

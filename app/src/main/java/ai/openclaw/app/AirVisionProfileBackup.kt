@@ -38,6 +38,10 @@ data class AirVisionBackupAppPreferences(
     val startupDestination: String,
     val hudDisplayTarget: String,
     val demoModeEnabled: Boolean,
+    val speakerEnabled: Boolean = true,
+    val nativeCaptionsEnabled: Boolean = false,
+    val translationCaptionSourceLanguage: String = TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
+    val translationCaptionTargetLanguage: String = TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
 )
 
 @Serializable
@@ -70,8 +74,8 @@ data class AirVisionBackupRuntimeProfile(
 
 object AirVisionProfileBackups {
     const val SCHEMA = "openclaw.airvision.m1.profile-backup"
-    const val VERSION = 2
-    private val SUPPORTED_VERSIONS = setOf(1, VERSION)
+    const val VERSION = 3
+    private val SUPPORTED_VERSIONS = setOf(1, 2, VERSION)
 
     private val json =
         Json {
@@ -174,6 +178,18 @@ object AirVisionProfileBackups {
             startupDestination = requireStartupDestination(preferences.startupDestination),
             hudDisplayTarget = requireHudDisplayTarget(preferences.hudDisplayTarget),
             demoModeEnabled = preferences.demoModeEnabled,
+            speakerEnabled = preferences.speakerEnabled,
+            nativeCaptionsEnabled = preferences.nativeCaptionsEnabled,
+            translationCaptionSourceLanguage =
+                TranslationCaptionMode.normalizeLanguageCode(
+                    preferences.translationCaptionSourceLanguage,
+                    TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
+                ),
+            translationCaptionTargetLanguage =
+                TranslationCaptionMode.normalizeLanguageCode(
+                    preferences.translationCaptionTargetLanguage,
+                    TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
+                ),
         )
 
     fun requireViewMode(rawValue: String): AirVisionViewMode =
@@ -226,4 +242,8 @@ data class AirVisionBackupResolvedAppPreferences(
     val startupDestination: AirVisionStartupDestination,
     val hudDisplayTarget: AirVisionHudDisplayTarget,
     val demoModeEnabled: Boolean,
+    val speakerEnabled: Boolean,
+    val nativeCaptionsEnabled: Boolean,
+    val translationCaptionSourceLanguage: String,
+    val translationCaptionTargetLanguage: String,
 )

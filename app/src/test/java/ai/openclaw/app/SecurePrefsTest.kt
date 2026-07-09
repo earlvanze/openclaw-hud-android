@@ -230,6 +230,10 @@ class SecurePrefsTest {
         prefs.setAirVisionStartupDestination(AirVisionStartupDestination.Voice)
         prefs.setAirVisionHudDisplayTarget(AirVisionHudDisplayTarget.LargestExternal)
         prefs.setAirVisionDemoModeEnabled(true)
+        prefs.setSpeakerEnabled(false)
+        prefs.setNativeCaptionsEnabled(true)
+        prefs.setTranslationCaptionSourceLanguage("pt-BR")
+        prefs.setTranslationCaptionTargetLanguage("ja")
 
         prefs.setAirVisionViewMode(AirVisionViewMode.Working)
         prefs.setAirVisionBrightnessPercent(51)
@@ -251,13 +255,18 @@ class SecurePrefsTest {
         val backup = prefs.exportAirVisionProfileBackup()
         val backupRoot = Json.parseToJsonElement(backup).jsonObject
         val runtimeProfiles = backupRoot.getValue("runtimeProfiles").jsonArray
+        val appPreferences = backupRoot.getValue("appPreferences").jsonObject
         val infinityRuntime =
             runtimeProfiles
                 .first { it.jsonObject.getValue("viewMode").jsonPrimitive.content == AirVisionViewMode.Infinity.rawValue }
                 .jsonObject
 
-        assertEquals("2", backupRoot.getValue("version").jsonPrimitive.content)
+        assertEquals("3", backupRoot.getValue("version").jsonPrimitive.content)
         assertEquals(AirVisionViewMode.entries.size, runtimeProfiles.size)
+        assertEquals(false, appPreferences.getValue("speakerEnabled").jsonPrimitive.boolean)
+        assertEquals(true, appPreferences.getValue("nativeCaptionsEnabled").jsonPrimitive.boolean)
+        assertEquals("pt", appPreferences.getValue("translationCaptionSourceLanguage").jsonPrimitive.content)
+        assertEquals("ja", appPreferences.getValue("translationCaptionTargetLanguage").jsonPrimitive.content)
         assertEquals(
             AirVisionDisplaySettings.LIGHT_LOAD_HUD_TRANSCRIPT_ENTRY_COUNT,
             infinityRuntime.getValue("hudTranscriptEntryCount").jsonPrimitive.int,
@@ -297,6 +306,10 @@ class SecurePrefsTest {
         assertEquals(AirVisionStartupDestination.Voice, importedPrefs.airVisionStartupDestination.value)
         assertEquals(AirVisionHudDisplayTarget.LargestExternal, importedPrefs.airVisionHudDisplayTarget.value)
         assertEquals(true, importedPrefs.airVisionDemoModeEnabled.value)
+        assertEquals(false, importedPrefs.speakerEnabled.value)
+        assertEquals(true, importedPrefs.nativeCaptionsEnabled.value)
+        assertEquals("pt", importedPrefs.translationCaptionSourceLanguage.value)
+        assertEquals("ja", importedPrefs.translationCaptionTargetLanguage.value)
 
         importedPrefs.setAirVisionViewMode(AirVisionViewMode.Working)
         assertEquals(51, importedPrefs.airVisionDisplaySettings.value.brightnessPercent)
@@ -348,6 +361,10 @@ class SecurePrefsTest {
         assertEquals(44, prefs.airVisionDisplaySettings.value.brightnessPercent)
         assertEquals(92, prefs.airVisionDisplaySettings.value.distanceCm)
         assertEquals("Walk HUD", prefs.airVisionCustomProfileLabels.value.custom1)
+        assertEquals(true, prefs.speakerEnabled.value)
+        assertEquals(false, prefs.nativeCaptionsEnabled.value)
+        assertEquals(TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE, prefs.translationCaptionSourceLanguage.value)
+        assertEquals(TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE, prefs.translationCaptionTargetLanguage.value)
     }
 
     @Test

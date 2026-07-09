@@ -84,6 +84,10 @@ class AirVisionDiagnosticsSnapshotTest {
                         reason = "selected_presentation_display",
                     ),
                 demoModeEnabled = true,
+                speakerEnabled = false,
+                nativeCaptionsEnabled = true,
+                translationCaptionSourceLanguage = "pt-BR",
+                translationCaptionTargetLanguage = "ja",
             )
 
         val encoded = AirVisionDiagnosticsSnapshots.encode(snapshot)
@@ -92,13 +96,14 @@ class AirVisionDiagnosticsSnapshotTest {
         val firmwareCapabilities = usb.getValue("firmwareCapabilities").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
         val hudRuntime = root.getValue("hudRuntime").jsonObject
+        val appPreferences = root.getValue("appPreferences").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
         val writableReportPath = firmwareCapabilities.getValue("writableReportPaths").jsonArray.first().jsonObject
         val firstFeatureReadiness = firmwareCapabilities.getValue("featureReadiness").jsonArray.first().jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("7", root.getValue("version").jsonPrimitive.content)
+        assertEquals("8", root.getValue("version").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)
@@ -160,7 +165,11 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", hudRuntime.getValue("selectedDisplayPresentationEligible").jsonPrimitive.content)
         assertEquals("false", hudRuntime.getValue("usedNonDefaultDisplayFallback").jsonPrimitive.content)
         assertEquals("selected_presentation_display", hudRuntime.getValue("displayRouteReason").jsonPrimitive.content)
-        assertEquals("es", root.getValue("appPreferences").jsonObject.getValue("language").jsonPrimitive.content)
+        assertEquals("es", appPreferences.getValue("language").jsonPrimitive.content)
+        assertEquals("false", appPreferences.getValue("speakerEnabled").jsonPrimitive.content)
+        assertEquals("true", appPreferences.getValue("nativeCaptionsEnabled").jsonPrimitive.content)
+        assertEquals("pt", appPreferences.getValue("translationCaptionSourceLanguage").jsonPrimitive.content)
+        assertEquals("ja", appPreferences.getValue("translationCaptionTargetLanguage").jsonPrimitive.content)
         assertTrue(encoded.contains("ASUS AirVision M1"))
     }
 

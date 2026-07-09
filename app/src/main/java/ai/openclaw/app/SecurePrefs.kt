@@ -844,6 +844,10 @@ class SecurePrefs(
                         startupDestination = _airVisionStartupDestination.value.rawValue,
                         hudDisplayTarget = _airVisionHudDisplayTarget.value.rawValue,
                         demoModeEnabled = _airVisionDemoModeEnabled.value,
+                        speakerEnabled = _speakerEnabled.value,
+                        nativeCaptionsEnabled = _nativeCaptionsEnabled.value,
+                        translationCaptionSourceLanguage = _translationCaptionSourceLanguage.value,
+                        translationCaptionTargetLanguage = _translationCaptionTargetLanguage.value,
                     ),
                 runtimeProfiles =
                     AirVisionViewMode.entries.map { mode ->
@@ -894,6 +898,10 @@ class SecurePrefs(
             putString(AIR_VISION_STARTUP_DESTINATION_KEY, appPreferences.startupDestination.rawValue)
             putString(AIR_VISION_HUD_DISPLAY_TARGET_KEY, appPreferences.hudDisplayTarget.rawValue)
             putBoolean(AIR_VISION_DEMO_MODE_ENABLED_KEY, appPreferences.demoModeEnabled)
+            putBoolean("voice.speakerEnabled", appPreferences.speakerEnabled)
+            putBoolean("nativeCaptions.enabled", appPreferences.nativeCaptionsEnabled)
+            putString("translationCaptions.sourceLanguage", appPreferences.translationCaptionSourceLanguage)
+            putString("translationCaptions.targetLanguage", appPreferences.translationCaptionTargetLanguage)
             AirVisionViewMode.entries.forEach { mode ->
                 putAirVisionProfileSettings(checkNotNull(profileByMode[mode]))
             }
@@ -905,6 +913,10 @@ class SecurePrefs(
         _airVisionStartupDestination.value = appPreferences.startupDestination
         _airVisionHudDisplayTarget.value = appPreferences.hudDisplayTarget
         _airVisionDemoModeEnabled.value = appPreferences.demoModeEnabled
+        _speakerEnabled.value = appPreferences.speakerEnabled
+        _nativeCaptionsEnabled.value = appPreferences.nativeCaptionsEnabled
+        _translationCaptionSourceLanguage.value = appPreferences.translationCaptionSourceLanguage
+        _translationCaptionTargetLanguage.value = appPreferences.translationCaptionTargetLanguage
         _airVisionDisplaySettings.value = activeSettings
         _airVisionPhysicalMainScreenVisible.value = activeSettings.physicalMainScreenVisible
     }

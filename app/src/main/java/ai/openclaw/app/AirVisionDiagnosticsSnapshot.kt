@@ -130,7 +130,7 @@ data class AirVisionDiagnosticsHudRuntime(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 7
+    const val VERSION = 8
 
     private val json =
         Json {
@@ -150,6 +150,10 @@ object AirVisionDiagnosticsSnapshots {
         hudPresentationActive: Boolean = false,
         hudDisplayRoute: AirVisionHudDisplayRoute = AirVisionHudDisplayRoute(target = hudDisplayTarget),
         demoModeEnabled: Boolean,
+        speakerEnabled: Boolean = true,
+        nativeCaptionsEnabled: Boolean = false,
+        translationCaptionSourceLanguage: String = TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
+        translationCaptionTargetLanguage: String = TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
     ): AirVisionDiagnosticsSnapshot =
         AirVisionDiagnosticsSnapshot(
             usb =
@@ -238,6 +242,18 @@ object AirVisionDiagnosticsSnapshots {
                     startupDestination = startupDestination.rawValue,
                     hudDisplayTarget = hudDisplayTarget.rawValue,
                     demoModeEnabled = demoModeEnabled,
+                    speakerEnabled = speakerEnabled,
+                    nativeCaptionsEnabled = nativeCaptionsEnabled,
+                    translationCaptionSourceLanguage =
+                        TranslationCaptionMode.normalizeLanguageCode(
+                            translationCaptionSourceLanguage,
+                            TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
+                        ),
+                    translationCaptionTargetLanguage =
+                        TranslationCaptionMode.normalizeLanguageCode(
+                            translationCaptionTargetLanguage,
+                            TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
+                        ),
                 ),
         )
 

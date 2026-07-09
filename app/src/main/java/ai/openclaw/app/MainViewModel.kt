@@ -502,6 +502,10 @@ class MainViewModel(
                 hudPresentationActive = airVisionHudPresentationActive.value,
                 hudDisplayRoute = airVisionHudDisplayRoute.value,
                 demoModeEnabled = airVisionDemoModeEnabled.value,
+                speakerEnabled = speakerEnabled.value,
+                nativeCaptionsEnabled = nativeCaptionsEnabled.value,
+                translationCaptionSourceLanguage = translationCaptionSourceLanguage.value,
+                translationCaptionTargetLanguage = translationCaptionTargetLanguage.value,
             ),
         )
 
