@@ -333,7 +333,11 @@ release screenshots.
 Play target. It verifies the newest signed HUD AAB, confirms the generated
 manifest package is `ai.openclaw.app.hud`, fails if restricted Play-risk
 permissions drift back into the HUD flavor, confirms the notification-listener
-service declaration, and checks the English listing/release-notes length limits.
+service declaration, checks the English listing/release-notes length limits, and
+confirms App Bundle language splits stay disabled while the app uses runtime
+AirVision language switching. The language split setting is intentional: Play
+can otherwise deliver only the install-time language resources, which breaks the
+in-app AirVision companion language menu.
 GitHub Actions also builds the HUD release bundle with
 `-POPENCLAW_ANDROID_ALLOW_UNSIGNED_RELEASE=true` and runs the verifier with
 `--skip-signature` so CI can validate the release manifest and listing without

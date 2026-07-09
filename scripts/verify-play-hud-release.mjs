@@ -29,6 +29,18 @@ const defaultManifestPath = join(
   "AndroidManifest.xml",
 );
 const defaultListingDir = join(androidDir, "play", "listings");
+const gradleBuildPath = join(androidDir, "app", "build.gradle.kts");
+const airVisionAppLocalePath = join(
+  androidDir,
+  "app",
+  "src",
+  "main",
+  "java",
+  "ai",
+  "openclaw",
+  "app",
+  "AirVisionAppLocale.kt",
+);
 
 const expectedPackage = "ai.openclaw.app.hud";
 const expectedPermissions = [
@@ -201,6 +213,91 @@ function trimTrailingNewline(value) {
   return value.replace(/\r\n/gu, "\n").replace(/\n+$/u, "");
 }
 
+function stripKotlinComments(source) {
+  let stripped = "";
+  let index = 0;
+  let inLineComment = false;
+  let inBlockComment = false;
+  let inString = false;
+  let inTripleString = false;
+  let escaped = false;
+
+  while (index < source.length) {
+    const current = source[index];
+    const next = source[index + 1];
+    const nextTwo = source.slice(index, index + 3);
+
+    if (inLineComment) {
+      if (current === "\n") {
+        inLineComment = false;
+        stripped += "\n";
+      }
+      index += 1;
+      continue;
+    }
+
+    if (inBlockComment) {
+      if (current === "*" && next === "/") {
+        inBlockComment = false;
+        index += 2;
+      } else {
+        if (current === "\n") stripped += "\n";
+        index += 1;
+      }
+      continue;
+    }
+
+    if (inTripleString) {
+      stripped += current;
+      if (nextTwo === "\"\"\"") {
+        stripped += source[index + 1] + source[index + 2];
+        inTripleString = false;
+        index += 3;
+      } else {
+        index += 1;
+      }
+      continue;
+    }
+
+    if (inString) {
+      stripped += current;
+      if (escaped) escaped = false;
+      else if (current === "\\") escaped = true;
+      else if (current === "\"") inString = false;
+      index += 1;
+      continue;
+    }
+
+    if (current === "/" && next === "/") {
+      inLineComment = true;
+      index += 2;
+      continue;
+    }
+    if (current === "/" && next === "*") {
+      inBlockComment = true;
+      index += 2;
+      continue;
+    }
+    if (nextTwo === "\"\"\"") {
+      inTripleString = true;
+      stripped += nextTwo;
+      index += 3;
+      continue;
+    }
+    if (current === "\"") {
+      inString = true;
+      stripped += current;
+      index += 1;
+      continue;
+    }
+
+    stripped += current;
+    index += 1;
+  }
+
+  return stripped;
+}
+
 async function readListingFile(path) {
   return trimTrailingNewline(await readFile(path, "utf8"));
 }
@@ -300,12 +397,40 @@ async function verifyManifest(manifestPath) {
   return verifyManifestXml(xml, manifestPath);
 }
 
+async function verifyRuntimeLocaleBundleConfig() {
+  const localeSource = await readFile(airVisionAppLocalePath, "utf8").catch(() => "");
+  const usesRuntimeLocale =
+    localeSource.includes("createConfigurationContext") ||
+    localeSource.includes("LocaleManager") ||
+    localeSource.includes("applicationLocales");
+
+  if (!usesRuntimeLocale) {
+    return { usesRuntimeLocale: false, languageSplitsDisabled: null };
+  }
+
+  const gradleSource = stripKotlinComments(await readFile(gradleBuildPath, "utf8"));
+  const languageSplitsDisabled =
+    /bundle\s*\{[\s\S]*language\s*\{[\s\S]*enableSplit\s*=\s*false/u.test(gradleSource);
+
+  if (!languageSplitsDisabled) {
+    throw new Error(
+      [
+        "Runtime AirVision app-language switching requires Play App Bundle language splits to stay disabled.",
+        "Add android { bundle { language { enableSplit = false } } } to app/build.gradle.kts.",
+      ].join(" "),
+    );
+  }
+
+  return { usesRuntimeLocale: true, languageSplitsDisabled };
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const bundlePath = args.bundle ?? (await latestHudBundle());
   const bundle = await verifyBundle(bundlePath, args.skipSignature);
   const manifest = await verifyManifest(args.manifest);
   const listing = await verifyListing(args.listingDir, args.language);
+  const localeBundleConfig = await verifyRuntimeLocaleBundleConfig();
 
   console.log(`Bundle: ${bundle.path} (${bundle.size} bytes)`);
   console.log(`SHA-256: ${bundle.sha256}`);
@@ -317,6 +442,9 @@ async function main() {
   console.log(
     `Listing ${args.language}: title ${listing.title}/30, short ${listing.shortDescription}/80, full ${listing.fullDescription}/4000, release notes ${listing.releaseNotes}/500`,
   );
+  if (localeBundleConfig.usesRuntimeLocale) {
+    console.log("Runtime locale delivery: App Bundle language splits disabled");
+  }
   console.log("Play HUD release verifier passed.");
 }
 

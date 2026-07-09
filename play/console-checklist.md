@@ -26,6 +26,8 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
   Play Console and set `play/app-content-answers.json`
   `finalSubmission.hostedPrivacyPolicyUrl` to that URL.
 - Run `node scripts/verify-play-hud-release.mjs` before every Play upload.
+  This also confirms App Bundle language splits remain disabled for the
+  AirVision companion language menu.
 - Run `node scripts/verify-play-submission-package.mjs` before filling or
   updating Play Console App content answers.
 - Upload `build/release-bundles/openclaw-2026.7.9-hud-release.aab` to the internal track first.
