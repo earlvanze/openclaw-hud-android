@@ -7,12 +7,72 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbEndpoint
 import android.hardware.usb.UsbInterface
 import android.hardware.usb.UsbManager
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.atomic.AtomicBoolean
+
+data class AirVisionUsbEndpointInfo(
+    val address: Int,
+    val direction: Int,
+    val type: Int,
+    val maxPacketSize: Int,
+    val interval: Int,
+) {
+    val directionLabel: String
+        get() =
+            when (direction) {
+                UsbConstants.USB_DIR_IN -> "in"
+                UsbConstants.USB_DIR_OUT -> "out"
+                else -> "0x${direction.toString(16)}"
+            }
+
+    val typeLabel: String
+        get() =
+            when (type) {
+                UsbConstants.USB_ENDPOINT_XFER_CONTROL -> "control"
+                UsbConstants.USB_ENDPOINT_XFER_ISOC -> "isoc"
+                UsbConstants.USB_ENDPOINT_XFER_BULK -> "bulk"
+                UsbConstants.USB_ENDPOINT_XFER_INT -> "interrupt"
+                else -> "type-$type"
+            }
+
+    val summary: String
+        get() = "$directionLabel/$typeLabel addr=0x${address.toString(16)} max=$maxPacketSize int=$interval"
+}
+
+data class AirVisionUsbInterfaceInfo(
+    val id: Int,
+    val interfaceClass: Int,
+    val interfaceSubclass: Int,
+    val interfaceProtocol: Int,
+    val endpoints: List<AirVisionUsbEndpointInfo>,
+) {
+    val classLabel: String
+        get() =
+            when (interfaceClass) {
+                UsbConstants.USB_CLASS_AUDIO -> "audio"
+                UsbConstants.USB_CLASS_HID -> "hid"
+                UsbConstants.USB_CLASS_HUB -> "hub"
+                UsbConstants.USB_CLASS_MASS_STORAGE -> "storage"
+                UsbConstants.USB_CLASS_PER_INTERFACE -> "per-interface"
+                UsbConstants.USB_CLASS_VENDOR_SPEC -> "vendor"
+                else -> "class-$interfaceClass"
+            }
+
+    val summary: String
+        get() {
+            val endpointText =
+                endpoints
+                    .takeIf { it.isNotEmpty() }
+                    ?.joinToString("; ") { it.summary }
+                    ?: "no endpoints"
+            return "if$id $classLabel sub=$interfaceSubclass proto=$interfaceProtocol: $endpointText"
+        }
+}
 
 data class AirVisionUsbState(
     val connected: Boolean = false,
@@ -22,6 +82,7 @@ data class AirVisionUsbState(
     val hidControlInterface: Boolean = false,
     val audioInterface: Boolean = false,
     val inputInterface: Boolean = false,
+    val interfaces: List<AirVisionUsbInterfaceInfo> = emptyList(),
     val lastPermissionGranted: Boolean? = null,
 ) {
     val firmwareControlReady: Boolean
@@ -35,6 +96,13 @@ data class AirVisionUsbState(
                 hidControlInterface -> "M1 HID control interface detected. ASUS report protocol still pending."
                 else -> "M1 detected, but no writable HID control interface was exposed."
             }
+
+    val diagnosticsText: String
+        get() =
+            interfaces
+                .takeIf { it.isNotEmpty() }
+                ?.joinToString("\n") { it.summary }
+                ?: "No USB interface descriptors captured."
 }
 
 class AirVisionUsbController(
@@ -118,6 +186,7 @@ class AirVisionUsbController(
                 hidControlInterface = device.hasHidControlInterface(),
                 audioInterface = device.hasInterfaceClass(UsbConstants.USB_CLASS_AUDIO),
                 inputInterface = device.hasInputOnlyHidInterface(),
+                interfaces = device.airVisionInterfaceInfo(),
                 lastPermissionGranted = lastPermissionGranted,
             )
     }
@@ -192,3 +261,24 @@ private fun UsbDevice.interfaces(): Sequence<UsbInterface> =
 
 private fun UsbInterface.endpoints() =
     (0 until endpointCount).asSequence().map { getEndpoint(it) }
+
+private fun UsbDevice.airVisionInterfaceInfo(): List<AirVisionUsbInterfaceInfo> =
+    interfaces()
+        .map { usbInterface ->
+            AirVisionUsbInterfaceInfo(
+                id = usbInterface.id,
+                interfaceClass = usbInterface.interfaceClass,
+                interfaceSubclass = usbInterface.interfaceSubclass,
+                interfaceProtocol = usbInterface.interfaceProtocol,
+                endpoints = usbInterface.endpoints().map { it.airVisionEndpointInfo() }.toList(),
+            )
+        }.toList()
+
+private fun UsbEndpoint.airVisionEndpointInfo(): AirVisionUsbEndpointInfo =
+    AirVisionUsbEndpointInfo(
+        address = address,
+        direction = direction,
+        type = type,
+        maxPacketSize = maxPacketSize,
+        interval = interval,
+    )

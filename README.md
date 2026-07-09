@@ -41,7 +41,8 @@ Current live target:
 - [x] AirVision M1 per-mode settings profiles with viewing mode, HUD placement,
   safe area, Splendid mode, brightness, blue-light filter, distance, IPD,
   Motion Sync, Light Load, and active-profile reset controls
-- [x] Optional AirVision M1 USB firmware-link detection and permission flow
+- [x] Optional AirVision M1 USB firmware-link detection, permission flow, and
+  interface/endpoint diagnostics
 - [ ] Full end-to-end QA and release hardening
 
 ## Open in Android Studio
@@ -134,13 +135,14 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation. |
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll handling, and M1 media/tap key double-tap mic behavior. |
-| Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, and HID/audio/input interface status. |
+| Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, and USB interface/endpoint diagnostics for protocol capture work. |
 | Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports per-mode placement and safe-area layout profiles for the M1 presentation. |
 
 Firmware controls are intentionally read-only/status-only for now. The app can
-detect the M1 USB HID control interface and request Android USB permission, but
-it does not send ASUS vendor reports until the Windows app protocol is captured
-and validated.
+detect the M1 USB HID control interface, request Android USB permission, and
+display USB interface/endpoint descriptors in Settings for future ASUS protocol
+capture work, but it does not send ASUS vendor reports until the Windows app
+protocol is captured and validated.
 
 Captions default to Samsung/Android native captioning so the system floating
 caption window can sit over the minimal HUD. The Voice tab exposes the provider

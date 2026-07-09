@@ -580,6 +580,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                     hidControlInterface = airVisionUsbState.hidControlInterface,
                                     audioInterface = airVisionUsbState.audioInterface,
                                     inputInterface = airVisionUsbState.inputInterface,
+                                    diagnosticsText = airVisionUsbState.diagnosticsText,
                                 ),
                                 style = mobileCallout,
                             )
@@ -1703,6 +1704,7 @@ private fun airVisionUsbStatusText(
     hidControlInterface: Boolean,
     audioInterface: Boolean,
     inputInterface: Boolean,
+    diagnosticsText: String,
 ): String {
     val interfaces =
         listOfNotNull(
@@ -1715,6 +1717,7 @@ private fun airVisionUsbStatusText(
         deviceLabel?.takeIf { it.isNotBlank() },
         vendorProduct?.takeIf { it.isNotBlank() },
         interfaces.takeIf { it.isNotBlank() }?.let { "interfaces: $it" },
+        diagnosticsText.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
     ).joinToString("\n")
 }
 

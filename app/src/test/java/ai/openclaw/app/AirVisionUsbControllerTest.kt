@@ -61,4 +61,35 @@ class AirVisionUsbControllerTest {
             ).statusText,
         )
     }
+
+    @Test
+    fun diagnosticsText_summarizesInterfacesAndEndpoints() {
+        val state =
+            AirVisionUsbState(
+                interfaces =
+                    listOf(
+                        AirVisionUsbInterfaceInfo(
+                            id = 1,
+                            interfaceClass = 3,
+                            interfaceSubclass = 0,
+                            interfaceProtocol = 0,
+                            endpoints =
+                                listOf(
+                                    AirVisionUsbEndpointInfo(
+                                        address = 1,
+                                        direction = 0,
+                                        type = 3,
+                                        maxPacketSize = 64,
+                                        interval = 1,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        assertEquals(
+            "if1 hid sub=0 proto=0: out/interrupt addr=0x1 max=64 int=1",
+            state.diagnosticsText,
+        )
+    }
 }
