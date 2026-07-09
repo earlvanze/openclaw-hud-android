@@ -118,6 +118,7 @@ class MainViewModel(
     val micEnabled: StateFlow<Boolean> = prefs.talkEnabled
     val nativeCaptionsEnabled: StateFlow<Boolean> = prefs.nativeCaptionsEnabled
     val airVisionDisplaySettings: StateFlow<AirVisionDisplaySettings> = prefs.airVisionDisplaySettings
+    val airVisionHudControls: StateFlow<AirVisionHudControls> = prefs.airVisionHudControls
     val airVisionUsbState: StateFlow<AirVisionUsbState> = nodeApp.airVisionUsb.state
 
     val micCooldown: StateFlow<Boolean> = runtimeState(initial = false) { it.micCooldown }
@@ -386,6 +387,26 @@ class MainViewModel(
 
     fun setAirVisionLightLoadModeEnabled(enabled: Boolean) {
         prefs.setAirVisionLightLoadModeEnabled(enabled)
+    }
+
+    fun setAirVisionHudSingleTapAction(action: AirVisionHudTouchAction) {
+        prefs.setAirVisionHudSingleTapAction(action)
+    }
+
+    fun setAirVisionHudDoubleTapAction(action: AirVisionHudDoubleTapAction) {
+        prefs.setAirVisionHudDoubleTapAction(action)
+    }
+
+    fun setAirVisionHudSwipeAction(action: AirVisionHudSwipeAction) {
+        prefs.setAirVisionHudSwipeAction(action)
+    }
+
+    fun setAirVisionHudBrightnessKeyAction(action: AirVisionHudKeyAction) {
+        prefs.setAirVisionHudBrightnessKeyAction(action)
+    }
+
+    fun setAirVisionHudMediaKeyAction(action: AirVisionHudMediaKeyAction) {
+        prefs.setAirVisionHudMediaKeyAction(action)
     }
 
     fun refreshAirVisionUsb() {

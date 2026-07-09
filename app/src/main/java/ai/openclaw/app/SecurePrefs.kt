@@ -45,6 +45,11 @@ class SecurePrefs(
         private const val AIR_VISION_IPD_MM_KEY = "airVision.ipdMm"
         private const val AIR_VISION_MOTION_SYNC_ENABLED_KEY = "airVision.motionSyncEnabled"
         private const val AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY = "airVision.lightLoadModeEnabled"
+        private const val AIR_VISION_HUD_SINGLE_TAP_ACTION_KEY = "airVision.hud.singleTapAction"
+        private const val AIR_VISION_HUD_DOUBLE_TAP_ACTION_KEY = "airVision.hud.doubleTapAction"
+        private const val AIR_VISION_HUD_SWIPE_ACTION_KEY = "airVision.hud.swipeAction"
+        private const val AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY = "airVision.hud.brightnessKeyAction"
+        private const val AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY = "airVision.hud.mediaKeyAction"
     }
 
     private val appContext = context.applicationContext
@@ -182,6 +187,9 @@ class SecurePrefs(
 
     private val _airVisionDisplaySettings = MutableStateFlow(loadAirVisionDisplaySettings())
     val airVisionDisplaySettings: StateFlow<AirVisionDisplaySettings> = _airVisionDisplaySettings
+
+    private val _airVisionHudControls = MutableStateFlow(loadAirVisionHudControls())
+    val airVisionHudControls: StateFlow<AirVisionHudControls> = _airVisionHudControls
 
     private val _translationCaptionSourceLanguage =
         MutableStateFlow(
@@ -576,6 +584,31 @@ class SecurePrefs(
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(lightLoadModeEnabled = value)
     }
 
+    fun setAirVisionHudSingleTapAction(action: AirVisionHudTouchAction) {
+        plainPrefs.edit { putString(AIR_VISION_HUD_SINGLE_TAP_ACTION_KEY, action.rawValue) }
+        _airVisionHudControls.value = _airVisionHudControls.value.copy(singleTapAction = action)
+    }
+
+    fun setAirVisionHudDoubleTapAction(action: AirVisionHudDoubleTapAction) {
+        plainPrefs.edit { putString(AIR_VISION_HUD_DOUBLE_TAP_ACTION_KEY, action.rawValue) }
+        _airVisionHudControls.value = _airVisionHudControls.value.copy(doubleTapAction = action)
+    }
+
+    fun setAirVisionHudSwipeAction(action: AirVisionHudSwipeAction) {
+        plainPrefs.edit { putString(AIR_VISION_HUD_SWIPE_ACTION_KEY, action.rawValue) }
+        _airVisionHudControls.value = _airVisionHudControls.value.copy(swipeAction = action)
+    }
+
+    fun setAirVisionHudBrightnessKeyAction(action: AirVisionHudKeyAction) {
+        plainPrefs.edit { putString(AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY, action.rawValue) }
+        _airVisionHudControls.value = _airVisionHudControls.value.copy(brightnessKeyAction = action)
+    }
+
+    fun setAirVisionHudMediaKeyAction(action: AirVisionHudMediaKeyAction) {
+        plainPrefs.edit { putString(AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY, action.rawValue) }
+        _airVisionHudControls.value = _airVisionHudControls.value.copy(mediaKeyAction = action)
+    }
+
     fun setTranslationCaptionSourceLanguage(value: String) {
         val normalized =
             TranslationCaptionMode.normalizeLanguageCode(
@@ -665,6 +698,30 @@ class SecurePrefs(
             motionSyncEnabled = plainPrefs.getBoolean(AIR_VISION_MOTION_SYNC_ENABLED_KEY, true),
             lightLoadModeEnabled = plainPrefs.getBoolean(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, false),
         ).normalized
+
+    private fun loadAirVisionHudControls(): AirVisionHudControls =
+        AirVisionHudControls(
+            singleTapAction =
+                AirVisionHudTouchAction.fromRawValue(
+                    plainPrefs.getString(AIR_VISION_HUD_SINGLE_TAP_ACTION_KEY, null),
+                ),
+            doubleTapAction =
+                AirVisionHudDoubleTapAction.fromRawValue(
+                    plainPrefs.getString(AIR_VISION_HUD_DOUBLE_TAP_ACTION_KEY, null),
+                ),
+            swipeAction =
+                AirVisionHudSwipeAction.fromRawValue(
+                    plainPrefs.getString(AIR_VISION_HUD_SWIPE_ACTION_KEY, null),
+                ),
+            brightnessKeyAction =
+                AirVisionHudKeyAction.fromRawValue(
+                    plainPrefs.getString(AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY, null),
+                ),
+            mediaKeyAction =
+                AirVisionHudMediaKeyAction.fromRawValue(
+                    plainPrefs.getString(AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY, null),
+                ),
+        )
 
     private fun loadWakeWords(): List<String> {
         val raw = plainPrefs.getString("voiceWake.triggerWords", null)?.trim()

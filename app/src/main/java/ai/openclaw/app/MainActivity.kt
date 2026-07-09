@@ -315,8 +315,12 @@ class MainActivity : ComponentActivity() {
 
     internal fun handleHudKeyEvent(event: KeyEvent): Boolean {
         if (!BuildConfig.OPENCLAW_DEFAULT_HUD) return false
+        val hudControls = viewModel.airVisionHudControls.value
         val scrollDelta = hudScrollKeyDeltas[event.keyCode]
         if (scrollDelta != null) {
+            if (hudControls.brightnessKeyAction != AirVisionHudKeyAction.ScrollChat) {
+                return false
+            }
             if (event.action == KeyEvent.ACTION_DOWN) {
                 viewModel.requestHudScroll(scrollDelta)
                 Log.d(TAG, "M1/brightness key scrolled HUD keyCode=${event.keyCode} delta=$scrollDelta")
@@ -329,6 +333,10 @@ class MainActivity : ComponentActivity() {
             if (event.action == KeyEvent.ACTION_UP && event.isAirVisionM1Event()) {
                 Log.d(TAG, "unhandled M1 key keyCode=${event.keyCode} scanCode=${event.scanCode}")
             }
+            return false
+        }
+
+        if (hudControls.mediaKeyAction != AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
             return false
         }
 

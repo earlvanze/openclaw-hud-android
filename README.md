@@ -33,7 +33,8 @@ Current live target:
 - [x] Voice tab full functionality
 - [x] Agents tab for agent/session selection and provider/model controls
 - [x] HUD presentation mode for wearable display testing
-- [x] Minimal HUD gestures: swipe scrolls chat, double-tap dismisses clearable notification
+- [x] Minimal HUD gestures: single-tap dismisses clearable notifications,
+  double-tap toggles mic, and swipe scrolls chat
 - [x] HUD input: Enter sends, Shift+Enter inserts a newline
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
@@ -113,6 +114,12 @@ HUD controls:
 - Press Enter on a hardware keyboard to send the chat input.
 - Press Shift+Enter for a newline.
 
+The single-tap, double-tap, swipe, M1 brightness-key, and M1 media/tap-key
+actions are configurable in Settings -> AirVision M1 -> Gesture & Hotkey
+Settings. Defaults are tuned for walking HUD use: single-tap clears the current
+notification, double-tap toggles mic, vertical swipe scrolls chat, and M1
+brightness-key events scroll chat while the HUD is focused.
+
 AirVision M1 companion settings live in Settings -> AirVision M1:
 
 | Windows AirVision feature | Android HUD status |
@@ -125,6 +132,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Blue Light Filter | Implemented as Android HUD warm filtering. |
 | Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation. |
+| Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll handling, and M1 media/tap key double-tap mic behavior. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, and HID/audio/input interface status. |
 | Multi-screen desktop layouts | Not implemented on Android. Samsung DeX and Android Presentation own the external display topology. |
 

@@ -3,6 +3,9 @@
 package ai.openclaw.app.ui
 
 import ai.openclaw.app.AirVisionDisplaySettings
+import ai.openclaw.app.AirVisionHudDoubleTapAction
+import ai.openclaw.app.AirVisionHudSwipeAction
+import ai.openclaw.app.AirVisionHudTouchAction
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.TranslationCaptionMode
 import ai.openclaw.app.chat.ChatMessage
@@ -108,6 +111,7 @@ fun HudScreen(viewModel: MainViewModel) {
     val notificationSnapshot by viewModel.notificationSnapshot.collectAsState()
     val pendingTrust by viewModel.pendingGatewayTrust.collectAsState()
     val airVisionSettings by viewModel.airVisionDisplaySettings.collectAsState()
+    val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
     var prompt by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(mainSessionKey) {
@@ -196,20 +200,28 @@ fun HudScreen(viewModel: MainViewModel) {
             Modifier
                 .fillMaxSize()
                 .background(hudBackground)
-                .pointerInput(notificationLine?.key) {
+                .pointerInput(notificationLine?.key, airVisionHudControls.singleTapAction, airVisionHudControls.doubleTapAction) {
                     detectTapGestures(
                         onTap = {
-                            val line = notificationLine
-                            if (line?.isClearable == true) {
-                                viewModel.dismissNotification(line.key)
-                            }
+                            performHudSingleTapAction(
+                                action = airVisionHudControls.singleTapAction,
+                                notificationLine = notificationLine,
+                                viewModel = viewModel,
+                            )
                         },
                         onDoubleTap = {
-                            viewModel.toggleMicEnabled()
+                            performHudDoubleTapAction(
+                                action = airVisionHudControls.doubleTapAction,
+                                notificationLine = notificationLine,
+                                viewModel = viewModel,
+                            )
                         },
                     )
-                }.pointerInput(chatScrollState) {
+                }.pointerInput(chatScrollState, airVisionHudControls.swipeAction) {
                     detectDragGestures { change, dragAmount ->
+                        if (airVisionHudControls.swipeAction != AirVisionHudSwipeAction.ScrollChat) {
+                            return@detectDragGestures
+                        }
                         change.consume()
                         gestureScope.launch {
                             chatScrollState.scrollBy(-dragAmount.y)
@@ -350,6 +362,40 @@ fun HudScreen(viewModel: MainViewModel) {
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = dimAlpha)),
             )
+        }
+    }
+}
+
+private fun performHudSingleTapAction(
+    action: AirVisionHudTouchAction,
+    notificationLine: HudNotificationLine?,
+    viewModel: MainViewModel,
+) {
+    when (action) {
+        AirVisionHudTouchAction.None -> Unit
+        AirVisionHudTouchAction.DismissNotification -> {
+            val line = notificationLine
+            if (line?.isClearable == true) {
+                viewModel.dismissNotification(line.key)
+            }
+        }
+        AirVisionHudTouchAction.ToggleMic -> viewModel.toggleMicEnabled()
+    }
+}
+
+private fun performHudDoubleTapAction(
+    action: AirVisionHudDoubleTapAction,
+    notificationLine: HudNotificationLine?,
+    viewModel: MainViewModel,
+) {
+    when (action) {
+        AirVisionHudDoubleTapAction.None -> Unit
+        AirVisionHudDoubleTapAction.ToggleMic -> viewModel.toggleMicEnabled()
+        AirVisionHudDoubleTapAction.DismissNotification -> {
+            val line = notificationLine
+            if (line?.isClearable == true) {
+                viewModel.dismissNotification(line.key)
+            }
         }
     }
 }

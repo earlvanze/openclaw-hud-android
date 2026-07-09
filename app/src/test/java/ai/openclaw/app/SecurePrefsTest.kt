@@ -89,4 +89,27 @@ class SecurePrefsTest {
         assertEquals(false, settings.motionSyncEnabled)
         assertEquals(true, settings.lightLoadModeEnabled)
     }
+
+    @Test
+    fun airVisionHudControls_persist() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionHudSingleTapAction(AirVisionHudTouchAction.ToggleMic)
+        prefs.setAirVisionHudDoubleTapAction(AirVisionHudDoubleTapAction.DismissNotification)
+        prefs.setAirVisionHudSwipeAction(AirVisionHudSwipeAction.None)
+        prefs.setAirVisionHudBrightnessKeyAction(AirVisionHudKeyAction.None)
+        prefs.setAirVisionHudMediaKeyAction(AirVisionHudMediaKeyAction.None)
+
+        val reloaded = SecurePrefs(context)
+        val controls = reloaded.airVisionHudControls.value
+
+        assertEquals(AirVisionHudTouchAction.ToggleMic, controls.singleTapAction)
+        assertEquals(AirVisionHudDoubleTapAction.DismissNotification, controls.doubleTapAction)
+        assertEquals(AirVisionHudSwipeAction.None, controls.swipeAction)
+        assertEquals(AirVisionHudKeyAction.None, controls.brightnessKeyAction)
+        assertEquals(AirVisionHudMediaKeyAction.None, controls.mediaKeyAction)
+    }
 }

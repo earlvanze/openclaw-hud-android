@@ -1,6 +1,11 @@
 package ai.openclaw.app.ui
 
 import ai.openclaw.app.AirVisionDisplaySettings
+import ai.openclaw.app.AirVisionHudDoubleTapAction
+import ai.openclaw.app.AirVisionHudKeyAction
+import ai.openclaw.app.AirVisionHudMediaKeyAction
+import ai.openclaw.app.AirVisionHudSwipeAction
+import ai.openclaw.app.AirVisionHudTouchAction
 import ai.openclaw.app.AirVisionSplendidMode
 import ai.openclaw.app.AirVisionViewMode
 import ai.openclaw.app.BuildConfig
@@ -96,6 +101,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val notificationForwardingMaxEventsPerMinute by viewModel.notificationForwardingMaxEventsPerMinute.collectAsState()
     val notificationForwardingSessionKey by viewModel.notificationForwardingSessionKey.collectAsState()
     val airVisionDisplaySettings by viewModel.airVisionDisplaySettings.collectAsState()
+    val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
 
     var notificationQuietStartDraft by remember(notificationForwardingQuietStart) {
@@ -741,6 +747,76 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 onCheckedChange = viewModel::setAirVisionLightLoadModeEnabled,
                             )
                         },
+                    )
+                }
+            }
+            item {
+                Column(modifier = Modifier.settingsRowModifier()) {
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Gesture & Hotkey Settings", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Configures HUD touch gestures and M1 key handling while the HUD is focused.",
+                                style = mobileCallout,
+                            )
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "Single Tap",
+                        currentLabel = airVisionHudControls.singleTapAction.label,
+                        supportingText = "Default clears the visible notification.",
+                        options = AirVisionHudTouchAction.entries.toList(),
+                        selected = airVisionHudControls.singleTapAction,
+                        optionLabel = { it.label },
+                        optionDescription = ::airVisionTouchActionDescription,
+                        onSelected = viewModel::setAirVisionHudSingleTapAction,
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "Double Tap",
+                        currentLabel = airVisionHudControls.doubleTapAction.label,
+                        supportingText = "Default toggles microphone capture.",
+                        options = AirVisionHudDoubleTapAction.entries.toList(),
+                        selected = airVisionHudControls.doubleTapAction,
+                        optionLabel = { it.label },
+                        optionDescription = ::airVisionDoubleTapActionDescription,
+                        onSelected = viewModel::setAirVisionHudDoubleTapAction,
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "Swipe",
+                        currentLabel = airVisionHudControls.swipeAction.label,
+                        supportingText = "Controls drag gestures on the HUD surface.",
+                        options = AirVisionHudSwipeAction.entries.toList(),
+                        selected = airVisionHudControls.swipeAction,
+                        optionLabel = { it.label },
+                        optionDescription = ::airVisionSwipeActionDescription,
+                        onSelected = viewModel::setAirVisionHudSwipeAction,
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "M1 Brightness Keys",
+                        currentLabel = airVisionHudControls.brightnessKeyAction.label,
+                        supportingText = "Scroll chat consumes M1 brightness key events while HUD is focused.",
+                        options = AirVisionHudKeyAction.entries.toList(),
+                        selected = airVisionHudControls.brightnessKeyAction,
+                        optionLabel = { it.label },
+                        optionDescription = ::airVisionBrightnessKeyActionDescription,
+                        onSelected = viewModel::setAirVisionHudBrightnessKeyAction,
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "M1 Media/Tap Key",
+                        currentLabel = airVisionHudControls.mediaKeyAction.label,
+                        supportingText = "Controls media-key handling from the M1 touch hardware.",
+                        options = AirVisionHudMediaKeyAction.entries.toList(),
+                        selected = airVisionHudControls.mediaKeyAction,
+                        optionLabel = { it.label },
+                        optionDescription = ::airVisionMediaKeyActionDescription,
+                        onSelected = viewModel::setAirVisionHudMediaKeyAction,
                     )
                 }
             }
@@ -1434,6 +1510,60 @@ fun SettingsSheet(viewModel: MainViewModel) {
 }
 
 @Composable
+private fun <T> AirVisionOptionGroup(
+    title: String,
+    currentLabel: String,
+    supportingText: String,
+    options: List<T>,
+    selected: T,
+    optionLabel: (T) -> String,
+    optionDescription: (T) -> String,
+    onSelected: (T) -> Unit,
+) {
+    Column {
+        ListItem(
+            modifier = Modifier.fillMaxWidth(),
+            colors =
+                ListItemDefaults.colors(
+                    containerColor = Color.Transparent,
+                    headlineColor = mobileText,
+                    supportingColor = mobileTextSecondary,
+                    trailingIconColor = mobileTextSecondary,
+                    leadingIconColor = mobileTextSecondary,
+                ),
+            headlineContent = { Text(title, style = mobileHeadline) },
+            supportingContent = {
+                Text("Current: $currentLabel. $supportingText", style = mobileCallout)
+            },
+        )
+        options.forEach { option ->
+            HorizontalDivider(color = mobileBorder)
+            ListItem(
+                modifier = Modifier.fillMaxWidth(),
+                colors =
+                    ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                        headlineColor = mobileText,
+                        supportingColor = mobileTextSecondary,
+                        trailingIconColor = mobileTextSecondary,
+                        leadingIconColor = mobileTextSecondary,
+                    ),
+                headlineContent = { Text(optionLabel(option), style = mobileHeadline) },
+                supportingContent = {
+                    Text(optionDescription(option), style = mobileCallout)
+                },
+                trailingContent = {
+                    RadioButton(
+                        selected = selected == option,
+                        onClick = { onSelected(option) },
+                    )
+                },
+            )
+        }
+    }
+}
+
+@Composable
 private fun AirVisionSliderRow(
     label: String,
     valueText: String,
@@ -1478,6 +1608,38 @@ private fun airVisionSplendidModeDescription(mode: AirVisionSplendidMode): Strin
         AirVisionSplendidMode.Office -> "Stored Windows-style profile for document work."
         AirVisionSplendidMode.Game -> "Stored Windows-style profile for low-latency visual preference."
         AirVisionSplendidMode.EyeCare -> "Adds a warm Android HUD overlay."
+    }
+
+private fun airVisionTouchActionDescription(action: AirVisionHudTouchAction): String =
+    when (action) {
+        AirVisionHudTouchAction.None -> "Let the tap pass without a HUD action."
+        AirVisionHudTouchAction.DismissNotification -> "Clear the visible notification when it can be dismissed."
+        AirVisionHudTouchAction.ToggleMic -> "Toggle microphone capture on each tap."
+    }
+
+private fun airVisionDoubleTapActionDescription(action: AirVisionHudDoubleTapAction): String =
+    when (action) {
+        AirVisionHudDoubleTapAction.None -> "Let double taps pass without a HUD action."
+        AirVisionHudDoubleTapAction.ToggleMic -> "Toggle microphone capture on double tap."
+        AirVisionHudDoubleTapAction.DismissNotification -> "Clear the visible notification when it can be dismissed."
+    }
+
+private fun airVisionSwipeActionDescription(action: AirVisionHudSwipeAction): String =
+    when (action) {
+        AirVisionHudSwipeAction.None -> "Let Android or device firmware handle the gesture."
+        AirVisionHudSwipeAction.ScrollChat -> "Drag up or down on the HUD to scroll chat history."
+    }
+
+private fun airVisionBrightnessKeyActionDescription(action: AirVisionHudKeyAction): String =
+    when (action) {
+        AirVisionHudKeyAction.None -> "Let Android or M1 firmware handle brightness keys."
+        AirVisionHudKeyAction.ScrollChat -> "Use brightness key events as chat scroll controls."
+    }
+
+private fun airVisionMediaKeyActionDescription(action: AirVisionHudMediaKeyAction): String =
+    when (action) {
+        AirVisionHudMediaKeyAction.None -> "Let Android handle media key events."
+        AirVisionHudMediaKeyAction.DoubleTapToggleMic -> "Toggle the microphone only after a double tap."
     }
 
 private fun airVisionUsbStatusText(
