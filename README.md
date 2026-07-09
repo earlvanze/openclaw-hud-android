@@ -112,7 +112,8 @@ HUD controls:
 - Double-tap the HUD/touch surface to toggle mic capture when available.
 - Swipe vertically to scroll the compact chat transcript.
 - Tap the thinking-level text in the status lights to cycle thinking level.
-- Tap `cc` in the HUD status lights to toggle Samsung/native captions.
+- Tap `cc` in the HUD status lights to cycle captions: Off -> Samsung/native
+  -> OpenClaw translation -> Off.
 - Press Enter on a hardware keyboard to send the chat input.
 - Press Shift+Enter for a newline.
 
@@ -155,10 +156,11 @@ history, or raw USB serial values. The app does not send ASUS vendor reports
 until the Windows app protocol is captured and validated.
 
 Captions default to Samsung/Android native captioning so the system floating
-caption window can sit over the minimal HUD. The Voice tab exposes the provider
-selector: Samsung, OpenClaw, or Off. The OpenClaw fallback is intended for
-low-latency walking use when native captions are not available or when captions
-need OpenClaw session context. It forces thinking `off`, prefers the
+caption window can sit over the minimal HUD. The HUD `cc` status light cycles
+between Samsung, OpenClaw, and Off; the Voice tab exposes the same providers as
+larger controls. The OpenClaw fallback is intended for low-latency walking use
+when native captions are not available or when captions need OpenClaw session
+context. It forces thinking `off`, prefers the
 `sage-router/fast` model profile, suppresses spoken assistant replies while
 captions are active, and labels alternating turns as `S1` / `S2`. The default
 OpenClaw target language is Spanish. Source and target language selection live

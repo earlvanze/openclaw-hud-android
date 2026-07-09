@@ -292,10 +292,25 @@ fun HudScreen(viewModel: MainViewModel) {
             nativeCaptionsEnabled = if (airVisionDemoModeEnabled) false else nativeCaptionsEnabled,
             onToggleThinking = { viewModel.setChatThinkingLevel(nextHudThinkingLevel(thinkingLevel)) },
             onToggleTranslationCaptions = {
-                val enabled = !nativeCaptionsEnabled
-                viewModel.setNativeCaptionsEnabled(enabled)
-                if (enabled) {
-                    openNativeCaptionSettings(context)
+                when (
+                    HudCaptionProviders.next(
+                        nativeEnabled = nativeCaptionsEnabled,
+                        openClawEnabled = translationCaptionsEnabled,
+                    )
+                ) {
+                    HudCaptionProvider.Native -> {
+                        viewModel.setTranslationCaptionsEnabled(false)
+                        viewModel.setNativeCaptionsEnabled(true)
+                        openNativeCaptionSettings(context)
+                    }
+                    HudCaptionProvider.OpenClaw -> {
+                        viewModel.setNativeCaptionsEnabled(false)
+                        viewModel.setTranslationCaptionsEnabled(true)
+                    }
+                    HudCaptionProvider.Off -> {
+                        viewModel.setNativeCaptionsEnabled(false)
+                        viewModel.setTranslationCaptionsEnabled(false)
+                    }
                 }
             },
         )
