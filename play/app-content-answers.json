@@ -95,6 +95,6 @@
     "internalTestersConfiguredInPlayConsole": false,
     "reviewerAccessConfiguredInPlayConsole": false,
     "phoneScreenshots": [],
-    "notes": "Fill these external Play Console artifacts before running scripts/verify-play-submission-package.mjs --final and publish-play-internal.mjs --commit."
+    "notes": "Fill these external Play Console artifacts before running scripts/verify-play-submission-package.mjs --final and publish-play-internal.mjs --commit. Local screenshot paths listed here are validated as Play-compliant JPEG or 24-bit PNG files."
   }
 }

@@ -10,3 +10,6 @@ local.properties
 *.keystore
 captures/
 play/screenshots/**/*.png
+play/screenshots/**/*.jpg
+play/screenshots/**/*.jpeg
+play/screenshots/**/manifest.json

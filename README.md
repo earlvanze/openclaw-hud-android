@@ -278,10 +278,12 @@ ANDROID_HOME=/home/digit/android-sdk ANDROID_SDK_ROOT=/home/digit/android-sdk \
 ```
 
 The script installs the HUD debug APK, marks the app ready for review/demo mode,
-launches deterministic HUD and Settings states on the phone display, and writes
-`play/screenshots/phone/hud-demo.png` plus
-`play/screenshots/phone/settings-demo.png`. After uploading screenshots in Play
-Console, record their names or URLs in
+launches deterministic HUD and Settings states on the phone display, normalizes
+Android screencaps to 24-bit PNG without alpha, and writes
+`play/screenshots/phone/hud-demo.png`,
+`play/screenshots/phone/settings-demo.png`, plus a generated
+`play/screenshots/phone/manifest.json`. After uploading screenshots in Play
+Console, record their local paths, names, or URLs in
 `play/app-content-answers.json` `finalSubmission.phoneScreenshots`.
 
 `verify-play-hud-release.mjs` is the offline-safe local gate for the HUD/M1
@@ -308,7 +310,10 @@ external Play Console artifacts have been filled into
 the local draft gate; `--final` is expected to fail until the Play app exists,
 the hosted privacy policy URL is public, at least two phone screenshots are
 recorded, internal testers are configured, and reviewer access instructions have
-been entered in Play Console.
+been entered in Play Console. When screenshot entries are local paths, `--final`
+also validates that the files are JPEG or 24-bit PNG without alpha, no larger
+than 8 MiB, at least 320 px on the shortest side, no larger than 3840 px on the
+longest side, and no more than 2:1 in either orientation.
 
 ## Kotlin Lint + Format
 

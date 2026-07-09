@@ -26,6 +26,10 @@ const defaultListingDir = join(androidDir, "play", "listings", "en-US");
 
 const expectedPackage = "ai.openclaw.app.hud";
 const expectedSchema = "openclaw.play.app-content";
+const maxScreenshotBytes = 8 * 1024 * 1024;
+const screenshotMinDimension = 320;
+const screenshotMaxDimension = 3840;
+const pngSignature = Buffer.from("89504e470d0a1a0a", "hex");
 
 const forbiddenPermissionGroups = {
   sms: ["android.permission.SEND_SMS", "android.permission.READ_SMS"],
@@ -181,7 +185,118 @@ function isHttpsUrl(value) {
   }
 }
 
-function verifyFinalSubmissionReadiness(appContent) {
+function resolveScreenshotPath(value) {
+  const trimmed = value.trim();
+  if (isHttpsUrl(trimmed)) return null;
+  return resolve(androidDir, trimmed);
+}
+
+function readPngInfo(buffer) {
+  if (!buffer.subarray(0, pngSignature.length).equals(pngSignature)) return null;
+  const ihdrLength = buffer.readUInt32BE(8);
+  const ihdrType = buffer.toString("ascii", 12, 16);
+  if (ihdrLength !== 13 || ihdrType !== "IHDR") throw new Error("PNG is missing a valid IHDR chunk.");
+  return {
+    type: "PNG",
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+    bitDepth: buffer[24],
+    colorType: buffer[25],
+  };
+}
+
+function isJpegStartOfFrame(marker) {
+  return (
+    (marker >= 0xc0 && marker <= 0xc3) ||
+    (marker >= 0xc5 && marker <= 0xc7) ||
+    (marker >= 0xc9 && marker <= 0xcb) ||
+    (marker >= 0xcd && marker <= 0xcf)
+  );
+}
+
+function readJpegInfo(buffer) {
+  if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) return null;
+  let offset = 2;
+  while (offset < buffer.length) {
+    while (offset < buffer.length && buffer[offset] !== 0xff) offset += 1;
+    while (offset < buffer.length && buffer[offset] === 0xff) offset += 1;
+    if (offset >= buffer.length) break;
+
+    const marker = buffer[offset];
+    offset += 1;
+    if (marker === 0xd9 || marker === 0xda) break;
+    if (marker >= 0xd0 && marker <= 0xd7) continue;
+    if (offset + 2 > buffer.length) break;
+    const length = buffer.readUInt16BE(offset);
+    if (length < 2 || offset + length > buffer.length) break;
+    if (isJpegStartOfFrame(marker)) {
+      return {
+        type: "JPEG",
+        width: buffer.readUInt16BE(offset + 5),
+        height: buffer.readUInt16BE(offset + 3),
+      };
+    }
+    offset += length;
+  }
+  throw new Error("JPEG dimensions could not be read.");
+}
+
+function verifyScreenshotDimensions(info, label, problems) {
+  const minDimension = Math.min(info.width, info.height);
+  const maxDimension = Math.max(info.width, info.height);
+  if (minDimension < screenshotMinDimension) {
+    problems.push(`${label} is too small: ${info.width}x${info.height}; minimum dimension is ${screenshotMinDimension}px.`);
+  }
+  if (maxDimension > screenshotMaxDimension) {
+    problems.push(`${label} is too large: ${info.width}x${info.height}; maximum dimension is ${screenshotMaxDimension}px.`);
+  }
+  if (maxDimension > minDimension * 2) {
+    problems.push(`${label} aspect ratio is too extreme: ${info.width}x${info.height}; max dimension must be no more than 2x the min dimension.`);
+  }
+}
+
+async function verifyScreenshotFile(screenshot, index, problems) {
+  const label = `finalSubmission.phoneScreenshots[${index}]`;
+  if (isHttpsUrl(screenshot)) return;
+
+  const path = resolveScreenshotPath(screenshot);
+  let fileInfo;
+  try {
+    fileInfo = await stat(path);
+  } catch {
+    problems.push(`${label} local file does not exist: ${screenshot}`);
+    return;
+  }
+
+  if (!fileInfo.isFile()) {
+    problems.push(`${label} is not a file: ${screenshot}`);
+    return;
+  }
+  if (fileInfo.size <= 0) {
+    problems.push(`${label} is empty: ${screenshot}`);
+    return;
+  }
+  if (fileInfo.size > maxScreenshotBytes) {
+    problems.push(`${label} is ${(fileInfo.size / (1024 * 1024)).toFixed(1)} MiB; maximum is 8 MiB.`);
+  }
+
+  const bytes = await readFile(path);
+  try {
+    const info = readPngInfo(bytes) ?? readJpegInfo(bytes);
+    if (!info) {
+      problems.push(`${label} must be a JPEG or PNG file: ${screenshot}`);
+      return;
+    }
+    if (info.type === "PNG" && (info.bitDepth !== 8 || info.colorType !== 2)) {
+      problems.push(`${label} PNG must be 24-bit RGB without alpha; got bit depth ${info.bitDepth}, color type ${info.colorType}.`);
+    }
+    verifyScreenshotDimensions(info, label, problems);
+  } catch (error) {
+    problems.push(`${label} could not be validated: ${error.message}`);
+  }
+}
+
+async function verifyFinalSubmissionReadiness(appContent) {
   const finalSubmission = appContent.finalSubmission ?? {};
   const problems = [];
   if (!isHttpsUrl(finalSubmission.hostedPrivacyPolicyUrl)) {
@@ -206,6 +321,12 @@ function verifyFinalSubmissionReadiness(appContent) {
       break;
     }
   }
+  await Promise.all(
+    phoneScreenshots
+      .map((screenshot, index) => ({ screenshot, index }))
+      .filter((entry) => typeof entry.screenshot === "string" && entry.screenshot.trim() !== "")
+      .map((entry) => verifyScreenshotFile(entry.screenshot, entry.index, problems)),
+  );
   if (problems.length > 0) {
     throw new Error(["Final Play submission readiness failed:", ...problems.map((problem) => `- ${problem}`)].join("\n"));
   }
@@ -294,7 +415,7 @@ async function main() {
 
   await verifyListing(args.listingDir);
   verifyAppContentShape(appContent);
-  if (args.final) verifyFinalSubmissionReadiness(appContent);
+  if (args.final) await verifyFinalSubmissionReadiness(appContent);
   const permissionCount = verifyManifestAgainstAppContent(manifestXml, appContent);
 
   requireIncludes("Privacy policy", privacyPolicy, [

@@ -20,7 +20,9 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
   updating Play Console App content answers.
 - Upload `build/release-bundles/openclaw-2026.7.9-hud-release.aab` to the internal track first.
 - Capture phone screenshots with `scripts/capture-play-screenshots.sh` or an
-  equivalent Play Console screenshot workflow.
+  equivalent Play Console screenshot workflow. The local script normalizes
+  Android screencaps to Play-ready 24-bit PNG without alpha and writes
+  `play/screenshots/phone/manifest.json`.
 - Keep the initial release status as `draft` until screenshots, policy forms, and tester access are verified.
 - Fill `play/app-content-answers.json` `finalSubmission` fields, then run
   `node scripts/verify-play-submission-package.mjs --final` before the first
@@ -31,7 +33,7 @@ Current local status:
 - Latest signed HUD AAB builds successfully from `main`:
   `build/release-bundles/openclaw-2026.7.9-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `5e8a395313cb50614ed8f6da06733ad1cfb1d040af613b488b5644cd7674066e`
+  `0cce3b2efb863eb67452d502d578496717b8439042e36141eb51d8671d32cfae`
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -44,7 +46,8 @@ Current local status:
 - `play/app-content-answers.json` also tracks final external readiness fields
   for hosted privacy URL, app creation, internal testers, reviewer access, and
   phone screenshots. These are intentionally incomplete until Play Console is
-  configured.
+  configured. Local screenshot paths are validated by the final submission
+  verifier before commit publishing.
 - `node scripts/verify-play-submission-package.mjs` checks the App content
   packet against the HUD manifest, hosted privacy policy source, in-app privacy
   policy source, data-safety notes, console checklist, and English listing

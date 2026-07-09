@@ -32,6 +32,7 @@ launching OpenClaw HUD in review/demo mode. The script captures:
   2. settings-demo.png Settings/App Preferences demo state.
 
 The M1 display is not required; screenshots are captured from the phone display.
+Captured screenshots are normalized to 24-bit PNG without alpha for Google Play.
 USAGE
 }
 
@@ -100,6 +101,7 @@ if [[ -n "$ADB_APK_PATH" && "$ADB_BIN" == *.exe && -x "$(command -v wslpath)" ]]
 fi
 
 mkdir -p "$OUT_DIR"
+MANIFEST_PATH="$OUT_DIR/manifest.json"
 
 if [[ "$INSTALL_APK" == "true" ]]; then
     echo "Installing HUD APK on $SERIAL"
@@ -110,6 +112,9 @@ capture_destination() {
     local destination="$1"
     local output_name="$2"
     local output_path="$OUT_DIR/$output_name"
+    local raw_path
+    raw_path="$(mktemp --suffix=.png)"
+    trap 'rm -f "$raw_path"' RETURN
 
     echo "Launching demo destination: $destination"
     "$ADB_BIN" -s "$SERIAL" shell am force-stop "$PACKAGE_NAME" || true
@@ -119,7 +124,8 @@ capture_destination() {
         -n "$COMPONENT" \
         --es "$DESTINATION_EXTRA" "$destination" >/dev/null
     sleep "$WAIT_SECONDS"
-    "$ADB_BIN" -s "$SERIAL" exec-out screencap -p > "$output_path"
+    "$ADB_BIN" -s "$SERIAL" exec-out screencap -p > "$raw_path"
+    node "$ROOT_DIR/scripts/convert-play-screenshot.mjs" "$raw_path" "$output_path"
     if [[ ! -s "$output_path" ]]; then
         echo "Screenshot is empty: $output_path" >&2
         exit 1
@@ -130,12 +136,31 @@ capture_destination() {
 capture_destination "hud" "hud-demo.png"
 capture_destination "settings" "settings-demo.png"
 
+cat > "$MANIFEST_PATH" <<EOF
+{
+  "schema": "openclaw.play.screenshots",
+  "version": 1,
+  "deviceType": "phone",
+  "screenshots": [
+    "play/screenshots/phone/hud-demo.png",
+    "play/screenshots/phone/settings-demo.png"
+  ]
+}
+EOF
+
 cat <<EOF
 
 Play screenshots captured:
 - $OUT_DIR/hud-demo.png
 - $OUT_DIR/settings-demo.png
+- $MANIFEST_PATH
 
 After uploading these in Play Console, record their paths/names in:
   play/app-content-answers.json -> finalSubmission.phoneScreenshots
+
+Local final verifier snippet:
+  "phoneScreenshots": [
+    "play/screenshots/phone/hud-demo.png",
+    "play/screenshots/phone/settings-demo.png"
+  ]
 EOF
