@@ -3,6 +3,7 @@ package ai.openclaw.app
 import android.content.Context
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -203,6 +204,115 @@ class SecurePrefsTest {
         assertEquals(false, copied.motionSyncEnabled)
         assertEquals(true, copied.threeDModeEnabled)
         assertEquals(false, copied.lightLoadModeEnabled)
+    }
+
+    @Test
+    fun airVisionProfileBackup_exportsAndImportsTuningState() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionCustomProfileLabel(AirVisionViewMode.Custom1, "Walk HUD")
+        prefs.setAirVisionCustomProfileLabel(AirVisionViewMode.Custom2, "Desk HUD")
+        prefs.setAirVisionHudSingleTapAction(AirVisionHudTouchAction.ToggleMic)
+        prefs.setAirVisionHudDoubleTapAction(AirVisionHudDoubleTapAction.DismissNotification)
+        prefs.setAirVisionHudSwipeAction(AirVisionHudSwipeAction.None)
+        prefs.setAirVisionHudBrightnessKeyAction(AirVisionHudKeyAction.AdjustDistance)
+        prefs.setAirVisionHudMediaKeyAction(AirVisionHudMediaKeyAction.None)
+        prefs.setAirVisionAppLanguage(AirVisionAppLanguage.Spanish)
+        prefs.setAirVisionStartupDestination(AirVisionStartupDestination.Voice)
+        prefs.setAirVisionHudDisplayTarget(AirVisionHudDisplayTarget.LargestExternal)
+        prefs.setAirVisionDemoModeEnabled(true)
+
+        prefs.setAirVisionViewMode(AirVisionViewMode.Working)
+        prefs.setAirVisionBrightnessPercent(51)
+        prefs.setAirVisionDistanceCm(111)
+        prefs.setAirVisionHudPlacement(AirVisionHudPlacement.UpperRight)
+        prefs.setAirVisionPhysicalMainScreenVisible(false)
+
+        prefs.setAirVisionViewMode(AirVisionViewMode.Gaming)
+        prefs.setAirVisionLightLoadModeEnabled(false)
+        prefs.setAirVisionSplendidMode(AirVisionSplendidMode.EyeCare)
+        prefs.setAirVisionBlueLightFilterPercent(49)
+        prefs.setAirVisionBrightnessPercent(96)
+        prefs.setAirVisionDistanceCm(61)
+        prefs.setAirVisionIpdMm(69)
+        prefs.setAirVisionHudPlacement(AirVisionHudPlacement.Center)
+        prefs.setAirVisionSafeAreaPercent(4)
+        prefs.setAirVisionThreeDModeEnabled(true)
+
+        val backup = prefs.exportAirVisionProfileBackup()
+
+        plainPrefs.edit().clear().commit()
+        val importedPrefs = SecurePrefs(context)
+        importedPrefs.importAirVisionProfileBackup(backup)
+
+        assertEquals(AirVisionViewMode.Gaming, importedPrefs.airVisionDisplaySettings.value.viewMode)
+        assertEquals(AirVisionSplendidMode.EyeCare, importedPrefs.airVisionDisplaySettings.value.splendidMode)
+        assertEquals(49, importedPrefs.airVisionDisplaySettings.value.blueLightFilterPercent)
+        assertEquals(96, importedPrefs.airVisionDisplaySettings.value.brightnessPercent)
+        assertEquals(61, importedPrefs.airVisionDisplaySettings.value.distanceCm)
+        assertEquals(69, importedPrefs.airVisionDisplaySettings.value.ipdMm)
+        assertEquals(AirVisionHudPlacement.Center, importedPrefs.airVisionDisplaySettings.value.hudPlacement)
+        assertEquals(4, importedPrefs.airVisionDisplaySettings.value.safeAreaPercent)
+        assertEquals(true, importedPrefs.airVisionDisplaySettings.value.threeDModeEnabled)
+        assertEquals("Walk HUD", importedPrefs.airVisionCustomProfileLabels.value.custom1)
+        assertEquals("Desk HUD", importedPrefs.airVisionCustomProfileLabels.value.custom2)
+        assertEquals(AirVisionHudTouchAction.ToggleMic, importedPrefs.airVisionHudControls.value.singleTapAction)
+        assertEquals(
+            AirVisionHudDoubleTapAction.DismissNotification,
+            importedPrefs.airVisionHudControls.value.doubleTapAction,
+        )
+        assertEquals(AirVisionHudSwipeAction.None, importedPrefs.airVisionHudControls.value.swipeAction)
+        assertEquals(AirVisionHudKeyAction.AdjustDistance, importedPrefs.airVisionHudControls.value.brightnessKeyAction)
+        assertEquals(AirVisionHudMediaKeyAction.None, importedPrefs.airVisionHudControls.value.mediaKeyAction)
+        assertEquals(AirVisionAppLanguage.Spanish, importedPrefs.airVisionAppLanguage.value)
+        assertEquals(AirVisionStartupDestination.Voice, importedPrefs.airVisionStartupDestination.value)
+        assertEquals(AirVisionHudDisplayTarget.LargestExternal, importedPrefs.airVisionHudDisplayTarget.value)
+        assertEquals(true, importedPrefs.airVisionDemoModeEnabled.value)
+
+        importedPrefs.setAirVisionViewMode(AirVisionViewMode.Working)
+        assertEquals(51, importedPrefs.airVisionDisplaySettings.value.brightnessPercent)
+        assertEquals(111, importedPrefs.airVisionDisplaySettings.value.distanceCm)
+        assertEquals(AirVisionHudPlacement.UpperRight, importedPrefs.airVisionDisplaySettings.value.hudPlacement)
+        assertEquals(false, importedPrefs.airVisionDisplaySettings.value.physicalMainScreenVisible)
+    }
+
+    @Test
+    fun importAirVisionProfileBackup_rejectsMalformedBackup() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            prefs.importAirVisionProfileBackup(
+                """
+                {
+                  "schema": "openclaw.airvision.m1.profile-backup",
+                  "version": 1,
+                  "activeViewMode": "working",
+                  "customLabels": { "custom1": "A", "custom2": "B" },
+                  "hudControls": {
+                    "singleTapAction": "dismiss_notification",
+                    "doubleTapAction": "toggle_mic",
+                    "swipeAction": "scroll_chat",
+                    "brightnessKeyAction": "scroll_chat",
+                    "mediaKeyAction": "double_tap_toggle_mic"
+                  },
+                  "appPreferences": {
+                    "language": "system",
+                    "startupDestination": "hud",
+                    "hudDisplayTarget": "airvision_preferred",
+                    "demoModeEnabled": false
+                  },
+                  "profiles": []
+                }
+                """.trimIndent(),
+            )
+        }
     }
 
     @Test

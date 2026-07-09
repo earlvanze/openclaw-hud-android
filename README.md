@@ -128,7 +128,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 
 | Windows AirVision feature | Android HUD status |
 | --- | --- |
-| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, user-named Custom 1 / Custom 2 labels, copy-current-to-custom actions, active-profile reset, HUD placement, physical main screen behavior, safe area, scale/layout, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
+| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, user-named Custom 1 / Custom 2 labels, copy-current-to-custom actions, JSON profile backup/import, active-profile reset, HUD placement, physical main screen behavior, safe area, scale/layout, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
 | Brightness | Implemented as software HUD dimming. Hardware brightness remains available from the M1 touch bar. |
 | Screen distance | Implemented as virtual HUD distance scaling. |
 | IPD | Stored as a calibration value, defaulting to 67 mm. Adjustment is locked while Light Load Mode is enabled, matching the ASUS app. Firmware-level apply still needs the ASUS HID protocol. |
@@ -138,7 +138,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | 3D Mode | Stored in the AirVision profile and disabled while Light Load Mode is enabled. Hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation and locks IPD adjustment while enabled. |
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
-| App Preferences | Implemented with startup view, AirVision companion language preference, demo mode, software version/build display, EULA note, official FAQ/tutorial, product registration, and ASUS support links. |
+| App Preferences | Implemented with startup view, AirVision companion language preference, demo mode, JSON profile backup/import, software version/build display, EULA note, official FAQ/tutorial, product registration, and ASUS support links. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, serial availability, and firmware protocol status. Actual firmware version still needs ASUS HID support. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, and USB interface/endpoint diagnostics for protocol capture work. |
 | Identify | Implemented as a temporary `HUD 1` marker on the Android Presentation display. |
@@ -180,6 +180,13 @@ Custom profile names and copy-current-to-custom actions live under Viewing Mode
 in Settings -> AirVision M1. The labels rename the saved Custom 1 and Custom 2
 profile slots without changing their stored display settings; the copy actions
 duplicate the active profile settings into a custom slot.
+
+Profile Backup lives under Settings -> AirVision M1 -> App Preferences. Export
+writes a JSON file containing AirVision M1 tuning profiles, custom labels,
+gesture/hotkey settings, display targeting, startup view, language preference,
+and demo mode. Import validates the same AirVision-only schema and never
+includes gateway endpoints, auth tokens, accounts, chat history, or other
+OpenClaw runtime state.
 
 To pair on first launch, pass a setup code directly or from a local file:
 

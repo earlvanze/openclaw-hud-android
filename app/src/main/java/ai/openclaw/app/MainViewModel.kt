@@ -480,6 +480,22 @@ class MainViewModel(
         }
     }
 
+    fun exportAirVisionProfileBackup(): String = prefs.exportAirVisionProfileBackup()
+
+    fun importAirVisionProfileBackup(raw: String): Boolean =
+        runCatching {
+            prefs.importAirVisionProfileBackup(raw)
+        }.fold(
+            onSuccess = {
+                showHudTransientMessage("Imported AirVision profile backup")
+                true
+            },
+            onFailure = { error ->
+                showHudTransientMessage("AirVision profile import failed: ${error.message.orEmpty()}")
+                false
+            },
+        )
+
     fun setAirVisionPhysicalMainScreenVisible(visible: Boolean) {
         prefs.setAirVisionPhysicalMainScreenVisible(visible)
     }

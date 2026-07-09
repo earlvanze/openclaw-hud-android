@@ -821,6 +821,82 @@ class SecurePrefs(
         return true
     }
 
+    fun exportAirVisionProfileBackup(): String =
+        AirVisionProfileBackups.encode(
+            AirVisionProfileBackup(
+                activeViewMode = _airVisionDisplaySettings.value.viewMode.rawValue,
+                customLabels =
+                    AirVisionBackupCustomLabels(
+                        custom1 = _airVisionCustomProfileLabels.value.custom1,
+                        custom2 = _airVisionCustomProfileLabels.value.custom2,
+                    ),
+                hudControls =
+                    AirVisionBackupHudControls(
+                        singleTapAction = _airVisionHudControls.value.singleTapAction.rawValue,
+                        doubleTapAction = _airVisionHudControls.value.doubleTapAction.rawValue,
+                        swipeAction = _airVisionHudControls.value.swipeAction.rawValue,
+                        brightnessKeyAction = _airVisionHudControls.value.brightnessKeyAction.rawValue,
+                        mediaKeyAction = _airVisionHudControls.value.mediaKeyAction.rawValue,
+                    ),
+                appPreferences =
+                    AirVisionBackupAppPreferences(
+                        language = _airVisionAppLanguage.value.rawValue,
+                        startupDestination = _airVisionStartupDestination.value.rawValue,
+                        hudDisplayTarget = _airVisionHudDisplayTarget.value.rawValue,
+                        demoModeEnabled = _airVisionDemoModeEnabled.value,
+                    ),
+                profiles =
+                    AirVisionViewMode.entries.map { mode ->
+                        AirVisionProfileBackups.profileFromSettings(loadAirVisionDisplaySettings(mode))
+                    },
+            ),
+        )
+
+    fun importAirVisionProfileBackup(raw: String) {
+        val backup = AirVisionProfileBackups.decode(raw)
+        val activeViewMode = AirVisionProfileBackups.requireViewMode(backup.activeViewMode)
+        val profileByMode =
+            backup.profiles
+                .map(AirVisionProfileBackups::settingsFromProfile)
+                .associateBy { it.viewMode }
+        val missingModes = AirVisionViewMode.entries.filterNot { profileByMode.containsKey(it) }
+        require(missingModes.isEmpty()) {
+            "Profile backup is missing: ${missingModes.joinToString { it.label }}."
+        }
+
+        val labels = AirVisionProfileBackups.labelsFromBackup(backup.customLabels)
+        val controls = AirVisionProfileBackups.controlsFromBackup(backup.hudControls)
+        val appPreferences = AirVisionProfileBackups.appPreferencesFromBackup(backup.appPreferences)
+        val activeSettings = checkNotNull(profileByMode[activeViewMode])
+
+        plainPrefs.edit {
+            putString(AIR_VISION_VIEW_MODE_KEY, activeViewMode.rawValue)
+            putString(AIR_VISION_CUSTOM_1_LABEL_KEY, labels.custom1)
+            putString(AIR_VISION_CUSTOM_2_LABEL_KEY, labels.custom2)
+            putString(AIR_VISION_HUD_SINGLE_TAP_ACTION_KEY, controls.singleTapAction.rawValue)
+            putString(AIR_VISION_HUD_DOUBLE_TAP_ACTION_KEY, controls.doubleTapAction.rawValue)
+            putString(AIR_VISION_HUD_SWIPE_ACTION_KEY, controls.swipeAction.rawValue)
+            putString(AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY, controls.brightnessKeyAction.rawValue)
+            putString(AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY, controls.mediaKeyAction.rawValue)
+            putString(AIR_VISION_APP_LANGUAGE_KEY, appPreferences.language.rawValue)
+            putString(AIR_VISION_STARTUP_DESTINATION_KEY, appPreferences.startupDestination.rawValue)
+            putString(AIR_VISION_HUD_DISPLAY_TARGET_KEY, appPreferences.hudDisplayTarget.rawValue)
+            putBoolean(AIR_VISION_DEMO_MODE_ENABLED_KEY, appPreferences.demoModeEnabled)
+            AirVisionViewMode.entries.forEach { mode ->
+                putAirVisionProfileSettings(checkNotNull(profileByMode[mode]))
+            }
+        }
+
+        _airVisionCustomProfileLabels.value = labels
+        _airVisionHudControls.value = controls
+        _airVisionAppLanguage.value = appPreferences.language
+        _airVisionStartupDestination.value = appPreferences.startupDestination
+        _airVisionHudDisplayTarget.value = appPreferences.hudDisplayTarget
+        _airVisionDemoModeEnabled.value = appPreferences.demoModeEnabled
+        _airVisionDisplaySettings.value = activeSettings
+        _airVisionPhysicalMainScreenVisible.value = activeSettings.physicalMainScreenVisible
+    }
+
     fun setAirVisionPhysicalMainScreenVisible(visible: Boolean) {
         val viewMode = _airVisionDisplaySettings.value.viewMode
         plainPrefs.edit {

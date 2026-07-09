@@ -28,6 +28,7 @@ import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -384,6 +385,44 @@ fun SettingsSheet(viewModel: MainViewModel) {
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             assistantRoleAvailable = isAssistantRoleAvailable(context)
             assistantRoleHeld = isAssistantRoleHeld(context)
+        }
+
+    val airVisionProfileExportLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            runCatching {
+                context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { writer ->
+                    writer.write(viewModel.exportAirVisionProfileBackup())
+                } ?: error("Unable to open profile backup file.")
+            }.onSuccess {
+                Toast.makeText(context, "Exported AirVision profile backup", Toast.LENGTH_SHORT).show()
+                viewModel.showHudTransientMessage("Exported AirVision profile backup")
+            }.onFailure { error ->
+                Toast.makeText(context, "AirVision export failed", Toast.LENGTH_SHORT).show()
+                viewModel.showHudTransientMessage("AirVision export failed: ${error.message.orEmpty()}")
+            }
+        }
+
+    val airVisionProfileImportLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            val imported =
+                runCatching {
+                    context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { reader ->
+                        reader.readText()
+                    } ?: error("Unable to open profile backup file.")
+                }.map { raw ->
+                    viewModel.importAirVisionProfileBackup(raw)
+                }.getOrElse { error ->
+                    viewModel.showHudTransientMessage("AirVision import failed: ${error.message.orEmpty()}")
+                    false
+                }
+            Toast
+                .makeText(
+                    context,
+                    if (imported) "Imported AirVision profile backup" else "AirVision import failed",
+                    Toast.LENGTH_SHORT,
+                ).show()
         }
 
     DisposableEffect(lifecycleOwner, context) {
@@ -1136,6 +1175,46 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 checked = airVisionDemoModeEnabled,
                                 onCheckedChange = viewModel::setAirVisionDemoModeEnabled,
                             )
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Profile Backup", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Export or import AirVision M1 tuning profiles, labels, gestures, and app preferences as JSON.",
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(
+                                    onClick = {
+                                        airVisionProfileExportLauncher.launch(
+                                            "openclaw-airvision-m1-profile.json",
+                                        )
+                                    },
+                                    colors = settingsPrimaryButtonColors(),
+                                    shape = RoundedCornerShape(14.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                                ) {
+                                    Text("Export", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                                }
+                                Button(
+                                    onClick = {
+                                        airVisionProfileImportLauncher.launch(
+                                            arrayOf("application/json", "text/*", "application/octet-stream"),
+                                        )
+                                    },
+                                    colors = settingsPrimaryButtonColors(),
+                                    shape = RoundedCornerShape(14.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                                ) {
+                                    Text("Import", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                                }
+                            }
                         },
                     )
                     HorizontalDivider(color = mobileBorder)

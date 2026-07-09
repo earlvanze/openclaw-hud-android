@@ -8,6 +8,7 @@ Initial M1 HUD release candidate.
 - HUD display targeting can now prefer AirVision, largest external, first external, or last external display routes.
 - Custom 1 and Custom 2 AirVision profiles can now be renamed.
 - Active AirVision profile settings can now be copied into Custom 1 or Custom 2.
+- AirVision M1 tuning profiles can now be exported and imported as JSON backups.
 - M1 brightness-key handling can now be configured for chat scrolling, Android HUD brightness, or virtual-distance stepping.
 - Added AirVision app preferences with startup view, language, version, legal note, FAQ/tutorial, registration, and support links.
 - AirVision 3D Mode is now stored per profile and disabled while Light Load Mode is on.
