@@ -89,11 +89,20 @@ data class AirVisionDiagnosticsHudRuntime(
     val displayTarget: String,
     val presentationDisplayCategoryPreferred: Boolean,
     val nonDefaultDisplayFallbackEnabled: Boolean,
+    val displayCandidateCount: Int,
+    val presentationDisplayCandidateCount: Int,
+    val selectedDisplayId: Int?,
+    val selectedDisplayName: String?,
+    val selectedDisplayWidthPx: Int?,
+    val selectedDisplayHeightPx: Int?,
+    val selectedDisplayPresentationEligible: Boolean?,
+    val usedNonDefaultDisplayFallback: Boolean,
+    val displayRouteReason: String,
 )
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 4
+    const val VERSION = 5
 
     private val json =
         Json {
@@ -111,6 +120,7 @@ object AirVisionDiagnosticsSnapshots {
         startupDestination: AirVisionStartupDestination,
         hudDisplayTarget: AirVisionHudDisplayTarget,
         hudPresentationActive: Boolean = false,
+        hudDisplayRoute: AirVisionHudDisplayRoute = AirVisionHudDisplayRoute(target = hudDisplayTarget),
         demoModeEnabled: Boolean,
     ): AirVisionDiagnosticsSnapshot =
         AirVisionDiagnosticsSnapshot(
@@ -176,6 +186,15 @@ object AirVisionDiagnosticsSnapshots {
                     displayTarget = hudDisplayTarget.rawValue,
                     presentationDisplayCategoryPreferred = true,
                     nonDefaultDisplayFallbackEnabled = true,
+                    displayCandidateCount = hudDisplayRoute.candidateCount,
+                    presentationDisplayCandidateCount = hudDisplayRoute.presentationCandidateCount,
+                    selectedDisplayId = hudDisplayRoute.selectedCandidate?.displayId,
+                    selectedDisplayName = hudDisplayRoute.selectedCandidate?.name,
+                    selectedDisplayWidthPx = hudDisplayRoute.selectedCandidate?.widthPx,
+                    selectedDisplayHeightPx = hudDisplayRoute.selectedCandidate?.heightPx,
+                    selectedDisplayPresentationEligible = hudDisplayRoute.selectedCandidate?.isPresentation,
+                    usedNonDefaultDisplayFallback = hudDisplayRoute.usedNonDefaultDisplayFallback,
+                    displayRouteReason = hudDisplayRoute.reason,
                 ),
             hudControls =
                 AirVisionBackupHudControls(

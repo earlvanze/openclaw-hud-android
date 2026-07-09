@@ -132,6 +132,8 @@ class MainViewModel(
     val airVisionUsbState: StateFlow<AirVisionUsbState> = nodeApp.airVisionUsb.state
     private val _airVisionHudPresentationActive = MutableStateFlow(false)
     val airVisionHudPresentationActive: StateFlow<Boolean> = _airVisionHudPresentationActive
+    private val _airVisionHudDisplayRoute = MutableStateFlow(AirVisionHudDisplayRoute())
+    val airVisionHudDisplayRoute: StateFlow<AirVisionHudDisplayRoute> = _airVisionHudDisplayRoute
 
     val micCooldown: StateFlow<Boolean> = runtimeState(initial = false) { it.micCooldown }
     val micStatusText: StateFlow<String> = runtimeState(initial = "Mic off") { it.micStatusText }
@@ -498,6 +500,7 @@ class MainViewModel(
                 startupDestination = airVisionStartupDestination.value,
                 hudDisplayTarget = airVisionHudDisplayTarget.value,
                 hudPresentationActive = airVisionHudPresentationActive.value,
+                hudDisplayRoute = airVisionHudDisplayRoute.value,
                 demoModeEnabled = airVisionDemoModeEnabled.value,
             ),
         )
@@ -526,6 +529,10 @@ class MainViewModel(
 
     fun setAirVisionHudPresentationActive(active: Boolean) {
         _airVisionHudPresentationActive.value = active
+    }
+
+    fun setAirVisionHudDisplayRoute(route: AirVisionHudDisplayRoute) {
+        _airVisionHudDisplayRoute.value = route
     }
 
     fun refreshAirVisionUsb() {

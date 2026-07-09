@@ -239,10 +239,26 @@ class MainActivity : ComponentActivity() {
             hudPresentation?.dismiss()
             hudPresentation = null
             viewModel.setAirVisionHudPresentationActive(false)
+            viewModel.setAirVisionHudDisplayRoute(
+                AirVisionHudDisplayRoute(
+                    target = viewModel.airVisionHudDisplayTarget.value,
+                    reason = "activity_on_external_display",
+                ),
+            )
             applyPhoneSystemBars()
             return
         }
-        val displayManager = getSystemService(DisplayManager::class.java) ?: return
+        val displayManager =
+            getSystemService(DisplayManager::class.java)
+                ?: run {
+                    viewModel.setAirVisionHudDisplayRoute(
+                        AirVisionHudDisplayRoute(
+                            target = viewModel.airVisionHudDisplayTarget.value,
+                            reason = "display_manager_unavailable",
+                        ),
+                    )
+                    return
+                }
         val presentationDisplayIds =
             displayManager
                 .getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
@@ -250,13 +266,14 @@ class MainActivity : ComponentActivity() {
                 .toSet()
         val externalDisplays =
             displayManager.displays.filter { it.displayId != Display.DEFAULT_DISPLAY && it.isValid }
-        val targetCandidate =
-            AirVisionHudDisplayRouter.choose(
+        val displayRoute =
+            AirVisionHudDisplayRouter.select(
                 candidates = externalDisplays.map { it.toHudDisplayCandidate(presentationDisplayIds) },
                 target = viewModel.airVisionHudDisplayTarget.value,
             )
+        viewModel.setAirVisionHudDisplayRoute(displayRoute)
         val targetDisplay =
-            externalDisplays.firstOrNull { it.displayId == targetCandidate?.displayId }
+            externalDisplays.firstOrNull { it.displayId == displayRoute.selectedCandidate?.displayId }
                 ?: run {
                     hudPresentation?.dismiss()
                     hudPresentation = null

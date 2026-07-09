@@ -27,30 +27,66 @@ data class AirVisionHudDisplayCandidate(
         get() = widthPx.coerceAtLeast(0).toLong() * heightPx.coerceAtLeast(0).toLong()
 }
 
+data class AirVisionHudDisplayRoute(
+    val target: AirVisionHudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
+    val candidateCount: Int = 0,
+    val presentationCandidateCount: Int = 0,
+    val selectedCandidate: AirVisionHudDisplayCandidate? = null,
+    val usedNonDefaultDisplayFallback: Boolean = false,
+    val reason: String = "not_evaluated",
+)
+
 object AirVisionHudDisplayRouter {
+    fun select(
+        candidates: List<AirVisionHudDisplayCandidate>,
+        target: AirVisionHudDisplayTarget,
+    ): AirVisionHudDisplayRoute {
+        if (candidates.isEmpty()) {
+            return AirVisionHudDisplayRoute(target = target, reason = "no_external_displays")
+        }
+        val presentationCandidates = candidates.filter { it.isPresentation }
+        val eligibleCandidates = presentationCandidates.ifEmpty { candidates }
+        val selectedCandidate = chooseFromEligible(eligibleCandidates, target)
+        return AirVisionHudDisplayRoute(
+            target = target,
+            candidateCount = candidates.size,
+            presentationCandidateCount = presentationCandidates.size,
+            selectedCandidate = selectedCandidate,
+            usedNonDefaultDisplayFallback = presentationCandidates.isEmpty(),
+            reason =
+                when {
+                    selectedCandidate == null -> "no_display_selected"
+                    presentationCandidates.isEmpty() -> "selected_non_default_display_fallback"
+                    else -> "selected_presentation_display"
+                },
+        )
+    }
+
     fun choose(
         candidates: List<AirVisionHudDisplayCandidate>,
         target: AirVisionHudDisplayTarget,
-    ): AirVisionHudDisplayCandidate? {
-        if (candidates.isEmpty()) return null
-        val eligibleCandidates = candidates.filter { it.isPresentation }.ifEmpty { candidates }
-        return when (target) {
+    ): AirVisionHudDisplayCandidate? = select(candidates, target).selectedCandidate
+
+    private fun chooseFromEligible(
+        candidates: List<AirVisionHudDisplayCandidate>,
+        target: AirVisionHudDisplayTarget,
+    ): AirVisionHudDisplayCandidate? =
+        when (target) {
             AirVisionHudDisplayTarget.AirVisionPreferred ->
-                eligibleCandidates.maxWithOrNull(
+                candidates.maxWithOrNull(
                     compareBy<AirVisionHudDisplayCandidate> { scoreAirVisionPreferred(it) }
                         .thenBy { it.areaPx }
                         .thenBy { it.displayId },
                 )
             AirVisionHudDisplayTarget.LargestExternal ->
-                eligibleCandidates.maxWithOrNull(
+                candidates.maxWithOrNull(
                     compareBy<AirVisionHudDisplayCandidate> { it.areaPx }
                         .thenBy { scoreAirVisionPreferred(it) }
                         .thenBy { it.displayId },
                 )
-            AirVisionHudDisplayTarget.FirstExternal -> eligibleCandidates.minByOrNull { it.displayId }
-            AirVisionHudDisplayTarget.LastExternal -> eligibleCandidates.maxByOrNull { it.displayId }
+            AirVisionHudDisplayTarget.FirstExternal -> candidates.minByOrNull { it.displayId }
+            AirVisionHudDisplayTarget.LastExternal -> candidates.maxByOrNull { it.displayId }
         }
-    }
 
     fun scoreAirVisionPreferred(candidate: AirVisionHudDisplayCandidate): Int {
         val name = candidate.name

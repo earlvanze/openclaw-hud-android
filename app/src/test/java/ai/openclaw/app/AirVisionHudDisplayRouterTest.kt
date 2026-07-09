@@ -107,6 +107,37 @@ class AirVisionHudDisplayRouterTest {
     }
 
     @Test
+    fun select_reportsPresentationRouteMetadata() {
+        val selection =
+            AirVisionHudDisplayRouter.select(
+                candidates =
+                    listOf(
+                        AirVisionHudDisplayCandidate(
+                            displayId = 9,
+                            name = "ASUS AirVision M1 mirrored desktop",
+                            widthPx = 3840,
+                            heightPx = 2160,
+                            isPresentation = false,
+                        ),
+                        AirVisionHudDisplayCandidate(
+                            displayId = 5,
+                            name = "ASUS AirVision M1",
+                            widthPx = 1920,
+                            heightPx = 1080,
+                            isPresentation = true,
+                        ),
+                    ),
+                target = AirVisionHudDisplayTarget.AirVisionPreferred,
+            )
+
+        assertEquals(2, selection.candidateCount)
+        assertEquals(1, selection.presentationCandidateCount)
+        assertEquals(5, selection.selectedCandidate?.displayId)
+        assertEquals(false, selection.usedNonDefaultDisplayFallback)
+        assertEquals("selected_presentation_display", selection.reason)
+    }
+
+    @Test
     fun choose_fallsBackWhenNoPresentationEligibleDisplaysExist() {
         val candidates =
             listOf(
@@ -129,5 +160,29 @@ class AirVisionHudDisplayRouterTest {
         val selected = AirVisionHudDisplayRouter.choose(candidates, AirVisionHudDisplayTarget.AirVisionPreferred)
 
         assertEquals(9, selected?.displayId)
+    }
+
+    @Test
+    fun select_reportsFallbackRouteMetadata() {
+        val selection =
+            AirVisionHudDisplayRouter.select(
+                candidates =
+                    listOf(
+                        AirVisionHudDisplayCandidate(
+                            displayId = 9,
+                            name = "ASUS AirVision M1",
+                            widthPx = 1920,
+                            heightPx = 1080,
+                            isPresentation = false,
+                        ),
+                    ),
+                target = AirVisionHudDisplayTarget.AirVisionPreferred,
+            )
+
+        assertEquals(1, selection.candidateCount)
+        assertEquals(0, selection.presentationCandidateCount)
+        assertEquals(9, selection.selectedCandidate?.displayId)
+        assertEquals(true, selection.usedNonDefaultDisplayFallback)
+        assertEquals("selected_non_default_display_fallback", selection.reason)
     }
 }

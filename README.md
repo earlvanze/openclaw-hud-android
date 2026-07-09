@@ -151,10 +151,11 @@ display USB device identity plus interface/endpoint descriptors in Settings for
 future ASUS protocol capture work. Firmware Link can also export an AirVision
 diagnostics JSON snapshot containing current USB readiness, descriptor summaries,
 derived HID report-path capabilities, the active HUD profile, derived HUD
-runtime state, Android Presentation routing state, gesture settings, and
-AirVision app preferences without gateway endpoints, auth tokens, chat history,
-or raw USB serial values. The app does not send ASUS vendor reports until the
-Windows app protocol is captured and validated.
+runtime state, Android Presentation routing state, display candidate counts,
+selected display identity, gesture settings, and AirVision app preferences
+without gateway endpoints, auth tokens, chat history, or raw USB serial values.
+The app does not send ASUS vendor reports until the Windows app protocol is
+captured and validated.
 
 Captions default to Samsung/Android native captioning so the system floating
 caption window can sit over the minimal HUD. The HUD `cc` status light cycles

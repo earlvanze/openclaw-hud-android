@@ -68,6 +68,21 @@ class AirVisionDiagnosticsSnapshotTest {
                 startupDestination = AirVisionStartupDestination.Hud,
                 hudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
                 hudPresentationActive = true,
+                hudDisplayRoute =
+                    AirVisionHudDisplayRoute(
+                        target = AirVisionHudDisplayTarget.AirVisionPreferred,
+                        candidateCount = 2,
+                        presentationCandidateCount = 1,
+                        selectedCandidate =
+                            AirVisionHudDisplayCandidate(
+                                displayId = 5,
+                                name = "ASUS AirVision M1",
+                                widthPx = 1920,
+                                heightPx = 1080,
+                                isPresentation = true,
+                            ),
+                        reason = "selected_presentation_display",
+                    ),
                 demoModeEnabled = true,
             )
 
@@ -81,7 +96,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("4", root.getValue("version").jsonPrimitive.content)
+        assertEquals("5", root.getValue("version").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)
@@ -104,6 +119,15 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("airvision_preferred", hudRuntime.getValue("displayTarget").jsonPrimitive.content)
         assertEquals("true", hudRuntime.getValue("presentationDisplayCategoryPreferred").jsonPrimitive.content)
         assertEquals("true", hudRuntime.getValue("nonDefaultDisplayFallbackEnabled").jsonPrimitive.content)
+        assertEquals("2", hudRuntime.getValue("displayCandidateCount").jsonPrimitive.content)
+        assertEquals("1", hudRuntime.getValue("presentationDisplayCandidateCount").jsonPrimitive.content)
+        assertEquals("5", hudRuntime.getValue("selectedDisplayId").jsonPrimitive.content)
+        assertEquals("ASUS AirVision M1", hudRuntime.getValue("selectedDisplayName").jsonPrimitive.content)
+        assertEquals("1920", hudRuntime.getValue("selectedDisplayWidthPx").jsonPrimitive.content)
+        assertEquals("1080", hudRuntime.getValue("selectedDisplayHeightPx").jsonPrimitive.content)
+        assertEquals("true", hudRuntime.getValue("selectedDisplayPresentationEligible").jsonPrimitive.content)
+        assertEquals("false", hudRuntime.getValue("usedNonDefaultDisplayFallback").jsonPrimitive.content)
+        assertEquals("selected_presentation_display", hudRuntime.getValue("displayRouteReason").jsonPrimitive.content)
         assertEquals("es", root.getValue("appPreferences").jsonObject.getValue("language").jsonPrimitive.content)
         assertTrue(encoded.contains("ASUS AirVision M1"))
     }
