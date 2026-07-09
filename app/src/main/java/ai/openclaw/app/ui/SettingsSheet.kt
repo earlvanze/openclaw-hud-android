@@ -403,6 +403,22 @@ fun SettingsSheet(viewModel: MainViewModel) {
             }
         }
 
+    val airVisionDiagnosticsExportLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            runCatching {
+                context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { writer ->
+                    writer.write(viewModel.exportAirVisionDiagnosticsSnapshot())
+                } ?: error("Unable to open diagnostics file.")
+            }.onSuccess {
+                Toast.makeText(context, "Exported AirVision diagnostics", Toast.LENGTH_SHORT).show()
+                viewModel.showHudTransientMessage("Exported AirVision diagnostics")
+            }.onFailure { error ->
+                Toast.makeText(context, "AirVision diagnostics export failed", Toast.LENGTH_SHORT).show()
+                viewModel.showHudTransientMessage("AirVision diagnostics export failed: ${error.message.orEmpty()}")
+            }
+        }
+
     val airVisionProfileImportLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
@@ -682,6 +698,31 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                     },
                                     style = mobileCallout.copy(fontWeight = FontWeight.Bold),
                                 )
+                            }
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Diagnostics Export", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Save current M1 USB readiness, descriptors, and active AirVision settings for protocol capture.",
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Button(
+                                onClick = {
+                                    airVisionDiagnosticsExportLauncher.launch(
+                                        "openclaw-airvision-m1-diagnostics.json",
+                                    )
+                                },
+                                colors = settingsPrimaryButtonColors(),
+                                shape = RoundedCornerShape(14.dp),
+                            ) {
+                                Text("Export", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
                             }
                         },
                     )

@@ -482,6 +482,19 @@ class MainViewModel(
 
     fun exportAirVisionProfileBackup(): String = prefs.exportAirVisionProfileBackup()
 
+    fun exportAirVisionDiagnosticsSnapshot(): String =
+        AirVisionDiagnosticsSnapshots.encode(
+            AirVisionDiagnosticsSnapshots.fromState(
+                usbState = airVisionUsbState.value,
+                displaySettings = airVisionDisplaySettings.value,
+                hudControls = airVisionHudControls.value,
+                appLanguage = airVisionAppLanguage.value,
+                startupDestination = airVisionStartupDestination.value,
+                hudDisplayTarget = airVisionHudDisplayTarget.value,
+                demoModeEnabled = airVisionDemoModeEnabled.value,
+            ),
+        )
+
     fun importAirVisionProfileBackup(raw: String): Boolean =
         runCatching {
             prefs.importAirVisionProfileBackup(raw)

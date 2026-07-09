@@ -140,15 +140,19 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
 | App Preferences | Implemented with startup view, AirVision companion language preference, demo mode, JSON profile backup/import, software version/build display, EULA note, official FAQ/tutorial, product registration, and ASUS support links. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, serial availability, and firmware protocol status. Actual firmware version still needs ASUS HID support. |
-| Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, and USB interface/endpoint diagnostics for protocol capture work. |
+| Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, USB interface/endpoint diagnostics for protocol capture work, and a JSON diagnostics export that omits raw USB serial values. |
 | Identify | Implemented as a temporary `HUD 1` marker on the Android Presentation display. |
 | Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports configurable external-display targeting, per-mode placement, per-mode physical main screen visibility, and safe-area layout profiles for the M1 presentation. |
 
 Firmware controls are intentionally read-only/status-only for now. The app can
 detect the M1 USB HID control interface, request Android USB permission, and
 display USB device identity plus interface/endpoint descriptors in Settings for
-future ASUS protocol capture work, but it does not send ASUS vendor reports
-until the Windows app protocol is captured and validated.
+future ASUS protocol capture work. Firmware Link can also export an AirVision
+diagnostics JSON snapshot containing current USB readiness, descriptor summaries,
+the active HUD profile, gesture settings, and AirVision app preferences without
+gateway endpoints, auth tokens, chat history, or raw USB serial values. The app
+does not send ASUS vendor reports until the Windows app protocol is captured and
+validated.
 
 Captions default to Samsung/Android native captioning so the system floating
 caption window can sit over the minimal HUD. The Voice tab exposes the provider
