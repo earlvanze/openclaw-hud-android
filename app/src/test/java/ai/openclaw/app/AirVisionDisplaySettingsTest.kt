@@ -72,6 +72,25 @@ class AirVisionDisplaySettingsTest {
     }
 
     @Test
+    fun customProfileLabels_normalizeAndLabelCustomModesOnly() {
+        val labels =
+            AirVisionCustomProfileLabels(
+                custom1 = AirVisionCustomProfileLabels.normalizeLabel("  Walking    HUD  ", AirVisionViewMode.Custom1.label),
+                custom2 =
+                    AirVisionCustomProfileLabels.normalizeLabel(
+                        "This profile name is intentionally much too long",
+                        AirVisionViewMode.Custom2.label,
+                    ),
+            )
+
+        assertEquals("Walking HUD", labels.custom1)
+        assertEquals(AirVisionCustomProfileLabels.MAX_LABEL_LENGTH, labels.custom2.length)
+        assertEquals("Walking HUD", labels.labelFor(AirVisionViewMode.Custom1))
+        assertEquals(labels.custom2, labels.labelFor(AirVisionViewMode.Custom2))
+        assertEquals("Working", labels.labelFor(AirVisionViewMode.Working))
+    }
+
+    @Test
     fun ipdAdjustmentEnabled_followsLightLoadMode() {
         assertTrue(AirVisionDisplaySettings(lightLoadModeEnabled = false).ipdAdjustmentEnabled)
         assertEquals(false, AirVisionDisplaySettings(lightLoadModeEnabled = true).ipdAdjustmentEnabled)

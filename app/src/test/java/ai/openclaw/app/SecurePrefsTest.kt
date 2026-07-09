@@ -326,6 +326,25 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun airVisionCustomProfileLabels_persistAndNormalize() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        assertEquals(AirVisionViewMode.Custom1.label, prefs.airVisionCustomProfileLabels.value.custom1)
+        assertEquals(AirVisionViewMode.Custom2.label, prefs.airVisionCustomProfileLabels.value.custom2)
+
+        prefs.setAirVisionCustomProfileLabel(AirVisionViewMode.Custom1, "  walking   hud  ")
+        prefs.setAirVisionCustomProfileLabel(AirVisionViewMode.Custom2, "")
+        prefs.setAirVisionCustomProfileLabel(AirVisionViewMode.Working, "Ignored")
+
+        val reloaded = SecurePrefs(context).airVisionCustomProfileLabels.value
+        assertEquals("walking hud", reloaded.custom1)
+        assertEquals(AirVisionViewMode.Custom2.label, reloaded.custom2)
+    }
+
+    @Test
     fun airVisionDemoModeEnabled_persists() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)

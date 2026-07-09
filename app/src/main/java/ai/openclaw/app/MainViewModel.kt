@@ -126,6 +126,7 @@ class MainViewModel(
     val airVisionAppLanguage: StateFlow<AirVisionAppLanguage> = prefs.airVisionAppLanguage
     val airVisionStartupDestination: StateFlow<AirVisionStartupDestination> = prefs.airVisionStartupDestination
     val airVisionHudDisplayTarget: StateFlow<AirVisionHudDisplayTarget> = prefs.airVisionHudDisplayTarget
+    val airVisionCustomProfileLabels: StateFlow<AirVisionCustomProfileLabels> = prefs.airVisionCustomProfileLabels
     val airVisionPhysicalMainScreenVisible: StateFlow<Boolean> = prefs.airVisionPhysicalMainScreenVisible
     val airVisionDemoModeEnabled: StateFlow<Boolean> = prefs.airVisionDemoModeEnabled
     val airVisionUsbState: StateFlow<AirVisionUsbState> = nodeApp.airVisionUsb.state
@@ -464,6 +465,13 @@ class MainViewModel(
 
     fun setAirVisionHudDisplayTarget(target: AirVisionHudDisplayTarget) {
         prefs.setAirVisionHudDisplayTarget(target)
+    }
+
+    fun setAirVisionCustomProfileLabel(
+        mode: AirVisionViewMode,
+        label: String,
+    ) {
+        prefs.setAirVisionCustomProfileLabel(mode, label)
     }
 
     fun setAirVisionPhysicalMainScreenVisible(visible: Boolean) {

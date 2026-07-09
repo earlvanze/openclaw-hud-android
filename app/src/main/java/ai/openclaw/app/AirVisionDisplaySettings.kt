@@ -17,6 +17,30 @@ enum class AirVisionViewMode(
     }
 }
 
+data class AirVisionCustomProfileLabels(
+    val custom1: String = AirVisionViewMode.Custom1.label,
+    val custom2: String = AirVisionViewMode.Custom2.label,
+) {
+    fun labelFor(mode: AirVisionViewMode): String =
+        when (mode) {
+            AirVisionViewMode.Custom1 -> custom1
+            AirVisionViewMode.Custom2 -> custom2
+            else -> mode.label
+        }
+
+    companion object {
+        const val MAX_LABEL_LENGTH = 24
+
+        fun normalizeLabel(
+            value: String,
+            fallback: String,
+        ): String {
+            val compact = value.trim().replace(Regex("\\s+"), " ")
+            return compact.take(MAX_LABEL_LENGTH).ifBlank { fallback }
+        }
+    }
+}
+
 enum class AirVisionSplendidMode(
     val rawValue: String,
     val label: String,

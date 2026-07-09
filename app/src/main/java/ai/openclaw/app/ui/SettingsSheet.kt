@@ -112,6 +112,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionAppLanguage by viewModel.airVisionAppLanguage.collectAsState()
     val airVisionStartupDestination by viewModel.airVisionStartupDestination.collectAsState()
     val airVisionHudDisplayTarget by viewModel.airVisionHudDisplayTarget.collectAsState()
+    val airVisionCustomProfileLabels by viewModel.airVisionCustomProfileLabels.collectAsState()
     val airVisionPhysicalMainScreenVisible by viewModel.airVisionPhysicalMainScreenVisible.collectAsState()
     val airVisionDemoModeEnabled by viewModel.airVisionDemoModeEnabled.collectAsState()
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
@@ -662,7 +663,8 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Viewing Mode", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                "Current: ${airVisionDisplaySettings.viewMode.label}. Each mode keeps its own saved HUD profile.",
+                                "Current: ${airVisionCustomProfileLabels.labelFor(airVisionDisplaySettings.viewMode)}. " +
+                                    "Each mode keeps its own saved HUD profile.",
                                 style = mobileCallout,
                             )
                         },
@@ -672,7 +674,9 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         ListItem(
                             modifier = Modifier.fillMaxWidth(),
                             colors = listItemColors,
-                            headlineContent = { Text(mode.label, style = mobileHeadline) },
+                            headlineContent = {
+                                Text(airVisionCustomProfileLabels.labelFor(mode), style = mobileHeadline)
+                            },
                             supportingContent = {
                                 Text(airVisionViewModeDescription(mode), style = mobileCallout)
                             },
@@ -682,6 +686,35 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                     onClick = { viewModel.setAirVisionViewMode(mode) },
                                 )
                             },
+                        )
+                    }
+                    HorizontalDivider(color = mobileBorder)
+                    Column(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Text("Custom Profile Names", style = mobileHeadline, color = mobileText)
+                        OutlinedTextField(
+                            value = airVisionCustomProfileLabels.custom1,
+                            onValueChange = {
+                                viewModel.setAirVisionCustomProfileLabel(AirVisionViewMode.Custom1, it)
+                            },
+                            label = { Text(AirVisionViewMode.Custom1.label, style = mobileCaption1, color = mobileTextSecondary) },
+                            modifier = Modifier.fillMaxWidth(),
+                            textStyle = mobileBody.copy(color = mobileText),
+                            colors = settingsTextFieldColors(),
+                            singleLine = true,
+                        )
+                        OutlinedTextField(
+                            value = airVisionCustomProfileLabels.custom2,
+                            onValueChange = {
+                                viewModel.setAirVisionCustomProfileLabel(AirVisionViewMode.Custom2, it)
+                            },
+                            label = { Text(AirVisionViewMode.Custom2.label, style = mobileCaption1, color = mobileTextSecondary) },
+                            modifier = Modifier.fillMaxWidth(),
+                            textStyle = mobileBody.copy(color = mobileText),
+                            colors = settingsTextFieldColors(),
+                            singleLine = true,
                         )
                     }
                     HorizontalDivider(color = mobileBorder)
@@ -804,7 +837,8 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Reset Profile", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                "Restore ${airVisionDisplaySettings.viewMode.label} placement, safe area, brightness, distance, IPD, color, and performance defaults.",
+                                "Restore ${airVisionCustomProfileLabels.labelFor(airVisionDisplaySettings.viewMode)} " +
+                                    "placement, safe area, brightness, distance, IPD, color, and performance defaults.",
                                 style = mobileCallout,
                             )
                         },
@@ -1912,8 +1946,8 @@ private fun airVisionViewModeDescription(mode: AirVisionViewMode): String =
         AirVisionViewMode.Working -> "Balanced text scale for walking and workstation HUD use."
         AirVisionViewMode.Gaming -> "Larger HUD content for glanceable, high-motion sessions."
         AirVisionViewMode.Infinity -> "Smaller, farther-feeling content for less intrusive overlays."
-        AirVisionViewMode.Custom1 -> "Compact custom profile."
-        AirVisionViewMode.Custom2 -> "Large custom profile."
+        AirVisionViewMode.Custom1 -> "User-named compact saved profile."
+        AirVisionViewMode.Custom2 -> "User-named large saved profile."
     }
 
 private fun airVisionSplendidModeDescription(mode: AirVisionSplendidMode): String =

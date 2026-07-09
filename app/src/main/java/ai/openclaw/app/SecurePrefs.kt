@@ -56,6 +56,8 @@ class SecurePrefs(
         private const val AIR_VISION_APP_LANGUAGE_KEY = "airVision.app.language"
         private const val AIR_VISION_STARTUP_DESTINATION_KEY = "airVision.app.startupDestination"
         private const val AIR_VISION_HUD_DISPLAY_TARGET_KEY = "airVision.app.hudDisplayTarget"
+        private const val AIR_VISION_CUSTOM_1_LABEL_KEY = "airVision.profile.custom1.label"
+        private const val AIR_VISION_CUSTOM_2_LABEL_KEY = "airVision.profile.custom2.label"
         private const val AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY = "airVision.physicalMainScreenVisible"
         private const val AIR_VISION_DEMO_MODE_ENABLED_KEY = "airVision.demoModeEnabled"
     }
@@ -220,6 +222,10 @@ class SecurePrefs(
             ),
         )
     val airVisionHudDisplayTarget: StateFlow<AirVisionHudDisplayTarget> = _airVisionHudDisplayTarget
+
+    private val _airVisionCustomProfileLabels =
+        MutableStateFlow(loadAirVisionCustomProfileLabels())
+    val airVisionCustomProfileLabels: StateFlow<AirVisionCustomProfileLabels> = _airVisionCustomProfileLabels
 
     private val _airVisionPhysicalMainScreenVisible =
         MutableStateFlow(_airVisionDisplaySettings.value.physicalMainScreenVisible)
@@ -781,6 +787,25 @@ class SecurePrefs(
         _airVisionHudDisplayTarget.value = target
     }
 
+    fun setAirVisionCustomProfileLabel(
+        mode: AirVisionViewMode,
+        label: String,
+    ) {
+        val key =
+            when (mode) {
+                AirVisionViewMode.Custom1 -> AIR_VISION_CUSTOM_1_LABEL_KEY
+                AirVisionViewMode.Custom2 -> AIR_VISION_CUSTOM_2_LABEL_KEY
+                else -> return
+            }
+        val normalized = AirVisionCustomProfileLabels.normalizeLabel(label, mode.label)
+        plainPrefs.edit { putString(key, normalized) }
+        _airVisionCustomProfileLabels.value =
+            when (mode) {
+                AirVisionViewMode.Custom1 -> _airVisionCustomProfileLabels.value.copy(custom1 = normalized)
+                AirVisionViewMode.Custom2 -> _airVisionCustomProfileLabels.value.copy(custom2 = normalized)
+            }
+    }
+
     fun setAirVisionPhysicalMainScreenVisible(visible: Boolean) {
         val viewMode = _airVisionDisplaySettings.value.viewMode
         plainPrefs.edit {
@@ -1039,6 +1064,20 @@ class SecurePrefs(
             mediaKeyAction =
                 AirVisionHudMediaKeyAction.fromRawValue(
                     plainPrefs.getString(AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY, null),
+                ),
+        )
+
+    private fun loadAirVisionCustomProfileLabels(): AirVisionCustomProfileLabels =
+        AirVisionCustomProfileLabels(
+            custom1 =
+                AirVisionCustomProfileLabels.normalizeLabel(
+                    plainPrefs.getString(AIR_VISION_CUSTOM_1_LABEL_KEY, null).orEmpty(),
+                    AirVisionViewMode.Custom1.label,
+                ),
+            custom2 =
+                AirVisionCustomProfileLabels.normalizeLabel(
+                    plainPrefs.getString(AIR_VISION_CUSTOM_2_LABEL_KEY, null).orEmpty(),
+                    AirVisionViewMode.Custom2.label,
                 ),
         )
 
