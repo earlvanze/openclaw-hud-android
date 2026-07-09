@@ -47,3 +47,4 @@ jobs:
           node scripts/render-play-console-handoff.mjs --check
           node scripts/render-privacy-policy-site.mjs --check
           node scripts/verify-play-submission-package.mjs
+          node scripts/test-play-submission-verifier.mjs

@@ -69,6 +69,8 @@ Current local status:
   screenshot converter and final submission verifier.
 - `node scripts/test-play-publish-helper.mjs` passes against fake gcloud account
   scenarios for OAuth account selection and auth-check mode.
+- `node scripts/test-play-submission-verifier.mjs` passes against stale generated
+  Play Console handoff detection in the local submission verifier.
 - `node scripts/render-play-console-handoff.mjs --check` verifies the generated
   Play Console handoff packet against the current listing copy, app-content
   answers, privacy URL, and screenshot manifest.
