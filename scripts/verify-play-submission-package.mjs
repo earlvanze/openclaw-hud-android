@@ -135,6 +135,29 @@ function requireIncludes(label, text, needles) {
   if (missing.length > 0) throw new Error(`${label} is missing required text: ${missing.join(", ")}`);
 }
 
+function normalizePolicyText(text) {
+  return text
+    .replace(/^# .+$/gmu, "")
+    .replace(/`/gu, "")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function verifyInAppPolicyMirrorsHostedPolicy(hostedPolicy, inAppPolicy) {
+  const hosted = normalizePolicyText(hostedPolicy);
+  const inApp = normalizePolicyText(inAppPolicy);
+  const coreDisclosures = [
+    "OpenClaw HUD connects your Android device to an OpenClaw gateway that you configure",
+    "The Google Play HUD build may request microphone, notification, nearby-device, network, foreground-service, and audio-routing permissions",
+    "Notification access is optional",
+    "Voice and caption features may send microphone transcripts, caption text, chat text, assistant status, and selected AirVision HUD settings",
+    "OpenClaw HUD does not sell personal data and does not include advertising",
+  ];
+
+  requireIncludes("Hosted privacy policy parity", hosted, coreDisclosures);
+  requireIncludes("In-app privacy policy parity", inApp, coreDisclosures);
+}
+
 function requireArrayIncludes(label, values, expected) {
   const missing = expected.filter((value) => !values.includes(value));
   if (missing.length > 0) throw new Error(`${label} is missing: ${missing.join(", ")}`);
@@ -247,6 +270,7 @@ async function main() {
     "does not sell personal data",
     "clear data",
   ]);
+  verifyInAppPolicyMirrorsHostedPolicy(privacyPolicy, inAppPrivacyPolicy);
   requireIncludes("Settings privacy policy surface", settingsSheet, [
     "PrivacyPolicyText",
     "Privacy Policy",
