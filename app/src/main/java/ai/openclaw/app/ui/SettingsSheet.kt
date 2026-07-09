@@ -96,6 +96,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val notificationForwardingMaxEventsPerMinute by viewModel.notificationForwardingMaxEventsPerMinute.collectAsState()
     val notificationForwardingSessionKey by viewModel.notificationForwardingSessionKey.collectAsState()
     val airVisionDisplaySettings by viewModel.airVisionDisplaySettings.collectAsState()
+    val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
 
     var notificationQuietStartDraft by remember(notificationForwardingQuietStart) {
         mutableStateOf(notificationForwardingQuietStart)
@@ -378,6 +379,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         PackageManager.PERMISSION_GRANTED
                     assistantRoleAvailable = isAssistantRoleAvailable(context)
                     assistantRoleHeld = isAssistantRoleHeld(context)
+                    viewModel.refreshAirVisionUsb()
                 }
             }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -561,6 +563,47 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
+                        headlineContent = { Text("Firmware Link", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                airVisionUsbStatusText(
+                                    statusText = airVisionUsbState.statusText,
+                                    deviceLabel = airVisionUsbState.deviceLabel,
+                                    vendorProduct = airVisionUsbState.vendorProduct,
+                                    hidControlInterface = airVisionUsbState.hidControlInterface,
+                                    audioInterface = airVisionUsbState.audioInterface,
+                                    inputInterface = airVisionUsbState.inputInterface,
+                                ),
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Button(
+                                onClick = {
+                                    if (airVisionUsbState.connected && !airVisionUsbState.permissionGranted) {
+                                        viewModel.requestAirVisionUsbPermission()
+                                    } else {
+                                        viewModel.refreshAirVisionUsb()
+                                    }
+                                },
+                                colors = settingsPrimaryButtonColors(),
+                                shape = RoundedCornerShape(14.dp),
+                            ) {
+                                Text(
+                                    if (airVisionUsbState.connected && !airVisionUsbState.permissionGranted) {
+                                        "Grant"
+                                    } else {
+                                        "Refresh"
+                                    },
+                                    style = mobileCallout.copy(fontWeight = FontWeight.Bold),
+                                )
+                            }
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
                         headlineContent = { Text("Viewing Mode", style = mobileHeadline) },
                         supportingContent = {
                             Text(
@@ -703,7 +746,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
             }
             item {
                 Text(
-                    "Android applies HUD brightness, Eye Care filtering, and virtual distance now. Hardware IPD, true Splendid panel presets, and multi-screen desktop layouts require ASUS AirVision HID protocol support.",
+                    "Android applies HUD brightness, Eye Care filtering, and virtual distance now. Hardware IPD, true Splendid panel presets, and multi-screen desktop layouts require ASUS AirVision HID report support after the firmware link is verified.",
                     style = mobileCallout,
                     color = mobileTextSecondary,
                 )
@@ -1436,6 +1479,28 @@ private fun airVisionSplendidModeDescription(mode: AirVisionSplendidMode): Strin
         AirVisionSplendidMode.Game -> "Stored Windows-style profile for low-latency visual preference."
         AirVisionSplendidMode.EyeCare -> "Adds a warm Android HUD overlay."
     }
+
+private fun airVisionUsbStatusText(
+    statusText: String,
+    deviceLabel: String?,
+    vendorProduct: String?,
+    hidControlInterface: Boolean,
+    audioInterface: Boolean,
+    inputInterface: Boolean,
+): String {
+    val interfaces =
+        listOfNotNull(
+            "hid-out".takeIf { hidControlInterface },
+            "audio".takeIf { audioInterface },
+            "input".takeIf { inputInterface },
+        ).joinToString(", ")
+    return listOfNotNull(
+        statusText,
+        deviceLabel?.takeIf { it.isNotBlank() },
+        vendorProduct?.takeIf { it.isNotBlank() },
+        interfaces.takeIf { it.isNotBlank() }?.let { "interfaces: $it" },
+    ).joinToString("\n")
+}
 
 data class InstalledApp(
     val label: String,

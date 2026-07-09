@@ -118,6 +118,7 @@ class MainViewModel(
     val micEnabled: StateFlow<Boolean> = prefs.talkEnabled
     val nativeCaptionsEnabled: StateFlow<Boolean> = prefs.nativeCaptionsEnabled
     val airVisionDisplaySettings: StateFlow<AirVisionDisplaySettings> = prefs.airVisionDisplaySettings
+    val airVisionUsbState: StateFlow<AirVisionUsbState> = nodeApp.airVisionUsb.state
 
     val micCooldown: StateFlow<Boolean> = runtimeState(initial = false) { it.micCooldown }
     val micStatusText: StateFlow<String> = runtimeState(initial = "Mic off") { it.micStatusText }
@@ -146,6 +147,7 @@ class MainViewModel(
     val pendingRunCount: StateFlow<Int> = runtimeState(initial = 0) { it.pendingRunCount }
 
     init {
+        nodeApp.airVisionUsb.start()
         if (prefs.onboardingCompleted.value) {
             ensureRuntime()
         }
@@ -386,6 +388,14 @@ class MainViewModel(
         prefs.setAirVisionLightLoadModeEnabled(enabled)
     }
 
+    fun refreshAirVisionUsb() {
+        nodeApp.airVisionUsb.refresh()
+    }
+
+    fun requestAirVisionUsbPermission() {
+        nodeApp.airVisionUsb.requestPermission()
+    }
+
     fun setTranslationCaptionsEnabled(enabled: Boolean) {
         if (enabled) {
             prefs.setNativeCaptionsEnabled(false)
@@ -513,4 +523,9 @@ class MainViewModel(
             thinking = thinking,
             attachments = attachments,
         )
+
+    override fun onCleared() {
+        nodeApp.airVisionUsb.stop()
+        super.onCleared()
+    }
 }

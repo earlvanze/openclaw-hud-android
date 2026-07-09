@@ -39,6 +39,7 @@ Current live target:
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
 - [x] AirVision M1 settings profile with viewing mode, Splendid mode, brightness,
   blue-light filter, distance, IPD, Motion Sync, and Light Load controls
+- [x] Optional AirVision M1 USB firmware-link detection and permission flow
 - [ ] Full end-to-end QA and release hardening
 
 ## Open in Android Studio
@@ -124,7 +125,13 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Blue Light Filter | Implemented as Android HUD warm filtering. |
 | Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation. |
+| Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, and HID/audio/input interface status. |
 | Multi-screen desktop layouts | Not implemented on Android. Samsung DeX and Android Presentation own the external display topology. |
+
+Firmware controls are intentionally read-only/status-only for now. The app can
+detect the M1 USB HID control interface and request Android USB permission, but
+it does not send ASUS vendor reports until the Windows app protocol is captured
+and validated.
 
 Captions default to Samsung/Android native captioning so the system floating
 caption window can sit over the minimal HUD. The Voice tab exposes the provider

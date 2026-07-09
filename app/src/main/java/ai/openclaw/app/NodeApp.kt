@@ -5,6 +5,7 @@ import android.os.StrictMode
 
 class NodeApp : Application() {
     val prefs: SecurePrefs by lazy { SecurePrefs(this) }
+    val airVisionUsb: AirVisionUsbController by lazy { AirVisionUsbController(this) }
 
     @Volatile private var runtimeInstance: NodeRuntime? = null
 
