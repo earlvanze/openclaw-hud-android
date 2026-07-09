@@ -138,6 +138,31 @@ class AirVisionHudDisplayRouterTest {
     }
 
     @Test
+    fun summaryText_reportsPresentationSelection() {
+        val selection =
+            AirVisionHudDisplayRoute(
+                candidateCount = 2,
+                presentationCandidateCount = 1,
+                selectedCandidate =
+                    AirVisionHudDisplayCandidate(
+                        displayId = 5,
+                        name = "ASUS AirVision M1",
+                        widthPx = 1920,
+                        heightPx = 1080,
+                        isPresentation = true,
+                    ),
+                reason = "selected_presentation_display",
+            )
+
+        assertEquals(
+            "Selected display 5: ASUS AirVision M1 1920x1080. " +
+                "1/2 presentation-capable external display(s). " +
+                "Using Android Presentation display category.",
+            selection.summaryText(),
+        )
+    }
+
+    @Test
     fun choose_fallsBackWhenNoPresentationEligibleDisplaysExist() {
         val candidates =
             listOf(
@@ -184,5 +209,44 @@ class AirVisionHudDisplayRouterTest {
         assertEquals(9, selection.selectedCandidate?.displayId)
         assertEquals(true, selection.usedNonDefaultDisplayFallback)
         assertEquals("selected_non_default_display_fallback", selection.reason)
+    }
+
+    @Test
+    fun summaryText_reportsFallbackSelection() {
+        val selection =
+            AirVisionHudDisplayRoute(
+                candidateCount = 1,
+                presentationCandidateCount = 0,
+                selectedCandidate =
+                    AirVisionHudDisplayCandidate(
+                        displayId = 9,
+                        name = "ASUS AirVision M1",
+                        isPresentation = false,
+                    ),
+                usedNonDefaultDisplayFallback = true,
+                reason = "selected_non_default_display_fallback",
+            )
+
+        assertEquals(
+            "Selected display 9: ASUS AirVision M1. " +
+                "0/1 presentation-capable external display(s). " +
+                "Using non-default display fallback.",
+            selection.summaryText(),
+        )
+    }
+
+    @Test
+    fun summaryText_reportsNoExternalDisplays() {
+        val selection =
+            AirVisionHudDisplayRoute(
+                reason = "no_external_displays",
+            )
+
+        assertEquals(
+            "No external display is available. " +
+                "0/0 presentation-capable external display(s). " +
+                "Waiting for an Android Presentation display.",
+            selection.summaryText(),
+        )
     }
 }

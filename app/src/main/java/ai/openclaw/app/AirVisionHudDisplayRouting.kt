@@ -34,7 +34,33 @@ data class AirVisionHudDisplayRoute(
     val selectedCandidate: AirVisionHudDisplayCandidate? = null,
     val usedNonDefaultDisplayFallback: Boolean = false,
     val reason: String = "not_evaluated",
-)
+) {
+    fun summaryText(): String {
+        val selected =
+            selectedCandidate?.let { candidate ->
+                val size =
+                    if (candidate.widthPx > 0 && candidate.heightPx > 0) {
+                        " ${candidate.widthPx}x${candidate.heightPx}"
+                    } else {
+                        ""
+                    }
+                "Selected display ${candidate.displayId}: ${candidate.name.ifBlank { "Unnamed" }}$size"
+            } ?: when (reason) {
+                "activity_on_external_display" -> "Activity is already running on an external display"
+                "display_manager_unavailable" -> "Android display manager is unavailable"
+                "no_external_displays" -> "No external display is available"
+                else -> "No presentation display is selected yet"
+            }
+        val presentationSummary = "$presentationCandidateCount/$candidateCount presentation-capable external display(s)."
+        val routeSummary =
+            when {
+                selectedCandidate == null -> "Waiting for an Android Presentation display."
+                usedNonDefaultDisplayFallback -> "Using non-default display fallback."
+                else -> "Using Android Presentation display category."
+            }
+        return "$selected. $presentationSummary $routeSummary"
+    }
+}
 
 object AirVisionHudDisplayRouter {
     fun select(

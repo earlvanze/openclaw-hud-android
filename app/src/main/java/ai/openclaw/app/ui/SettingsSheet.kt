@@ -3,7 +3,6 @@ package ai.openclaw.app.ui
 import ai.openclaw.app.AirVisionAppLanguage
 import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionHudDoubleTapAction
-import ai.openclaw.app.AirVisionHudDisplayRoute
 import ai.openclaw.app.AirVisionHudDisplayTarget
 import ai.openclaw.app.AirVisionHudKeyAction
 import ai.openclaw.app.AirVisionHudMediaKeyAction
@@ -771,7 +770,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("HUD Display Route", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                airVisionHudDisplayRouteText(airVisionHudDisplayRoute),
+                                airVisionHudDisplayRoute.summaryText(),
                                 style = mobileCallout,
                             )
                         },
@@ -2178,33 +2177,6 @@ private fun airVisionHudDisplayTargetDescription(target: AirVisionHudDisplayTarg
         AirVisionHudDisplayTarget.FirstExternal -> "Use the lowest-numbered external display."
         AirVisionHudDisplayTarget.LastExternal -> "Use the highest-numbered external display."
     }
-
-private fun airVisionHudDisplayRouteText(route: AirVisionHudDisplayRoute): String {
-    val selected =
-        route.selectedCandidate?.let { candidate ->
-            val size =
-                if (candidate.widthPx > 0 && candidate.heightPx > 0) {
-                    " ${candidate.widthPx}x${candidate.heightPx}"
-                } else {
-                    ""
-                }
-            "Selected display ${candidate.displayId}: ${candidate.name.ifBlank { "Unnamed" }}$size"
-        } ?: when (route.reason) {
-            "activity_on_external_display" -> "Activity is already running on an external display."
-            "display_manager_unavailable" -> "Android display manager is unavailable."
-            "no_external_displays" -> "No external display is available."
-            else -> "No presentation display is selected yet."
-        }
-    val presentationSummary =
-        "${route.presentationCandidateCount}/${route.candidateCount} presentation-capable external display(s)."
-    val routeSummary =
-        if (route.usedNonDefaultDisplayFallback) {
-            "Using non-default display fallback."
-        } else {
-            "Using Android Presentation display category."
-        }
-    return "$selected. $presentationSummary $routeSummary"
-}
 
 private fun airVisionTouchActionDescription(action: AirVisionHudTouchAction): String =
     when (action) {
