@@ -855,10 +855,18 @@ class SecurePrefs(
     fun importAirVisionProfileBackup(raw: String) {
         val backup = AirVisionProfileBackups.decode(raw)
         val activeViewMode = AirVisionProfileBackups.requireViewMode(backup.activeViewMode)
+        val resolvedProfiles = backup.profiles.map(AirVisionProfileBackups::settingsFromProfile)
+        val duplicatedModes =
+            resolvedProfiles
+                .groupingBy { it.viewMode }
+                .eachCount()
+                .filterValues { it > 1 }
+                .keys
+        require(duplicatedModes.isEmpty()) {
+            "Profile backup includes duplicate profiles: ${duplicatedModes.joinToString { it.label }}."
+        }
         val profileByMode =
-            backup.profiles
-                .map(AirVisionProfileBackups::settingsFromProfile)
-                .associateBy { it.viewMode }
+            resolvedProfiles.associateBy { it.viewMode }
         val missingModes = AirVisionViewMode.entries.filterNot { profileByMode.containsKey(it) }
         require(missingModes.isEmpty()) {
             "Profile backup is missing: ${missingModes.joinToString { it.label }}."

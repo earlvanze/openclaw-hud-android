@@ -316,6 +316,52 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun importAirVisionProfileBackup_rejectsDuplicateProfileSlots() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        val duplicateBackup =
+            """
+            {
+              "schema": "openclaw.airvision.m1.profile-backup",
+              "version": 1,
+              "activeViewMode": "working",
+              "customLabels": { "custom1": "A", "custom2": "B" },
+              "hudControls": {
+                "singleTapAction": "dismiss_notification",
+                "doubleTapAction": "toggle_mic",
+                "swipeAction": "scroll_chat",
+                "brightnessKeyAction": "scroll_chat",
+                "mediaKeyAction": "double_tap_toggle_mic"
+              },
+              "appPreferences": {
+                "language": "system",
+                "startupDestination": "hud",
+                "hudDisplayTarget": "airvision_preferred",
+                "demoModeEnabled": false
+              },
+              "profiles": [
+                ${backupProfileJson("working")},
+                ${backupProfileJson("gaming")},
+                ${backupProfileJson("infinity")},
+                ${backupProfileJson("custom1")},
+                ${backupProfileJson("custom2")},
+                ${backupProfileJson("working")}
+              ]
+            }
+            """.trimIndent()
+
+        val error =
+            assertThrows(IllegalArgumentException::class.java) {
+                prefs.importAirVisionProfileBackup(duplicateBackup)
+            }
+
+        assertEquals("Profile backup includes duplicate profiles: Working.", error.message)
+    }
+
+    @Test
     fun airVisionIpdChange_isLockedWhileLightLoadModeIsEnabled() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
@@ -551,3 +597,21 @@ class SecurePrefsTest {
         assertEquals(true, SecurePrefs(context).airVisionPhysicalMainScreenVisible.value)
     }
 }
+
+private fun backupProfileJson(viewMode: String): String =
+    """
+    {
+      "viewMode": "$viewMode",
+      "splendidMode": "standard",
+      "hudPlacement": "upper_left",
+      "brightnessPercent": 80,
+      "blueLightFilterPercent": 0,
+      "distanceCm": 75,
+      "ipdMm": 67,
+      "safeAreaPercent": 5,
+      "physicalMainScreenVisible": true,
+      "motionSyncEnabled": true,
+      "threeDModeEnabled": false,
+      "lightLoadModeEnabled": false
+    }
+    """.trimIndent()
