@@ -75,6 +75,7 @@ function parseArgs(argv) {
           "Use --skip-listing or --skip-release-notes to upload only the bundle/track changes.",
           "",
           "Use --preflight to verify Play API package/access state without uploading a bundle.",
+          "Commit mode also runs `verify-play-submission-package.mjs --final` before any Play API upload.",
         ].join("\n"),
       );
       process.exit(0);
@@ -299,6 +300,27 @@ async function deleteEdit(token, baseUrl, editId) {
   await googleJson(token, `${baseUrl}/edits/${encodeURIComponent(editId)}:delete`, { method: "DELETE" }).catch(() => {});
 }
 
+function verifyFinalSubmissionReadinessBeforeUpload() {
+  const result = spawnSync(process.execPath, [join(scriptDir, "verify-play-submission-package.mjs"), "--final"], {
+    cwd: androidDir,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (result.status !== 0) {
+    const detail = result.stderr.trim() || result.stdout.trim() || "Final Play submission verifier failed.";
+    throw new Error(
+      [
+        "Refusing Google Play upload because final submission readiness has not passed.",
+        detail,
+        "Fill play/app-content-answers.json finalSubmission fields and rerun `node scripts/verify-play-submission-package.mjs --final`.",
+      ].join("\n"),
+    );
+  }
+  const summary = result.stdout.trim();
+  if (summary) console.log(summary);
+  console.log("Final Play submission readiness verified.");
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const bundlePath = args.bundle ?? (await latestHudBundle());
@@ -328,6 +350,10 @@ async function main() {
   if (!args.commit && !args.preflight) {
     console.log("Dry-run complete. Re-run with --preflight to verify Play access, or --commit to upload and commit a Google Play edit.");
     return;
+  }
+
+  if (args.commit) {
+    verifyFinalSubmissionReadinessBeforeUpload();
   }
 
   const { token, source } = await resolveAccessToken(args);

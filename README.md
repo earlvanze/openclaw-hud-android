@@ -256,8 +256,11 @@ release status `draft`, and the newest
 `build/release-bundles/*-hud-release.aab`. It validates the English Play
 listing files, creates a Play edit, uploads the AAB, patches the localized
 store listing, attaches localized release notes to the internal-track release,
-and commits only when `--commit` is supplied. Auth can come from a Play Console
-service-account JSON file or the active `gcloud auth print-access-token`
+and commits only when `--commit` is supplied. Commit mode refuses to create a
+Play edit or upload a bundle until `node scripts/verify-play-submission-package.mjs --final`
+passes, so screenshots, hosted privacy URL, tester setup, reviewer access, and
+app creation status must be recorded locally first. Auth can come from a Play
+Console service-account JSON file or the active `gcloud auth print-access-token`
 account. For `--auth gcloud`, the helper restricts publishing to
 `earlvanze@gmail.com` or `earl@earlbnb.com` by default so an accidental active
 Cloud account cannot publish the app; run `gcloud config set account <email>`
@@ -317,7 +320,9 @@ recorded, internal testers are configured, and reviewer access instructions have
 been entered in Play Console. When screenshot entries are local paths, `--final`
 also validates that the files are JPEG or 24-bit PNG without alpha, no larger
 than 8 MiB, at least 320 px on the shortest side, no larger than 3840 px on the
-longest side, and no more than 2:1 in either orientation.
+longest side, and no more than 2:1 in either orientation. The publish helper
+runs this final verifier automatically in `--commit` mode before contacting the
+Google Play edit/upload API.
 
 ## Kotlin Lint + Format
 

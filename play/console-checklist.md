@@ -28,7 +28,8 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 - Keep the initial release status as `draft` until screenshots, policy forms, and tester access are verified.
 - Fill `play/app-content-answers.json` `finalSubmission` fields, then run
   `node scripts/verify-play-submission-package.mjs --final` before the first
-  `--commit`.
+  `--commit`. The publish helper runs this final verifier again in `--commit`
+  mode before creating a Play edit or uploading a bundle.
 
 Current local status:
 
@@ -42,6 +43,9 @@ Current local status:
 - `testHudDebugUnitTest` passes.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, and release notes character limits.
+- `node scripts/publish-play-internal.mjs --commit` is guarded by
+  `node scripts/verify-play-submission-package.mjs --final` before any Play API
+  upload.
 - `node scripts/test-play-screenshot-tools.mjs` passes against the current
   screenshot converter and final submission verifier.
 - `play/app-content-answers.json` contains the draft App content answers for
@@ -63,6 +67,8 @@ Current local status:
   SMS, Call Log, camera, location, contacts, calendar, or media-library
   permissions.
 - Google Play Android Developer API is enabled for the active gcloud project.
+- Non-authorized active gcloud accounts are rejected before the helper requests
+  an upload token or creates a Play edit.
 - With an authorized OAuth account active, API preflight should reach Google
   Play but still return
   `Package not found: ai.openclaw.app.hud`.
