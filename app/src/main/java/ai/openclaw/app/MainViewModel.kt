@@ -358,6 +358,12 @@ class MainViewModel(
         return true
     }
 
+    fun handlePlayReviewDemoLaunch(request: PlayReviewDemoLaunchRequest) {
+        prefs.setAirVisionDemoModeEnabled(true)
+        prefs.setAirVisionStartupDestination(request.destination)
+        setOnboardingCompleted(true)
+    }
+
     fun setMicEnabled(enabled: Boolean) {
         ensureRuntime().setMicEnabled(enabled)
     }

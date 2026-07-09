@@ -74,6 +74,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         handleGatewaySetupIntent(intent)
         handleAssistantIntent(intent)
+        handlePlayReviewDemoIntent(intent)
         if (BuildConfig.OPENCLAW_DEFAULT_HUD) {
             applyPhoneSystemBars()
         } else {
@@ -181,6 +182,7 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         handleGatewaySetupIntent(intent)
         handleAssistantIntent(intent)
+        handlePlayReviewDemoIntent(intent)
     }
 
     private fun handleGatewaySetupIntent(intent: android.content.Intent?) {
@@ -191,6 +193,11 @@ class MainActivity : ComponentActivity() {
     private fun handleAssistantIntent(intent: android.content.Intent?) {
         val request = parseAssistantLaunchIntent(intent) ?: return
         viewModel.handleAssistantLaunch(request)
+    }
+
+    private fun handlePlayReviewDemoIntent(intent: android.content.Intent?) {
+        val request = parsePlayReviewDemoLaunchIntent(intent) ?: return
+        viewModel.handlePlayReviewDemoLaunch(request)
     }
 
     private fun registerHudDisplayListener() {

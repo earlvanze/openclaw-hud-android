@@ -334,6 +334,7 @@ async function main() {
     "Target audience",
     "Data deletion",
     "in-app privacy",
+    "capture-play-screenshots",
     "verify-play-submission-package",
   ]);
 

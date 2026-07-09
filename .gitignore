@@ -9,3 +9,4 @@ local.properties
 *.jks
 *.keystore
 captures/
+play/screenshots/**/*.png

@@ -30,4 +30,5 @@ jobs:
           node scripts/verify-play-hud-release.mjs \
             --bundle app/build/outputs/bundle/hudRelease/app-hud-release.aab \
             --skip-signature
+          bash -n scripts/capture-play-screenshots.sh
           node scripts/verify-play-submission-package.mjs

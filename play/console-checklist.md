@@ -19,6 +19,8 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 - Run `node scripts/verify-play-submission-package.mjs` before filling or
   updating Play Console App content answers.
 - Upload `build/release-bundles/openclaw-2026.7.9-hud-release.aab` to the internal track first.
+- Capture phone screenshots with `scripts/capture-play-screenshots.sh` or an
+  equivalent Play Console screenshot workflow.
 - Keep the initial release status as `draft` until screenshots, policy forms, and tester access are verified.
 - Fill `play/app-content-answers.json` `finalSubmission` fields, then run
   `node scripts/verify-play-submission-package.mjs --final` before the first

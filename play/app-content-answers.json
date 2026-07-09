@@ -85,6 +85,7 @@
   "reviewEvidence": {
     "releaseVerifier": "node scripts/verify-play-hud-release.mjs",
     "submissionVerifier": "node scripts/verify-play-submission-package.mjs",
+    "screenshotCapture": "scripts/capture-play-screenshots.sh",
     "ciWorkflow": ".github/workflows/android-hud.yml",
     "demoMode": "Settings > AirVision M1 > App Preferences > Demo Mode"
   },

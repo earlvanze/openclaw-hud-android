@@ -268,6 +268,22 @@ accepted. Store listing and policy prep files live under `play/`. Use
 Console app must already exist for `ai.openclaw.app.hud`; follow
 `play/console-checklist.md` before the first commit.
 
+Play phone screenshots can be captured from the HUD build without a live M1 by
+using the app's review/demo launch action:
+
+```bash
+ANDROID_HOME=/home/digit/android-sdk ANDROID_SDK_ROOT=/home/digit/android-sdk \
+  ./gradlew :app:assembleHudDebug
+./scripts/capture-play-screenshots.sh --serial <adb-serial>
+```
+
+The script installs the HUD debug APK, marks the app ready for review/demo mode,
+launches deterministic HUD and Settings states on the phone display, and writes
+`play/screenshots/phone/hud-demo.png` plus
+`play/screenshots/phone/settings-demo.png`. After uploading screenshots in Play
+Console, record their names or URLs in
+`play/app-content-answers.json` `finalSubmission.phoneScreenshots`.
+
 `verify-play-hud-release.mjs` is the offline-safe local gate for the HUD/M1
 Play target. It verifies the newest signed HUD AAB, confirms the generated
 manifest package is `ai.openclaw.app.hud`, fails if restricted Play-risk
