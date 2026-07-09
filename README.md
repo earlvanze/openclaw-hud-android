@@ -186,7 +186,9 @@ Preferred keeps the default behavior of selecting presentation displays named
 like ASUS AirVision M1. Largest External, First External, and Last External
 provide manual fallbacks for Samsung DeX or adapter setups where Android exposes
 multiple presentation displays. If Android does not expose any presentation
-targets, the router falls back to the older non-default display list.
+targets, the router falls back to the older non-default display list. Settings
+also shows the current HUD Display Route with candidate counts, selected display
+identity, and whether fallback routing is active.
 
 Custom profile names and copy-current-to-custom actions live under Viewing Mode
 in Settings -> AirVision M1. The labels rename the saved Custom 1 and Custom 2
