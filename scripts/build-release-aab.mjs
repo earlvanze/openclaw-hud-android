@@ -61,8 +61,7 @@ function formatVersionName(date) {
 }
 
 function formatVersionCodePrefix(date) {
-  const year = String(date.getFullYear()).slice(-2);
-  return `${year}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
+  return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function parseVersionMatches(buildGradleText) {

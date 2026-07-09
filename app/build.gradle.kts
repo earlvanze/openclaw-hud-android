@@ -65,7 +65,7 @@ android {
         applicationId = "ai.openclaw.app"
         minSdk = 31
         targetSdk = 36
-        versionCode = 26070900
+        versionCode = 2026070901
         versionName = "2026.7.9"
         ndk {
             // Support all major ABIs — native libs are tiny (~47 KB per ABI)
@@ -147,6 +147,9 @@ android {
                 "AndroidGradlePluginVersion",
                 "GradleDependency",
                 "IconLauncherShape",
+                // Existing HUD installs use YYYYMMDDNN version codes, so Play/internal
+                // updates must stay above those builds even though the value is high.
+                "HighAppVersionCode",
                 "NewerVersionAvailable",
             )
         warningsAsErrors = true
