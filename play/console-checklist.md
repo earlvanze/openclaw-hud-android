@@ -30,7 +30,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
   AirVision companion language menu.
 - Run `node scripts/verify-play-submission-package.mjs` before filling or
   updating Play Console App content answers.
-- Upload `build/release-bundles/openclaw-2026.7.9-hud-release.aab` to the internal track first.
+- Upload the fresh HUD AAB selected by the publish helper to the internal track
+  first. Rebuild with `./gradlew :app:bundleHudRelease` for local dry-runs, or
+  `node scripts/build-release-aab.mjs --flavor hud` for a locally signed release
+  bundle.
 - Capture phone screenshots with `scripts/capture-play-screenshots.sh`, or run
   `node scripts/render-play-screenshots.mjs` when the Fold/M1 capture path is
   offline. Both paths write Play-ready 24-bit PNG screenshots and
@@ -49,19 +52,25 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 
 Current local status:
 
-- Latest signed HUD AAB builds successfully from `main`:
-  `build/release-bundles/openclaw-2026.7.9-hud-release.aab`
+- Latest local HUD AAB builds successfully from `main`:
+  `app/build/outputs/bundle/hudRelease/app-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `0cce3b2efb863eb67452d502d578496717b8439042e36141eb51d8671d32cfae`
-- `node scripts/verify-play-hud-release.mjs` passes against the latest signed
-  HUD AAB, packaged HUD manifest, and English Play listing copy.
+  `90358ce30c9a1e91c99bdf8b057130f100495091f6431414f7fbb31684bb1311`
+- `node scripts/verify-play-hud-release.mjs` passes against the latest local
+  HUD AAB, packaged HUD manifest, and English Play listing copy. Publishing
+  still requires a locally signed release bundle from
+  `node scripts/build-release-aab.mjs --flavor hud`.
 - `lintHudRelease` passes.
 - `testHudDebugUnitTest` passes.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, release notes character limits, and local Play
-  submission packet.
+  submission packet. It refuses stale local artifacts when HUD source/build
+  inputs are dirty or newer than the selected AAB.
 - `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account
   earlvanze@gmail.com --auth-check` verifies the selected local OAuth publisher
+  account before any Play API request.
+- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account
+  earl@earlbnb.com --auth-check` verifies the alternate allowed OAuth publisher
   account before any Play API request.
 - `node scripts/publish-play-internal.mjs --commit` is guarded by
   `node scripts/verify-play-submission-package.mjs --final` before any Play API

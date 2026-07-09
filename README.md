@@ -264,10 +264,13 @@ node scripts/verify-play-submission-package.mjs
 node scripts/verify-play-submission-package.mjs --final
 node scripts/publish-play-internal.mjs --dry-run
 node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@gmail.com --auth-check
+node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earl@earlbnb.com --auth-check
 node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@gmail.com --preflight
+node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earl@earlbnb.com --preflight
 GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=/path/to/service-account.json \
   node scripts/publish-play-internal.mjs --commit
 node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@gmail.com --commit
+node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earl@earlbnb.com --commit
 ```
 
 The publish helper defaults to package `ai.openclaw.app.hud`, track `internal`,

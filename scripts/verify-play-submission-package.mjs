@@ -676,6 +676,9 @@ async function main() {
     "capture-play-screenshots",
     "render-privacy-policy-site",
     "verify-play-submission-package",
+    "earlvanze@gmail.com",
+    "earl@earlbnb.com",
+    "stale local artifacts",
   ]);
 
   console.log(`App-content package: ${appContent.packageName}`);

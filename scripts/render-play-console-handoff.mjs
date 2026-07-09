@@ -126,8 +126,9 @@ async function render() {
     "- `node scripts/publish-play-internal.mjs --dry-run`",
     "- `node scripts/verify-play-submission-package.mjs --final` after Console blockers are complete",
     "- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@gmail.com --auth-check` after OAuth login",
-    "- `node scripts/publish-play-internal.mjs --preflight` after the Play Console app exists",
-    "- `node scripts/publish-play-internal.mjs --commit` for the first internal draft upload",
+    "- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earl@earlbnb.com --auth-check` after OAuth login",
+    "- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account <allowed-account> --preflight` after the Play Console app exists",
+    "- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account <allowed-account> --commit` for the first internal draft upload",
     "",
   ].join("\n")}\n`;
 }
