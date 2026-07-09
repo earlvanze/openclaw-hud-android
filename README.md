@@ -128,7 +128,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 
 | Windows AirVision feature | Android HUD status |
 | --- | --- |
-| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, active-profile reset, HUD placement, safe area, scale/layout, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
+| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, active-profile reset, HUD placement, physical main screen behavior, safe area, scale/layout, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
 | Brightness | Implemented as software HUD dimming. Hardware brightness remains available from the M1 touch bar. |
 | Screen distance | Implemented as virtual HUD distance scaling. |
 | IPD | Stored as a calibration value, defaulting to 67 mm. Adjustment is locked while Light Load Mode is enabled, matching the ASUS app. Firmware-level apply still needs the ASUS HID protocol. |
@@ -142,7 +142,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, serial availability, and firmware protocol status. Actual firmware version still needs ASUS HID support. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, and USB interface/endpoint diagnostics for protocol capture work. |
 | Identify | Implemented as a temporary `HUD 1` marker on the Android Presentation display. |
-| Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports per-mode placement and safe-area layout profiles for the M1 presentation. |
+| Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports per-mode placement, physical main screen visibility, and safe-area layout profiles for the M1 presentation. |
 
 Firmware controls are intentionally read-only/status-only for now. The app can
 detect the M1 USB HID control interface, request Android USB permission, and

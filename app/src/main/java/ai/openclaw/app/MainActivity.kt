@@ -61,6 +61,7 @@ class MainActivity : ComponentActivity() {
                 if (presentation.display.displayId == displayId) {
                     presentation.dismiss()
                     hudPresentation = null
+                    viewModel.setAirVisionHudPresentationActive(false)
                 }
                 showHudPresentationIfAvailable()
             }
@@ -160,6 +161,7 @@ class MainActivity : ComponentActivity() {
         unregisterHudDisplayListener()
         hudPresentation?.dismiss()
         hudPresentation = null
+        viewModel.setAirVisionHudPresentationActive(false)
         hudMediaSession?.release()
         hudMediaSession = null
         AirVisionAudioRouter.clearHudRoute(this)
@@ -202,6 +204,7 @@ class MainActivity : ComponentActivity() {
         if (isOnExternalDisplay()) {
             hudPresentation?.dismiss()
             hudPresentation = null
+            viewModel.setAirVisionHudPresentationActive(false)
             applyPhoneSystemBars()
             return
         }
@@ -213,14 +216,17 @@ class MainActivity : ComponentActivity() {
                 ?: run {
                     hudPresentation?.dismiss()
                     hudPresentation = null
+                    viewModel.setAirVisionHudPresentationActive(false)
                     return
                 }
 
         hudPresentation?.let { current ->
             if (current.display.displayId == targetDisplay.displayId && current.isShowing) {
+                viewModel.setAirVisionHudPresentationActive(true)
                 return
             }
             current.dismiss()
+            viewModel.setAirVisionHudPresentationActive(false)
         }
 
         hudPresentation =
@@ -228,10 +234,12 @@ class MainActivity : ComponentActivity() {
                 runCatching { presentation.show() }
                     .onSuccess {
                         Log.d(TAG, "HUD presentation shown on display ${targetDisplay.displayId} ${targetDisplay.name}")
+                        viewModel.setAirVisionHudPresentationActive(true)
                         applyPhoneSystemBars()
                     }.onFailure { error ->
                         Log.w(TAG, "Failed to show HUD presentation on display ${targetDisplay.displayId}", error)
                         hudPresentation = null
+                        viewModel.setAirVisionHudPresentationActive(false)
                     }
             }
     }

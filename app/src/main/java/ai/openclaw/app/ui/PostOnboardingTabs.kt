@@ -35,6 +35,8 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -91,6 +93,18 @@ fun PostOnboardingTabs(
     var chatTabStarted by rememberSaveable { mutableStateOf(false) }
     var agentsTabStarted by rememberSaveable { mutableStateOf(false) }
     val requestedHomeDestination by viewModel.requestedHomeDestination.collectAsState()
+    val airVisionHudPresentationActive by viewModel.airVisionHudPresentationActive.collectAsState()
+    val airVisionPhysicalMainScreenVisible by viewModel.airVisionPhysicalMainScreenVisible.collectAsState()
+    val isConnected by viewModel.isConnected.collectAsState()
+
+    if (BuildConfig.OPENCLAW_DEFAULT_HUD && airVisionHudPresentationActive && !airVisionPhysicalMainScreenVisible) {
+        AirVisionPhoneMainScreenHidden(
+            isConnected = isConnected,
+            onShowPhone = { viewModel.setAirVisionPhysicalMainScreenVisible(true) },
+            modifier = modifier,
+        )
+        return
+    }
 
     LaunchedEffect(requestedHomeDestination) {
         val destination = requestedHomeDestination ?: return@LaunchedEffect
@@ -118,8 +132,6 @@ fun PostOnboardingTabs(
     }
 
     val statusText by viewModel.statusText.collectAsState()
-    val isConnected by viewModel.isConnected.collectAsState()
-
     val statusVisual =
         remember(statusText, isConnected) {
             val lower = statusText.lowercase()
@@ -205,6 +217,65 @@ fun PostOnboardingTabs(
                     HomeTab.Agents -> Unit
                     HomeTab.Settings -> SettingsSheet(viewModel = viewModel)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AirVisionPhoneMainScreenHidden(
+    isConnected: Boolean,
+    onShowPhone: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(18.dp),
+        ) {
+            Surface(
+                shape = RoundedCornerShape(999.dp),
+                color = if (isConnected) Color(0xFF00FF66) else Color(0xFF1F6B2B),
+                modifier = Modifier.padding(2.dp),
+            ) {
+                Box(modifier = Modifier.padding(5.dp))
+            }
+        }
+        Column(
+            modifier =
+                Modifier
+                    .align(Alignment.Center)
+                    .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = "HUD on M1",
+                style = mobileTitle1.copy(fontWeight = FontWeight.Bold),
+                color = Color(0xFFB8FFB0),
+            )
+            Text(
+                text = "Phone main screen hidden",
+                style = mobileCallout,
+                color = Color(0xFF66FF66),
+            )
+            Button(
+                onClick = onShowPhone,
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF00FF66),
+                        contentColor = Color.Black,
+                    ),
+            ) {
+                Text("Show Phone", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
             }
         }
     }

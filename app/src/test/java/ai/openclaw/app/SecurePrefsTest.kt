@@ -274,4 +274,18 @@ class SecurePrefsTest {
 
         assertEquals(AirVisionAppLanguage.Spanish, SecurePrefs(context).airVisionAppLanguage.value)
     }
+
+    @Test
+    fun airVisionPhysicalMainScreenVisible_persists() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        assertEquals(true, prefs.airVisionPhysicalMainScreenVisible.value)
+
+        prefs.setAirVisionPhysicalMainScreenVisible(false)
+
+        assertEquals(false, SecurePrefs(context).airVisionPhysicalMainScreenVisible.value)
+    }
 }

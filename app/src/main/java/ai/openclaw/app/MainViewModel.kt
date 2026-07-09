@@ -124,7 +124,10 @@ class MainViewModel(
     val airVisionDisplaySettings: StateFlow<AirVisionDisplaySettings> = prefs.airVisionDisplaySettings
     val airVisionHudControls: StateFlow<AirVisionHudControls> = prefs.airVisionHudControls
     val airVisionAppLanguage: StateFlow<AirVisionAppLanguage> = prefs.airVisionAppLanguage
+    val airVisionPhysicalMainScreenVisible: StateFlow<Boolean> = prefs.airVisionPhysicalMainScreenVisible
     val airVisionUsbState: StateFlow<AirVisionUsbState> = nodeApp.airVisionUsb.state
+    private val _airVisionHudPresentationActive = MutableStateFlow(false)
+    val airVisionHudPresentationActive: StateFlow<Boolean> = _airVisionHudPresentationActive
 
     val micCooldown: StateFlow<Boolean> = runtimeState(initial = false) { it.micCooldown }
     val micStatusText: StateFlow<String> = runtimeState(initial = "Mic off") { it.micStatusText }
@@ -450,6 +453,14 @@ class MainViewModel(
 
     fun setAirVisionAppLanguage(language: AirVisionAppLanguage) {
         prefs.setAirVisionAppLanguage(language)
+    }
+
+    fun setAirVisionPhysicalMainScreenVisible(visible: Boolean) {
+        prefs.setAirVisionPhysicalMainScreenVisible(visible)
+    }
+
+    fun setAirVisionHudPresentationActive(active: Boolean) {
+        _airVisionHudPresentationActive.value = active
     }
 
     fun refreshAirVisionUsb() {

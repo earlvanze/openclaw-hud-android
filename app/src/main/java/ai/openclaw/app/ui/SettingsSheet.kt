@@ -108,6 +108,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionDisplaySettings by viewModel.airVisionDisplaySettings.collectAsState()
     val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
     val airVisionAppLanguage by viewModel.airVisionAppLanguage.collectAsState()
+    val airVisionPhysicalMainScreenVisible by viewModel.airVisionPhysicalMainScreenVisible.collectAsState()
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
 
     var notificationQuietStartDraft by remember(notificationForwardingQuietStart) {
@@ -686,6 +687,28 @@ fun SettingsSheet(viewModel: MainViewModel) {
                             ) {
                                 Text("Identify", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
                             }
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Physical Main Screen", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                if (airVisionPhysicalMainScreenVisible) {
+                                    "Phone controls stay visible while the M1 presentation is active."
+                                } else {
+                                    "When the M1 presentation is active, the phone view switches to a black restore screen."
+                                },
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = airVisionPhysicalMainScreenVisible,
+                                onCheckedChange = viewModel::setAirVisionPhysicalMainScreenVisible,
+                            )
                         },
                     )
                     HorizontalDivider(color = mobileBorder)
