@@ -42,5 +42,6 @@ jobs:
             --skip-signature
           bash -n scripts/capture-play-screenshots.sh
           node scripts/test-play-screenshot-tools.mjs
+          node scripts/render-play-screenshots.mjs --check
           node scripts/render-privacy-policy-site.mjs --check
           node scripts/verify-play-submission-package.mjs

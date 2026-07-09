@@ -13,3 +13,7 @@ play/screenshots/**/*.png
 play/screenshots/**/*.jpg
 play/screenshots/**/*.jpeg
 play/screenshots/**/manifest.json
+!play/screenshots/phone/
+!play/screenshots/phone/hud-demo.png
+!play/screenshots/phone/settings-demo.png
+!play/screenshots/phone/manifest.json

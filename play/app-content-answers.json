@@ -96,7 +96,10 @@
     "appCreatedInPlayConsole": false,
     "internalTestersConfiguredInPlayConsole": false,
     "reviewerAccessConfiguredInPlayConsole": false,
-    "phoneScreenshots": [],
+    "phoneScreenshots": [
+      "play/screenshots/phone/hud-demo.png",
+      "play/screenshots/phone/settings-demo.png"
+    ],
     "notes": "Fill these external Play Console artifacts before running scripts/verify-play-submission-package.mjs --final and publish-play-internal.mjs --commit. Local screenshot paths listed here are validated as Play-compliant JPEG or 24-bit PNG files."
   }
 }

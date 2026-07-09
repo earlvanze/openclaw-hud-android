@@ -289,12 +289,15 @@ fetches the public URL and confirms it still matches the generated local policy
 page before any Play upload can start.
 
 Play phone screenshots can be captured from the HUD build without a live M1 by
-using the app's review/demo launch action:
+using the app's review/demo launch action, or rendered deterministically from
+the same demo state when the phone/M1 capture path is unavailable:
 
 ```bash
 ANDROID_HOME=/home/digit/android-sdk ANDROID_SDK_ROOT=/home/digit/android-sdk \
   ./gradlew :app:assembleHudDebug
 ./scripts/capture-play-screenshots.sh --serial <adb-serial>
+node scripts/render-play-screenshots.mjs
+node scripts/render-play-screenshots.mjs --check
 node scripts/test-play-screenshot-tools.mjs
 ```
 
@@ -308,8 +311,9 @@ launches deterministic HUD and Settings states on the phone display, normalizes
 Android screencaps to 24-bit PNG without alpha, and writes
 `play/screenshots/phone/hud-demo.png`,
 `play/screenshots/phone/settings-demo.png`, plus a generated
-`play/screenshots/phone/manifest.json`. After uploading screenshots in Play
-Console, record their local paths, names, or URLs in
+`play/screenshots/phone/manifest.json`. `render-play-screenshots.mjs` writes the
+same tracked artifact paths using a host-side renderer for offline release prep.
+After uploading screenshots in Play Console, record their local paths, names, or URLs in
 `play/app-content-answers.json` `finalSubmission.phoneScreenshots`.
 `test-play-screenshot-tools.mjs` is the offline regression gate for this path:
 it converts a synthetic alpha PNG, verifies the converted asset passes the final

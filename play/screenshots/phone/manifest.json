@@ -1,0 +1,10 @@
+{
+  "schema": "openclaw.play.screenshots",
+  "version": 1,
+  "deviceType": "phone",
+  "generatedBy": "scripts/render-play-screenshots.mjs",
+  "screenshots": [
+    "play/screenshots/phone/hud-demo.png",
+    "play/screenshots/phone/settings-demo.png"
+  ]
+}
