@@ -120,8 +120,9 @@ The single-tap, double-tap, swipe, M1 brightness-key, and M1 media/tap-key
 actions are configurable in Settings -> AirVision M1 -> Gesture & Hotkey
 Settings. Defaults are tuned for walking HUD use: single-tap clears the current
 notification, double-tap toggles mic, vertical swipe scrolls chat, and M1
-brightness-key events can scroll chat or step virtual distance while the HUD is
-focused. Distance-key changes show a temporary green HUD text confirmation.
+brightness-key events can scroll chat, step Android HUD brightness, or step
+virtual distance while the HUD is focused. Brightness and distance key changes
+show a temporary green HUD text confirmation.
 
 AirVision M1 companion settings live in Settings -> AirVision M1:
 
@@ -136,7 +137,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
 | 3D Mode | Stored in the AirVision profile and disabled while Light Load Mode is enabled. Hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation and locks IPD adjustment while enabled. |
-| Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
+| Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, serial availability, and firmware protocol status. Actual firmware version still needs ASUS HID support. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, and USB interface/endpoint diagnostics for protocol capture work. |
 | Identify | Implemented as a temporary `HUD 1` marker on the Android Presentation display. |

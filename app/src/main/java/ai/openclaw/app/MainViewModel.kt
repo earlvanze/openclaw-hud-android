@@ -389,6 +389,11 @@ class MainViewModel(
         prefs.setAirVisionBrightnessPercent(value)
     }
 
+    fun adjustAirVisionBrightnessPercent(delta: Int) {
+        prefs.adjustAirVisionBrightnessPercent(delta)
+        showHudTransientMessage("Brightness ${airVisionDisplaySettings.value.brightnessPercent}%")
+    }
+
     fun setAirVisionBlueLightFilterPercent(value: Int) {
         prefs.setAirVisionBlueLightFilterPercent(value)
     }

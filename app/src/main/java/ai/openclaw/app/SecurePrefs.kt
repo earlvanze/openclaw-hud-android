@@ -611,6 +611,10 @@ class SecurePrefs(
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(brightnessPercent = normalized)
     }
 
+    fun adjustAirVisionBrightnessPercent(delta: Int) {
+        setAirVisionBrightnessPercent(_airVisionDisplaySettings.value.brightnessPercent + delta)
+    }
+
     fun setAirVisionBlueLightFilterPercent(value: Int) {
         val normalized = AirVisionDisplaySettings.normalizeBlueLightFilterPercent(value)
         val viewMode = _airVisionDisplaySettings.value.viewMode

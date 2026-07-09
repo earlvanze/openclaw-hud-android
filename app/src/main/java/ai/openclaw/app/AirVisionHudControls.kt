@@ -50,6 +50,7 @@ enum class AirVisionHudKeyAction(
 ) {
     None("none", "None"),
     ScrollChat("scroll_chat", "Scroll chat"),
+    AdjustBrightness("adjust_brightness", "Adjust brightness"),
     AdjustDistance("adjust_distance", "Adjust distance"),
     ;
 

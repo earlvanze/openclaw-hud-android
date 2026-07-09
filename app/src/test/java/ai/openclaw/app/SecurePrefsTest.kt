@@ -220,6 +220,25 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun adjustAirVisionBrightnessPercent_clampsAndPersists() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionBrightnessPercent(AirVisionDisplaySettings.MIN_BRIGHTNESS_PERCENT)
+        prefs.adjustAirVisionBrightnessPercent(-5)
+        assertEquals(AirVisionDisplaySettings.MIN_BRIGHTNESS_PERCENT, prefs.airVisionDisplaySettings.value.brightnessPercent)
+
+        prefs.setAirVisionBrightnessPercent(AirVisionDisplaySettings.MAX_BRIGHTNESS_PERCENT)
+        prefs.adjustAirVisionBrightnessPercent(5)
+        assertEquals(
+            AirVisionDisplaySettings.MAX_BRIGHTNESS_PERCENT,
+            SecurePrefs(context).airVisionDisplaySettings.value.brightnessPercent,
+        )
+    }
+
+    @Test
     fun airVisionHudControls_persist() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)

@@ -326,6 +326,16 @@ class MainActivity : ComponentActivity() {
                         Log.d(TAG, "M1/brightness key scrolled HUD keyCode=${event.keyCode} delta=$scrollDelta")
                     }
                 }
+                AirVisionHudKeyAction.AdjustBrightness -> {
+                    val brightnessDelta = hudBrightnessKeyDeltas[event.keyCode] ?: 0
+                    if (event.action == KeyEvent.ACTION_DOWN && brightnessDelta != 0) {
+                        viewModel.adjustAirVisionBrightnessPercent(brightnessDelta)
+                        Log.d(
+                            TAG,
+                            "M1/brightness key adjusted HUD brightness keyCode=${event.keyCode} delta=$brightnessDelta",
+                        )
+                    }
+                }
                 AirVisionHudKeyAction.AdjustDistance -> {
                     val distanceDelta = hudDistanceKeyDeltas[event.keyCode] ?: 0
                     if (event.action == KeyEvent.ACTION_DOWN && distanceDelta != 0) {
@@ -456,12 +466,18 @@ class MainActivity : ComponentActivity() {
                 KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_SCROLL_PIXELS,
                 KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_SCROLL_PIXELS,
             )
+        private val hudBrightnessKeyDeltas =
+            mapOf(
+                KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_BRIGHTNESS_STEP_PERCENT,
+                KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_BRIGHTNESS_STEP_PERCENT,
+            )
         private val hudDistanceKeyDeltas =
             mapOf(
                 KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_DISTANCE_STEP_CM,
                 KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_DISTANCE_STEP_CM,
             )
         private const val HUD_KEY_SCROLL_PIXELS = 160f
+        private const val HUD_KEY_BRIGHTNESS_STEP_PERCENT = 5
         private const val HUD_KEY_DISTANCE_STEP_CM = 5
         private const val HUD_MIC_DOUBLE_TAP_TIMEOUT_MS = 500L
     }

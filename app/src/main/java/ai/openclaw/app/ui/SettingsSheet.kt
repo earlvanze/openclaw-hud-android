@@ -1756,6 +1756,7 @@ private fun airVisionBrightnessKeyActionDescription(action: AirVisionHudKeyActio
     when (action) {
         AirVisionHudKeyAction.None -> "Let Android or M1 firmware handle brightness keys."
         AirVisionHudKeyAction.ScrollChat -> "Use brightness key events as chat scroll controls."
+        AirVisionHudKeyAction.AdjustBrightness -> "Use brightness up and down to step Android HUD brightness."
         AirVisionHudKeyAction.AdjustDistance -> "Use brightness up and down to step virtual distance farther or closer."
     }
 
