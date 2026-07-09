@@ -74,6 +74,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 private val hudBackground = Color.Black
@@ -119,6 +120,7 @@ fun HudScreen(viewModel: MainViewModel) {
     val airVisionIdentifyToken by viewModel.airVisionIdentifyToken.collectAsState()
     var prompt by rememberSaveable { mutableStateOf("") }
     var identifyVisible by remember { mutableStateOf(false) }
+    var transientHudText by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(mainSessionKey) {
         viewModel.loadChat(mainSessionKey)
@@ -170,6 +172,13 @@ fun HudScreen(viewModel: MainViewModel) {
         identifyVisible = true
         delay(3500)
         identifyVisible = false
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.hudTransientMessages.collectLatest { message ->
+            transientHudText = message
+            delay(1800)
+            transientHudText = null
+        }
     }
     val primaryLine =
         runningLine
@@ -388,7 +397,28 @@ fun HudScreen(viewModel: MainViewModel) {
                 modifier = Modifier.align(Alignment.Center),
             )
         }
+        transientHudText?.let { message ->
+            HudTransientTextOverlay(
+                message = message,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
     }
+}
+
+@Composable
+private fun HudTransientTextOverlay(
+    message: String,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        message,
+        modifier = modifier.padding(top = 28.dp),
+        style = hudPrimaryTextStyle.copy(fontWeight = FontWeight.SemiBold),
+        color = hudAccent,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 @Composable

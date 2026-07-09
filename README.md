@@ -121,7 +121,7 @@ actions are configurable in Settings -> AirVision M1 -> Gesture & Hotkey
 Settings. Defaults are tuned for walking HUD use: single-tap clears the current
 notification, double-tap toggles mic, vertical swipe scrolls chat, and M1
 brightness-key events can scroll chat or step virtual distance while the HUD is
-focused.
+focused. Distance-key changes show a temporary green HUD text confirmation.
 
 AirVision M1 companion settings live in Settings -> AirVision M1:
 

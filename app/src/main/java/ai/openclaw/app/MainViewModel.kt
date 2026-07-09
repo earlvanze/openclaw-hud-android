@@ -41,6 +41,8 @@ class MainViewModel(
     val pendingAssistantAutoSend: StateFlow<String?> = _pendingAssistantAutoSend
     private val _hudScrollRequests = MutableSharedFlow<Float>(extraBufferCapacity = 16)
     val hudScrollRequests: SharedFlow<Float> = _hudScrollRequests
+    private val _hudTransientMessages = MutableSharedFlow<String>(extraBufferCapacity = 16)
+    val hudTransientMessages: SharedFlow<String> = _hudTransientMessages
     private val _airVisionIdentifyToken = MutableStateFlow(0L)
     val airVisionIdentifyToken: StateFlow<Long> = _airVisionIdentifyToken
 
@@ -288,6 +290,10 @@ class MainViewModel(
         _hudScrollRequests.tryEmit(deltaPx)
     }
 
+    fun showHudTransientMessage(message: String) {
+        _hudTransientMessages.tryEmit(message)
+    }
+
     fun identifyAirVisionHudDisplay() {
         _airVisionIdentifyToken.value = _airVisionIdentifyToken.value + 1L
     }
@@ -393,6 +399,7 @@ class MainViewModel(
 
     fun adjustAirVisionDistanceCm(delta: Int) {
         prefs.adjustAirVisionDistanceCm(delta)
+        showHudTransientMessage("Distance ${airVisionDisplaySettings.value.distanceCm} cm")
     }
 
     fun setAirVisionIpdMm(value: Int) {
