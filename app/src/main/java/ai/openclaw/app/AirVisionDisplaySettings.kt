@@ -34,13 +34,32 @@ enum class AirVisionSplendidMode(
     }
 }
 
+enum class AirVisionHudPlacement(
+    val rawValue: String,
+    val label: String,
+) {
+    UpperLeft("upper_left", "Upper Left"),
+    UpperCenter("upper_center", "Upper Center"),
+    UpperRight("upper_right", "Upper Right"),
+    Center("center", "Center"),
+    LowerCenter("lower_center", "Lower Center"),
+    ;
+
+    companion object {
+        fun fromRawValue(rawValue: String?): AirVisionHudPlacement =
+            entries.firstOrNull { it.rawValue == rawValue?.trim()?.lowercase() } ?: UpperLeft
+    }
+}
+
 data class AirVisionDisplaySettings(
     val viewMode: AirVisionViewMode = AirVisionViewMode.Working,
     val splendidMode: AirVisionSplendidMode = AirVisionSplendidMode.Standard,
+    val hudPlacement: AirVisionHudPlacement = AirVisionHudPlacement.UpperLeft,
     val brightnessPercent: Int = DEFAULT_BRIGHTNESS_PERCENT,
     val blueLightFilterPercent: Int = DEFAULT_BLUE_LIGHT_FILTER_PERCENT,
     val distanceCm: Int = DEFAULT_DISTANCE_CM,
     val ipdMm: Int = DEFAULT_IPD_MM,
+    val safeAreaPercent: Int = DEFAULT_SAFE_AREA_PERCENT,
     val motionSyncEnabled: Boolean = true,
     val lightLoadModeEnabled: Boolean = false,
 ) {
@@ -51,6 +70,7 @@ data class AirVisionDisplaySettings(
                 blueLightFilterPercent = normalizeBlueLightFilterPercent(blueLightFilterPercent),
                 distanceCm = normalizeDistanceCm(distanceCm),
                 ipdMm = normalizeIpdMm(ipdMm),
+                safeAreaPercent = normalizeSafeAreaPercent(safeAreaPercent),
             )
 
     companion object {
@@ -66,6 +86,9 @@ data class AirVisionDisplaySettings(
         const val MIN_IPD_MM = 52
         const val MAX_IPD_MM = 78
         const val DEFAULT_IPD_MM = 67
+        const val MIN_SAFE_AREA_PERCENT = 0
+        const val MAX_SAFE_AREA_PERCENT = 20
+        const val DEFAULT_SAFE_AREA_PERCENT = 5
 
         fun defaultsForViewMode(mode: AirVisionViewMode): AirVisionDisplaySettings =
             when (mode) {
@@ -73,10 +96,12 @@ data class AirVisionDisplaySettings(
                     AirVisionDisplaySettings(
                         viewMode = mode,
                         splendidMode = AirVisionSplendidMode.Standard,
+                        hudPlacement = AirVisionHudPlacement.UpperLeft,
                         brightnessPercent = DEFAULT_BRIGHTNESS_PERCENT,
                         blueLightFilterPercent = DEFAULT_BLUE_LIGHT_FILTER_PERCENT,
                         distanceCm = DEFAULT_DISTANCE_CM,
                         ipdMm = DEFAULT_IPD_MM,
+                        safeAreaPercent = DEFAULT_SAFE_AREA_PERCENT,
                         motionSyncEnabled = true,
                         lightLoadModeEnabled = false,
                     )
@@ -84,10 +109,12 @@ data class AirVisionDisplaySettings(
                     AirVisionDisplaySettings(
                         viewMode = mode,
                         splendidMode = AirVisionSplendidMode.Game,
+                        hudPlacement = AirVisionHudPlacement.Center,
                         brightnessPercent = 100,
                         blueLightFilterPercent = 0,
                         distanceCm = 65,
                         ipdMm = DEFAULT_IPD_MM,
+                        safeAreaPercent = 3,
                         motionSyncEnabled = true,
                         lightLoadModeEnabled = true,
                     )
@@ -95,10 +122,12 @@ data class AirVisionDisplaySettings(
                     AirVisionDisplaySettings(
                         viewMode = mode,
                         splendidMode = AirVisionSplendidMode.Standard,
+                        hudPlacement = AirVisionHudPlacement.UpperCenter,
                         brightnessPercent = 70,
                         blueLightFilterPercent = 10,
                         distanceCm = 120,
                         ipdMm = DEFAULT_IPD_MM,
+                        safeAreaPercent = 8,
                         motionSyncEnabled = true,
                         lightLoadModeEnabled = true,
                     )
@@ -106,10 +135,12 @@ data class AirVisionDisplaySettings(
                     AirVisionDisplaySettings(
                         viewMode = mode,
                         splendidMode = AirVisionSplendidMode.Office,
+                        hudPlacement = AirVisionHudPlacement.UpperLeft,
                         brightnessPercent = DEFAULT_BRIGHTNESS_PERCENT,
                         blueLightFilterPercent = 15,
                         distanceCm = 90,
                         ipdMm = DEFAULT_IPD_MM,
+                        safeAreaPercent = DEFAULT_SAFE_AREA_PERCENT,
                         motionSyncEnabled = true,
                         lightLoadModeEnabled = false,
                     )
@@ -117,10 +148,12 @@ data class AirVisionDisplaySettings(
                     AirVisionDisplaySettings(
                         viewMode = mode,
                         splendidMode = AirVisionSplendidMode.EyeCare,
+                        hudPlacement = AirVisionHudPlacement.LowerCenter,
                         brightnessPercent = 75,
                         blueLightFilterPercent = 30,
                         distanceCm = 60,
                         ipdMm = DEFAULT_IPD_MM,
+                        safeAreaPercent = 10,
                         motionSyncEnabled = true,
                         lightLoadModeEnabled = false,
                     )
@@ -133,6 +166,8 @@ data class AirVisionDisplaySettings(
         fun normalizeDistanceCm(value: Int): Int = value.coerceIn(MIN_DISTANCE_CM, MAX_DISTANCE_CM)
 
         fun normalizeIpdMm(value: Int): Int = value.coerceIn(MIN_IPD_MM, MAX_IPD_MM)
+
+        fun normalizeSafeAreaPercent(value: Int): Int = value.coerceIn(MIN_SAFE_AREA_PERCENT, MAX_SAFE_AREA_PERCENT)
 
         fun hudScaleForDistanceCm(value: Int): Float {
             val normalized = normalizeDistanceCm(value)

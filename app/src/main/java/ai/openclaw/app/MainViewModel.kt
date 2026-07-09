@@ -365,6 +365,10 @@ class MainViewModel(
         prefs.setAirVisionSplendidMode(mode)
     }
 
+    fun setAirVisionHudPlacement(value: AirVisionHudPlacement) {
+        prefs.setAirVisionHudPlacement(value)
+    }
+
     fun setAirVisionBrightnessPercent(value: Int) {
         prefs.setAirVisionBrightnessPercent(value)
     }
@@ -379,6 +383,10 @@ class MainViewModel(
 
     fun setAirVisionIpdMm(value: Int) {
         prefs.setAirVisionIpdMm(value)
+    }
+
+    fun setAirVisionSafeAreaPercent(value: Int) {
+        prefs.setAirVisionSafeAreaPercent(value)
     }
 
     fun setAirVisionMotionSyncEnabled(enabled: Boolean) {

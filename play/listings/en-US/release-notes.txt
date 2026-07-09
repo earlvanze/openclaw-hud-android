@@ -1,7 +1,7 @@
 Initial M1 HUD release candidate.
 
 - Minimal green-on-black HUD presentation for AirVision M1 and Samsung DeX.
-- AirVision HUD per-mode profile controls for view mode, software brightness, virtual distance, IPD calibration, Eye Care filtering, gestures, hotkeys, Motion Sync, and Light Load preferences.
+- AirVision HUD per-mode profile controls for view mode, placement, safe area, software brightness, virtual distance, IPD calibration, Eye Care filtering, gestures, hotkeys, Motion Sync, and Light Load preferences.
 - Secure OpenClaw gateway pairing and reconnect handling.
 - Compact chat, notification summaries, voice controls, and captions controls.
 - HUD build removes SMS and Call Log permissions for Google Play.

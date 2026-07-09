@@ -4,6 +4,7 @@ import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionHudDoubleTapAction
 import ai.openclaw.app.AirVisionHudKeyAction
 import ai.openclaw.app.AirVisionHudMediaKeyAction
+import ai.openclaw.app.AirVisionHudPlacement
 import ai.openclaw.app.AirVisionHudSwipeAction
 import ai.openclaw.app.AirVisionHudTouchAction
 import ai.openclaw.app.AirVisionSplendidMode
@@ -635,6 +636,29 @@ fun SettingsSheet(viewModel: MainViewModel) {
                             },
                         )
                     }
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "HUD Placement",
+                        currentLabel = airVisionDisplaySettings.hudPlacement.label,
+                        supportingText = "Positions the presentation content inside the M1 view.",
+                        options = AirVisionHudPlacement.entries.toList(),
+                        selected = airVisionDisplaySettings.hudPlacement,
+                        optionLabel = { it.label },
+                        optionDescription = ::airVisionHudPlacementDescription,
+                        onSelected = viewModel::setAirVisionHudPlacement,
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionSliderRow(
+                        label = "Safe Area",
+                        valueText = "${airVisionDisplaySettings.safeAreaPercent}%",
+                        supportingText = "Adds extra edge padding for DeX shelves, projector alignment, and walking comfort.",
+                        value = airVisionDisplaySettings.safeAreaPercent.toFloat(),
+                        valueRange =
+                            AirVisionDisplaySettings.MIN_SAFE_AREA_PERCENT
+                                .toFloat()
+                                .rangeTo(AirVisionDisplaySettings.MAX_SAFE_AREA_PERCENT.toFloat()),
+                        onValueChange = { viewModel.setAirVisionSafeAreaPercent(it.roundToInt()) },
+                    )
                     HorizontalDivider(color = mobileBorder)
                     AirVisionSliderRow(
                         label = "Brightness",
@@ -1608,6 +1632,15 @@ private fun airVisionSplendidModeDescription(mode: AirVisionSplendidMode): Strin
         AirVisionSplendidMode.Office -> "Stored Windows-style profile for document work."
         AirVisionSplendidMode.Game -> "Stored Windows-style profile for low-latency visual preference."
         AirVisionSplendidMode.EyeCare -> "Adds a warm Android HUD overlay."
+    }
+
+private fun airVisionHudPlacementDescription(placement: AirVisionHudPlacement): String =
+    when (placement) {
+        AirVisionHudPlacement.UpperLeft -> "Keeps glance text high and left for walking HUD use."
+        AirVisionHudPlacement.UpperCenter -> "Centers glance text near the top of the M1 display."
+        AirVisionHudPlacement.UpperRight -> "Moves content away from left-side app or DeX overlays."
+        AirVisionHudPlacement.Center -> "Places content in the central view for focused seated use."
+        AirVisionHudPlacement.LowerCenter -> "Drops content lower when top captions or system UI need space."
     }
 
 private fun airVisionTouchActionDescription(action: AirVisionHudTouchAction): String =

@@ -4,6 +4,7 @@ package ai.openclaw.app.ui
 
 import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionHudDoubleTapAction
+import ai.openclaw.app.AirVisionHudPlacement
 import ai.openclaw.app.AirVisionHudSwipeAction
 import ai.openclaw.app.AirVisionHudTouchAction
 import ai.openclaw.app.MainViewModel
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -68,6 +70,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -194,6 +197,8 @@ fun HudScreen(viewModel: MainViewModel) {
             splendidMode = airVisionSettings.splendidMode,
             blueLightFilterPercent = airVisionSettings.blueLightFilterPercent,
         )
+    val safePadding = (22 + airVisionSettings.safeAreaPercent * 3).dp
+    val layoutSpec = hudLayoutSpec(airVisionSettings.hudPlacement)
 
     Box(
         modifier =
@@ -228,7 +233,7 @@ fun HudScreen(viewModel: MainViewModel) {
                         }
                     }
                 }.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
-                .padding(horizontal = 30.dp, vertical = 22.dp),
+                .padding(safePadding),
     ) {
         HudSignalLights(
             modifier = Modifier.align(Alignment.TopEnd),
@@ -250,7 +255,13 @@ fun HudScreen(viewModel: MainViewModel) {
             },
         )
 
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier =
+                Modifier
+                    .align(layoutSpec.alignment)
+                    .fillMaxWidth(layoutSpec.widthFraction)
+                    .fillMaxHeight(),
+        ) {
             Column(
                 modifier =
                     Modifier
@@ -259,10 +270,10 @@ fun HudScreen(viewModel: MainViewModel) {
                         .graphicsLayer {
                             scaleX = hudScale
                             scaleY = hudScale
-                            transformOrigin = TransformOrigin(0f, 0f)
+                            transformOrigin = layoutSpec.transformOrigin
                         }
-                        .padding(top = 34.dp)
-                        .padding(end = 48.dp),
+                        .padding(top = layoutSpec.topPadding)
+                        .padding(end = layoutSpec.trailingPadding),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 notificationLine?.let { line ->
@@ -343,7 +354,7 @@ fun HudScreen(viewModel: MainViewModel) {
                     Modifier
                         .fillMaxWidth()
                         .imePadding()
-                        .padding(end = 48.dp),
+                        .padding(end = layoutSpec.trailingPadding, bottom = layoutSpec.bottomPadding),
             )
         }
 
@@ -365,6 +376,64 @@ fun HudScreen(viewModel: MainViewModel) {
         }
     }
 }
+
+private data class HudLayoutSpec(
+    val alignment: Alignment,
+    val widthFraction: Float,
+    val topPadding: Dp,
+    val bottomPadding: Dp,
+    val trailingPadding: Dp,
+    val transformOrigin: TransformOrigin,
+)
+
+private fun hudLayoutSpec(placement: AirVisionHudPlacement): HudLayoutSpec =
+    when (placement) {
+        AirVisionHudPlacement.UpperLeft ->
+            HudLayoutSpec(
+                alignment = Alignment.TopStart,
+                widthFraction = 0.90f,
+                topPadding = 34.dp,
+                bottomPadding = 0.dp,
+                trailingPadding = 48.dp,
+                transformOrigin = TransformOrigin(0f, 0f),
+            )
+        AirVisionHudPlacement.UpperCenter ->
+            HudLayoutSpec(
+                alignment = Alignment.TopCenter,
+                widthFraction = 0.82f,
+                topPadding = 34.dp,
+                bottomPadding = 0.dp,
+                trailingPadding = 0.dp,
+                transformOrigin = TransformOrigin(0.5f, 0f),
+            )
+        AirVisionHudPlacement.UpperRight ->
+            HudLayoutSpec(
+                alignment = Alignment.TopEnd,
+                widthFraction = 0.84f,
+                topPadding = 34.dp,
+                bottomPadding = 0.dp,
+                trailingPadding = 0.dp,
+                transformOrigin = TransformOrigin(1f, 0f),
+            )
+        AirVisionHudPlacement.Center ->
+            HudLayoutSpec(
+                alignment = Alignment.Center,
+                widthFraction = 0.78f,
+                topPadding = 116.dp,
+                bottomPadding = 42.dp,
+                trailingPadding = 0.dp,
+                transformOrigin = TransformOrigin(0.5f, 0.5f),
+            )
+        AirVisionHudPlacement.LowerCenter ->
+            HudLayoutSpec(
+                alignment = Alignment.BottomCenter,
+                widthFraction = 0.82f,
+                topPadding = 180.dp,
+                bottomPadding = 10.dp,
+                trailingPadding = 0.dp,
+                transformOrigin = TransformOrigin(0.5f, 1f),
+            )
+    }
 
 private fun performHudSingleTapAction(
     action: AirVisionHudTouchAction,

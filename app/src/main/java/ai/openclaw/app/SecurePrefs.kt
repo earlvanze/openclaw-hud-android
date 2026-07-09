@@ -39,10 +39,12 @@ class SecurePrefs(
         private const val notificationsForwardingSessionKeyKey = "notifications.forwarding.sessionKey"
         private const val AIR_VISION_VIEW_MODE_KEY = "airVision.viewMode"
         private const val AIR_VISION_SPLENDID_MODE_KEY = "airVision.splendidMode"
+        private const val AIR_VISION_HUD_PLACEMENT_KEY = "airVision.hudPlacement"
         private const val AIR_VISION_BRIGHTNESS_PERCENT_KEY = "airVision.brightnessPercent"
         private const val AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY = "airVision.blueLightFilterPercent"
         private const val AIR_VISION_DISTANCE_CM_KEY = "airVision.distanceCm"
         private const val AIR_VISION_IPD_MM_KEY = "airVision.ipdMm"
+        private const val AIR_VISION_SAFE_AREA_PERCENT_KEY = "airVision.safeAreaPercent"
         private const val AIR_VISION_MOTION_SYNC_ENABLED_KEY = "airVision.motionSyncEnabled"
         private const val AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY = "airVision.lightLoadModeEnabled"
         private const val AIR_VISION_HUD_SINGLE_TAP_ACTION_KEY = "airVision.hud.singleTapAction"
@@ -554,6 +556,15 @@ class SecurePrefs(
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(splendidMode = mode)
     }
 
+    fun setAirVisionHudPlacement(value: AirVisionHudPlacement) {
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putString(AIR_VISION_HUD_PLACEMENT_KEY, value.rawValue)
+            putString(airVisionProfileKey(AIR_VISION_HUD_PLACEMENT_KEY, viewMode), value.rawValue)
+        }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(hudPlacement = value)
+    }
+
     fun setAirVisionBrightnessPercent(value: Int) {
         val normalized = AirVisionDisplaySettings.normalizeBrightnessPercent(value)
         val viewMode = _airVisionDisplaySettings.value.viewMode
@@ -592,6 +603,16 @@ class SecurePrefs(
             putInt(airVisionProfileKey(AIR_VISION_IPD_MM_KEY, viewMode), normalized)
         }
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(ipdMm = normalized)
+    }
+
+    fun setAirVisionSafeAreaPercent(value: Int) {
+        val normalized = AirVisionDisplaySettings.normalizeSafeAreaPercent(value)
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putInt(AIR_VISION_SAFE_AREA_PERCENT_KEY, normalized)
+            putInt(airVisionProfileKey(AIR_VISION_SAFE_AREA_PERCENT_KEY, viewMode), normalized)
+        }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(safeAreaPercent = normalized)
     }
 
     fun setAirVisionMotionSyncEnabled(value: Boolean) {
@@ -716,6 +737,15 @@ class SecurePrefs(
                         defaultValue = defaults.splendidMode.rawValue,
                     ),
                 ),
+            hudPlacement =
+                AirVisionHudPlacement.fromRawValue(
+                    getAirVisionProfileString(
+                        key = AIR_VISION_HUD_PLACEMENT_KEY,
+                        mode = viewMode,
+                        allowLegacyFallback = allowLegacyFallback,
+                        defaultValue = defaults.hudPlacement.rawValue,
+                    ),
+                ),
             brightnessPercent =
                 getAirVisionProfileInt(
                     key = AIR_VISION_BRIGHTNESS_PERCENT_KEY,
@@ -744,6 +774,13 @@ class SecurePrefs(
                     allowLegacyFallback = allowLegacyFallback,
                     defaultValue = defaults.ipdMm,
                 ),
+            safeAreaPercent =
+                getAirVisionProfileInt(
+                    key = AIR_VISION_SAFE_AREA_PERCENT_KEY,
+                    mode = viewMode,
+                    allowLegacyFallback = allowLegacyFallback,
+                    defaultValue = defaults.safeAreaPercent,
+                ),
             motionSyncEnabled =
                 getAirVisionProfileBoolean(
                     key = AIR_VISION_MOTION_SYNC_ENABLED_KEY,
@@ -770,10 +807,12 @@ class SecurePrefs(
         val keys =
             listOf(
                 AIR_VISION_SPLENDID_MODE_KEY,
+                AIR_VISION_HUD_PLACEMENT_KEY,
                 AIR_VISION_BRIGHTNESS_PERCENT_KEY,
                 AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY,
                 AIR_VISION_DISTANCE_CM_KEY,
                 AIR_VISION_IPD_MM_KEY,
+                AIR_VISION_SAFE_AREA_PERCENT_KEY,
                 AIR_VISION_MOTION_SYNC_ENABLED_KEY,
                 AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY,
             )

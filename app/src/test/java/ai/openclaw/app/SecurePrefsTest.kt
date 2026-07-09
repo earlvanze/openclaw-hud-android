@@ -99,27 +99,36 @@ class SecurePrefsTest {
         val prefs = SecurePrefs(context)
         prefs.setAirVisionBrightnessPercent(42)
         prefs.setAirVisionDistanceCm(88)
+        prefs.setAirVisionHudPlacement(AirVisionHudPlacement.UpperRight)
+        prefs.setAirVisionSafeAreaPercent(12)
         prefs.setAirVisionViewMode(AirVisionViewMode.Gaming)
 
         assertEquals(AirVisionViewMode.Gaming, prefs.airVisionDisplaySettings.value.viewMode)
         assertEquals(AirVisionSplendidMode.Game, prefs.airVisionDisplaySettings.value.splendidMode)
+        assertEquals(AirVisionHudPlacement.Center, prefs.airVisionDisplaySettings.value.hudPlacement)
         assertEquals(100, prefs.airVisionDisplaySettings.value.brightnessPercent)
 
         prefs.setAirVisionBrightnessPercent(55)
         prefs.setAirVisionDistanceCm(66)
         prefs.setAirVisionSplendidMode(AirVisionSplendidMode.Theater)
+        prefs.setAirVisionHudPlacement(AirVisionHudPlacement.LowerCenter)
+        prefs.setAirVisionSafeAreaPercent(7)
         prefs.setAirVisionViewMode(AirVisionViewMode.Working)
 
         assertEquals(42, prefs.airVisionDisplaySettings.value.brightnessPercent)
         assertEquals(88, prefs.airVisionDisplaySettings.value.distanceCm)
+        assertEquals(AirVisionHudPlacement.UpperRight, prefs.airVisionDisplaySettings.value.hudPlacement)
+        assertEquals(12, prefs.airVisionDisplaySettings.value.safeAreaPercent)
 
         prefs.setAirVisionViewMode(AirVisionViewMode.Gaming)
 
         val reloaded = SecurePrefs(context).airVisionDisplaySettings.value
         assertEquals(AirVisionViewMode.Gaming, reloaded.viewMode)
         assertEquals(AirVisionSplendidMode.Theater, reloaded.splendidMode)
+        assertEquals(AirVisionHudPlacement.LowerCenter, reloaded.hudPlacement)
         assertEquals(55, reloaded.brightnessPercent)
         assertEquals(66, reloaded.distanceCm)
+        assertEquals(7, reloaded.safeAreaPercent)
     }
 
     @Test

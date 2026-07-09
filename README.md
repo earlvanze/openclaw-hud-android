@@ -38,8 +38,9 @@ Current live target:
 - [x] HUD input: Enter sends, Shift+Enter inserts a newline
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
-- [x] AirVision M1 per-mode settings profiles with viewing mode, Splendid mode, brightness,
-  blue-light filter, distance, IPD, Motion Sync, and Light Load controls
+- [x] AirVision M1 per-mode settings profiles with viewing mode, HUD placement,
+  safe area, Splendid mode, brightness, blue-light filter, distance, IPD,
+  Motion Sync, and Light Load controls
 - [x] Optional AirVision M1 USB firmware-link detection and permission flow
 - [ ] Full end-to-end QA and release hardening
 
@@ -124,7 +125,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 
 | Windows AirVision feature | Android HUD status |
 | --- | --- |
-| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, scale/layout, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
+| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, HUD placement, safe area, scale/layout, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
 | Brightness | Implemented as software HUD dimming. Hardware brightness remains available from the M1 touch bar. |
 | Screen distance | Implemented as virtual HUD distance scaling. |
 | IPD | Stored as a calibration value, defaulting to 67 mm. Firmware-level apply still needs the ASUS HID protocol. |
@@ -134,7 +135,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation. |
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll handling, and M1 media/tap key double-tap mic behavior. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, and HID/audio/input interface status. |
-| Multi-screen desktop layouts | Not implemented on Android. Samsung DeX and Android Presentation own the external display topology. |
+| Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports per-mode placement and safe-area layout profiles for the M1 presentation. |
 
 Firmware controls are intentionally read-only/status-only for now. The app can
 detect the M1 USB HID control interface and request Android USB permission, but

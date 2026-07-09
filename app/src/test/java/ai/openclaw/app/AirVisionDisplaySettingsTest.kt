@@ -13,12 +13,14 @@ class AirVisionDisplaySettingsTest {
                 blueLightFilterPercent = 140,
                 distanceCm = 12,
                 ipdMm = 120,
+                safeAreaPercent = 99,
             ).normalized
 
         assertEquals(AirVisionDisplaySettings.MIN_BRIGHTNESS_PERCENT, settings.brightnessPercent)
         assertEquals(AirVisionDisplaySettings.MAX_BLUE_LIGHT_FILTER_PERCENT, settings.blueLightFilterPercent)
         assertEquals(AirVisionDisplaySettings.MIN_DISTANCE_CM, settings.distanceCm)
         assertEquals(AirVisionDisplaySettings.MAX_IPD_MM, settings.ipdMm)
+        assertEquals(AirVisionDisplaySettings.MAX_SAFE_AREA_PERCENT, settings.safeAreaPercent)
     }
 
     @Test
@@ -58,10 +60,13 @@ class AirVisionDisplaySettingsTest {
 
         assertEquals(AirVisionViewMode.Working, working.viewMode)
         assertEquals(AirVisionSplendidMode.Standard, working.splendidMode)
+        assertEquals(AirVisionHudPlacement.UpperLeft, working.hudPlacement)
         assertEquals(AirVisionViewMode.Gaming, gaming.viewMode)
         assertEquals(AirVisionSplendidMode.Game, gaming.splendidMode)
+        assertEquals(AirVisionHudPlacement.Center, gaming.hudPlacement)
         assertEquals(100, gaming.brightnessPercent)
         assertEquals(AirVisionViewMode.Infinity, infinity.viewMode)
+        assertEquals(AirVisionHudPlacement.UpperCenter, infinity.hudPlacement)
         assertTrue(infinity.distanceCm > working.distanceCm)
         assertTrue(infinity.lightLoadModeEnabled)
     }
