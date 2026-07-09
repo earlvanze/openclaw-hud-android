@@ -48,3 +48,5 @@ jobs:
           node scripts/render-privacy-policy-site.mjs --check
           node scripts/verify-play-submission-package.mjs
           node scripts/test-play-submission-verifier.mjs
+          node scripts/test-play-publish-helper.mjs
+          node scripts/publish-play-internal.mjs --dry-run

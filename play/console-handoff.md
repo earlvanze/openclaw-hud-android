@@ -127,6 +127,7 @@ Sensitive permission declarations:
 - `node scripts/render-privacy-policy-site.mjs --check`
 - `node scripts/verify-play-submission-package.mjs`
 - `node scripts/test-play-submission-verifier.mjs`
+- `node scripts/publish-play-internal.mjs --dry-run`
 - `node scripts/verify-play-submission-package.mjs --final` after Console blockers are complete
 - `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@gmail.com --auth-check` after OAuth login
 - `node scripts/publish-play-internal.mjs --preflight` after the Play Console app exists
