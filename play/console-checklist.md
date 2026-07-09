@@ -15,8 +15,19 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 
 Current local status:
 
-- Signed HUD AAB builds successfully.
+- Latest signed HUD AAB builds successfully from `main`:
+  `build/release-bundles/openclaw-2026.7.9-hud-release.aab`
+- Latest HUD AAB SHA-256:
+  `cdc996c8ef267abbbc0edea268e14503090bd6fa8dbe11ae564e190ee8cf36d6`
 - `lintHudRelease` passes.
 - `testHudDebugUnitTest` passes.
+- HUD release manifest package is `ai.openclaw.app.hud` and does not request
+  SMS, Call Log, camera, location, contacts, calendar, or media-library
+  permissions.
 - Google Play Android Developer API is enabled for the active gcloud project.
-- API publishing cannot proceed until the Play Console app exists for `ai.openclaw.app.hud`.
+- API preflight reaches Google Play with gcloud auth, but returns
+  `Package not found: ai.openclaw.app.hud`.
+- API publishing cannot proceed until the Play Console app exists for
+  `ai.openclaw.app.hud`. The Android Publisher API can create edits and upload
+  bundles for an existing package; first app creation still has to happen in
+  Play Console.
