@@ -132,6 +132,29 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun resetActiveAirVisionProfile_restoresCurrentModeDefaults() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionViewMode(AirVisionViewMode.Infinity)
+        prefs.setAirVisionBrightnessPercent(33)
+        prefs.setAirVisionDistanceCm(44)
+        prefs.setAirVisionIpdMm(61)
+        prefs.setAirVisionHudPlacement(AirVisionHudPlacement.LowerCenter)
+        prefs.setAirVisionSafeAreaPercent(1)
+        prefs.setAirVisionSplendidMode(AirVisionSplendidMode.Theater)
+        prefs.setAirVisionLightLoadModeEnabled(false)
+
+        prefs.resetActiveAirVisionProfile()
+
+        val reloaded = SecurePrefs(context).airVisionDisplaySettings.value
+        val defaults = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Infinity)
+        assertEquals(defaults, reloaded)
+    }
+
+    @Test
     fun airVisionHudControls_persist() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)

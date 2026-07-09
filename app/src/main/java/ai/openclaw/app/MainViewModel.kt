@@ -361,6 +361,10 @@ class MainViewModel(
         prefs.setAirVisionViewMode(mode)
     }
 
+    fun resetActiveAirVisionProfile() {
+        prefs.resetActiveAirVisionProfile()
+    }
+
     fun setAirVisionSplendidMode(mode: AirVisionSplendidMode) {
         prefs.setAirVisionSplendidMode(mode)
     }

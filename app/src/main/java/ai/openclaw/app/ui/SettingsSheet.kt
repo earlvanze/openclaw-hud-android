@@ -695,6 +695,27 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 .rangeTo(AirVisionDisplaySettings.MAX_IPD_MM.toFloat()),
                         onValueChange = { viewModel.setAirVisionIpdMm(it.roundToInt()) },
                     )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Reset Profile", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Restore ${airVisionDisplaySettings.viewMode.label} placement, safe area, brightness, distance, IPD, color, and performance defaults.",
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Button(
+                                onClick = viewModel::resetActiveAirVisionProfile,
+                                colors = settingsPrimaryButtonColors(),
+                                shape = RoundedCornerShape(14.dp),
+                            ) {
+                                Text("Reset", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                            }
+                        },
+                    )
                 }
             }
             item {

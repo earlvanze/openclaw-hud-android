@@ -547,6 +547,39 @@ class SecurePrefs(
         _airVisionDisplaySettings.value = loadAirVisionDisplaySettings(mode)
     }
 
+    fun resetActiveAirVisionProfile() {
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        val defaults = AirVisionDisplaySettings.defaultsForViewMode(viewMode)
+        plainPrefs.edit {
+            putString(AIR_VISION_VIEW_MODE_KEY, viewMode.rawValue)
+            putString(AIR_VISION_SPLENDID_MODE_KEY, defaults.splendidMode.rawValue)
+            putString(AIR_VISION_HUD_PLACEMENT_KEY, defaults.hudPlacement.rawValue)
+            putInt(AIR_VISION_BRIGHTNESS_PERCENT_KEY, defaults.brightnessPercent)
+            putInt(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, defaults.blueLightFilterPercent)
+            putInt(AIR_VISION_DISTANCE_CM_KEY, defaults.distanceCm)
+            putInt(AIR_VISION_IPD_MM_KEY, defaults.ipdMm)
+            putInt(AIR_VISION_SAFE_AREA_PERCENT_KEY, defaults.safeAreaPercent)
+            putBoolean(AIR_VISION_MOTION_SYNC_ENABLED_KEY, defaults.motionSyncEnabled)
+            putBoolean(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, defaults.lightLoadModeEnabled)
+            putString(airVisionProfileKey(AIR_VISION_SPLENDID_MODE_KEY, viewMode), defaults.splendidMode.rawValue)
+            putString(airVisionProfileKey(AIR_VISION_HUD_PLACEMENT_KEY, viewMode), defaults.hudPlacement.rawValue)
+            putInt(airVisionProfileKey(AIR_VISION_BRIGHTNESS_PERCENT_KEY, viewMode), defaults.brightnessPercent)
+            putInt(
+                airVisionProfileKey(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, viewMode),
+                defaults.blueLightFilterPercent,
+            )
+            putInt(airVisionProfileKey(AIR_VISION_DISTANCE_CM_KEY, viewMode), defaults.distanceCm)
+            putInt(airVisionProfileKey(AIR_VISION_IPD_MM_KEY, viewMode), defaults.ipdMm)
+            putInt(airVisionProfileKey(AIR_VISION_SAFE_AREA_PERCENT_KEY, viewMode), defaults.safeAreaPercent)
+            putBoolean(airVisionProfileKey(AIR_VISION_MOTION_SYNC_ENABLED_KEY, viewMode), defaults.motionSyncEnabled)
+            putBoolean(
+                airVisionProfileKey(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, viewMode),
+                defaults.lightLoadModeEnabled,
+            )
+        }
+        _airVisionDisplaySettings.value = defaults
+    }
+
     fun setAirVisionSplendidMode(mode: AirVisionSplendidMode) {
         val viewMode = _airVisionDisplaySettings.value.viewMode
         plainPrefs.edit {
