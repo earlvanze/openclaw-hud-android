@@ -639,6 +639,27 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         )
                     }
                     HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Identify HUD Display", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Shows a temporary HUD 1 marker on the external presentation, mirroring the AirVision identify action.",
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Button(
+                                onClick = viewModel::identifyAirVisionHudDisplay,
+                                colors = settingsPrimaryButtonColors(),
+                                shape = RoundedCornerShape(14.dp),
+                            ) {
+                                Text("Identify", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                            }
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
                     AirVisionOptionGroup(
                         title = "HUD Placement",
                         currentLabel = airVisionDisplaySettings.hudPlacement.label,

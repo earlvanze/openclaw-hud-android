@@ -73,6 +73,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val hudBackground = Color.Black
@@ -115,7 +116,9 @@ fun HudScreen(viewModel: MainViewModel) {
     val pendingTrust by viewModel.pendingGatewayTrust.collectAsState()
     val airVisionSettings by viewModel.airVisionDisplaySettings.collectAsState()
     val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
+    val airVisionIdentifyToken by viewModel.airVisionIdentifyToken.collectAsState()
     var prompt by rememberSaveable { mutableStateOf("") }
+    var identifyVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(mainSessionKey) {
         viewModel.loadChat(mainSessionKey)
@@ -161,6 +164,12 @@ fun HudScreen(viewModel: MainViewModel) {
         viewModel.hudScrollRequests.collect { deltaPx ->
             chatScrollState.scrollBy(deltaPx)
         }
+    }
+    LaunchedEffect(airVisionIdentifyToken) {
+        if (airVisionIdentifyToken <= 0L) return@LaunchedEffect
+        identifyVisible = true
+        delay(3500)
+        identifyVisible = false
     }
     val primaryLine =
         runningLine
@@ -374,6 +383,37 @@ fun HudScreen(viewModel: MainViewModel) {
                         .background(Color.Black.copy(alpha = dimAlpha)),
             )
         }
+        if (identifyVisible) {
+            HudDisplayIdentifyOverlay(
+                modifier = Modifier.align(Alignment.Center),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HudDisplayIdentifyOverlay(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            "HUD 1",
+            style = TextStyle(
+                fontSize = 72.sp,
+                lineHeight = 78.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+            color = hudAccent,
+            maxLines = 1,
+        )
+        Text(
+            "AirVision M1",
+            style = hudPrimaryTextStyle.copy(fontWeight = FontWeight.SemiBold),
+            color = hudSecondary,
+            maxLines = 1,
+        )
     }
 }
 

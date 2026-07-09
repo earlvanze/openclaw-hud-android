@@ -5,6 +5,7 @@ Initial M1 HUD release candidate.
 - Light Load Mode now locks IPD adjustment to mirror the ASUS AirVision app behavior.
 - AirVision firmware link now shows USB device identity and firmware protocol status.
 - AirVision USB firmware-link status now includes interface and endpoint diagnostics for future hardware protocol work.
+- Added a HUD display identify action for the external AirVision presentation.
 - Secure OpenClaw gateway pairing and reconnect handling.
 - Compact chat, notification summaries, voice controls, and captions controls.
 - HUD build removes SMS and Call Log permissions for Google Play.

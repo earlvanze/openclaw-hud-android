@@ -41,6 +41,8 @@ class MainViewModel(
     val pendingAssistantAutoSend: StateFlow<String?> = _pendingAssistantAutoSend
     private val _hudScrollRequests = MutableSharedFlow<Float>(extraBufferCapacity = 16)
     val hudScrollRequests: SharedFlow<Float> = _hudScrollRequests
+    private val _airVisionIdentifyToken = MutableStateFlow(0L)
+    val airVisionIdentifyToken: StateFlow<Long> = _airVisionIdentifyToken
 
     private fun ensureRuntime(): NodeRuntime {
         runtimeRef.value?.let { return it }
@@ -284,6 +286,10 @@ class MainViewModel(
 
     fun requestHudScroll(deltaPx: Float) {
         _hudScrollRequests.tryEmit(deltaPx)
+    }
+
+    fun identifyAirVisionHudDisplay() {
+        _airVisionIdentifyToken.value = _airVisionIdentifyToken.value + 1L
     }
 
     fun setVoiceScreenActive(active: Boolean) {
