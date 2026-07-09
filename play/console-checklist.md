@@ -59,11 +59,16 @@ Current local status:
 - `testHudDebugUnitTest` passes.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, and release notes character limits.
+- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account
+  earlvanze@gmail.com --auth-check` verifies the selected local OAuth publisher
+  account before any Play API request.
 - `node scripts/publish-play-internal.mjs --commit` is guarded by
   `node scripts/verify-play-submission-package.mjs --final` before any Play API
   upload.
 - `node scripts/test-play-screenshot-tools.mjs` passes against the current
   screenshot converter and final submission verifier.
+- `node scripts/test-play-publish-helper.mjs` passes against fake gcloud account
+  scenarios for OAuth account selection and auth-check mode.
 - `node scripts/render-play-console-handoff.mjs --check` verifies the generated
   Play Console handoff packet against the current listing copy, app-content
   answers, privacy URL, and screenshot manifest.

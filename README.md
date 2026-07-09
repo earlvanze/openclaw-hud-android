@@ -245,9 +245,11 @@ Google Play internal-track publishing helper:
 
 ```bash
 node scripts/verify-play-hud-release.mjs
+node scripts/test-play-publish-helper.mjs
 node scripts/verify-play-submission-package.mjs
 node scripts/verify-play-submission-package.mjs --final
 node scripts/publish-play-internal.mjs --dry-run
+node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@gmail.com --auth-check
 node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@gmail.com --preflight
 GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=/path/to/service-account.json \
   node scripts/publish-play-internal.mjs --commit
@@ -267,13 +269,17 @@ app creation status must be recorded locally first. Auth can come from a Play
 Console service-account JSON file or the active `gcloud auth print-access-token`
 account. For `--auth gcloud`, the helper restricts publishing to
 `earlvanze@gmail.com` or `earl@earlbnb.com` by default so an accidental active
-Cloud account cannot publish the app. Pass `--gcloud-account <email>` or set
-`GOOGLE_PLAY_GCLOUD_ACCOUNT` to use an authenticated personal account without
-changing Cyber's global gcloud config; `gcloud config set account <email>` is
-also supported. Set `GOOGLE_PLAY_ALLOWED_ACCOUNTS` or pass `--allowed-account`
-only when a different authorized Play publisher should be accepted. Store
-listing and policy prep files live under `play/`. Use `--preflight` to verify
-Play API package/auth access before building an AAB. Use `--skip-listing` or
+Cloud account cannot publish the app. It also checks `gcloud auth list` before
+requesting an Android Publisher token, so a selected but not locally
+authenticated publisher account fails with the currently authenticated accounts
+listed. Pass `--gcloud-account <email>` or set `GOOGLE_PLAY_GCLOUD_ACCOUNT` to
+use an authenticated personal account without changing Cyber's global gcloud
+config; `gcloud config set account <email>` is also supported. Set
+`GOOGLE_PLAY_ALLOWED_ACCOUNTS` or pass `--allowed-account` only when a different
+authorized Play publisher should be accepted. Store listing and policy prep
+files live under `play/`. Use `--auth-check` to verify local OAuth/service
+account readiness without contacting Play. Use `--preflight` to verify Play API
+package/auth access before building an AAB. Use `--skip-listing` or
 `--skip-release-notes` for bundle-only edits. The Play Console app must already
 exist for `ai.openclaw.app.hud`; follow `play/console-checklist.md` before the
 first commit.

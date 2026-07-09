@@ -45,6 +45,7 @@ function parseArgs(argv) {
     uploadReleaseNotes: true,
     commit: false,
     preflight: false,
+    authCheck: false,
     bundle: null,
     serviceAccount: process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_APPLICATION_CREDENTIALS || null,
     auth: process.env.GOOGLE_PLAY_AUTH || "auto",
@@ -71,6 +72,7 @@ function parseArgs(argv) {
     else if (arg === "--skip-release-notes") args.uploadReleaseNotes = false;
     else if (arg === "--commit") args.commit = true;
     else if (arg === "--preflight") args.preflight = true;
+    else if (arg === "--auth-check") args.authCheck = true;
     else if (arg === "--dry-run") args.commit = false;
     else if (arg === "--help" || arg === "-h") {
       console.log(
@@ -94,6 +96,7 @@ function parseArgs(argv) {
           "",
           "Use --preflight to verify Play API package/access state without uploading a bundle.",
           "Preflight does not require a local bundle unless --bundle is provided.",
+          "Use --auth-check to verify local publishing auth without making a Play API request.",
           "Commit mode also runs `verify-play-submission-package.mjs --final` before any Play API upload.",
         ].join("\n"),
       );
@@ -244,6 +247,31 @@ function gcloudActiveAccount(preferredAccount) {
   return account;
 }
 
+function gcloudAuthenticatedAccounts() {
+  const result = spawnSync("gcloud", ["auth", "list", "--format=json"], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (result.status !== 0) {
+    const detail = result.stderr.trim() || result.stdout.trim() || "gcloud auth list failed";
+    return { accounts: null, detail };
+  }
+  try {
+    const entries = JSON.parse(result.stdout);
+    const accounts =
+      Array.isArray(entries)
+        ? entries.map((entry) => normalizeAccount(entry.account)).filter(Boolean)
+        : [];
+    return { accounts: [...new Set(accounts)], detail: null };
+  } catch (error) {
+    return { accounts: null, detail: `Unable to parse gcloud auth list output: ${error.message}` };
+  }
+}
+
+function formatAccountList(accounts) {
+  return accounts?.length ? accounts.join(", ") : "(none)";
+}
+
 function verifyAllowedGcloudAccount(gcloudAccount, allowedAccounts) {
   const allowed = new Set(allowedAccounts.map((account) => account.trim().toLowerCase()).filter(Boolean));
   if (allowed.size === 0) return;
@@ -257,6 +285,26 @@ function verifyAllowedGcloudAccount(gcloudAccount, allowedAccounts) {
   );
 }
 
+function verifyAuthenticatedGcloudAccount(gcloudAccount) {
+  const { accounts, detail } = gcloudAuthenticatedAccounts();
+  if (accounts === null) {
+    throw new Error(
+      [
+        `Unable to verify local gcloud authentication for ${gcloudAccount}: ${detail}.`,
+        `Run \`gcloud auth login ${gcloudAccount}\`, then rerun this command.`,
+      ].join("\n"),
+    );
+  }
+  if (accounts.includes(gcloudAccount)) return;
+  throw new Error(
+    [
+      `Selected gcloud account is ${gcloudAccount}, but it is not authenticated locally.`,
+      `Authenticated gcloud accounts: ${formatAccountList(accounts)}.`,
+      `Run \`gcloud auth login ${gcloudAccount}\`, then rerun this command.`,
+    ].join("\n"),
+  );
+}
+
 async function resolveAccessToken(args) {
   if (args.auth === "service-account" || (args.auth === "auto" && args.serviceAccount)) {
     const serviceAccount = await loadServiceAccount(args.serviceAccount);
@@ -265,6 +313,7 @@ async function resolveAccessToken(args) {
   if (args.auth === "gcloud" || args.auth === "auto") {
     const account = gcloudActiveAccount(args.gcloudAccount);
     verifyAllowedGcloudAccount(account, args.allowedAccounts);
+    verifyAuthenticatedGcloudAccount(account);
     return { token: gcloudAccessToken(account), source: `gcloud:${account}` };
   }
   throw new Error(`Unknown auth mode: ${args.auth}`);
@@ -352,8 +401,8 @@ function verifyFinalSubmissionReadinessBeforeUpload() {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const bundlePath = args.bundle ?? (args.preflight ? null : await latestHudBundle());
-  if (!bundlePath && !args.preflight) {
+  const bundlePath = args.bundle ?? (args.preflight || args.authCheck ? null : await latestHudBundle());
+  if (!bundlePath && !args.preflight && !args.authCheck) {
     throw new Error(
       [
         `No HUD release bundle found in ${releaseOutputDir} or ${gradleHudBundlePath}.`,
@@ -370,6 +419,8 @@ async function main() {
   console.log(`Language: ${args.language}`);
   if (bundlePath && bundleInfo) {
     console.log(`Bundle: ${bundlePath} (${bundleInfo.size} bytes)`);
+  } else if (args.authCheck) {
+    console.log("Bundle: not required for auth-check");
   } else {
     console.log("Bundle: not required for preflight");
   }
@@ -385,9 +436,9 @@ async function main() {
   } else {
     console.log("Release notes: skipped");
   }
-  console.log(`Mode: ${args.preflight ? "preflight" : args.commit ? "commit" : "dry-run"}`);
+  console.log(`Mode: ${args.authCheck ? "auth-check" : args.preflight ? "preflight" : args.commit ? "commit" : "dry-run"}`);
 
-  if (!args.commit && !args.preflight) {
+  if (!args.commit && !args.preflight && !args.authCheck) {
     console.log("Dry-run complete. Re-run with --preflight to verify Play access, or --commit to upload and commit a Google Play edit.");
     return;
   }
@@ -398,6 +449,10 @@ async function main() {
 
   const { token, source } = await resolveAccessToken(args);
   console.log(`Auth: ${source}`);
+  if (args.authCheck) {
+    console.log("Auth check complete. Local publishing auth is available; no Play API request was made.");
+    return;
+  }
   const baseUrl = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(args.packageName)}`;
   const edit = await googleJson(token, `${baseUrl}/edits`, { method: "POST", body: "{}" });
   console.log(`Created edit: ${edit.id}`);
