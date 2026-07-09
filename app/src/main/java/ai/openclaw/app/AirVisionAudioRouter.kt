@@ -14,13 +14,21 @@ object AirVisionAudioRouter {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return null
         val outputs =
             audioManager
-            .getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+                .getDevices(AudioManager.GET_DEVICES_OUTPUTS)
                 .toList()
-        val namedM1 = outputs.firstOrNull { it.isAirVisionM1Output() }
-        if (namedM1 != null) return namedM1
-
-        val externalDisplayAudio = outputs.firstOrNull { it.type == AudioDeviceInfo.TYPE_HDMI }
-        if (externalDisplayAudio != null) return externalDisplayAudio
+        val selected =
+            AirVisionAudioRouteSelector.choose(
+                outputs.map { output ->
+                    AirVisionAudioOutputCandidate(
+                        id = output.id,
+                        type = output.type,
+                        productName = output.productName?.toString().orEmpty(),
+                    )
+                },
+            )
+        if (selected != null) {
+            return outputs.firstOrNull { it.id == selected.id }
+        }
 
         Log.i(TAG, "no M1 output; available=${outputs.joinToString { it.routeLabel() }}")
         return null
@@ -39,19 +47,32 @@ object AirVisionAudioRouter {
         audioManager.clearCommunicationDevice()
     }
 
-    private fun AudioDeviceInfo.isAirVisionM1Output(): Boolean {
-        val name = productName?.toString().orEmpty()
-        return (
-            name.contains("AirVision", ignoreCase = true) ||
-                name.contains("ASUS", ignoreCase = true) ||
-                name.contains("M1", ignoreCase = true)
-        ) && (
-            type == AudioDeviceInfo.TYPE_USB_DEVICE ||
-                type == AudioDeviceInfo.TYPE_USB_HEADSET ||
-                type == AudioDeviceInfo.TYPE_HDMI
-        )
-    }
-
     private fun AudioDeviceInfo.routeLabel(): String =
         "type=$type name=${productName?.toString().orEmpty().ifBlank { "(blank)" }}"
+}
+
+internal data class AirVisionAudioOutputCandidate(
+    val id: Int,
+    val type: Int,
+    val productName: String,
+)
+
+internal object AirVisionAudioRouteSelector {
+    fun choose(outputs: List<AirVisionAudioOutputCandidate>): AirVisionAudioOutputCandidate? =
+        outputs.firstOrNull { it.isNamedAirVisionM1Output() }
+            ?: outputs.firstOrNull { it.type == AudioDeviceInfo.TYPE_HDMI }
+
+    private fun AirVisionAudioOutputCandidate.isNamedAirVisionM1Output(): Boolean {
+        if (
+            type != AudioDeviceInfo.TYPE_USB_DEVICE &&
+            type != AudioDeviceInfo.TYPE_USB_HEADSET &&
+            type != AudioDeviceInfo.TYPE_HDMI
+        ) {
+            return false
+        }
+
+        val name = productName.trim()
+        if (name.contains("AirVision", ignoreCase = true)) return true
+        return name.contains("ASUS", ignoreCase = true) && name.contains("M1", ignoreCase = true)
+    }
 }
