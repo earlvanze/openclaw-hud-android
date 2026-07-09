@@ -4,6 +4,7 @@ import ai.openclaw.app.ui.OpenClawTheme
 import ai.openclaw.app.ui.RootScreen
 import android.annotation.SuppressLint
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -44,6 +45,7 @@ class MainActivity : ComponentActivity() {
     private var hudMediaSession: MediaSession? = null
     private var hudPresentation: HudPresentation? = null
     private var hudDisplayListenerRegistered = false
+    private var appliedAirVisionAppLanguage: AirVisionAppLanguage? = null
     private val hudKeyInputController = AirVisionHudKeyInputController()
     private val hudSystemBarsHandler = Handler(Looper.getMainLooper())
     private val hudDisplayListener =
@@ -66,6 +68,10 @@ class MainActivity : ComponentActivity() {
                 showHudPresentationIfAvailable()
             }
         }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AirVisionAppLocale.wrap(newBase, AirVisionAppLocale.storedLanguage(newBase)))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (BuildConfig.OPENCLAW_DEFAULT_HUD) {
@@ -101,6 +107,19 @@ class MainActivity : ComponentActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.airVisionHudDisplayTarget.collect {
                     showHudPresentationIfAvailable()
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.airVisionAppLanguage.collect { language ->
+                    val previous = appliedAirVisionAppLanguage
+                    appliedAirVisionAppLanguage = language
+                    AirVisionAppLocale.apply(this@MainActivity, language)
+                    if (previous != null && previous != language) {
+                        recreate()
+                    }
                 }
             }
         }

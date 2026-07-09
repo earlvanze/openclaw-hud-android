@@ -1218,7 +1218,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     AirVisionOptionGroup(
                         title = "Language",
                         currentLabel = airVisionAppLanguage.label,
-                        supportingText = "Stores the preferred AirVision companion language; Android UI follows system resources.",
+                        supportingText = "Applies the preferred AirVision companion language; System follows Android settings.",
                         options = AirVisionAppLanguage.entries.toList(),
                         selected = airVisionAppLanguage,
                         optionLabel = { it.label },
@@ -2196,7 +2196,7 @@ private fun airVisionBrightnessKeyActionDescription(action: AirVisionHudKeyActio
 private fun airVisionAppLanguageDescription(language: AirVisionAppLanguage): String =
     when (language) {
         AirVisionAppLanguage.System -> "Follow the Android system language."
-        else -> "Store ${language.label} as the AirVision companion language preference."
+        else -> "Apply ${language.label} to the AirVision companion app."
     }
 
 private fun airVisionStartupDestinationDescription(destination: AirVisionStartupDestination): String =

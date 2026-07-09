@@ -1,6 +1,7 @@
 package ai.openclaw.app
 
 import android.app.Application
+import android.content.Context
 import android.os.StrictMode
 
 class NodeApp : Application() {
@@ -17,6 +18,10 @@ class NodeApp : Application() {
     }
 
     fun peekRuntime(): NodeRuntime? = runtimeInstance
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(AirVisionAppLocale.wrap(base, AirVisionAppLocale.storedLanguage(base)))
+    }
 
     override fun onCreate() {
         super.onCreate()
