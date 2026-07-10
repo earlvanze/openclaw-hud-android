@@ -60,10 +60,39 @@ const validListingFiles = {
   ].join("\n"),
 };
 
+const validReadme = [
+  "OpenClaw HUD is optimized for Samsung DeX and has been live-tested with a Samsung Galaxy Fold 7.",
+  "",
+  "The single-tap, double-tap, swipe, M1 brightness-key, and M1 media/tap-key actions are configurable.",
+  "Defaults are tuned for walking HUD use: single-tap clears the current notification, double-tap toggles mic, vertical swipe scrolls chat, and M1 brightness-key events can scroll chat.",
+  "",
+  "| Windows AirVision feature | Android HUD status |",
+  "| --- | --- |",
+  "| Working / Gaming / Infinity / Custom modes | Profiles, custom labels, backup/import, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |",
+  "| Brightness | Software HUD dimming. |",
+  "| Screen distance | Virtual HUD distance scaling. |",
+  "| IPD | Calibration value. |",
+  "| Splendid Standard / Theater / Office / Game / Eye Care | Stored profile setting. |",
+  "| Blue Light Filter | HUD warm filtering. |",
+  "| Motion Sync | Stored in the AirVision profile. |",
+  "| 3D Mode | Stored in the AirVision profile. |",
+  "| Light Load Mode | Low-overhead HUD operation. |",
+  "| Gesture & Hotkey Settings | HUD touch, swipe, brightness-key, and media/tap key handling. |",
+  "| App Preferences | Startup, language, speaker, captions, backup, policy, and support links. |",
+  "| Device Information | USB identity details. |",
+  "| Firmware link | USB diagnostics and protocol capture state. |",
+  "| Identify | Temporary HUD marker. |",
+  "| Multi-screen desktop layouts | Configurable external-display targeting. |",
+  "",
+  "Captions default to Samsung/Android native captioning. The OpenClaw fallback forces thinking off, prefers sage-router/fast, and labels alternating turns as `S1` / `S2`.",
+  "Profile Backup exports gesture/hotkey settings, speaker state, Samsung/native captions preference, and OpenClaw translation caption settings, and never includes gateway endpoints, auth tokens, or chat history.",
+].join("\n");
+
 function runVerifier(
   gradlePath,
   localePath,
   listingDir,
+  readmePath,
 ) {
   const args = [scriptPath, "--bundle", bundlePath, "--skip-signature"];
   if (listingDir) args.push("--listing-dir", listingDir);
@@ -76,6 +105,7 @@ function runVerifier(
         ...process.env,
         OPENCLAW_ANDROID_GRADLE_BUILD_PATH: gradlePath,
         OPENCLAW_ANDROID_AIRVISION_APP_LOCALE_PATH: localePath,
+        ...(readmePath ? { OPENCLAW_ANDROID_README_PATH: readmePath } : {}),
       },
     },
   );
@@ -97,6 +127,7 @@ function runListingVerifier(
   gradlePath,
   localePath,
   listingDir,
+  readmePath,
 ) {
   return spawnSync(
     process.execPath,
@@ -107,6 +138,7 @@ function runListingVerifier(
         ...process.env,
         OPENCLAW_ANDROID_GRADLE_BUILD_PATH: gradlePath,
         OPENCLAW_ANDROID_AIRVISION_APP_LOCALE_PATH: localePath,
+        ...(readmePath ? { OPENCLAW_ANDROID_README_PATH: readmePath } : {}),
       },
     },
   );
@@ -118,10 +150,12 @@ async function main() {
     const localePath = join(tempDir, "AirVisionAppLocale.kt");
     const gradlePath = join(tempDir, "build.gradle.kts");
     const listingPath = join(tempDir, "listings");
+    const readmePath = join(tempDir, "README.md");
     await writeFile(localePath, localeSource);
+    await writeFile(readmePath, validReadme);
 
     await writeFile(gradlePath, gradleWithLanguageSplitsEnabled);
-    const failing = runVerifier(gradlePath, localePath);
+    const failing = runVerifier(gradlePath, localePath, null, readmePath);
     if (failing.status === 0 || !failing.stderr.includes("language splits")) {
       throw new Error(
         [
@@ -133,7 +167,7 @@ async function main() {
     }
 
     await writeFile(gradlePath, gradleWithLanguageSplitsDisabled);
-    const passing = runVerifier(gradlePath, localePath);
+    const passing = runVerifier(gradlePath, localePath, null, readmePath);
     if (passing.status !== 0) {
       throw new Error(
         [
@@ -146,7 +180,7 @@ async function main() {
     }
 
     await writeListing(listingPath);
-    const listingPassing = runListingVerifier(gradlePath, localePath, listingPath);
+    const listingPassing = runListingVerifier(gradlePath, localePath, listingPath, readmePath);
     if (listingPassing.status !== 0) {
       throw new Error(
         [
@@ -161,7 +195,7 @@ async function main() {
     await writeListing(listingPath, {
       "release-notes.txt": "Initial AirVision M1 HUD release candidate.",
     });
-    const listingFailing = runListingVerifier(gradlePath, localePath, listingPath);
+    const listingFailing = runListingVerifier(gradlePath, localePath, listingPath, readmePath);
     if (listingFailing.status === 0 || !listingFailing.stderr.includes("required Play listing text")) {
       throw new Error(
         [
@@ -169,6 +203,20 @@ async function main() {
           `status=${listingFailing.status}`,
           `stderr=${listingFailing.stderr.trim()}`,
           `stdout=${listingFailing.stdout.trim()}`,
+        ].join("\n"),
+      );
+    }
+
+    await writeListing(listingPath);
+    await writeFile(readmePath, validReadme.replace("| IPD | Calibration value. |", ""));
+    const readmeFailing = runListingVerifier(gradlePath, localePath, listingPath, readmePath);
+    if (readmeFailing.status === 0 || !readmeFailing.stderr.includes("README Windows AirVision feature matrix")) {
+      throw new Error(
+        [
+          "Expected verifier to reject README text that omits Windows AirVision parity rows.",
+          `status=${readmeFailing.status}`,
+          `stderr=${readmeFailing.stderr.trim()}`,
+          `stdout=${readmeFailing.stdout.trim()}`,
         ].join("\n"),
       );
     }

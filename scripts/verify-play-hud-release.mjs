@@ -46,6 +46,9 @@ const airVisionAppLocalePath =
     "AirVisionAppLocale.kt",
   );
 const airVisionFirmwareCapturePlanScript = join(scriptDir, "render-airvision-firmware-capture-plan.mjs");
+const readmePath =
+  process.env.OPENCLAW_ANDROID_README_PATH?.trim() ||
+  join(androidDir, "README.md");
 
 const expectedPackage = "ai.openclaw.app.hud";
 const expectedPermissions = [
@@ -453,6 +456,55 @@ async function verifyRuntimeLocaleBundleConfig() {
   return { usesRuntimeLocale: true, languageSplitsDisabled };
 }
 
+async function verifyReadmeAirVisionParity() {
+  const readme = await readFile(readmePath, "utf8");
+  requireIncludes("README AirVision positioning", readme, [
+    "optimized for Samsung DeX",
+    "Samsung Galaxy Fold 7",
+    "Windows AirVision feature",
+  ]);
+  requireIncludes("README Windows AirVision feature matrix", readme, [
+    "| Working / Gaming / Infinity / Custom modes |",
+    "| Brightness |",
+    "| Screen distance |",
+    "| IPD |",
+    "| Splendid Standard / Theater / Office / Game / Eye Care |",
+    "| Blue Light Filter |",
+    "| Motion Sync |",
+    "| 3D Mode |",
+    "| Light Load Mode |",
+    "| Gesture & Hotkey Settings |",
+    "| App Preferences |",
+    "| Device Information |",
+    "| Firmware link |",
+    "| Identify |",
+    "| Multi-screen desktop layouts |",
+  ]);
+  requireIncludes("README HUD walking defaults", readme, [
+    "single-tap clears the current",
+    "double-tap toggles mic",
+    "vertical swipe scrolls chat",
+    "brightness-key events can scroll chat",
+  ]);
+  requireIncludes("README captions parity", readme, [
+    "Samsung/Android native captioning",
+    "OpenClaw fallback",
+    "sage-router/fast",
+    "S1` / `S2",
+  ]);
+  requireIncludes("README AirVision profile backup boundary", readme, [
+    "gesture/hotkey settings",
+    "speaker state",
+    "Samsung/native captions preference",
+    "OpenClaw translation caption",
+    "never includes gateway endpoints",
+    "auth tokens",
+    "chat history",
+  ]);
+
+  return { path: readmePath };
+}
+
 function verifyGeneratedAirVisionFirmwareCapturePlan() {
   runChecked(
     process.execPath,
@@ -468,6 +520,7 @@ async function main() {
   const manifest = await verifyManifest(args.manifest);
   const listing = await verifyListing(args.listingDir, args.language);
   const localeBundleConfig = await verifyRuntimeLocaleBundleConfig();
+  const readmeParity = await verifyReadmeAirVisionParity();
   verifyGeneratedAirVisionFirmwareCapturePlan();
 
   console.log(`Bundle: ${bundle.path} (${bundle.size} bytes)`);
@@ -483,6 +536,7 @@ async function main() {
   if (localeBundleConfig.usesRuntimeLocale) {
     console.log("Runtime locale delivery: App Bundle language splits disabled");
   }
+  console.log(`README AirVision parity: ${readmeParity.path}`);
   console.log("AirVision firmware capture plan: current");
   console.log("Play HUD release verifier passed.");
 }
