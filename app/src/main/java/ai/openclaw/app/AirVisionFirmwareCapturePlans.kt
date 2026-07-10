@@ -63,18 +63,21 @@ object AirVisionFirmwareCapturePlans {
                         "HID report paths against USBPcap endpoints.",
                 )
                 add(
-                    "- Keep Android firmware writes disabled until the vendor report payload, report ID, length, and " +
-                        "checksum behavior are validated from captures.",
+                    "- Keep Android firmware writes disabled until the vendor report ID, payload length, endpoint, " +
+                        "sanitized payload summary, and checksum behavior are validated from captures.",
                 )
                 add("- Do not commit raw USB serial numbers, raw private capture payloads, or temporary review/demo credentials.")
                 add("")
                 add("## Capture Acceptance Criteria")
                 add("")
                 add(
-                    "- Record the exact Windows write report ID, payload bytes, payload length, and endpoint for each " +
-                        "feature before Android sends any vendor report.",
+                    "- Record the exact Windows write report ID, payload length, endpoint, and sanitized payload summary for each " +
+                        "feature before Android sends any vendor report. Keep raw bytes only in private capture files.",
                 )
-                add("- Record any matching readback report ID, payload bytes, endpoint, and timing after each Windows setting change.")
+                add(
+                    "- Record any matching readback report ID, payload length, endpoint, timing, and sanitized payload summary " +
+                        "after each Windows setting change.",
+                )
                 add("- Identify checksum, framing, sequence, or padding behavior from at least two distinct probe values for the same feature.")
                 add("- Confirm the ASUS app UI and the M1 visible state changed as expected for every captured probe value.")
                 add("- Keep Android enablement as `blocked` until write, readback, checksum/framing, and visible-state evidence agree.")
@@ -128,7 +131,7 @@ object AirVisionFirmwareCapturePlans {
                 add("## Capture Result Template")
                 add("")
                 add(
-                    "| Feature | Write report ID | Write payload bytes | Readback report ID | Readback payload bytes | " +
+                    "| Feature | Write report ID | Write payload summary | Readback report ID | Readback payload summary | " +
                         "Checksum/framing notes | ASUS UI + M1 visible confirmation | Android enablement decision |",
                 )
                 add("| --- | --- | --- | --- | --- | --- | --- | --- |")

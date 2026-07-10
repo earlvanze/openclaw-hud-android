@@ -7,13 +7,13 @@ Generated from `AirVisionFirmwareFeature` in `AirVisionUsbController.kt`. Run `n
 - Keep the AirVision M1 connected to the Windows/Cyber machine running the ASUS AirVision app when capturing vendor traffic.
 - Capture USB traffic while changing one AirVision setting at a time through the probe values below.
 - Export the Android HUD AirVision diagnostics JSON before and after the capture session, then compare its readable/writable HID report-path summaries against the USBPcap endpoints.
-- Keep Android firmware writes disabled until the vendor report payload, report ID, length, and checksum behavior are validated from captures.
+- Keep Android firmware writes disabled until the vendor report ID, payload length, endpoint, sanitized payload summary, and checksum behavior are validated from captures.
 - Do not commit raw USB serial numbers, raw private capture payloads, or temporary review/demo credentials.
 
 ## Capture Acceptance Criteria
 
-- Record the exact Windows write report ID, payload bytes, payload length, and endpoint for each feature before Android sends any vendor report.
-- Record any matching readback report ID, payload bytes, endpoint, and timing after each Windows setting change.
+- Record the exact Windows write report ID, payload length, endpoint, and sanitized payload summary for each feature before Android sends any vendor report. Keep raw bytes only in private capture files.
+- Record any matching readback report ID, payload length, endpoint, timing, and sanitized payload summary after each Windows setting change.
 - Identify checksum, framing, sequence, or padding behavior from at least two distinct probe values for the same feature.
 - Confirm the ASUS app UI and the M1 visible state changed as expected for every captured probe value.
 - Keep Android enablement as `blocked` until write, readback, checksum/framing, and visible-state evidence agree.
@@ -104,7 +104,7 @@ Generated from `AirVisionFirmwareFeature` in `AirVisionUsbController.kt`. Run `n
 
 ## Capture Result Template
 
-| Feature | Write report ID | Write payload bytes | Readback report ID | Readback payload bytes | Checksum/framing notes | ASUS UI + M1 visible confirmation | Android enablement decision |
+| Feature | Write report ID | Write payload summary | Readback report ID | Readback payload summary | Checksum/framing notes | ASUS UI + M1 visible confirmation | Android enablement decision |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Brightness | pending | pending | pending | pending | pending | pending | blocked |
 | Screen distance | pending | pending | pending | pending | pending | pending | blocked |

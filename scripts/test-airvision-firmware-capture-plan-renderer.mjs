@@ -48,13 +48,20 @@ const labels = parseCaptureFeatureLabels(source);
 requireIncludes("Capture plan safety criteria", capturePlan, [
   "## Capture Acceptance Criteria",
   "exact Windows write report ID",
-  "payload bytes",
+  "sanitized payload summary",
+  "Keep raw bytes only in private capture files.",
   "checksum/framing",
   "visible-state evidence",
   "## Capture Result Template",
+  "Write payload summary",
+  "Readback payload summary",
   "Android enablement decision",
   "- Do not commit raw USB serial numbers, raw private capture payloads, or temporary review/demo credentials.",
 ]);
+
+if (capturePlan.includes("payload bytes")) {
+  throw new Error("Capture plan must not ask operators to record raw payload bytes in checked-in results.");
+}
 
 for (const label of labels) {
   requireIncludes(`Capture result row for ${label}`, capturePlan, [
