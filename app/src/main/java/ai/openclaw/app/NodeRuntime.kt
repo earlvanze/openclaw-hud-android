@@ -293,7 +293,7 @@ class NodeRuntime(
     private val _seamColorArgb = MutableStateFlow(DEFAULT_SEAM_COLOR_ARGB)
     val seamColorArgb: StateFlow<Long> = _seamColorArgb.asStateFlow()
 
-    private val _isForeground = MutableStateFlow(true)
+    private val _isForeground = MutableStateFlow(false)
     val isForeground: StateFlow<Boolean> = _isForeground.asStateFlow()
 
     private var gatewayDefaultAgentId: String? = null
@@ -311,6 +311,7 @@ class NodeRuntime(
     private var operatorConnected = false
     private var operatorStatusText: String = "Offline"
     private var nodeStatusText: String = "Offline"
+    private var suppressNextPreferredGatewayReconnect = false
 
     private val operatorSession =
         GatewaySession(
@@ -773,7 +774,10 @@ class NodeRuntime(
         _isForeground.value = value
         if (value) {
             if (reconnectPreferredGateway) {
+                suppressNextPreferredGatewayReconnect = false
                 reconnectPreferredGatewayOnForeground()
+            } else {
+                suppressNextPreferredGatewayReconnect = true
             }
         } else {
             stopActiveVoiceSession()
@@ -803,6 +807,11 @@ class NodeRuntime(
     }
 
     private fun autoConnectIfNeeded() {
+        if (!_isForeground.value) return
+        if (suppressNextPreferredGatewayReconnect) {
+            suppressNextPreferredGatewayReconnect = false
+            return
+        }
         if (didAutoConnect) return
         if (_isConnected.value) return
         val endpoint = resolvePreferredGatewayEndpoint() ?: return
