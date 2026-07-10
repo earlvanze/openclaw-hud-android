@@ -123,7 +123,25 @@ function isFilled(value) {
 }
 
 function containsForbiddenSecretShape(text) {
-  return /(token|password|secret|signaturekey|authorization)\s*[:=]/i.test(text);
+  return /(token|password|secret|signaturekey|authorization|serial(?:number)?)\s*[:=]/i.test(text);
+}
+
+function containsRawHexDumpShape(text) {
+  return /(?:\b[0-9a-fA-F]{2}\b[\s,;:-]*){16,}/.test(text);
+}
+
+function hasRawCaptureDumpExtension(value) {
+  return /\.(pcap|pcapng|usbpcap|etl|cap)$/i.test(value.trim());
+}
+
+function assertSanitizedText(value, label) {
+  if (typeof value !== "string") return;
+  if (containsForbiddenSecretShape(value)) {
+    throw new Error(`${label} contains a secret or raw-serial-shaped assignment; keep private values out of capture results.`);
+  }
+  if (containsRawHexDumpShape(value)) {
+    throw new Error(`${label} looks like a raw byte dump; keep only sanitized summaries in capture results.`);
+  }
 }
 
 function validateCaptureReferences(references, label) {
@@ -136,6 +154,11 @@ function validateCaptureReferences(references, label) {
     if (reference.sha256 !== null && !/^[a-f0-9]{64}$/i.test(reference.sha256)) {
       throw new Error(`${label}.captureReferences[${index}].sha256 must be a SHA-256 hex digest or null.`);
     }
+    if (typeof reference.file === "string" && hasRawCaptureDumpExtension(reference.file)) {
+      throw new Error(`${label}.captureReferences[${index}].file must reference a sanitized summary, not a raw capture dump.`);
+    }
+    assertSanitizedText(reference.file, `${label}.captureReferences[${index}].file`);
+    assertSanitizedText(reference.notes, `${label}.captureReferences[${index}].notes`);
   }
 }
 
@@ -149,6 +172,7 @@ function validateResults(results, features) {
   assertObject(results.source, "source");
   for (const field of ["windowsHost", "captureTool", "asusAirVisionAppVersion", "androidDiagnosticsExportSha256", "notes"]) {
     assertStringOrNull(results.source[field], `source.${field}`);
+    assertSanitizedText(results.source[field], `source.${field}`);
   }
   if (
     results.source.androidDiagnosticsExportSha256 !== null &&
@@ -194,6 +218,7 @@ function validateResults(results, features) {
         "blockerReason",
       ]) {
         assertStringOrNull(result[field], `${label}.${field}`);
+        assertSanitizedText(result[field], `${label}.${field}`);
       }
       if (typeof result.visibleStateConfirmed !== "boolean") {
         throw new Error(`${label}.visibleStateConfirmed must be boolean.`);
@@ -202,7 +227,7 @@ function validateResults(results, features) {
 
       const rawJson = JSON.stringify(result);
       if (containsForbiddenSecretShape(rawJson)) {
-        throw new Error(`${label} contains a secret-shaped assignment; keep credentials out of capture results.`);
+        throw new Error(`${label} contains a secret or raw-serial-shaped assignment; keep private values out of capture results.`);
       }
 
       const hasCompleteEvidence =

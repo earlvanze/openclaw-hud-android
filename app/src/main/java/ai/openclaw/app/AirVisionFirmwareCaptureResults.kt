@@ -129,11 +129,21 @@ object AirVisionFirmwareCaptureResultFiles {
             require(result.androidEnablementDecision in setOf("blocked", "enable_android_write")) {
                 "Feature ${result.rawKey} Android enablement decision is not supported."
             }
-            require(!containsForbiddenSecretShape(result.toString())) {
-                "Feature ${result.rawKey} contains a secret-shaped assignment."
-            }
+            requireSanitizedText(result.writeReportId, "Feature ${result.rawKey} write report ID")
+            requireSanitizedText(result.writeEndpoint, "Feature ${result.rawKey} write endpoint")
+            requireSanitizedText(result.writePayloadSummary, "Feature ${result.rawKey} write payload summary")
+            requireSanitizedText(result.readbackReportId, "Feature ${result.rawKey} readback report ID")
+            requireSanitizedText(result.readbackEndpoint, "Feature ${result.rawKey} readback endpoint")
+            requireSanitizedText(result.readbackPayloadSummary, "Feature ${result.rawKey} readback payload summary")
+            requireSanitizedText(result.checksumFramingNotes, "Feature ${result.rawKey} checksum/framing notes")
+            requireSanitizedText(result.blockerReason, "Feature ${result.rawKey} blocker reason")
             result.captureReferences.forEachIndexed { referenceIndex, reference ->
                 requireSha256OrNull(reference.sha256, "features[$index].captureReferences[$referenceIndex].sha256")
+                require(!hasRawCaptureDumpExtension(reference.file)) {
+                    "features[$index].captureReferences[$referenceIndex].file must reference a sanitized summary, not a raw capture dump."
+                }
+                requireSanitizedText(reference.file, "features[$index].captureReferences[$referenceIndex].file")
+                requireSanitizedText(reference.notes, "features[$index].captureReferences[$referenceIndex].notes")
             }
             val completeEvidence =
                 result.status == "validated" &&
@@ -157,6 +167,10 @@ object AirVisionFirmwareCaptureResultFiles {
         require(missing.isEmpty()) {
             "Firmware capture results missing: ${missing.joinToString { it.label }}."
         }
+        requireSanitizedText(results.source.windowsHost, "source.windowsHost")
+        requireSanitizedText(results.source.captureTool, "source.captureTool")
+        requireSanitizedText(results.source.asusAirVisionAppVersion, "source.asusAirVisionAppVersion")
+        requireSanitizedText(results.source.notes, "source.notes")
     }
 
     private fun requireSha256OrNull(
@@ -171,6 +185,29 @@ object AirVisionFirmwareCaptureResultFiles {
     private fun isFilled(value: String?): Boolean =
         !value.isNullOrBlank() && value.trim().lowercase() != "pending"
 
+    private fun requireSanitizedText(
+        value: String?,
+        label: String,
+    ) {
+        val text = value ?: return
+        require(!containsForbiddenSecretShape(text)) {
+            "$label contains a secret or raw-serial-shaped assignment."
+        }
+        require(!containsRawHexDumpShape(text)) {
+            "$label looks like a raw byte dump; use a sanitized summary instead."
+        }
+    }
+
     private fun containsForbiddenSecretShape(text: String): Boolean =
-        Regex("(token|password|secret|signaturekey|authorization)\\s*[:=]", RegexOption.IGNORE_CASE).containsMatchIn(text)
+        Regex("(token|password|secret|signaturekey|authorization|serial(?:number)?)\\s*[:=]", RegexOption.IGNORE_CASE)
+            .containsMatchIn(text)
+
+    private fun containsRawHexDumpShape(text: String): Boolean =
+        Regex("(?:\\b[0-9a-fA-F]{2}\\b[\\s,;:-]*){16,}").containsMatchIn(text)
+
+    private fun hasRawCaptureDumpExtension(value: String?): Boolean =
+        value
+            ?.trim()
+            ?.let { Regex("\\.(pcap|pcapng|usbpcap|etl|cap)$", RegexOption.IGNORE_CASE).containsMatchIn(it) }
+            ?: false
 }

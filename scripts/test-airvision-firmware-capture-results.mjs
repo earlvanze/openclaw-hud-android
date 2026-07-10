@@ -56,7 +56,31 @@ try {
   secretShaped.features[0].blockerReason = "token=abc123 should not be committed";
   const secretPath = join(tempDir, "secret-shaped.json");
   await writeFile(secretPath, `${JSON.stringify(secretShaped, null, 2)}\n`);
-  expectFailure("secret-shaped value", runVerifier(secretPath), "secret-shaped assignment");
+  expectFailure("secret-shaped value", runVerifier(secretPath), "secret or raw-serial-shaped assignment");
+
+  const rawSerial = structuredClone(template);
+  rawSerial.source.notes = "serial=private-device-serial";
+  const rawSerialPath = join(tempDir, "raw-serial.json");
+  await writeFile(rawSerialPath, `${JSON.stringify(rawSerial, null, 2)}\n`);
+  expectFailure("raw serial source", runVerifier(rawSerialPath), "secret or raw-serial-shaped assignment");
+
+  const rawCaptureReference = structuredClone(template);
+  rawCaptureReference.features[0].captureReferences = [
+    {
+      file: "airvision-m1-usb.pcapng",
+      sha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      notes: "raw capture",
+    },
+  ];
+  const rawCaptureReferencePath = join(tempDir, "raw-capture-reference.json");
+  await writeFile(rawCaptureReferencePath, `${JSON.stringify(rawCaptureReference, null, 2)}\n`);
+  expectFailure("raw capture reference", runVerifier(rawCaptureReferencePath), "raw capture dump");
+
+  const rawHexDump = structuredClone(template);
+  rawHexDump.features[0].writePayloadSummary = "05 11 aa bb cc dd ee ff 00 01 02 03 04 05 06 07";
+  const rawHexDumpPath = join(tempDir, "raw-hex-dump.json");
+  await writeFile(rawHexDumpPath, `${JSON.stringify(rawHexDump, null, 2)}\n`);
+  expectFailure("raw hex dump", runVerifier(rawHexDumpPath), "raw byte dump");
 } finally {
   await rm(tempDir, { recursive: true, force: true });
 }

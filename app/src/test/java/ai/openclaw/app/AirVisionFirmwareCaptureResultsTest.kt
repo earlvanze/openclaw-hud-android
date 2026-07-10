@@ -108,7 +108,69 @@ class AirVisionFirmwareCaptureResultsTest {
             runCatching { AirVisionFirmwareCaptureResultFiles.decode(unsafe) }
                 .exceptionOrNull()
 
-        assertTrue(error?.message.orEmpty().contains("secret-shaped"))
+        assertTrue(error?.message.orEmpty().contains("secret or raw-serial-shaped"))
+    }
+
+    @Test
+    fun decode_rejectsRawSerialAssignmentsInSource() {
+        val unsafe =
+            pendingResultsJson(
+                sourceOverride = "\"notes\": \"serial=private-device-serial\"",
+            )
+
+        val error =
+            runCatching { AirVisionFirmwareCaptureResultFiles.decode(unsafe) }
+                .exceptionOrNull()
+
+        assertTrue(error?.message.orEmpty().contains("raw-serial-shaped"))
+    }
+
+    @Test
+    fun decode_rejectsRawCaptureDumpReferences() {
+        val unsafe =
+            pendingResultsJson(
+                overridesByRawKey =
+                    mapOf(
+                        "brightness" to
+                            """
+                            "captureReferences": [
+                              {
+                                "file": "airvision-m1-usb.pcapng",
+                                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                                "notes": "raw capture"
+                              }
+                            ],
+                            "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+                            """.trimIndent(),
+                    ),
+            )
+
+        val error =
+            runCatching { AirVisionFirmwareCaptureResultFiles.decode(unsafe) }
+                .exceptionOrNull()
+
+        assertTrue(error?.message.orEmpty().contains("raw capture dump"))
+    }
+
+    @Test
+    fun decode_rejectsRawHexDumpPayloadSummaries() {
+        val unsafe =
+            pendingResultsJson(
+                overridesByRawKey =
+                    mapOf(
+                        "brightness" to
+                            """
+                            "writePayloadSummary": "05 11 aa bb cc dd ee ff 00 01 02 03 04 05 06 07",
+                            "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+                            """.trimIndent(),
+                    ),
+            )
+
+        val error =
+            runCatching { AirVisionFirmwareCaptureResultFiles.decode(unsafe) }
+                .exceptionOrNull()
+
+        assertTrue(error?.message.orEmpty().contains("raw byte dump"))
     }
 
     @Test
@@ -123,6 +185,7 @@ class AirVisionFirmwareCaptureResultsTest {
     private fun pendingResultsJson(
         features: List<AirVisionFirmwareFeature> = AirVisionFirmwareFeature.entries,
         overridesByRawKey: Map<String, String> = emptyMap(),
+        sourceOverride: String? = null,
     ): String =
         """
         {
@@ -134,7 +197,7 @@ class AirVisionFirmwareCaptureResultsTest {
             "captureTool": "USBPcap/Wireshark",
             "asusAirVisionAppVersion": null,
             "androidDiagnosticsExportSha256": null,
-            "notes": "test"
+            ${sourceOverride ?: "\"notes\": \"test\""}
           },
           "features": [
             ${features.joinToString(",\n") { featureJson(it, overridesByRawKey[it.rawValue]) }}
