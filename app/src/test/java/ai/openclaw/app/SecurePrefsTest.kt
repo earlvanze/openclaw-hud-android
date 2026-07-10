@@ -779,7 +779,7 @@ class SecurePrefsTest {
                 )
             }
 
-        assertEquals(true, error.message.orEmpty().contains("secret-shaped"))
+        assertEquals(true, error.message.orEmpty().contains("secret or raw-serial-shaped"))
         assertEquals(
             "capture results: 0 validated, 0 write-enabled, 7 blocked; host=Cyber, tool=USBPcap/Wireshark",
             prefs.airVisionFirmwareCaptureResultsSummary.value,
