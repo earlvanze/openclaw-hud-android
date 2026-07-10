@@ -237,8 +237,12 @@ class SecurePrefs(
         MutableStateFlow(plainPrefs.getBoolean(AIR_VISION_DEMO_MODE_ENABLED_KEY, false))
     val airVisionDemoModeEnabled: StateFlow<Boolean> = _airVisionDemoModeEnabled
 
+    private val _airVisionFirmwareCaptureResults =
+        MutableStateFlow(loadAirVisionFirmwareCaptureResults())
+    val airVisionFirmwareCaptureResults: StateFlow<AirVisionFirmwareCaptureResults?> = _airVisionFirmwareCaptureResults
+
     private val _airVisionFirmwareCaptureResultsSummary =
-        MutableStateFlow(loadAirVisionFirmwareCaptureResultsSummary())
+        MutableStateFlow(_airVisionFirmwareCaptureResults.value?.let(AirVisionFirmwareCaptureResultFiles::summarize)?.displayText)
     val airVisionFirmwareCaptureResultsSummary: StateFlow<String?> = _airVisionFirmwareCaptureResultsSummary
 
     private val _translationCaptionSourceLanguage =
@@ -833,12 +837,14 @@ class SecurePrefs(
         plainPrefs.edit {
             putString(AIR_VISION_FIRMWARE_CAPTURE_RESULTS_JSON_KEY, trimmed)
         }
+        _airVisionFirmwareCaptureResults.value = AirVisionFirmwareCaptureResultFiles.decode(trimmed)
         _airVisionFirmwareCaptureResultsSummary.value = summary.displayText
         return summary
     }
 
     fun clearAirVisionFirmwareCaptureResults() {
         plainPrefs.edit { remove(AIR_VISION_FIRMWARE_CAPTURE_RESULTS_JSON_KEY) }
+        _airVisionFirmwareCaptureResults.value = null
         _airVisionFirmwareCaptureResultsSummary.value = null
     }
 
@@ -1009,14 +1015,14 @@ class SecurePrefs(
         return resolved
     }
 
-    private fun loadAirVisionFirmwareCaptureResultsSummary(): String? {
+    private fun loadAirVisionFirmwareCaptureResults(): AirVisionFirmwareCaptureResults? {
         val raw =
             plainPrefs
                 .getString(AIR_VISION_FIRMWARE_CAPTURE_RESULTS_JSON_KEY, null)
                 ?.trim()
                 ?.takeIf(String::isNotEmpty) ?: return null
         return runCatching {
-            AirVisionFirmwareCaptureResultFiles.summarize(raw).displayText
+            AirVisionFirmwareCaptureResultFiles.decode(raw)
         }.getOrElse {
             plainPrefs.edit { remove(AIR_VISION_FIRMWARE_CAPTURE_RESULTS_JSON_KEY) }
             null

@@ -73,14 +73,21 @@ object AirVisionFirmwareSyncPlans {
     fun fromSettings(
         settings: AirVisionDisplaySettings,
         capabilities: AirVisionFirmwareCapabilities,
+        captureResults: AirVisionFirmwareCaptureResults? = null,
     ): AirVisionFirmwareSyncPlan {
         val normalized = settings.normalized
+        val captureResultsByFeature =
+            captureResults
+                ?.features
+                ?.associateBy { it.rawKey }
+                .orEmpty()
         return AirVisionFirmwareSyncPlan(
             items =
                 AirVisionFirmwareFeature.entries.map { feature ->
                     feature.syncItemFor(
                         settings = normalized,
                         capabilities = capabilities,
+                        captureResult = captureResultsByFeature[feature.rawValue],
                     )
                 },
         )
@@ -89,14 +96,24 @@ object AirVisionFirmwareSyncPlans {
     private fun AirVisionFirmwareFeature.syncItemFor(
         settings: AirVisionDisplaySettings,
         capabilities: AirVisionFirmwareCapabilities,
+        captureResult: AirVisionFirmwareCaptureResult?,
     ): AirVisionFirmwareSyncItem {
+        val captureResultStatus = captureResult?.status ?: "pending_validated_capture_result"
+        val androidEnablementDecision = captureResult?.androidEnablementDecision ?: "blocked"
+        val hasValidatedAndroidWriteEvidence =
+            captureResultStatus == "validated" &&
+                androidEnablementDecision == "enable_android_write"
         val hardwareSyncStatus =
             when {
+                hasValidatedAndroidWriteEvidence -> "validated capture imported"
                 capabilities.hasWritableHidReports -> "capture pending"
                 else -> "waiting for writable HID"
             }
         val blockedReason =
             when {
+                hasValidatedAndroidWriteEvidence ->
+                    "Validated capture result imported; Android HID firmware-write implementation remains disabled until live M1 testing."
+                captureResult?.blockerReason?.isNotBlank() == true -> captureResult.blockerReason
                 capabilities.hasWritableHidReports ->
                     "Writable HID path detected, but ASUS vendor report payloads are not validated."
                 else ->
@@ -109,10 +126,10 @@ object AirVisionFirmwareSyncPlans {
             androidEffect = androidEffectFor(settings),
             hardwareSyncPending = true,
             hardwareSyncStatus = hardwareSyncStatus,
-            captureResultStatus = "pending_validated_capture_result",
-            androidEnablementDecision = "blocked",
+            captureResultStatus = captureResultStatus,
+            androidEnablementDecision = androidEnablementDecision,
             firmwareWriteAllowed = false,
-            requiredEvidence = validatedWriteEvidence,
+            requiredEvidence = if (hasValidatedAndroidWriteEvidence) emptyList() else validatedWriteEvidence,
             blockedReason = blockedReason,
         )
     }

@@ -706,6 +706,7 @@ class SecurePrefsTest {
             "capture results: 0 validated, 0 write-enabled, 7 blocked; host=Cyber, tool=USBPcap/Wireshark",
             reloaded.airVisionFirmwareCaptureResultsSummary.value,
         )
+        assertEquals(AirVisionFirmwareFeature.entries.size, reloaded.airVisionFirmwareCaptureResults.value?.features?.size)
         assertFalse(reloaded.exportAirVisionProfileBackup().contains("firmwareCaptureResults"))
     }
 

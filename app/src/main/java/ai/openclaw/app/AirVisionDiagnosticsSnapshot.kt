@@ -199,6 +199,7 @@ object AirVisionDiagnosticsSnapshots {
         nativeCaptionsEnabled: Boolean = false,
         translationCaptionSourceLanguage: String = TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
         translationCaptionTargetLanguage: String = TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
+        firmwareCaptureResults: AirVisionFirmwareCaptureResults? = null,
     ): AirVisionDiagnosticsSnapshot =
         AirVisionDiagnosticsSnapshot(
             usb =
@@ -251,6 +252,7 @@ object AirVisionDiagnosticsSnapshots {
                     .fromSettings(
                         settings = displaySettings,
                         capabilities = usbState.firmwareCapabilities,
+                        captureResults = firmwareCaptureResults,
                     ).toDiagnostics(),
             hudRuntime =
                 AirVisionDiagnosticsHudRuntime(

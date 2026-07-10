@@ -96,4 +96,79 @@ class AirVisionFirmwareSyncPlanTest {
         )
         assertTrue(plan.items.all { it.hardwareSyncStatus == "waiting for writable HID" })
     }
+
+    @Test
+    fun fromSettings_consumesImportedValidatedCaptureResultsWithoutEnablingWrites() {
+        val settings =
+            AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working).copy(
+                brightnessPercent = 72,
+            )
+        val captureResults =
+            AirVisionFirmwareCaptureResults(
+                schema = AirVisionFirmwareCaptureResultFiles.SCHEMA,
+                version = AirVisionFirmwareCaptureResultFiles.VERSION,
+                source = AirVisionFirmwareCaptureResultsSource(windowsHost = "Cyber"),
+                features =
+                    AirVisionFirmwareFeature.entries.map { feature ->
+                        if (feature == AirVisionFirmwareFeature.Brightness) {
+                            validatedBrightnessCaptureResult(feature)
+                        } else {
+                            pendingCaptureResult(feature)
+                        }
+                    },
+            )
+
+        val plan =
+            AirVisionFirmwareSyncPlans.fromSettings(
+                settings = settings,
+                capabilities = AirVisionFirmwareCapabilities(),
+                captureResults = captureResults,
+            )
+        val brightness = plan.items.first { it.feature == AirVisionFirmwareFeature.Brightness }
+
+        assertEquals("validated", brightness.captureResultStatus)
+        assertEquals("enable_android_write", brightness.androidEnablementDecision)
+        assertEquals("validated capture imported", brightness.hardwareSyncStatus)
+        assertEquals(false, brightness.firmwareWriteAllowed)
+        assertEquals(emptyList<String>(), brightness.requiredEvidence)
+        assertTrue(brightness.blockedReason.contains("implementation remains disabled"))
+        assertEquals(0, plan.firmwareWriteAllowedCount)
+        assertEquals(AirVisionFirmwareFeature.entries.size, plan.blockedFirmwareWriteCount)
+    }
 }
+
+private fun pendingCaptureResult(feature: AirVisionFirmwareFeature): AirVisionFirmwareCaptureResult =
+    AirVisionFirmwareCaptureResult(
+        rawKey = feature.rawValue,
+        label = feature.label,
+        status = "pending",
+        probeValues = feature.captureProbeValues,
+        androidEnablementDecision = "blocked",
+        blockerReason = "Windows ASUS HID protocol capture has not been validated.",
+    )
+
+private fun validatedBrightnessCaptureResult(feature: AirVisionFirmwareFeature): AirVisionFirmwareCaptureResult =
+    AirVisionFirmwareCaptureResult(
+        rawKey = feature.rawValue,
+        label = feature.label,
+        status = "validated",
+        probeValues = feature.captureProbeValues,
+        writeReportId = "0x05",
+        writeEndpoint = "out if=2 interrupt addr=0x2 max=64 int=1",
+        writePayloadSummary = "brightness byte changes only; sanitized",
+        readbackReportId = "0x85",
+        readbackEndpoint = "in if=1 interrupt addr=0x81 max=32 int=4",
+        readbackPayloadSummary = "readback brightness byte matched; sanitized",
+        checksumFramingNotes = "xor checksum observed; sanitized",
+        visibleStateConfirmed = true,
+        captureReferences =
+            listOf(
+                AirVisionFirmwareCaptureReference(
+                    file = "airvision-brightness-summary.txt",
+                    sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    notes = "sanitized summary only",
+                ),
+            ),
+        androidEnablementDecision = "enable_android_write",
+        blockerReason = null,
+    )

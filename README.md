@@ -193,7 +193,10 @@ validated write/readback/checksum/visible-state evidence for a feature.
 The Android app can import the same sanitized capture-results JSON from
 Settings -> AirVision M1 -> Firmware Capture Results. Import validates the
 schema and safety evidence locally, records a compact summary in Settings, and
-does not enable Android firmware writes by itself.
+persists the parsed result for Settings and diagnostics. The imported evidence
+can mark a feature's capture result and Android enablement decision as
+validated, but firmware writes remain disabled until an Android HID write path
+is implemented and live-tested with the M1.
 The Android app can also export a live copy from Settings -> AirVision M1 ->
 Firmware Capture Plan, including the phone's current readable/writable HID
 report-path status when the M1 is connected plus the active AirVision profile's

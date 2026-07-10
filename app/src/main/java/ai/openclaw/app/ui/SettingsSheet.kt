@@ -121,11 +121,13 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionPhysicalMainScreenVisible by viewModel.airVisionPhysicalMainScreenVisible.collectAsState()
     val airVisionDemoModeEnabled by viewModel.airVisionDemoModeEnabled.collectAsState()
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
+    val airVisionFirmwareCaptureResults by viewModel.airVisionFirmwareCaptureResults.collectAsState()
     val airVisionFirmwareCaptureResultsSummary by viewModel.airVisionFirmwareCaptureResultsSummary.collectAsState()
     val airVisionFirmwareSyncPlan =
         AirVisionFirmwareSyncPlans.fromSettings(
             settings = airVisionDisplaySettings,
             capabilities = airVisionUsbState.firmwareCapabilities,
+            captureResults = airVisionFirmwareCaptureResults,
         )
 
     var notificationQuietStartDraft by remember(notificationForwardingQuietStart) {

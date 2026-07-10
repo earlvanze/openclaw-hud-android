@@ -134,6 +134,7 @@ class MainViewModel(
     val airVisionHudPresentationActive: StateFlow<Boolean> = _airVisionHudPresentationActive
     private val _airVisionHudDisplayRoute = MutableStateFlow(AirVisionHudDisplayRoute())
     val airVisionHudDisplayRoute: StateFlow<AirVisionHudDisplayRoute> = _airVisionHudDisplayRoute
+    val airVisionFirmwareCaptureResults: StateFlow<AirVisionFirmwareCaptureResults?> = prefs.airVisionFirmwareCaptureResults
     val airVisionFirmwareCaptureResultsSummary: StateFlow<String?> = prefs.airVisionFirmwareCaptureResultsSummary
 
     val micCooldown: StateFlow<Boolean> = runtimeState(initial = false) { it.micCooldown }
@@ -513,6 +514,7 @@ class MainViewModel(
                 nativeCaptionsEnabled = nativeCaptionsEnabled.value,
                 translationCaptionSourceLanguage = translationCaptionSourceLanguage.value,
                 translationCaptionTargetLanguage = translationCaptionTargetLanguage.value,
+                firmwareCaptureResults = airVisionFirmwareCaptureResults.value,
             ),
         )
 
