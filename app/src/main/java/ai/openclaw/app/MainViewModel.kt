@@ -134,6 +134,8 @@ class MainViewModel(
     val airVisionHudPresentationActive: StateFlow<Boolean> = _airVisionHudPresentationActive
     private val _airVisionHudDisplayRoute = MutableStateFlow(AirVisionHudDisplayRoute())
     val airVisionHudDisplayRoute: StateFlow<AirVisionHudDisplayRoute> = _airVisionHudDisplayRoute
+    private val _airVisionFirmwareCaptureResultsSummary = MutableStateFlow<String?>(null)
+    val airVisionFirmwareCaptureResultsSummary: StateFlow<String?> = _airVisionFirmwareCaptureResultsSummary
 
     val micCooldown: StateFlow<Boolean> = runtimeState(initial = false) { it.micCooldown }
     val micStatusText: StateFlow<String> = runtimeState(initial = "Mic off") { it.micStatusText }
@@ -513,6 +515,22 @@ class MainViewModel(
                 translationCaptionSourceLanguage = translationCaptionSourceLanguage.value,
                 translationCaptionTargetLanguage = translationCaptionTargetLanguage.value,
             ),
+        )
+
+    fun importAirVisionFirmwareCaptureResults(raw: String): Boolean =
+        runCatching {
+            AirVisionFirmwareCaptureResultFiles.summarize(raw)
+        }.fold(
+            onSuccess = { summary ->
+                val message = "${summary.summary}; ${summary.sourceSummary}"
+                _airVisionFirmwareCaptureResultsSummary.value = message
+                showHudTransientMessage("Validated AirVision capture results: ${summary.summary}")
+                true
+            },
+            onFailure = { error ->
+                showHudTransientMessage("AirVision capture results rejected: ${error.message.orEmpty()}")
+                false
+            },
         )
 
     fun importAirVisionProfileBackup(raw: String): Boolean =

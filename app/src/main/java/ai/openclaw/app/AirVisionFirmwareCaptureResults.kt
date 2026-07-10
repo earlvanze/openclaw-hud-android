@@ -1,0 +1,173 @@
+package ai.openclaw.app
+
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+
+@Serializable
+data class AirVisionFirmwareCaptureResults(
+    val schema: String,
+    val version: Int,
+    val payloadPolicy: String? = null,
+    val source: AirVisionFirmwareCaptureResultsSource,
+    val features: List<AirVisionFirmwareCaptureResult>,
+)
+
+@Serializable
+data class AirVisionFirmwareCaptureResultsSource(
+    val windowsHost: String? = null,
+    val captureTool: String? = null,
+    val asusAirVisionAppVersion: String? = null,
+    val androidDiagnosticsExportSha256: String? = null,
+    val notes: String? = null,
+)
+
+@Serializable
+data class AirVisionFirmwareCaptureResult(
+    val rawKey: String,
+    val label: String,
+    val status: String,
+    val probeValues: List<String>,
+    val writeReportId: String? = null,
+    val writeEndpoint: String? = null,
+    val writePayloadSummary: String? = null,
+    val readbackReportId: String? = null,
+    val readbackEndpoint: String? = null,
+    val readbackPayloadSummary: String? = null,
+    val checksumFramingNotes: String? = null,
+    val visibleStateConfirmed: Boolean = false,
+    val captureReferences: List<AirVisionFirmwareCaptureReference> = emptyList(),
+    val androidEnablementDecision: String,
+    val blockerReason: String? = null,
+)
+
+@Serializable
+data class AirVisionFirmwareCaptureReference(
+    val file: String? = null,
+    val sha256: String? = null,
+    val notes: String? = null,
+)
+
+data class AirVisionFirmwareCaptureResultsSummary(
+    val featureCount: Int,
+    val validatedFeatureCount: Int,
+    val writeEnabledFeatureCount: Int,
+    val blockedFeatureCount: Int,
+    val sourceSummary: String,
+    val summary: String,
+)
+
+object AirVisionFirmwareCaptureResultFiles {
+    const val SCHEMA = "openclaw.airvision.firmwareCaptureResults"
+    const val VERSION = 1
+
+    private val json =
+        Json {
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+        }
+
+    fun decode(raw: String): AirVisionFirmwareCaptureResults {
+        val results =
+            try {
+                json.decodeFromString<AirVisionFirmwareCaptureResults>(raw)
+            } catch (error: SerializationException) {
+                throw IllegalArgumentException("Firmware capture results are not valid JSON.", error)
+            }
+        validate(results)
+        return results
+    }
+
+    fun summarize(raw: String): AirVisionFirmwareCaptureResultsSummary = summarize(decode(raw))
+
+    fun summarize(results: AirVisionFirmwareCaptureResults): AirVisionFirmwareCaptureResultsSummary {
+        validate(results)
+        val validated = results.features.count { it.status == "validated" }
+        val enabled = results.features.count { it.androidEnablementDecision == "enable_android_write" }
+        val blocked = results.features.count { it.androidEnablementDecision == "blocked" }
+        val sourceSummary =
+            listOfNotNull(
+                results.source.windowsHost?.trim()?.takeIf(String::isNotEmpty)?.let { "host=$it" },
+                results.source.captureTool?.trim()?.takeIf(String::isNotEmpty)?.let { "tool=$it" },
+                results.source.asusAirVisionAppVersion?.trim()?.takeIf(String::isNotEmpty)?.let { "asusApp=$it" },
+                results.source.androidDiagnosticsExportSha256
+                    ?.trim()
+                    ?.takeIf(String::isNotEmpty)
+                    ?.let { "diagnosticsSha256=${it.take(12)}..." },
+            ).joinToString(", ").ifBlank { "source=pending" }
+        return AirVisionFirmwareCaptureResultsSummary(
+            featureCount = results.features.size,
+            validatedFeatureCount = validated,
+            writeEnabledFeatureCount = enabled,
+            blockedFeatureCount = blocked,
+            sourceSummary = sourceSummary,
+            summary = "capture results: $validated validated, $enabled write-enabled, $blocked blocked",
+        )
+    }
+
+    fun validate(results: AirVisionFirmwareCaptureResults) {
+        require(results.schema == SCHEMA) { "Firmware capture results schema is not supported." }
+        require(results.version == VERSION) { "Firmware capture results version is not supported." }
+        requireSha256OrNull(results.source.androidDiagnosticsExportSha256, "source.androidDiagnosticsExportSha256")
+        val expectedByKey = AirVisionFirmwareFeature.entries.associateBy { it.rawValue }
+        val seen = mutableSetOf<String>()
+        results.features.forEachIndexed { index, result ->
+            val feature = expectedByKey[result.rawKey]
+                ?: throw IllegalArgumentException("Unknown firmware capture feature: ${result.rawKey}")
+            require(seen.add(result.rawKey)) { "Duplicate firmware capture feature: ${result.rawKey}" }
+            require(result.label == feature.label) { "Feature ${result.rawKey} label must be ${feature.label}." }
+            require(result.probeValues == feature.captureProbeValues) {
+                "Feature ${result.rawKey} probe values do not match the Android feature list."
+            }
+            require(result.status in setOf("pending", "captured", "validated")) {
+                "Feature ${result.rawKey} status is not supported."
+            }
+            require(result.androidEnablementDecision in setOf("blocked", "enable_android_write")) {
+                "Feature ${result.rawKey} Android enablement decision is not supported."
+            }
+            require(!containsForbiddenSecretShape(result.toString())) {
+                "Feature ${result.rawKey} contains a secret-shaped assignment."
+            }
+            result.captureReferences.forEachIndexed { referenceIndex, reference ->
+                requireSha256OrNull(reference.sha256, "features[$index].captureReferences[$referenceIndex].sha256")
+            }
+            val completeEvidence =
+                result.status == "validated" &&
+                    isFilled(result.writeReportId) &&
+                    isFilled(result.writeEndpoint) &&
+                    isFilled(result.writePayloadSummary) &&
+                    isFilled(result.readbackReportId) &&
+                    isFilled(result.readbackEndpoint) &&
+                    isFilled(result.readbackPayloadSummary) &&
+                    isFilled(result.checksumFramingNotes) &&
+                    result.visibleStateConfirmed &&
+                    result.captureReferences.isNotEmpty()
+            require(result.androidEnablementDecision != "enable_android_write" || completeEvidence) {
+                "Feature ${result.rawKey} cannot enable Android writes without validated write/readback/checksum/visible-state evidence."
+            }
+            require(result.androidEnablementDecision != "blocked" || isFilled(result.blockerReason)) {
+                "Feature ${result.rawKey} needs a blocker reason while Android writes are blocked."
+            }
+        }
+        val missing = AirVisionFirmwareFeature.entries.filterNot { it.rawValue in seen }
+        require(missing.isEmpty()) {
+            "Firmware capture results missing: ${missing.joinToString { it.label }}."
+        }
+    }
+
+    private fun requireSha256OrNull(
+        value: String?,
+        label: String,
+    ) {
+        require(value == null || value.matches(Regex("^[a-fA-F0-9]{64}$"))) {
+            "$label must be a SHA-256 hex digest or null."
+        }
+    }
+
+    private fun isFilled(value: String?): Boolean =
+        !value.isNullOrBlank() && value.trim().lowercase() != "pending"
+
+    private fun containsForbiddenSecretShape(text: String): Boolean =
+        Regex("(token|password|secret|signaturekey|authorization)\\s*[:=]", RegexOption.IGNORE_CASE).containsMatchIn(text)
+}

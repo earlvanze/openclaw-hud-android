@@ -190,6 +190,10 @@ capture-results file. It starts with every feature blocked and must stay free of
 raw USBPcap dumps, raw USB serial numbers, tokens, and temporary review
 credentials. Android firmware writes remain blocked unless the verifier sees
 validated write/readback/checksum/visible-state evidence for a feature.
+The Android app can import the same sanitized capture-results JSON from
+Settings -> AirVision M1 -> Firmware Capture Results. Import validates the
+schema and safety evidence locally, records a compact summary in Settings, and
+does not enable Android firmware writes by itself.
 The Android app can also export a live copy from Settings -> AirVision M1 ->
 Firmware Capture Plan, including the phone's current readable/writable HID
 report-path status when the M1 is connected plus the active AirVision profile's

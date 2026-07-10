@@ -121,6 +121,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionPhysicalMainScreenVisible by viewModel.airVisionPhysicalMainScreenVisible.collectAsState()
     val airVisionDemoModeEnabled by viewModel.airVisionDemoModeEnabled.collectAsState()
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
+    val airVisionFirmwareCaptureResultsSummary by viewModel.airVisionFirmwareCaptureResultsSummary.collectAsState()
     val airVisionFirmwareSyncPlan =
         AirVisionFirmwareSyncPlans.fromSettings(
             settings = airVisionDisplaySettings,
@@ -466,6 +467,28 @@ fun SettingsSheet(viewModel: MainViewModel) {
             }
         }
 
+    val airVisionFirmwareCaptureResultsImportLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            val imported =
+                runCatching {
+                    context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { reader ->
+                        reader.readText()
+                    } ?: error("Unable to open firmware capture results file.")
+                }.map { raw ->
+                    viewModel.importAirVisionFirmwareCaptureResults(raw)
+                }.getOrElse { error ->
+                    viewModel.showHudTransientMessage("AirVision capture results import failed: ${error.message.orEmpty()}")
+                    false
+                }
+            Toast
+                .makeText(
+                    context,
+                    if (imported) "Validated AirVision capture results" else "AirVision capture results rejected",
+                    Toast.LENGTH_SHORT,
+                ).show()
+        }
+
     val airVisionProfileImportLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
@@ -749,6 +772,32 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                     },
                                     style = mobileCallout.copy(fontWeight = FontWeight.Bold),
                                 )
+                            }
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Firmware Capture Results", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                airVisionFirmwareCaptureResultsSummary
+                                    ?: "Import the sanitized Windows/Cyber capture-results JSON to validate ASUS HID evidence before any Android firmware-write enablement.",
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Button(
+                                onClick = {
+                                    airVisionFirmwareCaptureResultsImportLauncher.launch(
+                                        arrayOf("application/json", "text/*"),
+                                    )
+                                },
+                                colors = settingsPrimaryButtonColors(),
+                                shape = RoundedCornerShape(14.dp),
+                            ) {
+                                Text("Import", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
                             }
                         },
                     )
