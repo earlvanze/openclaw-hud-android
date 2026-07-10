@@ -205,6 +205,7 @@ async function render() {
     "- `node scripts/verify-airvision-firmware-capture-results.mjs`",
     "- `node scripts/test-airvision-firmware-capture-results.mjs`",
     "- `node scripts/test-airvision-firmware-capture-plan-renderer.mjs`",
+    "- `node scripts/test-install-launch-hud.mjs`",
     "- `node scripts/render-play-screenshots.mjs --check`",
     "- `node scripts/test-play-screenshot-tools.mjs`",
     "- `node scripts/test-play-publish-helper.mjs`",

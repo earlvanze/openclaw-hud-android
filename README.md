@@ -95,6 +95,10 @@ Display modes:
 
 The launch script also attempts non-destructive DeX/taskbar suppression and sets
 Samsung external-display audio output when an external display is present.
+`node scripts/test-install-launch-hud.mjs` runs an offline fake-ADB regression
+test that keeps the default path pinned to presentation launch args, verifies
+the explicit forced-display fallback still works, and covers the no-external
+display case.
 
 When the M1/Fold is available, capture the current presentation placement,
 DeX/taskbar state, display topology, audio route hints, and recent HUD logs with:
