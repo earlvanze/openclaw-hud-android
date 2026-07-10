@@ -1,0 +1,159 @@
+{
+  "schema": "openclaw.airvision.firmwareCaptureResults",
+  "version": 1,
+  "payloadPolicy": "Sanitized summaries only. Do not commit raw USBPcap dumps, raw USB serial numbers, auth tokens, or temporary review credentials.",
+  "source": {
+    "windowsHost": "Cyber",
+    "captureTool": "USBPcap/Wireshark",
+    "asusAirVisionAppVersion": null,
+    "androidDiagnosticsExportSha256": null,
+    "notes": "Fill after a Windows ASUS AirVision capture session."
+  },
+  "features": [
+    {
+      "rawKey": "brightness",
+      "label": "Brightness",
+      "status": "pending",
+      "probeValues": [
+        "20%",
+        "50%",
+        "80%"
+      ],
+      "writeReportId": null,
+      "writeEndpoint": null,
+      "writePayloadSummary": null,
+      "readbackReportId": null,
+      "readbackEndpoint": null,
+      "readbackPayloadSummary": null,
+      "checksumFramingNotes": null,
+      "visibleStateConfirmed": false,
+      "captureReferences": [],
+      "androidEnablementDecision": "blocked",
+      "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+    },
+    {
+      "rawKey": "screen_distance",
+      "label": "Screen distance",
+      "status": "pending",
+      "probeValues": [
+        "50 cm",
+        "100 cm",
+        "150 cm"
+      ],
+      "writeReportId": null,
+      "writeEndpoint": null,
+      "writePayloadSummary": null,
+      "readbackReportId": null,
+      "readbackEndpoint": null,
+      "readbackPayloadSummary": null,
+      "checksumFramingNotes": null,
+      "visibleStateConfirmed": false,
+      "captureReferences": [],
+      "androidEnablementDecision": "blocked",
+      "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+    },
+    {
+      "rawKey": "ipd",
+      "label": "IPD",
+      "status": "pending",
+      "probeValues": [
+        "60 mm",
+        "67 mm",
+        "72 mm"
+      ],
+      "writeReportId": null,
+      "writeEndpoint": null,
+      "writePayloadSummary": null,
+      "readbackReportId": null,
+      "readbackEndpoint": null,
+      "readbackPayloadSummary": null,
+      "checksumFramingNotes": null,
+      "visibleStateConfirmed": false,
+      "captureReferences": [],
+      "androidEnablementDecision": "blocked",
+      "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+    },
+    {
+      "rawKey": "splendid",
+      "label": "Splendid",
+      "status": "pending",
+      "probeValues": [
+        "standard",
+        "theater",
+        "eye_care"
+      ],
+      "writeReportId": null,
+      "writeEndpoint": null,
+      "writePayloadSummary": null,
+      "readbackReportId": null,
+      "readbackEndpoint": null,
+      "readbackPayloadSummary": null,
+      "checksumFramingNotes": null,
+      "visibleStateConfirmed": false,
+      "captureReferences": [],
+      "androidEnablementDecision": "blocked",
+      "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+    },
+    {
+      "rawKey": "blue_light_filter",
+      "label": "Blue Light Filter",
+      "status": "pending",
+      "probeValues": [
+        "0%",
+        "50%",
+        "100%"
+      ],
+      "writeReportId": null,
+      "writeEndpoint": null,
+      "writePayloadSummary": null,
+      "readbackReportId": null,
+      "readbackEndpoint": null,
+      "readbackPayloadSummary": null,
+      "checksumFramingNotes": null,
+      "visibleStateConfirmed": false,
+      "captureReferences": [],
+      "androidEnablementDecision": "blocked",
+      "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+    },
+    {
+      "rawKey": "motion_sync",
+      "label": "Motion Sync",
+      "status": "pending",
+      "probeValues": [
+        "off",
+        "on"
+      ],
+      "writeReportId": null,
+      "writeEndpoint": null,
+      "writePayloadSummary": null,
+      "readbackReportId": null,
+      "readbackEndpoint": null,
+      "readbackPayloadSummary": null,
+      "checksumFramingNotes": null,
+      "visibleStateConfirmed": false,
+      "captureReferences": [],
+      "androidEnablementDecision": "blocked",
+      "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+    },
+    {
+      "rawKey": "3d_mode",
+      "label": "3D Mode",
+      "status": "pending",
+      "probeValues": [
+        "off",
+        "on"
+      ],
+      "writeReportId": null,
+      "writeEndpoint": null,
+      "writePayloadSummary": null,
+      "readbackReportId": null,
+      "readbackEndpoint": null,
+      "readbackPayloadSummary": null,
+      "checksumFramingNotes": null,
+      "visibleStateConfirmed": false,
+      "captureReferences": [],
+      "androidEnablementDecision": "blocked",
+      "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+    }
+  ]
+}

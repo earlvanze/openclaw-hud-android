@@ -47,6 +47,8 @@ const airVisionAppLocalePath =
   );
 const airVisionFirmwareCapturePlanScript = join(scriptDir, "render-airvision-firmware-capture-plan.mjs");
 const airVisionFirmwareCapturePlanPath = join(androidDir, "play", "airvision-firmware-capture-plan.md");
+const airVisionFirmwareCaptureResultsScript = join(scriptDir, "verify-airvision-firmware-capture-results.mjs");
+const airVisionFirmwareCaptureResultsPath = join(androidDir, "play", "airvision-firmware-capture-results.json");
 const readmePath =
   process.env.OPENCLAW_ANDROID_README_PATH?.trim() ||
   join(androidDir, "README.md");
@@ -502,6 +504,11 @@ async function verifyReadmeAirVisionParity() {
     "auth tokens",
     "chat history",
   ]);
+  requireIncludes("README AirVision firmware capture results", readme, [
+    "play/airvision-firmware-capture-results.json",
+    "machine-checked sanitized",
+    "Android firmware writes remain blocked",
+  ]);
 
   return { path: readmePath };
 }
@@ -523,6 +530,19 @@ async function verifyGeneratedAirVisionFirmwareCapturePlan() {
     "Android enablement decision",
     "| Brightness | pending | pending | pending | pending | pending | pending | blocked |",
     "| IPD | pending | pending | pending | pending | pending | pending | blocked |",
+  ]);
+  runChecked(
+    process.execPath,
+    [airVisionFirmwareCaptureResultsScript],
+    "AirVision firmware capture results check",
+  );
+  const captureResults = await readFile(airVisionFirmwareCaptureResultsPath, "utf8");
+  requireIncludes("AirVision firmware capture results", captureResults, [
+    '"schema": "openclaw.airvision.firmwareCaptureResults"',
+    '"rawKey": "brightness"',
+    '"rawKey": "ipd"',
+    '"androidEnablementDecision": "blocked"',
+    "Windows ASUS HID protocol capture has not been validated.",
   ]);
 }
 
@@ -550,7 +570,7 @@ async function main() {
     console.log("Runtime locale delivery: App Bundle language splits disabled");
   }
   console.log(`README AirVision parity: ${readmeParity.path}`);
-  console.log("AirVision firmware capture plan: current");
+  console.log("AirVision firmware capture plan/results: current");
   console.log("Play HUD release verifier passed.");
 }
 

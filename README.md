@@ -177,6 +177,11 @@ screen distance, IPD, Splendid, blue-light filter, Motion Sync, and 3D Mode,
 plus acceptance criteria and a per-feature capture-result template for report
 IDs, payload bytes, readback data, checksum/framing notes, visible-state
 confirmation, and the Android firmware-write enablement decision.
+`play/airvision-firmware-capture-results.json` is the machine-checked sanitized
+capture-results file. It starts with every feature blocked and must stay free of
+raw USBPcap dumps, raw USB serial numbers, tokens, and temporary review
+credentials. Android firmware writes remain blocked unless the verifier sees
+validated write/readback/checksum/visible-state evidence for a feature.
 The Android app can also export a live copy from Settings -> AirVision M1 ->
 Firmware Capture Plan, including the phone's current readable/writable HID
 report-path status when the M1 is connected plus the active AirVision profile's
@@ -186,6 +191,7 @@ verify the tracked offline worksheet with:
 ```bash
 node scripts/render-airvision-firmware-capture-plan.mjs
 node scripts/render-airvision-firmware-capture-plan.mjs --check
+node scripts/verify-airvision-firmware-capture-results.mjs
 ```
 
 Captions default to Samsung/Android native captioning so the system floating

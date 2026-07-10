@@ -83,6 +83,10 @@ Current local status:
 - `node scripts/render-play-console-handoff.mjs --check` verifies the generated
   Play Console handoff packet against the current listing copy, app-content
   answers, privacy URL, and screenshot manifest.
+- `node scripts/verify-airvision-firmware-capture-results.mjs` and
+  `node scripts/test-airvision-firmware-capture-results.mjs` pass against the
+  structured AirVision firmware capture-results gate. Android firmware writes
+  remain blocked until sanitized Windows ASUS HID evidence is validated.
 - `play/app-content-answers.json` contains the draft App content answers for
   Privacy policy, Ads, App access, Target audience, Content rating, Data
   deletion, and Data safety. Keep it aligned with the final Play Console forms.

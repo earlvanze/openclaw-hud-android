@@ -8,8 +8,10 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
 const rendererPath = join(scriptDir, "render-airvision-firmware-capture-plan.mjs");
+const resultsVerifierPath = join(scriptDir, "verify-airvision-firmware-capture-results.mjs");
 const sourcePath = join(androidDir, "app/src/main/java/ai/openclaw/app/AirVisionUsbController.kt");
 const capturePlanPath = join(androidDir, "play/airvision-firmware-capture-plan.md");
+const captureResultsPath = join(androidDir, "play/airvision-firmware-capture-results.json");
 
 function parseCaptureFeatureLabels(source) {
   const enumStart = source.indexOf("enum class AirVisionFirmwareFeature");
@@ -40,6 +42,7 @@ if (check.status !== 0) {
 
 const source = await readFile(sourcePath, "utf8");
 const capturePlan = await readFile(capturePlanPath, "utf8");
+const captureResults = await readFile(captureResultsPath, "utf8");
 const labels = parseCaptureFeatureLabels(source);
 
 requireIncludes("Capture plan safety criteria", capturePlan, [
@@ -60,5 +63,21 @@ for (const label of labels) {
 }
 
 requireIncludes("Capture plan metadata", capturePlan, [`- Feature count: ${labels.length}`]);
+
+const resultsCheck = spawnSync(process.execPath, [resultsVerifierPath], {
+  cwd: androidDir,
+  encoding: "utf8",
+  stdio: ["ignore", "pipe", "pipe"],
+});
+if (resultsCheck.status !== 0) {
+  throw new Error(resultsCheck.stderr.trim() || resultsCheck.stdout.trim() || "Capture results verifier failed.");
+}
+
+const captureResultsJson = JSON.parse(captureResults);
+for (const label of labels) {
+  if (!captureResultsJson.features.some((feature) => feature.label === label && feature.androidEnablementDecision === "blocked")) {
+    throw new Error(`Capture results missing blocked feature entry for ${label}.`);
+  }
+}
 
 console.log("AirVision firmware capture plan renderer regression tests passed.");

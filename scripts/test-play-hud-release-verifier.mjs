@@ -86,6 +86,7 @@ const validReadme = [
   "",
   "Captions default to Samsung/Android native captioning. The OpenClaw fallback forces thinking off, prefers sage-router/fast, and labels alternating turns as `S1` / `S2`.",
   "Profile Backup exports gesture/hotkey settings, speaker state, Samsung/native captions preference, and OpenClaw translation caption settings, and never includes gateway endpoints, auth tokens, or chat history.",
+  "`play/airvision-firmware-capture-results.json` is the machine-checked sanitized capture-results file. Android firmware writes remain blocked until evidence is validated.",
 ].join("\n");
 
 function runVerifier(
