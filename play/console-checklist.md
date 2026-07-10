@@ -81,7 +81,12 @@ Current local status:
 - `node scripts/test-play-publish-helper.mjs` passes against fake gcloud account
   scenarios for OAuth account selection and auth-check mode.
 - `node scripts/test-play-submission-verifier.mjs` passes against stale generated
-  Play Console handoff detection in the local submission verifier.
+  Play Console handoff detection and generated Console evidence acceptance in
+  the local submission verifier.
+- `node scripts/render-play-console-evidence-template.mjs --verified-at
+  YYYY-MM-DD --json-only` renders copyable
+  `finalSubmission.consoleEvidence` JSON after external Console blockers are
+  actually complete.
 - `node scripts/render-play-console-handoff.mjs --check` verifies the generated
   Play Console handoff packet against the current listing copy, app-content
   answers, privacy URL, and screenshot manifest.
@@ -96,8 +101,11 @@ Current local status:
   for hosted privacy URL, app creation, internal testers, reviewer access, and
   phone screenshots. Each completed Play Console blocker also needs
   source/date/notes evidence under `finalSubmission.consoleEvidence`. These are
-  intentionally incomplete until Play Console is configured. Local screenshot
-  paths are validated by the final submission verifier before commit publishing.
+  intentionally incomplete until Play Console is configured. Generate the
+  evidence shape with `node scripts/render-play-console-evidence-template.mjs
+  --verified-at YYYY-MM-DD --json-only` after verifying the matching Console
+  page. Local screenshot paths are validated by the final submission verifier
+  before commit publishing.
 - `docs/privacy-policy.html` is the generated GitHub Pages privacy-policy page.
   It is published at
   `https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html` and

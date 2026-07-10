@@ -312,6 +312,7 @@ Google Play internal-track publishing helper:
 node scripts/verify-play-hud-release.mjs
 node scripts/test-play-publish-helper.mjs
 node scripts/verify-play-submission-package.mjs
+node scripts/render-play-console-evidence-template.mjs --verified-at 2026-07-10 --json-only
 node scripts/verify-play-submission-package.mjs --final
 node scripts/publish-play-internal.mjs --dry-run
 node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@gmail.com --auth-check
@@ -456,6 +457,12 @@ least 320 px on the shortest side, no larger than 3840 px on the longest side,
 and no more than 2:1 in either orientation. The publish helper runs this final
 verifier automatically in `--commit` mode before contacting the Google Play
 edit/upload API.
+
+Use `node scripts/render-play-console-evidence-template.mjs --verified-at
+YYYY-MM-DD --json-only` after each external Play Console blocker is actually
+complete to generate copyable `finalSubmission.consoleEvidence` JSON. The helper
+does not flip readiness booleans; it only renders the source/date/notes evidence
+shape that the final verifier requires.
 
 ## Kotlin Lint + Format
 
