@@ -68,6 +68,17 @@ object AirVisionFirmwareCapturePlans {
                 )
                 add("- Do not commit raw USB serial numbers, raw private capture payloads, or temporary review/demo credentials.")
                 add("")
+                add("## Capture Acceptance Criteria")
+                add("")
+                add(
+                    "- Record the exact Windows write report ID, payload bytes, payload length, and endpoint for each " +
+                        "feature before Android sends any vendor report.",
+                )
+                add("- Record any matching readback report ID, payload bytes, endpoint, and timing after each Windows setting change.")
+                add("- Identify checksum, framing, sequence, or padding behavior from at least two distinct probe values for the same feature.")
+                add("- Confirm the ASUS app UI and the M1 visible state changed as expected for every captured probe value.")
+                add("- Keep Android enablement as `blocked` until write, readback, checksum/framing, and visible-state evidence agree.")
+                add("")
                 add("## Probe Matrix")
                 add("")
                 add("| Feature | Raw key | Android status | Probe values | Capture status |")
@@ -114,6 +125,17 @@ object AirVisionFirmwareCapturePlans {
                     add("  - Record any matching writable HID report path from the Android diagnostics export.")
                     add("")
                 }
+                add("## Capture Result Template")
+                add("")
+                add(
+                    "| Feature | Write report ID | Write payload bytes | Readback report ID | Readback payload bytes | " +
+                        "Checksum/framing notes | ASUS UI + M1 visible confirmation | Android enablement decision |",
+                )
+                add("| --- | --- | --- | --- | --- | --- | --- | --- |")
+                AirVisionFirmwareFeature.entries.forEach { feature ->
+                    add("| ${feature.label.escapeTableCell()} | pending | pending | pending | pending | pending | pending | blocked |")
+                }
+                add("")
                 add("## Generated Metadata")
                 add("")
                 add("- Feature count: ${AirVisionFirmwareFeature.entries.size}")

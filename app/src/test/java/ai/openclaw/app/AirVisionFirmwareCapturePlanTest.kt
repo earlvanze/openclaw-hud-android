@@ -75,6 +75,15 @@ class AirVisionFirmwareCapturePlanTest {
         assertTrue(markdown.contains("out if=2 interrupt addr=0x2 max=64 int=1"))
         assertTrue(markdown.contains("in if=2 interrupt addr=0x81 max=32 int=4"))
         assertTrue(markdown.contains("- Feature count: ${AirVisionFirmwareFeature.entries.size}"))
+        assertTrue(markdown.contains("## Capture Acceptance Criteria"))
+        assertTrue(markdown.contains("exact Windows write report ID"))
+        assertTrue(markdown.contains("payload bytes"))
+        assertTrue(markdown.contains("checksum/framing"))
+        assertTrue(markdown.contains("visible-state evidence"))
+        assertTrue(markdown.contains("## Capture Result Template"))
+        assertTrue(markdown.contains("Android enablement decision"))
+        assertTrue(markdown.contains("| Brightness | pending | pending | pending | pending | pending | pending | blocked |"))
+        assertTrue(markdown.contains("| IPD | pending | pending | pending | pending | pending | pending | blocked |"))
     }
 
     @Test
