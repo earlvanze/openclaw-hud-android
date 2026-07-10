@@ -96,6 +96,13 @@ Display modes:
 The launch script also attempts non-destructive DeX/taskbar suppression and sets
 Samsung external-display audio output when an external display is present.
 
+When the M1/Fold is available, capture the current presentation placement,
+DeX/taskbar state, display topology, audio route hints, and recent HUD logs with:
+
+```bash
+./scripts/diagnose-hud-presentation.sh --serial <adb-serial>
+```
+
 The HUD flavor is designed to remain Google Play publishable: it uses the
 standard notification-listener grant for notification summaries, foreground
 microphone permission for wake/push-to-talk input, and normal foreground app UI
