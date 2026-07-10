@@ -477,6 +477,7 @@ async function verifyReadmeAirVisionParity() {
     "| 3D Mode |",
     "| Light Load Mode |",
     "| Gesture & Hotkey Settings |",
+    "| Cursor Follow / Center Cursor / 3DoF |",
     "| App Preferences |",
     "| Device Information |",
     "| Firmware link |",

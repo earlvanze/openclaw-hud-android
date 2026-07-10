@@ -1307,6 +1307,22 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         optionDescription = ::airVisionMediaKeyActionDescription,
                         onSelected = viewModel::setAirVisionHudMediaKeyAction,
                     )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Windows Spatial Controls", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                if (airVisionHudControls.brightnessKeyAction == AirVisionHudKeyAction.AdjustDistance) {
+                                    "Distance hotkey parity is mapped to M1 brightness keys. Cursor Follow, Center Cursor, and 3DoF remain Windows-only."
+                                } else {
+                                    "Cursor Follow, Center Cursor, and 3DoF remain Windows-only. Set M1 Brightness Keys to Adjust distance for the closest Android hotkey substitute."
+                                },
+                                style = mobileCallout,
+                            )
+                        },
+                    )
                 }
             }
             item {

@@ -12,6 +12,7 @@ data class AirVisionDiagnosticsSnapshot(
     val activeProfile: AirVisionBackupDisplayProfile,
     val firmwareSync: AirVisionDiagnosticsFirmwareSyncPlan,
     val hudRuntime: AirVisionDiagnosticsHudRuntime,
+    val windowsCompatibility: AirVisionDiagnosticsWindowsCompatibility,
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
 )
@@ -178,9 +179,20 @@ data class AirVisionDiagnosticsHudRuntime(
     val displayRouteReason: String,
 )
 
+@Serializable
+data class AirVisionDiagnosticsWindowsCompatibility(
+    val cursorFollowAvailable: Boolean,
+    val centerCursorAvailable: Boolean,
+    val threeDofAvailable: Boolean,
+    val distanceHotkeyMapped: Boolean,
+    val hardwareTouchpadPassthrough: Boolean,
+    val summary: String,
+    val limitations: List<String>,
+)
+
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 13
+    const val VERSION = 14
 
     private val json =
         Json {
@@ -296,6 +308,27 @@ object AirVisionDiagnosticsSnapshots {
                     selectedDisplayPresentationEligible = hudDisplayRoute.selectedCandidate?.isPresentation,
                     usedNonDefaultDisplayFallback = hudDisplayRoute.usedNonDefaultDisplayFallback,
                     displayRouteReason = hudDisplayRoute.reason,
+                ),
+            windowsCompatibility =
+                AirVisionDiagnosticsWindowsCompatibility(
+                    cursorFollowAvailable = false,
+                    centerCursorAvailable = false,
+                    threeDofAvailable = false,
+                    distanceHotkeyMapped = hudControls.brightnessKeyAction == AirVisionHudKeyAction.AdjustDistance,
+                    hardwareTouchpadPassthrough = true,
+                    summary =
+                        if (hudControls.brightnessKeyAction == AirVisionHudKeyAction.AdjustDistance) {
+                            "Android maps virtual-distance adjustment to M1 brightness key events; Windows cursor-follow, center-cursor, and 3DoF remain unavailable on Android."
+                        } else {
+                            "Windows cursor-follow, center-cursor, and 3DoF remain unavailable on Android; M1 touchpad brightness/media behavior can still pass through firmware."
+                        },
+                    limitations =
+                        listOf(
+                            "Cursor Follow requires Windows AirVision line-of-sight cursor control.",
+                            "Center Cursor requires Windows virtual-screen cursor ownership.",
+                            "ASUS documents 3DoF support as Windows laptop only; phones do not support it.",
+                            "M1 firmware can keep touchpad brightness swipe before Android receives a gesture event.",
+                        ),
                 ),
             hudControls =
                 AirVisionBackupHudControls(

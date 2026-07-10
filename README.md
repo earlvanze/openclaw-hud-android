@@ -153,6 +153,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | 3D Mode | Stored in the AirVision profile and disabled while Light Load Mode is enabled. Hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation, trims transcript/caption history, skips nonessential color-preview overlays, and locks IPD/3D adjustment while enabled. |
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
+| Cursor Follow / Center Cursor / 3DoF | Surfaced as Windows-only capability status in Android settings and diagnostics. Android can map the AirVision distance hotkey concept to M1 brightness-key events, but it does not claim Windows virtual-cursor or 3DoF control. |
 | App Preferences | Implemented with startup view, AirVision companion language preference with Android locale application, speaker state, Samsung/native captions preference, OpenClaw translation caption source/target languages, demo mode, JSON profile backup/import, software version/build display, EULA note, in-app privacy policy, official FAQ/tutorial, product registration, and ASUS support links. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, device class/subclass/protocol, interface count, serial availability, USB descriptor version when Android exposes it, and firmware protocol status. Actual ASUS HID firmware version still needs vendor protocol support. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, derived readable/writable HID report-path capability summaries with endpoint packet sizes, per-feature firmware-apply readiness for Windows-style controls, per-feature Windows protocol-capture targets for View Mode/brightness/distance/IPD/Splendid/Eye Care/Motion Sync/Light Load/3D Mode, USB interface/endpoint diagnostics for protocol capture work, and a JSON diagnostics export that omits raw USB serial values. |
@@ -171,9 +172,10 @@ AirVision profile, the Android firmware-write enablement decision, the validated
 capture evidence required before a write can be enabled, per-feature capture
 targets and probe values for future ASUS HID protocol validation, the active HUD
 profile, derived HUD runtime state, Android Presentation routing state, display
-candidate counts, selected display identity, gesture settings, and AirVision app
-preferences without gateway endpoints, auth tokens, chat history, or raw USB
-serial values. Settings -> AirVision M1 -> Firmware Link also shows a compact
+candidate counts, selected display identity, Windows-only cursor/3DoF capability
+status, gesture settings, and AirVision app preferences without gateway
+endpoints, auth tokens, chat history, or raw USB serial values. Settings ->
+AirVision M1 -> Firmware Link also shows a compact
 write-gate summary so firmware writes remain visibly blocked until the
 machine-checked capture results validate a feature.
 The app does not send ASUS vendor reports until the Windows app protocol is

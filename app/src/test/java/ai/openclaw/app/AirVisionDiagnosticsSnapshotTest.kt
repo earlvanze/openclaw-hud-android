@@ -104,6 +104,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val firmwareSync = root.getValue("firmwareSync").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
         val hudRuntime = root.getValue("hudRuntime").jsonObject
+        val windowsCompatibility = root.getValue("windowsCompatibility").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
@@ -130,7 +131,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("13", root.getValue("version").jsonPrimitive.content)
+        assertEquals("14", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -276,12 +277,53 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", hudRuntime.getValue("selectedDisplayPresentationEligible").jsonPrimitive.content)
         assertEquals("false", hudRuntime.getValue("usedNonDefaultDisplayFallback").jsonPrimitive.content)
         assertEquals("selected_presentation_display", hudRuntime.getValue("displayRouteReason").jsonPrimitive.content)
+        assertEquals("false", windowsCompatibility.getValue("cursorFollowAvailable").jsonPrimitive.content)
+        assertEquals("false", windowsCompatibility.getValue("centerCursorAvailable").jsonPrimitive.content)
+        assertEquals("false", windowsCompatibility.getValue("threeDofAvailable").jsonPrimitive.content)
+        assertEquals("false", windowsCompatibility.getValue("distanceHotkeyMapped").jsonPrimitive.content)
+        assertEquals("true", windowsCompatibility.getValue("hardwareTouchpadPassthrough").jsonPrimitive.content)
+        assertEquals(
+            "Windows cursor-follow, center-cursor, and 3DoF remain unavailable on Android; M1 touchpad brightness/media behavior can still pass through firmware.",
+            windowsCompatibility.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals(
+            "ASUS documents 3DoF support as Windows laptop only; phones do not support it.",
+            windowsCompatibility.getValue("limitations").jsonArray[2].jsonPrimitive.content,
+        )
         assertEquals("es", appPreferences.getValue("language").jsonPrimitive.content)
         assertEquals("false", appPreferences.getValue("speakerEnabled").jsonPrimitive.content)
         assertEquals("true", appPreferences.getValue("nativeCaptionsEnabled").jsonPrimitive.content)
         assertEquals("pt", appPreferences.getValue("translationCaptionSourceLanguage").jsonPrimitive.content)
         assertEquals("ja", appPreferences.getValue("translationCaptionTargetLanguage").jsonPrimitive.content)
         assertTrue(encoded.contains("ASUS AirVision M1"))
+    }
+
+    @Test
+    fun fromState_marksDistanceHotkeySubstituteWhenMapped() {
+        val encoded =
+            AirVisionDiagnosticsSnapshots.encode(
+                AirVisionDiagnosticsSnapshots.fromState(
+                    usbState = AirVisionUsbState(),
+                    displaySettings = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working),
+                    hudControls = AirVisionHudControls(brightnessKeyAction = AirVisionHudKeyAction.AdjustDistance),
+                    appLanguage = AirVisionAppLanguage.System,
+                    startupDestination = AirVisionStartupDestination.Hud,
+                    hudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
+                    demoModeEnabled = false,
+                ),
+            )
+
+        val windowsCompatibility =
+            Json.parseToJsonElement(encoded)
+                .jsonObject
+                .getValue("windowsCompatibility")
+                .jsonObject
+
+        assertEquals("true", windowsCompatibility.getValue("distanceHotkeyMapped").jsonPrimitive.content)
+        assertEquals(
+            "Android maps virtual-distance adjustment to M1 brightness key events; Windows cursor-follow, center-cursor, and 3DoF remain unavailable on Android.",
+            windowsCompatibility.getValue("summary").jsonPrimitive.content,
+        )
     }
 
     @Test
