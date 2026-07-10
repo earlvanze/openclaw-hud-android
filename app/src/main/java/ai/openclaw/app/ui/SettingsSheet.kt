@@ -1065,6 +1065,18 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     )
                     HorizontalDivider(color = mobileBorder)
                     AirVisionSliderRow(
+                        label = "HUD Scale",
+                        valueText = "${airVisionDisplaySettings.hudScalePercent}%",
+                        supportingText = "Zooms the Android HUD text and controls within this viewing mode.",
+                        value = airVisionDisplaySettings.hudScalePercent.toFloat(),
+                        valueRange =
+                            AirVisionDisplaySettings.MIN_HUD_SCALE_PERCENT
+                                .toFloat()
+                                .rangeTo(AirVisionDisplaySettings.MAX_HUD_SCALE_PERCENT.toFloat()),
+                        onValueChange = { viewModel.setAirVisionHudScalePercent(it.roundToInt()) },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionSliderRow(
                         label = "IPD",
                         valueText =
                             if (airVisionDisplaySettings.ipdAdjustmentEnabled) {

@@ -39,7 +39,7 @@ Current live target:
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
 - [x] AirVision M1 per-mode settings profiles with viewing mode, HUD placement,
-  safe area, Splendid mode, brightness, blue-light filter, distance, IPD,
+  safe area, Splendid mode, brightness, blue-light filter, distance, HUD scale, IPD,
   Motion Sync, 3D Mode, Light Load, and active-profile reset controls
 - [x] Optional AirVision M1 USB firmware-link detection, permission flow, and
   interface/endpoint diagnostics
@@ -142,9 +142,10 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 
 | Windows AirVision feature | Android HUD status |
 | --- | --- |
-| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, user-named Custom 1 / Custom 2 labels, copy-current-to-custom actions, JSON profile backup/import, active-profile reset, HUD placement, physical main screen behavior, safe area, scale/layout, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
+| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, user-named Custom 1 / Custom 2 labels, copy-current-to-custom actions, JSON profile backup/import, active-profile reset, HUD placement, physical main screen behavior, safe area, explicit HUD scale/zoom, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
 | Brightness | Implemented as software HUD dimming. Hardware brightness remains available from the M1 touch bar. |
 | Screen distance | Implemented as virtual HUD distance scaling. |
+| HUD scale / zoom | Implemented as a per-profile Android Presentation scale percentage layered with view-mode and virtual-distance scaling. |
 | IPD | Stored as a calibration value, defaulting to 67 mm. Adjustment is locked while Light Load Mode is enabled, matching the ASUS app. Firmware-level apply still needs the ASUS HID protocol. |
 | Splendid Standard / Theater / Office / Game / Eye Care | Stored as profile settings with subtle Android HUD color previews for Theater, Office, Game, and Eye Care. True panel presets need HID support. |
 | Blue Light Filter | Implemented as Android HUD warm filtering and available only in Eye Care mode, matching the ASUS app. |

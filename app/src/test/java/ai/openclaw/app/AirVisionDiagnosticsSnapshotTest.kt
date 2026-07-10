@@ -61,6 +61,7 @@ class AirVisionDiagnosticsSnapshotTest {
                         splendidMode = AirVisionSplendidMode.EyeCare,
                         brightnessPercent = 72,
                         blueLightFilterPercent = 40,
+                        hudScalePercent = 120,
                         ipdMm = 67,
                     ),
                 hudControls =
@@ -122,7 +123,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("12", root.getValue("version").jsonPrimitive.content)
+        assertEquals("13", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -242,6 +243,8 @@ class AirVisionDiagnosticsSnapshotTest {
         )
         assertEquals("8", hudRuntime.getValue("transcriptEntryCount").jsonPrimitive.content)
         assertEquals("5", hudRuntime.getValue("captionEntryCount").jsonPrimitive.content)
+        assertEquals("120", hudRuntime.getValue("effectiveHudScalePercent").jsonPrimitive.content)
+        assertEquals("120", activeProfile.getValue("hudScalePercent").jsonPrimitive.content)
         assertEquals("true", hudRuntime.getValue("colorPreviewOverlaysEnabled").jsonPrimitive.content)
         assertEquals("true", hudRuntime.getValue("brightnessDimmingEnabled").jsonPrimitive.content)
         assertEquals("true", hudRuntime.getValue("ipdAdjustmentEnabled").jsonPrimitive.content)

@@ -239,6 +239,7 @@ class SecurePrefsTest {
         prefs.setAirVisionViewMode(AirVisionViewMode.Working)
         prefs.setAirVisionBrightnessPercent(51)
         prefs.setAirVisionDistanceCm(111)
+        prefs.setAirVisionHudScalePercent(88)
         prefs.setAirVisionHudPlacement(AirVisionHudPlacement.UpperRight)
         prefs.setAirVisionPhysicalMainScreenVisible(false)
 
@@ -248,6 +249,7 @@ class SecurePrefsTest {
         prefs.setAirVisionBlueLightFilterPercent(49)
         prefs.setAirVisionBrightnessPercent(96)
         prefs.setAirVisionDistanceCm(61)
+        prefs.setAirVisionHudScalePercent(123)
         prefs.setAirVisionIpdMm(69)
         prefs.setAirVisionHudPlacement(AirVisionHudPlacement.Center)
         prefs.setAirVisionSafeAreaPercent(4)
@@ -262,7 +264,7 @@ class SecurePrefsTest {
                 .first { it.jsonObject.getValue("viewMode").jsonPrimitive.content == AirVisionViewMode.Infinity.rawValue }
                 .jsonObject
 
-        assertEquals("3", backupRoot.getValue("version").jsonPrimitive.content)
+        assertEquals("4", backupRoot.getValue("version").jsonPrimitive.content)
         assertEquals(AirVisionViewMode.entries.size, runtimeProfiles.size)
         assertEquals(false, appPreferences.getValue("speakerEnabled").jsonPrimitive.boolean)
         assertEquals(true, appPreferences.getValue("nativeCaptionsEnabled").jsonPrimitive.boolean)
@@ -289,6 +291,7 @@ class SecurePrefsTest {
         assertEquals(49, importedPrefs.airVisionDisplaySettings.value.blueLightFilterPercent)
         assertEquals(96, importedPrefs.airVisionDisplaySettings.value.brightnessPercent)
         assertEquals(61, importedPrefs.airVisionDisplaySettings.value.distanceCm)
+        assertEquals(123, importedPrefs.airVisionDisplaySettings.value.hudScalePercent)
         assertEquals(69, importedPrefs.airVisionDisplaySettings.value.ipdMm)
         assertEquals(AirVisionHudPlacement.Center, importedPrefs.airVisionDisplaySettings.value.hudPlacement)
         assertEquals(4, importedPrefs.airVisionDisplaySettings.value.safeAreaPercent)
@@ -315,6 +318,7 @@ class SecurePrefsTest {
         importedPrefs.setAirVisionViewMode(AirVisionViewMode.Working)
         assertEquals(51, importedPrefs.airVisionDisplaySettings.value.brightnessPercent)
         assertEquals(111, importedPrefs.airVisionDisplaySettings.value.distanceCm)
+        assertEquals(88, importedPrefs.airVisionDisplaySettings.value.hudScalePercent)
         assertEquals(AirVisionHudPlacement.UpperRight, importedPrefs.airVisionDisplaySettings.value.hudPlacement)
         assertEquals(false, importedPrefs.airVisionDisplaySettings.value.physicalMainScreenVisible)
     }
@@ -588,6 +592,26 @@ class SecurePrefsTest {
             AirVisionDisplaySettings.MAX_BRIGHTNESS_PERCENT,
             SecurePrefs(context).airVisionDisplaySettings.value.brightnessPercent,
         )
+    }
+
+    @Test
+    fun airVisionHudScalePercent_clampsAndPersistsPerProfile() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionHudScalePercent(25)
+        assertEquals(AirVisionDisplaySettings.MIN_HUD_SCALE_PERCENT, prefs.airVisionDisplaySettings.value.hudScalePercent)
+
+        prefs.setAirVisionViewMode(AirVisionViewMode.Gaming)
+        prefs.setAirVisionHudScalePercent(180)
+        assertEquals(AirVisionDisplaySettings.MAX_HUD_SCALE_PERCENT, prefs.airVisionDisplaySettings.value.hudScalePercent)
+
+        val reloaded = SecurePrefs(context)
+        assertEquals(AirVisionDisplaySettings.MAX_HUD_SCALE_PERCENT, reloaded.airVisionDisplaySettings.value.hudScalePercent)
+        reloaded.setAirVisionViewMode(AirVisionViewMode.Working)
+        assertEquals(AirVisionDisplaySettings.MIN_HUD_SCALE_PERCENT, reloaded.airVisionDisplaySettings.value.hudScalePercent)
     }
 
     @Test

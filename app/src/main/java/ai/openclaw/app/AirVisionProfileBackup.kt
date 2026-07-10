@@ -52,6 +52,7 @@ data class AirVisionBackupDisplayProfile(
     val brightnessPercent: Int,
     val blueLightFilterPercent: Int,
     val distanceCm: Int,
+    val hudScalePercent: Int = AirVisionDisplaySettings.DEFAULT_HUD_SCALE_PERCENT,
     val ipdMm: Int,
     val safeAreaPercent: Int,
     val physicalMainScreenVisible: Boolean,
@@ -68,14 +69,15 @@ data class AirVisionBackupRuntimeProfile(
     val blueLightFilterAvailable: Boolean,
     val hudTranscriptEntryCount: Int,
     val hudCaptionEntryCount: Int,
+    val effectiveHudScalePercent: Int = AirVisionDisplaySettings.DEFAULT_HUD_SCALE_PERCENT,
     val colorPreviewOverlaysEnabled: Boolean,
     val brightnessDimmingEnabled: Boolean,
 )
 
 object AirVisionProfileBackups {
     const val SCHEMA = "openclaw.airvision.m1.profile-backup"
-    const val VERSION = 3
-    private val SUPPORTED_VERSIONS = setOf(1, 2, VERSION)
+    const val VERSION = 4
+    private val SUPPORTED_VERSIONS = setOf(1, 2, 3, VERSION)
 
     private val json =
         Json {
@@ -108,6 +110,7 @@ object AirVisionProfileBackups {
             brightnessPercent = settings.brightnessPercent,
             blueLightFilterPercent = settings.blueLightFilterPercent,
             distanceCm = settings.distanceCm,
+            hudScalePercent = settings.hudScalePercent,
             ipdMm = settings.ipdMm,
             safeAreaPercent = settings.safeAreaPercent,
             physicalMainScreenVisible = settings.physicalMainScreenVisible,
@@ -124,6 +127,13 @@ object AirVisionProfileBackups {
             blueLightFilterAvailable = settings.blueLightFilterAvailable,
             hudTranscriptEntryCount = AirVisionDisplaySettings.hudTranscriptEntryCount(settings.lightLoadModeEnabled),
             hudCaptionEntryCount = AirVisionDisplaySettings.hudCaptionEntryCount(settings.lightLoadModeEnabled),
+            effectiveHudScalePercent =
+                (
+                    AirVisionDisplaySettings.hudScaleForDistanceCm(settings.distanceCm) *
+                        AirVisionDisplaySettings.hudScaleMultiplierForViewMode(settings.viewMode) *
+                        AirVisionDisplaySettings.hudScaleMultiplierForPercent(settings.hudScalePercent) *
+                        100f
+                ).toInt(),
             colorPreviewOverlaysEnabled =
                 AirVisionDisplaySettings.hudColorPreviewAlpha(
                     alpha = 1f,
@@ -141,6 +151,7 @@ object AirVisionProfileBackups {
             brightnessPercent = profile.brightnessPercent,
             blueLightFilterPercent = profile.blueLightFilterPercent,
             distanceCm = profile.distanceCm,
+            hudScalePercent = profile.hudScalePercent,
             ipdMm = profile.ipdMm,
             safeAreaPercent = profile.safeAreaPercent,
             physicalMainScreenVisible = profile.physicalMainScreenVisible,

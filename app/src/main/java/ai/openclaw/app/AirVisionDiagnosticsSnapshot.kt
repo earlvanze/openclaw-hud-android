@@ -158,6 +158,7 @@ data class AirVisionDiagnosticsEndpoint(
 data class AirVisionDiagnosticsHudRuntime(
     val transcriptEntryCount: Int,
     val captionEntryCount: Int,
+    val effectiveHudScalePercent: Int,
     val colorPreviewOverlaysEnabled: Boolean,
     val brightnessDimmingEnabled: Boolean,
     val ipdAdjustmentEnabled: Boolean,
@@ -179,7 +180,7 @@ data class AirVisionDiagnosticsHudRuntime(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 12
+    const val VERSION = 13
 
     private val json =
         Json {
@@ -266,6 +267,13 @@ object AirVisionDiagnosticsSnapshots {
                 AirVisionDiagnosticsHudRuntime(
                     transcriptEntryCount = AirVisionDisplaySettings.hudTranscriptEntryCount(displaySettings.lightLoadModeEnabled),
                     captionEntryCount = AirVisionDisplaySettings.hudCaptionEntryCount(displaySettings.lightLoadModeEnabled),
+                    effectiveHudScalePercent =
+                        (
+                            AirVisionDisplaySettings.hudScaleForDistanceCm(displaySettings.distanceCm) *
+                                AirVisionDisplaySettings.hudScaleMultiplierForViewMode(displaySettings.viewMode) *
+                                AirVisionDisplaySettings.hudScaleMultiplierForPercent(displaySettings.hudScalePercent) *
+                                100f
+                        ).toInt(),
                     colorPreviewOverlaysEnabled =
                         AirVisionDisplaySettings.hudColorPreviewAlpha(
                             alpha = 1f,

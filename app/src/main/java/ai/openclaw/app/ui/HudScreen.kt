@@ -238,8 +238,9 @@ fun HudScreen(viewModel: MainViewModel) {
     val hudScale =
         (
             AirVisionDisplaySettings.hudScaleForDistanceCm(airVisionSettings.distanceCm) *
-                AirVisionDisplaySettings.hudScaleMultiplierForViewMode(airVisionSettings.viewMode)
-        ).coerceIn(0.70f, 1.28f)
+                AirVisionDisplaySettings.hudScaleMultiplierForViewMode(airVisionSettings.viewMode) *
+                AirVisionDisplaySettings.hudScaleMultiplierForPercent(airVisionSettings.hudScalePercent)
+        ).coerceIn(0.60f, 1.60f)
     val dimAlpha = AirVisionDisplaySettings.hudDimAlphaForBrightnessPercent(airVisionSettings.brightnessPercent)
     val splendidOverlayAlpha =
         AirVisionDisplaySettings.hudColorPreviewAlpha(

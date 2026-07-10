@@ -43,6 +43,7 @@ class SecurePrefs(
         private const val AIR_VISION_BRIGHTNESS_PERCENT_KEY = "airVision.brightnessPercent"
         private const val AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY = "airVision.blueLightFilterPercent"
         private const val AIR_VISION_DISTANCE_CM_KEY = "airVision.distanceCm"
+        private const val AIR_VISION_HUD_SCALE_PERCENT_KEY = "airVision.hudScalePercent"
         private const val AIR_VISION_IPD_MM_KEY = "airVision.ipdMm"
         private const val AIR_VISION_SAFE_AREA_PERCENT_KEY = "airVision.safeAreaPercent"
         private const val AIR_VISION_MOTION_SYNC_ENABLED_KEY = "airVision.motionSyncEnabled"
@@ -611,6 +612,7 @@ class SecurePrefs(
             putInt(AIR_VISION_BRIGHTNESS_PERCENT_KEY, defaults.brightnessPercent)
             putInt(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, defaults.blueLightFilterPercent)
             putInt(AIR_VISION_DISTANCE_CM_KEY, defaults.distanceCm)
+            putInt(AIR_VISION_HUD_SCALE_PERCENT_KEY, defaults.hudScalePercent)
             putInt(AIR_VISION_IPD_MM_KEY, defaults.ipdMm)
             putInt(AIR_VISION_SAFE_AREA_PERCENT_KEY, defaults.safeAreaPercent)
             putBoolean(AIR_VISION_MOTION_SYNC_ENABLED_KEY, defaults.motionSyncEnabled)
@@ -624,6 +626,7 @@ class SecurePrefs(
                 defaults.blueLightFilterPercent,
             )
             putInt(airVisionProfileKey(AIR_VISION_DISTANCE_CM_KEY, viewMode), defaults.distanceCm)
+            putInt(airVisionProfileKey(AIR_VISION_HUD_SCALE_PERCENT_KEY, viewMode), defaults.hudScalePercent)
             putInt(airVisionProfileKey(AIR_VISION_IPD_MM_KEY, viewMode), defaults.ipdMm)
             putInt(airVisionProfileKey(AIR_VISION_SAFE_AREA_PERCENT_KEY, viewMode), defaults.safeAreaPercent)
             putBoolean(
@@ -696,6 +699,16 @@ class SecurePrefs(
 
     fun adjustAirVisionDistanceCm(delta: Int) {
         setAirVisionDistanceCm(_airVisionDisplaySettings.value.distanceCm + delta)
+    }
+
+    fun setAirVisionHudScalePercent(value: Int) {
+        val normalized = AirVisionDisplaySettings.normalizeHudScalePercent(value)
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putInt(AIR_VISION_HUD_SCALE_PERCENT_KEY, normalized)
+            putInt(airVisionProfileKey(AIR_VISION_HUD_SCALE_PERCENT_KEY, viewMode), normalized)
+        }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(hudScalePercent = normalized)
     }
 
     fun setAirVisionIpdMm(value: Int) {
@@ -1085,6 +1098,13 @@ class SecurePrefs(
                     allowLegacyFallback = allowLegacyFallback,
                     defaultValue = defaults.distanceCm,
                 ),
+            hudScalePercent =
+                getAirVisionProfileInt(
+                    key = AIR_VISION_HUD_SCALE_PERCENT_KEY,
+                    mode = viewMode,
+                    allowLegacyFallback = allowLegacyFallback,
+                    defaultValue = defaults.hudScalePercent,
+                ),
             ipdMm =
                 getAirVisionProfileInt(
                     key = AIR_VISION_IPD_MM_KEY,
@@ -1143,6 +1163,7 @@ class SecurePrefs(
                 AIR_VISION_BRIGHTNESS_PERCENT_KEY,
                 AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY,
                 AIR_VISION_DISTANCE_CM_KEY,
+                AIR_VISION_HUD_SCALE_PERCENT_KEY,
                 AIR_VISION_IPD_MM_KEY,
                 AIR_VISION_SAFE_AREA_PERCENT_KEY,
                 AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY,
@@ -1162,6 +1183,7 @@ class SecurePrefs(
         putInt(airVisionProfileKey(AIR_VISION_BRIGHTNESS_PERCENT_KEY, viewMode), settings.brightnessPercent)
         putInt(airVisionProfileKey(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, viewMode), settings.blueLightFilterPercent)
         putInt(airVisionProfileKey(AIR_VISION_DISTANCE_CM_KEY, viewMode), settings.distanceCm)
+        putInt(airVisionProfileKey(AIR_VISION_HUD_SCALE_PERCENT_KEY, viewMode), settings.hudScalePercent)
         putInt(airVisionProfileKey(AIR_VISION_IPD_MM_KEY, viewMode), settings.ipdMm)
         putInt(airVisionProfileKey(AIR_VISION_SAFE_AREA_PERCENT_KEY, viewMode), settings.safeAreaPercent)
         putBoolean(

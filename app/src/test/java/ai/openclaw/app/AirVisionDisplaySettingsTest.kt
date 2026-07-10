@@ -12,6 +12,7 @@ class AirVisionDisplaySettingsTest {
                 brightnessPercent = 2,
                 blueLightFilterPercent = 140,
                 distanceCm = 12,
+                hudScalePercent = 500,
                 ipdMm = 120,
                 safeAreaPercent = 99,
             ).normalized
@@ -19,6 +20,7 @@ class AirVisionDisplaySettingsTest {
         assertEquals(AirVisionDisplaySettings.MIN_BRIGHTNESS_PERCENT, settings.brightnessPercent)
         assertEquals(AirVisionDisplaySettings.MAX_BLUE_LIGHT_FILTER_PERCENT, settings.blueLightFilterPercent)
         assertEquals(AirVisionDisplaySettings.MIN_DISTANCE_CM, settings.distanceCm)
+        assertEquals(AirVisionDisplaySettings.MAX_HUD_SCALE_PERCENT, settings.hudScalePercent)
         assertEquals(AirVisionDisplaySettings.MAX_IPD_MM, settings.ipdMm)
         assertEquals(AirVisionDisplaySettings.MAX_SAFE_AREA_PERCENT, settings.safeAreaPercent)
     }
@@ -30,6 +32,13 @@ class AirVisionDisplaySettingsTest {
 
         assertTrue(close > far)
         assertEquals(1.0f, AirVisionDisplaySettings.hudScaleForDistanceCm(AirVisionDisplaySettings.DEFAULT_DISTANCE_CM), 0.001f)
+    }
+
+    @Test
+    fun hudScaleMultiplierForPercent_appliesUserZoom() {
+        assertEquals(1.0f, AirVisionDisplaySettings.hudScaleMultiplierForPercent(100), 0.001f)
+        assertEquals(0.75f, AirVisionDisplaySettings.hudScaleMultiplierForPercent(20), 0.001f)
+        assertEquals(1.40f, AirVisionDisplaySettings.hudScaleMultiplierForPercent(180), 0.001f)
     }
 
     @Test

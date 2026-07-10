@@ -436,6 +436,10 @@ class MainViewModel(
         prefs.setAirVisionDistanceCm(value)
     }
 
+    fun setAirVisionHudScalePercent(value: Int) {
+        prefs.setAirVisionHudScalePercent(value)
+    }
+
     fun adjustAirVisionDistanceCm(delta: Int) {
         prefs.adjustAirVisionDistanceCm(delta)
         showHudTransientMessage("Distance ${airVisionDisplaySettings.value.distanceCm} cm")

@@ -82,6 +82,7 @@ data class AirVisionDisplaySettings(
     val brightnessPercent: Int = DEFAULT_BRIGHTNESS_PERCENT,
     val blueLightFilterPercent: Int = DEFAULT_BLUE_LIGHT_FILTER_PERCENT,
     val distanceCm: Int = DEFAULT_DISTANCE_CM,
+    val hudScalePercent: Int = DEFAULT_HUD_SCALE_PERCENT,
     val ipdMm: Int = DEFAULT_IPD_MM,
     val safeAreaPercent: Int = DEFAULT_SAFE_AREA_PERCENT,
     val physicalMainScreenVisible: Boolean = true,
@@ -104,6 +105,7 @@ data class AirVisionDisplaySettings(
                 brightnessPercent = normalizeBrightnessPercent(brightnessPercent),
                 blueLightFilterPercent = normalizeBlueLightFilterPercent(blueLightFilterPercent),
                 distanceCm = normalizeDistanceCm(distanceCm),
+                hudScalePercent = normalizeHudScalePercent(hudScalePercent),
                 ipdMm = normalizeIpdMm(ipdMm),
                 safeAreaPercent = normalizeSafeAreaPercent(safeAreaPercent),
                 threeDModeEnabled = threeDModeEnabled && !lightLoadModeEnabled,
@@ -119,6 +121,9 @@ data class AirVisionDisplaySettings(
         const val MIN_DISTANCE_CM = 40
         const val MAX_DISTANCE_CM = 140
         const val DEFAULT_DISTANCE_CM = 75
+        const val MIN_HUD_SCALE_PERCENT = 75
+        const val MAX_HUD_SCALE_PERCENT = 140
+        const val DEFAULT_HUD_SCALE_PERCENT = 100
         const val MIN_IPD_MM = 52
         const val MAX_IPD_MM = 78
         const val DEFAULT_IPD_MM = 67
@@ -140,6 +145,7 @@ data class AirVisionDisplaySettings(
                         brightnessPercent = DEFAULT_BRIGHTNESS_PERCENT,
                         blueLightFilterPercent = DEFAULT_BLUE_LIGHT_FILTER_PERCENT,
                         distanceCm = DEFAULT_DISTANCE_CM,
+                        hudScalePercent = DEFAULT_HUD_SCALE_PERCENT,
                         ipdMm = DEFAULT_IPD_MM,
                         safeAreaPercent = DEFAULT_SAFE_AREA_PERCENT,
                         physicalMainScreenVisible = true,
@@ -155,6 +161,7 @@ data class AirVisionDisplaySettings(
                         brightnessPercent = 100,
                         blueLightFilterPercent = 0,
                         distanceCm = 65,
+                        hudScalePercent = 105,
                         ipdMm = DEFAULT_IPD_MM,
                         safeAreaPercent = 3,
                         physicalMainScreenVisible = true,
@@ -170,6 +177,7 @@ data class AirVisionDisplaySettings(
                         brightnessPercent = 70,
                         blueLightFilterPercent = 10,
                         distanceCm = 120,
+                        hudScalePercent = 90,
                         ipdMm = DEFAULT_IPD_MM,
                         safeAreaPercent = 8,
                         physicalMainScreenVisible = true,
@@ -185,6 +193,7 @@ data class AirVisionDisplaySettings(
                         brightnessPercent = DEFAULT_BRIGHTNESS_PERCENT,
                         blueLightFilterPercent = 15,
                         distanceCm = 90,
+                        hudScalePercent = DEFAULT_HUD_SCALE_PERCENT,
                         ipdMm = DEFAULT_IPD_MM,
                         safeAreaPercent = DEFAULT_SAFE_AREA_PERCENT,
                         physicalMainScreenVisible = true,
@@ -200,6 +209,7 @@ data class AirVisionDisplaySettings(
                         brightnessPercent = 75,
                         blueLightFilterPercent = 30,
                         distanceCm = 60,
+                        hudScalePercent = 110,
                         ipdMm = DEFAULT_IPD_MM,
                         safeAreaPercent = 10,
                         physicalMainScreenVisible = true,
@@ -215,6 +225,8 @@ data class AirVisionDisplaySettings(
 
         fun normalizeDistanceCm(value: Int): Int = value.coerceIn(MIN_DISTANCE_CM, MAX_DISTANCE_CM)
 
+        fun normalizeHudScalePercent(value: Int): Int = value.coerceIn(MIN_HUD_SCALE_PERCENT, MAX_HUD_SCALE_PERCENT)
+
         fun normalizeIpdMm(value: Int): Int = value.coerceIn(MIN_IPD_MM, MAX_IPD_MM)
 
         fun normalizeSafeAreaPercent(value: Int): Int = value.coerceIn(MIN_SAFE_AREA_PERCENT, MAX_SAFE_AREA_PERCENT)
@@ -224,6 +236,9 @@ data class AirVisionDisplaySettings(
             val ratio = DEFAULT_DISTANCE_CM.toFloat() / normalized.toFloat()
             return ratio.coerceIn(0.72f, 1.24f)
         }
+
+        fun hudScaleMultiplierForPercent(value: Int): Float =
+            normalizeHudScalePercent(value).toFloat() / DEFAULT_HUD_SCALE_PERCENT.toFloat()
 
         fun hudScaleMultiplierForViewMode(mode: AirVisionViewMode): Float =
             when (mode) {
