@@ -28,6 +28,36 @@ class AirVisionHudDisplayRouterTest {
     }
 
     @Test
+    fun select_ignoresPhoneDefaultDisplayWhenRoutingPresentation() {
+        val selection =
+            AirVisionHudDisplayRouter.select(
+                candidates =
+                    listOf(
+                        AirVisionHudDisplayCandidate(
+                            displayId = 0,
+                            name = "Built-in Fold display",
+                            widthPx = 2176,
+                            heightPx = 1812,
+                            isPresentation = true,
+                        ),
+                        AirVisionHudDisplayCandidate(
+                            displayId = 5,
+                            name = "ASUS AirVision M1",
+                            widthPx = 1920,
+                            heightPx = 1080,
+                            isPresentation = true,
+                        ),
+                    ),
+                target = AirVisionHudDisplayTarget.LargestExternal,
+            )
+
+        assertEquals(1, selection.candidateCount)
+        assertEquals(1, selection.presentationCandidateCount)
+        assertEquals(5, selection.selectedCandidate?.displayId)
+        assertEquals("selected_presentation_display", selection.reason)
+    }
+
+    @Test
     fun choose_canPreferLargestExternalDisplay() {
         val candidates =
             listOf(

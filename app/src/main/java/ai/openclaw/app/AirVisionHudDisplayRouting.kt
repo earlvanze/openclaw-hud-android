@@ -67,15 +67,16 @@ object AirVisionHudDisplayRouter {
         candidates: List<AirVisionHudDisplayCandidate>,
         target: AirVisionHudDisplayTarget,
     ): AirVisionHudDisplayRoute {
-        if (candidates.isEmpty()) {
+        val externalCandidates = candidates.filter { it.displayId != ANDROID_DEFAULT_DISPLAY_ID }
+        if (externalCandidates.isEmpty()) {
             return AirVisionHudDisplayRoute(target = target, reason = "no_external_displays")
         }
-        val presentationCandidates = candidates.filter { it.isPresentation }
-        val eligibleCandidates = presentationCandidates.ifEmpty { candidates }
+        val presentationCandidates = externalCandidates.filter { it.isPresentation }
+        val eligibleCandidates = presentationCandidates.ifEmpty { externalCandidates }
         val selectedCandidate = chooseFromEligible(eligibleCandidates, target)
         return AirVisionHudDisplayRoute(
             target = target,
-            candidateCount = candidates.size,
+            candidateCount = externalCandidates.size,
             presentationCandidateCount = presentationCandidates.size,
             selectedCandidate = selectedCandidate,
             usedNonDefaultDisplayFallback = presentationCandidates.isEmpty(),
@@ -122,4 +123,6 @@ object AirVisionHudDisplayRouter {
         if (name.contains("M1", ignoreCase = true)) score += 6
         return score
     }
+
+    private const val ANDROID_DEFAULT_DISPLAY_ID = 0
 }

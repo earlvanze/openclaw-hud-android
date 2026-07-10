@@ -22,6 +22,70 @@ class GatewaySessionInvokeTimeoutTest {
     }
 
     @Test
+    fun normalizeGatewayCanvasHostUrl_rewritesLoopbackMetadataToTailnetEndpoint() {
+        val endpoint =
+            GatewayEndpoint(
+                stableId = "manual|100.88.253.107|45219",
+                name = "Cyber gateway",
+                host = "100.88.253.107",
+                port = 45_219,
+                tlsEnabled = false,
+            )
+
+        assertEquals(
+            "http://100.88.253.107:45219/__openclaw__/cap/cap-1",
+            normalizeGatewayCanvasHostUrl(
+                raw = "http://127.0.0.1:18789/__openclaw__/cap/cap-1",
+                endpoint = endpoint,
+                isTlsConnection = false,
+            ),
+        )
+    }
+
+    @Test
+    fun normalizeGatewayCanvasHostUrl_prefersAdvertisedTailnetDnsOverLoopbackMetadata() {
+        val endpoint =
+            GatewayEndpoint(
+                stableId = "manual|cyber.tailnet.ts.net|443",
+                name = "Cyber gateway",
+                host = "100.88.253.107",
+                port = 443,
+                tailnetDns = "cyber.tailnet.ts.net",
+                tlsEnabled = true,
+            )
+
+        assertEquals(
+            "https://cyber.tailnet.ts.net/__openclaw__/cap/cap-2",
+            normalizeGatewayCanvasHostUrl(
+                raw = "http://localhost:18789/__openclaw__/cap/cap-2",
+                endpoint = endpoint,
+                isTlsConnection = true,
+            ),
+        )
+    }
+
+    @Test
+    fun normalizeGatewayCanvasHostUrl_keepsNonLoopbackCleartextMetadata() {
+        val endpoint =
+            GatewayEndpoint(
+                stableId = "manual|100.88.253.107|45219",
+                name = "Cyber gateway",
+                host = "100.88.253.107",
+                port = 45_219,
+                tlsEnabled = false,
+            )
+
+        assertEquals(
+            "http://100.88.253.107:45219/__openclaw__/cap/cap-3",
+            normalizeGatewayCanvasHostUrl(
+                raw = "http://100.88.253.107:45219/__openclaw__/cap/cap-3",
+                endpoint = endpoint,
+                isTlsConnection = false,
+            ),
+        )
+    }
+
+    @Test
     fun resolveInvokeResultAckTimeoutMs_usesFloorWhenMissingOrTooSmall() {
         assertEquals(15_000L, resolveInvokeResultAckTimeoutMs(null))
         assertEquals(15_000L, resolveInvokeResultAckTimeoutMs(0L))
