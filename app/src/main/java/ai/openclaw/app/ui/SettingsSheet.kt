@@ -723,6 +723,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                     firmwareCapabilitySummary = airVisionUsbState.firmwareCapabilities.summary,
                                     firmwareFeatureReadinessSummary = airVisionUsbState.firmwareCapabilities.featureReadinessSummary,
                                     firmwareSyncSummary = airVisionFirmwareSyncPlan.summary,
+                                    firmwareWriteGateSummary = airVisionFirmwareSyncPlan.writeGateSummary,
                                     diagnosticsText = airVisionUsbState.diagnosticsText,
                                 ),
                                 style = mobileCallout,
@@ -2287,6 +2288,7 @@ private fun airVisionUsbStatusText(
     firmwareCapabilitySummary: String,
     firmwareFeatureReadinessSummary: String,
     firmwareSyncSummary: String,
+    firmwareWriteGateSummary: String,
     diagnosticsText: String,
 ): String {
     val interfaces =
@@ -2302,6 +2304,7 @@ private fun airVisionUsbStatusText(
         firmwareCapabilitySummary.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
         firmwareFeatureReadinessSummary.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
         firmwareSyncSummary.takeIf { it.isNotBlank() },
+        firmwareWriteGateSummary.takeIf { it.isNotBlank() },
         diagnosticsText.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
     ).joinToString("\n")
 }

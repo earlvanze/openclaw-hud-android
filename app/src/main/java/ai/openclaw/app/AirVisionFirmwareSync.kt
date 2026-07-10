@@ -9,6 +9,12 @@ data class AirVisionFirmwareSyncPlan(
     val androidAppliedCount: Int
         get() = items.count { it.androidApplied }
 
+    val firmwareWriteAllowedCount: Int
+        get() = items.count { it.firmwareWriteAllowed }
+
+    val blockedFirmwareWriteCount: Int
+        get() = items.count { !it.firmwareWriteAllowed }
+
     val summary: String
         get() =
             if (items.isEmpty()) {
@@ -16,6 +22,15 @@ data class AirVisionFirmwareSyncPlan(
             } else {
                 "firmware sync: $androidAppliedCount Android-applied, " +
                     "$pendingHardwareSyncCount pending ASUS HID sync"
+            }
+
+    val writeGateSummary: String
+        get() =
+            if (items.isEmpty()) {
+                "firmware writes: no Windows-style controls configured"
+            } else {
+                "firmware writes: $firmwareWriteAllowedCount enabled, " +
+                    "$blockedFirmwareWriteCount blocked pending validated capture results"
             }
 
     val detailSummary: String
@@ -29,6 +44,10 @@ data class AirVisionFirmwareSyncItem(
     val androidEffect: String,
     val hardwareSyncPending: Boolean,
     val hardwareSyncStatus: String,
+    val captureResultStatus: String,
+    val androidEnablementDecision: String,
+    val firmwareWriteAllowed: Boolean,
+    val requiredEvidence: List<String>,
     val blockedReason: String,
 ) {
     val summary: String
@@ -36,6 +55,21 @@ data class AirVisionFirmwareSyncItem(
 }
 
 object AirVisionFirmwareSyncPlans {
+    const val CAPTURE_RESULTS_SCHEMA = "openclaw.airvision.firmwareCaptureResults"
+
+    private val validatedWriteEvidence =
+        listOf(
+            "validated write report ID",
+            "validated write endpoint",
+            "sanitized write payload summary",
+            "validated readback report ID",
+            "validated readback endpoint",
+            "sanitized readback payload summary",
+            "checksum/framing notes",
+            "visible M1 state confirmation",
+            "capture reference with SHA-256 digest",
+        )
+
     fun fromSettings(
         settings: AirVisionDisplaySettings,
         capabilities: AirVisionFirmwareCapabilities,
@@ -75,6 +109,10 @@ object AirVisionFirmwareSyncPlans {
             androidEffect = androidEffectFor(settings),
             hardwareSyncPending = true,
             hardwareSyncStatus = hardwareSyncStatus,
+            captureResultStatus = "pending_validated_capture_result",
+            androidEnablementDecision = "blocked",
+            firmwareWriteAllowed = false,
+            requiredEvidence = validatedWriteEvidence,
             blockedReason = blockedReason,
         )
     }

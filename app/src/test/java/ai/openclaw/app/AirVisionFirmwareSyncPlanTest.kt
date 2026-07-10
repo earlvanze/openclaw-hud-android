@@ -43,7 +43,10 @@ class AirVisionFirmwareSyncPlanTest {
         assertEquals(AirVisionFirmwareFeature.entries.size, plan.items.size)
         assertEquals(AirVisionFirmwareFeature.entries.size, plan.pendingHardwareSyncCount)
         assertEquals(AirVisionFirmwareFeature.entries.size, plan.androidAppliedCount)
+        assertEquals(0, plan.firmwareWriteAllowedCount)
+        assertEquals(AirVisionFirmwareFeature.entries.size, plan.blockedFirmwareWriteCount)
         assertEquals("firmware sync: 7 Android-applied, 7 pending ASUS HID sync", plan.summary)
+        assertEquals("firmware writes: 0 enabled, 7 blocked pending validated capture results", plan.writeGateSummary)
         assertEquals(
             "Brightness=64% (capture pending)",
             plan.items.first { it.feature == AirVisionFirmwareFeature.Brightness }.summary,
@@ -60,6 +63,10 @@ class AirVisionFirmwareSyncPlanTest {
             "on",
             plan.items.first { it.feature == AirVisionFirmwareFeature.ThreeDMode }.desiredValue,
         )
+        assertTrue(plan.items.all { it.captureResultStatus == "pending_validated_capture_result" })
+        assertTrue(plan.items.all { it.androidEnablementDecision == "blocked" })
+        assertTrue(plan.items.none { it.firmwareWriteAllowed })
+        assertTrue(plan.items.all { it.requiredEvidence.size == 9 })
         assertTrue(plan.items.all { it.blockedReason.contains("vendor report payloads are not validated") })
     }
 

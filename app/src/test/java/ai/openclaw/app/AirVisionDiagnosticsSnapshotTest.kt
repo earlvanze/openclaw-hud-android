@@ -116,7 +116,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("10", root.getValue("version").jsonPrimitive.content)
+        assertEquals("11", root.getValue("version").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)
@@ -191,15 +191,39 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("67", activeProfile.getValue("ipdMm").jsonPrimitive.content)
         assertEquals("7", firmwareSync.getValue("pendingHardwareSyncCount").jsonPrimitive.content)
         assertEquals("7", firmwareSync.getValue("androidAppliedCount").jsonPrimitive.content)
+        assertEquals("0", firmwareSync.getValue("firmwareWriteAllowedCount").jsonPrimitive.content)
+        assertEquals("7", firmwareSync.getValue("blockedFirmwareWriteCount").jsonPrimitive.content)
         assertEquals(
             "firmware sync: 7 Android-applied, 7 pending ASUS HID sync",
             firmwareSync.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals(
+            "firmware writes: 0 enabled, 7 blocked pending validated capture results",
+            firmwareSync.getValue("writeGateSummary").jsonPrimitive.content,
         )
         assertEquals("brightness", brightnessSync.getValue("feature").jsonPrimitive.content)
         assertEquals("72%", brightnessSync.getValue("desiredValue").jsonPrimitive.content)
         assertEquals("software HUD dimming", brightnessSync.getValue("androidEffect").jsonPrimitive.content)
         assertEquals("true", brightnessSync.getValue("hardwareSyncPending").jsonPrimitive.content)
         assertEquals("capture pending", brightnessSync.getValue("hardwareSyncStatus").jsonPrimitive.content)
+        assertEquals(
+            "openclaw.airvision.firmwareCaptureResults",
+            brightnessSync.getValue("captureResultsSchema").jsonPrimitive.content,
+        )
+        assertEquals(
+            "pending_validated_capture_result",
+            brightnessSync.getValue("captureResultStatus").jsonPrimitive.content,
+        )
+        assertEquals("blocked", brightnessSync.getValue("androidEnablementDecision").jsonPrimitive.content)
+        assertEquals("false", brightnessSync.getValue("firmwareWriteAllowed").jsonPrimitive.content)
+        assertEquals(
+            "validated write report ID",
+            brightnessSync.getValue("requiredEvidence").jsonArray.first().jsonPrimitive.content,
+        )
+        assertEquals(
+            "capture reference with SHA-256 digest",
+            brightnessSync.getValue("requiredEvidence").jsonArray.last().jsonPrimitive.content,
+        )
         assertEquals("67 mm", ipdSync.getValue("desiredValue").jsonPrimitive.content)
         assertEquals(
             "IPD=67 mm (capture pending)",

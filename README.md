@@ -166,11 +166,15 @@ diagnostics JSON snapshot containing current USB readiness, descriptor summaries
 derived readable/writable HID report paths with endpoint addresses and packet
 sizes, per-feature firmware-apply readiness for Windows-style AirVision
 controls, per-feature desired firmware-sync state derived from the active
-AirVision profile, per-feature capture targets and probe values for future ASUS
-HID protocol validation, the active HUD profile, derived HUD runtime state,
-Android Presentation routing state, display candidate counts, selected display
-identity, gesture settings, and AirVision app preferences without gateway
-endpoints, auth tokens, chat history, or raw USB serial values.
+AirVision profile, the Android firmware-write enablement decision, the validated
+capture evidence required before a write can be enabled, per-feature capture
+targets and probe values for future ASUS HID protocol validation, the active HUD
+profile, derived HUD runtime state, Android Presentation routing state, display
+candidate counts, selected display identity, gesture settings, and AirVision app
+preferences without gateway endpoints, auth tokens, chat history, or raw USB
+serial values. Settings -> AirVision M1 -> Firmware Link also shows a compact
+write-gate summary so firmware writes remain visibly blocked until the
+machine-checked capture results validate a feature.
 The app does not send ASUS vendor reports until the Windows app protocol is
 captured and validated.
 

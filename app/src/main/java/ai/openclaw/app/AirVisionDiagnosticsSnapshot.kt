@@ -93,7 +93,10 @@ data class AirVisionDiagnosticsFirmwareCaptureTarget(
 data class AirVisionDiagnosticsFirmwareSyncPlan(
     val pendingHardwareSyncCount: Int,
     val androidAppliedCount: Int,
+    val firmwareWriteAllowedCount: Int,
+    val blockedFirmwareWriteCount: Int,
     val summary: String,
+    val writeGateSummary: String,
     val detailSummary: String,
     val items: List<AirVisionDiagnosticsFirmwareSyncItem>,
 )
@@ -107,6 +110,11 @@ data class AirVisionDiagnosticsFirmwareSyncItem(
     val androidEffect: String,
     val hardwareSyncPending: Boolean,
     val hardwareSyncStatus: String,
+    val captureResultsSchema: String,
+    val captureResultStatus: String,
+    val androidEnablementDecision: String,
+    val firmwareWriteAllowed: Boolean,
+    val requiredEvidence: List<String>,
     val blockedReason: String,
     val summary: String,
 )
@@ -167,7 +175,7 @@ data class AirVisionDiagnosticsHudRuntime(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 10
+    const val VERSION = 11
 
     private val json =
         Json {
@@ -361,7 +369,10 @@ object AirVisionDiagnosticsSnapshots {
         AirVisionDiagnosticsFirmwareSyncPlan(
             pendingHardwareSyncCount = pendingHardwareSyncCount,
             androidAppliedCount = androidAppliedCount,
+            firmwareWriteAllowedCount = firmwareWriteAllowedCount,
+            blockedFirmwareWriteCount = blockedFirmwareWriteCount,
             summary = summary,
+            writeGateSummary = writeGateSummary,
             detailSummary = detailSummary,
             items = items.map { it.toDiagnostics() },
         )
@@ -375,6 +386,11 @@ object AirVisionDiagnosticsSnapshots {
             androidEffect = androidEffect,
             hardwareSyncPending = hardwareSyncPending,
             hardwareSyncStatus = hardwareSyncStatus,
+            captureResultsSchema = AirVisionFirmwareSyncPlans.CAPTURE_RESULTS_SCHEMA,
+            captureResultStatus = captureResultStatus,
+            androidEnablementDecision = androidEnablementDecision,
+            firmwareWriteAllowed = firmwareWriteAllowed,
+            requiredEvidence = requiredEvidence,
             blockedReason = blockedReason,
             summary = summary,
         )
