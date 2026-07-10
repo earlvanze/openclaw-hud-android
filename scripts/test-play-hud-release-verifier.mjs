@@ -79,6 +79,7 @@ const validReadme = [
   "| Light Load Mode | Low-overhead HUD operation. |",
   "| Gesture & Hotkey Settings | HUD touch, swipe, brightness-key, and media/tap key handling. |",
   "| Cursor Follow / Center Cursor / 3DoF | Windows-only capability status plus Android distance hotkey substitute. |",
+  "| Unity mirror window / projected glasses view | Windows-only mirror window status plus Android sharing fallback. |",
   "| App Preferences | Startup, language, speaker, captions, backup, policy, and support links. |",
   "| Device Information | USB identity details. |",
   "| Firmware link | USB diagnostics and protocol capture state. |",

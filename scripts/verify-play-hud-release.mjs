@@ -478,6 +478,7 @@ async function verifyReadmeAirVisionParity() {
     "| Light Load Mode |",
     "| Gesture & Hotkey Settings |",
     "| Cursor Follow / Center Cursor / 3DoF |",
+    "| Unity mirror window / projected glasses view |",
     "| App Preferences |",
     "| Device Information |",
     "| Firmware link |",

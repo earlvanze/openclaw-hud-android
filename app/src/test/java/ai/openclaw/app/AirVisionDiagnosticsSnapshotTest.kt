@@ -132,7 +132,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("15", root.getValue("version").jsonPrimitive.content)
+        assertEquals("16", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -297,15 +297,24 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("false", windowsCompatibility.getValue("cursorFollowAvailable").jsonPrimitive.content)
         assertEquals("false", windowsCompatibility.getValue("centerCursorAvailable").jsonPrimitive.content)
         assertEquals("false", windowsCompatibility.getValue("threeDofAvailable").jsonPrimitive.content)
+        assertEquals("false", windowsCompatibility.getValue("unityMirrorWindowAvailable").jsonPrimitive.content)
+        assertEquals(
+            "Use Android/DeX screen sharing outside OpenClaw HUD; the ASUS Unity mirror window is Windows-only.",
+            windowsCompatibility.getValue("androidMirrorFallback").jsonPrimitive.content,
+        )
         assertEquals("false", windowsCompatibility.getValue("distanceHotkeyMapped").jsonPrimitive.content)
         assertEquals("true", windowsCompatibility.getValue("hardwareTouchpadPassthrough").jsonPrimitive.content)
         assertEquals(
-            "Windows cursor-follow, center-cursor, and 3DoF remain unavailable on Android; M1 touchpad brightness/media behavior can still pass through firmware.",
+            "Windows cursor-follow, center-cursor, Unity mirror window, and 3DoF remain unavailable on Android; M1 touchpad brightness/media behavior can still pass through firmware.",
             windowsCompatibility.getValue("summary").jsonPrimitive.content,
         )
         assertEquals(
-            "ASUS documents 3DoF support as Windows laptop only; phones do not support it.",
+            "The ASUS Unity mirror window requires the Windows AirVision app shortcut.",
             windowsCompatibility.getValue("limitations").jsonArray[2].jsonPrimitive.content,
+        )
+        assertEquals(
+            "ASUS documents 3DoF support as Windows laptop only; phones do not support it.",
+            windowsCompatibility.getValue("limitations").jsonArray[3].jsonPrimitive.content,
         )
         assertEquals("es", appPreferences.getValue("language").jsonPrimitive.content)
         assertEquals("false", appPreferences.getValue("speakerEnabled").jsonPrimitive.content)
@@ -338,7 +347,7 @@ class AirVisionDiagnosticsSnapshotTest {
 
         assertEquals("true", windowsCompatibility.getValue("distanceHotkeyMapped").jsonPrimitive.content)
         assertEquals(
-            "Android maps virtual-distance adjustment to M1 brightness key events; Windows cursor-follow, center-cursor, and 3DoF remain unavailable on Android.",
+            "Android maps virtual-distance adjustment to M1 brightness key events; Windows cursor-follow, center-cursor, Unity mirror window, and 3DoF remain unavailable on Android.",
             windowsCompatibility.getValue("summary").jsonPrimitive.content,
         )
     }

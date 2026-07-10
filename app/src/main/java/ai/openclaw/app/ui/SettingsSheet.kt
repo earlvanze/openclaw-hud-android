@@ -1323,13 +1323,13 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
-                        headlineContent = { Text("Windows Spatial Controls", style = mobileHeadline) },
+                        headlineContent = { Text("Windows Spatial & Mirror Controls", style = mobileHeadline) },
                         supportingContent = {
                             Text(
                                 if (airVisionHudControls.brightnessKeyAction == AirVisionHudKeyAction.AdjustDistance) {
-                                    "Distance hotkey parity is mapped to M1 brightness keys. Cursor Follow, Center Cursor, and 3DoF remain Windows-only."
+                                    "Distance hotkey parity is mapped to M1 brightness keys. Cursor Follow, Center Cursor, Unity mirror window, and 3DoF remain Windows-only."
                                 } else {
-                                    "Cursor Follow, Center Cursor, and 3DoF remain Windows-only. Set M1 Brightness Keys to Adjust distance for the closest Android hotkey substitute."
+                                    "Cursor Follow, Center Cursor, Unity mirror window, and 3DoF remain Windows-only. Use Android or DeX screen sharing outside the HUD when you need a mirror fallback."
                                 },
                                 style = mobileCallout,
                             )
