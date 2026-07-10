@@ -105,6 +105,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val firmwareUpdate = root.getValue("firmwareUpdate").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
         val hudRuntime = root.getValue("hudRuntime").jsonObject
+        val demoExperience = root.getValue("demoExperience").jsonObject
         val windowsCompatibility = root.getValue("windowsCompatibility").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
@@ -132,7 +133,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("16", root.getValue("version").jsonPrimitive.content)
+        assertEquals("17", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -294,6 +295,18 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", hudRuntime.getValue("selectedDisplayPresentationEligible").jsonPrimitive.content)
         assertEquals("false", hudRuntime.getValue("usedNonDefaultDisplayFallback").jsonPrimitive.content)
         assertEquals("selected_presentation_display", hudRuntime.getValue("displayRouteReason").jsonPrimitive.content)
+        assertEquals("true", demoExperience.getValue("androidDemoModeAvailable").jsonPrimitive.content)
+        assertEquals("true", demoExperience.getValue("androidDemoModeEnabled").jsonPrimitive.content)
+        assertEquals("false", demoExperience.getValue("windowsDemoShortcutAvailable").jsonPrimitive.content)
+        assertEquals("true", demoExperience.getValue("reviewerAccessReady").jsonPrimitive.content)
+        assertEquals(
+            "Android Demo Mode is enabled for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway.",
+            demoExperience.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals(
+            "ASUS Windows demo mode uses the Windows AirVision tutorial shortcut flow.",
+            demoExperience.getValue("limitations").jsonArray[0].jsonPrimitive.content,
+        )
         assertEquals("false", windowsCompatibility.getValue("cursorFollowAvailable").jsonPrimitive.content)
         assertEquals("false", windowsCompatibility.getValue("centerCursorAvailable").jsonPrimitive.content)
         assertEquals("false", windowsCompatibility.getValue("threeDofAvailable").jsonPrimitive.content)
@@ -322,6 +335,36 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("pt", appPreferences.getValue("translationCaptionSourceLanguage").jsonPrimitive.content)
         assertEquals("ja", appPreferences.getValue("translationCaptionTargetLanguage").jsonPrimitive.content)
         assertTrue(encoded.contains("ASUS AirVision M1"))
+    }
+
+    @Test
+    fun fromState_marksDemoExperienceAvailableWhenDisabled() {
+        val encoded =
+            AirVisionDiagnosticsSnapshots.encode(
+                AirVisionDiagnosticsSnapshots.fromState(
+                    usbState = AirVisionUsbState(),
+                    displaySettings = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working),
+                    hudControls = AirVisionHudControls(),
+                    appLanguage = AirVisionAppLanguage.System,
+                    startupDestination = AirVisionStartupDestination.Hud,
+                    hudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
+                    demoModeEnabled = false,
+                ),
+            )
+
+        val demoExperience =
+            Json.parseToJsonElement(encoded)
+                .jsonObject
+                .getValue("demoExperience")
+                .jsonObject
+
+        assertEquals("true", demoExperience.getValue("androidDemoModeAvailable").jsonPrimitive.content)
+        assertEquals("false", demoExperience.getValue("androidDemoModeEnabled").jsonPrimitive.content)
+        assertEquals("false", demoExperience.getValue("reviewerAccessReady").jsonPrimitive.content)
+        assertEquals(
+            "Android Demo Mode is available for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway.",
+            demoExperience.getValue("summary").jsonPrimitive.content,
+        )
     }
 
     @Test

@@ -13,6 +13,7 @@ data class AirVisionDiagnosticsSnapshot(
     val firmwareSync: AirVisionDiagnosticsFirmwareSyncPlan,
     val firmwareUpdate: AirVisionDiagnosticsFirmwareUpdate,
     val hudRuntime: AirVisionDiagnosticsHudRuntime,
+    val demoExperience: AirVisionDiagnosticsDemoExperience,
     val windowsCompatibility: AirVisionDiagnosticsWindowsCompatibility,
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
@@ -192,6 +193,16 @@ data class AirVisionDiagnosticsHudRuntime(
 )
 
 @Serializable
+data class AirVisionDiagnosticsDemoExperience(
+    val androidDemoModeAvailable: Boolean,
+    val androidDemoModeEnabled: Boolean,
+    val windowsDemoShortcutAvailable: Boolean,
+    val reviewerAccessReady: Boolean,
+    val summary: String,
+    val limitations: List<String>,
+)
+
+@Serializable
 data class AirVisionDiagnosticsWindowsCompatibility(
     val cursorFollowAvailable: Boolean,
     val centerCursorAvailable: Boolean,
@@ -206,7 +217,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 16
+    const val VERSION = 17
 
     private val json =
         Json {
@@ -341,6 +352,25 @@ object AirVisionDiagnosticsSnapshots {
                     selectedDisplayPresentationEligible = hudDisplayRoute.selectedCandidate?.isPresentation,
                     usedNonDefaultDisplayFallback = hudDisplayRoute.usedNonDefaultDisplayFallback,
                     displayRouteReason = hudDisplayRoute.reason,
+                ),
+            demoExperience =
+                AirVisionDiagnosticsDemoExperience(
+                    androidDemoModeAvailable = true,
+                    androidDemoModeEnabled = demoModeEnabled,
+                    windowsDemoShortcutAvailable = false,
+                    reviewerAccessReady = demoModeEnabled,
+                    summary =
+                        if (demoModeEnabled) {
+                            "Android Demo Mode is enabled for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway."
+                        } else {
+                            "Android Demo Mode is available for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway."
+                        },
+                    limitations =
+                        listOf(
+                            "ASUS Windows demo mode uses the Windows AirVision tutorial shortcut flow.",
+                            "Android Demo Mode does not toggle ASUS Windows demo state on the glasses.",
+                            "Google Play reviewer access still needs Play Console App access instructions before final submission.",
+                        ),
                 ),
             windowsCompatibility =
                 AirVisionDiagnosticsWindowsCompatibility(
