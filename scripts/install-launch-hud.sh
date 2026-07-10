@@ -27,7 +27,7 @@ fi
 
 usage() {
     cat <<'USAGE'
-Usage: scripts/install-launch-hud.sh [--serial SERIAL] [--apk APK] [--display presentation|DISPLAY_ID|auto|default] [--setup-code CODE|--setup-code-file FILE|--setup-json FILE]
+Usage: scripts/install-launch-hud.sh [--serial SERIAL] [--apk APK] [--display presentation|DISPLAY_ID|auto|default] [--setup-code CODE|--setup-code-file FILE|--setup-json FILE] [--no-auto-connect]
 
 Installs the HUD flavor and launches OpenClaw HUD. The default presentation
 mode starts the activity on the phone display and lets Android Presentation own

@@ -179,6 +179,24 @@ async function main() {
       "policy cleanup command log",
     );
 
+    const setupNoAuto = await runScenario(tempDir, "setup-no-auto", [
+      "--setup-code",
+      "tailnet-setup-code",
+      "--no-auto-connect",
+    ]);
+    const setupStart = findCommand(setupNoAuto.lines, "shell am start");
+    assertIncludes(
+      setupStart,
+      "-a ai.openclaw.app.action.SETUP_GATEWAY",
+      "setup no-auto-connect am start",
+    );
+    assertIncludes(
+      setupStart,
+      "--es setup_code tailnet-setup-code",
+      "setup no-auto-connect am start",
+    );
+    assertIncludes(setupStart, "--ez auto_connect false", "setup no-auto-connect am start");
+
     const forcedExternal = await runScenario(tempDir, "forced-external", ["--display", "external"]);
     assertIncludes(
       forcedExternal.result.stdout,
