@@ -22,6 +22,18 @@ function runVerifier(extraArgs = []) {
   });
 }
 
+function runHandoffRendererWithEmptyReleaseDir(emptyReleaseDir) {
+  return spawnSync(process.execPath, ["scripts/render-play-console-handoff.mjs", "--check"], {
+    cwd: androidDir,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      OPENCLAW_ANDROID_RELEASE_OUTPUT_DIR: emptyReleaseDir,
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+}
+
 function outputText(result) {
   return `${result.stdout}\n${result.stderr}`.trim();
 }
@@ -49,6 +61,20 @@ try {
         "Expected submission verifier to accept the current generated Play Console handoff.",
         `status=${passing.status}`,
         outputText(passing),
+      ].join("\n"),
+    );
+  }
+
+  const cleanCheckoutHandoff = runHandoffRendererWithEmptyReleaseDir(join(tempDir, "missing-release-bundles"));
+  if (
+    cleanCheckoutHandoff.status !== 0 ||
+    !outputText(cleanCheckoutHandoff).includes("Play Console handoff verified")
+  ) {
+    throw new Error(
+      [
+        "Expected Play Console handoff renderer to verify from checklist metadata without local signed AAB files.",
+        `status=${cleanCheckoutHandoff.status}`,
+        outputText(cleanCheckoutHandoff),
       ].join("\n"),
     );
   }

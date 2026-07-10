@@ -13,7 +13,6 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 - AAB: `build/release-bundles/openclaw-2026.7.10-hud-release.aab`
 - SHA-256: `aa8e95586a6ef0049b895a1a1dc7bd1c6c5348f4cef22cf686af32e794f00492`
-- Size: 9507984 bytes
 - Version: 2026.7.10 (2026071001)
 
 ## Remaining Console Blockers

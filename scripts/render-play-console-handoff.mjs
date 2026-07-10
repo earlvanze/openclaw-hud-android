@@ -8,7 +8,11 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
 const outputPath = join(androidDir, "play", "console-handoff.md");
-const releaseOutputDir = join(androidDir, "build", "release-bundles");
+const releaseOutputDir = process.env.OPENCLAW_ANDROID_RELEASE_OUTPUT_DIR?.trim()
+  ? process.env.OPENCLAW_ANDROID_RELEASE_OUTPUT_DIR.trim()
+  : join(androidDir, "build", "release-bundles");
+const consoleChecklistPath = join(androidDir, "play", "console-checklist.md");
+const buildGradlePath = join(androidDir, "app", "build.gradle.kts");
 const manifestPath = join(
   androidDir,
   "app",
@@ -58,22 +62,46 @@ async function latestSignedHudReleaseBundle() {
   if (!bundle) return null;
   return {
     ...bundle,
+    source: "local-bundle",
     sha256: createHash("sha256").update(await readFile(bundle.path)).digest("hex"),
   };
 }
 
+async function signedHudReleaseBundleFromChecklist() {
+  const checklist = await readFile(consoleChecklistPath, "utf8").catch(() => "");
+  const relativePath = checklist.match(/`(build\/release-bundles\/[^`]+-hud-release\.aab)`/u)?.[1] ?? null;
+  const sha256 = checklist.match(/`([a-f0-9]{64})`/u)?.[1] ?? null;
+  if (!relativePath || !sha256) return null;
+  return {
+    relativePath,
+    sha256,
+    source: "console-checklist",
+  };
+}
+
+async function signedHudReleaseBundle() {
+  return (await latestSignedHudReleaseBundle()) ?? (await signedHudReleaseBundleFromChecklist());
+}
+
 async function hudManifestVersion() {
   const manifest = await readFile(manifestPath, "utf8").catch(() => "");
+  const gradle = await readFile(buildGradlePath, "utf8").catch(() => "");
   return {
-    versionName: manifest.match(/\bandroid:versionName\s*=\s*"([^"]+)"/u)?.[1] ?? "unknown",
-    versionCode: manifest.match(/\bandroid:versionCode\s*=\s*"([^"]+)"/u)?.[1] ?? "unknown",
+    versionName:
+      manifest.match(/\bandroid:versionName\s*=\s*"([^"]+)"/u)?.[1] ??
+      gradle.match(/\bversionName\s*=\s*"([^"]+)"/u)?.[1] ??
+      "unknown",
+    versionCode:
+      manifest.match(/\bandroid:versionCode\s*=\s*"([^"]+)"/u)?.[1] ??
+      gradle.match(/\bversionCode\s*=\s*(\d+)/u)?.[1] ??
+      "unknown",
   };
 }
 
 async function render() {
   const appContent = JSON.parse(await readText("play/app-content-answers.json"));
   const screenshotManifest = JSON.parse(await readText("play/screenshots/phone/manifest.json"));
-  const bundle = await latestSignedHudReleaseBundle();
+  const bundle = await signedHudReleaseBundle();
   const version = await hudManifestVersion();
   const title = await readTrimmed("play/listings/en-US/title.txt");
   const shortDescription = await readTrimmed("play/listings/en-US/short-description.txt");
@@ -105,7 +133,6 @@ async function render() {
       ? `- AAB: \`${bundle.relativePath}\``
       : "- AAB: missing; run `node scripts/build-release-aab.mjs --flavor hud --skip-version-bump`",
     bundle ? `- SHA-256: \`${bundle.sha256}\`` : "- SHA-256: missing",
-    bundle ? `- Size: ${bundle.size} bytes` : "- Size: missing",
     `- Version: ${version.versionName} (${version.versionCode})`,
     "",
     "## Remaining Console Blockers",
