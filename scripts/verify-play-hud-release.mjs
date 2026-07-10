@@ -46,6 +46,7 @@ const airVisionAppLocalePath =
     "AirVisionAppLocale.kt",
   );
 const airVisionFirmwareCapturePlanScript = join(scriptDir, "render-airvision-firmware-capture-plan.mjs");
+const airVisionFirmwareCapturePlanPath = join(androidDir, "play", "airvision-firmware-capture-plan.md");
 const readmePath =
   process.env.OPENCLAW_ANDROID_README_PATH?.trim() ||
   join(androidDir, "README.md");
@@ -505,12 +506,24 @@ async function verifyReadmeAirVisionParity() {
   return { path: readmePath };
 }
 
-function verifyGeneratedAirVisionFirmwareCapturePlan() {
+async function verifyGeneratedAirVisionFirmwareCapturePlan() {
   runChecked(
     process.execPath,
     [airVisionFirmwareCapturePlanScript, "--check"],
     "AirVision firmware capture plan check",
   );
+  const capturePlan = await readFile(airVisionFirmwareCapturePlanPath, "utf8");
+  requireIncludes("AirVision firmware capture worksheet", capturePlan, [
+    "## Capture Acceptance Criteria",
+    "exact Windows write report ID",
+    "payload bytes",
+    "checksum/framing",
+    "visible-state evidence",
+    "## Capture Result Template",
+    "Android enablement decision",
+    "| Brightness | pending | pending | pending | pending | pending | pending | blocked |",
+    "| IPD | pending | pending | pending | pending | pending | pending | blocked |",
+  ]);
 }
 
 async function main() {
@@ -521,7 +534,7 @@ async function main() {
   const listing = await verifyListing(args.listingDir, args.language);
   const localeBundleConfig = await verifyRuntimeLocaleBundleConfig();
   const readmeParity = await verifyReadmeAirVisionParity();
-  verifyGeneratedAirVisionFirmwareCapturePlan();
+  await verifyGeneratedAirVisionFirmwareCapturePlan();
 
   console.log(`Bundle: ${bundle.path} (${bundle.size} bytes)`);
   console.log(`SHA-256: ${bundle.sha256}`);

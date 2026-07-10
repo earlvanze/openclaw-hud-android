@@ -164,7 +164,10 @@ captured and validated.
 `play/airvision-firmware-capture-plan.md` is a generated offline worksheet for
 the next Windows/Cyber capture session. It is derived from the app's canonical
 AirVision firmware feature list and records probe sequences for brightness,
-screen distance, IPD, Splendid, blue-light filter, Motion Sync, and 3D Mode.
+screen distance, IPD, Splendid, blue-light filter, Motion Sync, and 3D Mode,
+plus acceptance criteria and a per-feature capture-result template for report
+IDs, payload bytes, readback data, checksum/framing notes, visible-state
+confirmation, and the Android firmware-write enablement decision.
 The Android app can also export a live copy from Settings -> AirVision M1 ->
 Firmware Capture Plan, including the phone's current readable/writable HID
 report-path status when the M1 is connected plus the active AirVision profile's
@@ -382,12 +385,16 @@ permissions drift back into the HUD flavor, confirms the notification-listener
 service declaration, checks the English listing/release-notes length limits, and
 confirms App Bundle language splits stay disabled while the app uses runtime
 AirVision language switching. It also verifies that the generated AirVision
-firmware capture worksheet is current. The language split setting is
+firmware capture worksheet is current and still contains the safety criteria
+and per-feature blocked result rows needed before Android firmware writes can
+be enabled. The language split setting is
 intentional: Play
 can otherwise deliver only the install-time language resources, which breaks the
 in-app AirVision companion language menu. Run
 `node scripts/test-play-hud-release-verifier.mjs` after changing the release
 verifier; it covers the language-split regression path with temporary sources.
+Run `node scripts/test-airvision-firmware-capture-plan-renderer.mjs` after
+changing the AirVision firmware feature list or worksheet renderer.
 GitHub Actions also builds the HUD release bundle with
 `-POPENCLAW_ANDROID_ALLOW_UNSIGNED_RELEASE=true` and runs the verifier with
 `--skip-signature` so CI can validate the release manifest and listing without

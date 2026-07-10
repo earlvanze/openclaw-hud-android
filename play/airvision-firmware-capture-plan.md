@@ -10,6 +10,14 @@ Generated from `AirVisionFirmwareFeature` in `AirVisionUsbController.kt`. Run `n
 - Keep Android firmware writes disabled until the vendor report payload, report ID, length, and checksum behavior are validated from captures.
 - Do not commit raw USB serial numbers, raw private capture payloads, or temporary review/demo credentials.
 
+## Capture Acceptance Criteria
+
+- Record the exact Windows write report ID, payload bytes, payload length, and endpoint for each feature before Android sends any vendor report.
+- Record any matching readback report ID, payload bytes, endpoint, and timing after each Windows setting change.
+- Identify checksum, framing, sequence, or padding behavior from at least two distinct probe values for the same feature.
+- Confirm the ASUS app UI and the M1 visible state changed as expected for every captured probe value.
+- Keep Android enablement as `blocked` until write, readback, checksum/framing, and visible-state evidence agree.
+
 ## Probe Matrix
 
 | Feature | Raw key | Android status | Probe values |
@@ -93,6 +101,18 @@ Generated from `AirVisionFirmwareFeature` in `AirVisionUsbController.kt`. Run `n
   - Change 3D Mode through the probe values in order, pausing briefly after each value.
   - Save the capture with the feature key and value sequence in the filename.
   - Record any matching writable HID report path from the Android diagnostics export.
+
+## Capture Result Template
+
+| Feature | Write report ID | Write payload bytes | Readback report ID | Readback payload bytes | Checksum/framing notes | ASUS UI + M1 visible confirmation | Android enablement decision |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Brightness | pending | pending | pending | pending | pending | pending | blocked |
+| Screen distance | pending | pending | pending | pending | pending | pending | blocked |
+| IPD | pending | pending | pending | pending | pending | pending | blocked |
+| Splendid | pending | pending | pending | pending | pending | pending | blocked |
+| Blue Light Filter | pending | pending | pending | pending | pending | pending | blocked |
+| Motion Sync | pending | pending | pending | pending | pending | pending | blocked |
+| 3D Mode | pending | pending | pending | pending | pending | pending | blocked |
 
 ## Generated Metadata
 
