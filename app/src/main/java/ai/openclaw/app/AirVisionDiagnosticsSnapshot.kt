@@ -10,6 +10,7 @@ data class AirVisionDiagnosticsSnapshot(
     val version: Int = AirVisionDiagnosticsSnapshots.VERSION,
     val usb: AirVisionDiagnosticsUsb,
     val activeProfile: AirVisionBackupDisplayProfile,
+    val firmwareSync: AirVisionDiagnosticsFirmwareSyncPlan,
     val hudRuntime: AirVisionDiagnosticsHudRuntime,
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
@@ -89,6 +90,28 @@ data class AirVisionDiagnosticsFirmwareCaptureTarget(
 )
 
 @Serializable
+data class AirVisionDiagnosticsFirmwareSyncPlan(
+    val pendingHardwareSyncCount: Int,
+    val androidAppliedCount: Int,
+    val summary: String,
+    val detailSummary: String,
+    val items: List<AirVisionDiagnosticsFirmwareSyncItem>,
+)
+
+@Serializable
+data class AirVisionDiagnosticsFirmwareSyncItem(
+    val feature: String,
+    val label: String,
+    val desiredValue: String,
+    val androidApplied: Boolean,
+    val androidEffect: String,
+    val hardwareSyncPending: Boolean,
+    val hardwareSyncStatus: String,
+    val blockedReason: String,
+    val summary: String,
+)
+
+@Serializable
 data class AirVisionDiagnosticsDeviceInfo(
     val manufacturerName: String?,
     val productName: String?,
@@ -144,7 +167,7 @@ data class AirVisionDiagnosticsHudRuntime(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 9
+    const val VERSION = 10
 
     private val json =
         Json {
@@ -215,6 +238,12 @@ object AirVisionDiagnosticsSnapshots {
                         },
                 ),
             activeProfile = AirVisionProfileBackups.profileFromSettings(displaySettings),
+            firmwareSync =
+                AirVisionFirmwareSyncPlans
+                    .fromSettings(
+                        settings = displaySettings,
+                        capabilities = usbState.firmwareCapabilities,
+                    ).toDiagnostics(),
             hudRuntime =
                 AirVisionDiagnosticsHudRuntime(
                     transcriptEntryCount = AirVisionDisplaySettings.hudTranscriptEntryCount(displaySettings.lightLoadModeEnabled),
@@ -325,6 +354,28 @@ object AirVisionDiagnosticsSnapshots {
             readReportPathSummaries = readReportPathSummaries,
             suggestedProbeValues = suggestedProbeValues,
             instruction = instruction,
+            summary = summary,
+        )
+
+    private fun AirVisionFirmwareSyncPlan.toDiagnostics(): AirVisionDiagnosticsFirmwareSyncPlan =
+        AirVisionDiagnosticsFirmwareSyncPlan(
+            pendingHardwareSyncCount = pendingHardwareSyncCount,
+            androidAppliedCount = androidAppliedCount,
+            summary = summary,
+            detailSummary = detailSummary,
+            items = items.map { it.toDiagnostics() },
+        )
+
+    private fun AirVisionFirmwareSyncItem.toDiagnostics(): AirVisionDiagnosticsFirmwareSyncItem =
+        AirVisionDiagnosticsFirmwareSyncItem(
+            feature = feature.rawValue,
+            label = feature.label,
+            desiredValue = desiredValue,
+            androidApplied = androidApplied,
+            androidEffect = androidEffect,
+            hardwareSyncPending = hardwareSyncPending,
+            hardwareSyncStatus = hardwareSyncStatus,
+            blockedReason = blockedReason,
             summary = summary,
         )
 }

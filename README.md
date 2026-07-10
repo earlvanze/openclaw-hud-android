@@ -152,11 +152,12 @@ future ASUS protocol capture work. Firmware Link can also export an AirVision
 diagnostics JSON snapshot containing current USB readiness, descriptor summaries,
 derived readable/writable HID report paths with endpoint addresses and packet
 sizes, per-feature firmware-apply readiness for Windows-style AirVision
-controls, per-feature capture targets and probe values for future ASUS HID
-protocol validation, the active HUD profile, derived HUD runtime state, Android
-Presentation routing state, display candidate counts, selected display identity,
-gesture settings, and AirVision app preferences without gateway endpoints, auth
-tokens, chat history, or raw USB serial values.
+controls, per-feature desired firmware-sync state derived from the active
+AirVision profile, per-feature capture targets and probe values for future ASUS
+HID protocol validation, the active HUD profile, derived HUD runtime state,
+Android Presentation routing state, display candidate counts, selected display
+identity, gesture settings, and AirVision app preferences without gateway
+endpoints, auth tokens, chat history, or raw USB serial values.
 The app does not send ASUS vendor reports until the Windows app protocol is
 captured and validated.
 

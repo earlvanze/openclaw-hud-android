@@ -2,8 +2,9 @@ package ai.openclaw.app.ui
 
 import ai.openclaw.app.AirVisionAppLanguage
 import ai.openclaw.app.AirVisionDisplaySettings
-import ai.openclaw.app.AirVisionHudDoubleTapAction
+import ai.openclaw.app.AirVisionFirmwareSyncPlans
 import ai.openclaw.app.AirVisionHudDisplayTarget
+import ai.openclaw.app.AirVisionHudDoubleTapAction
 import ai.openclaw.app.AirVisionHudKeyAction
 import ai.openclaw.app.AirVisionHudMediaKeyAction
 import ai.openclaw.app.AirVisionHudPlacement
@@ -120,6 +121,11 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionPhysicalMainScreenVisible by viewModel.airVisionPhysicalMainScreenVisible.collectAsState()
     val airVisionDemoModeEnabled by viewModel.airVisionDemoModeEnabled.collectAsState()
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
+    val airVisionFirmwareSyncPlan =
+        AirVisionFirmwareSyncPlans.fromSettings(
+            settings = airVisionDisplaySettings,
+            capabilities = airVisionUsbState.firmwareCapabilities,
+        )
 
     var notificationQuietStartDraft by remember(notificationForwardingQuietStart) {
         mutableStateOf(notificationForwardingQuietStart)
@@ -716,6 +722,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                     inputInterface = airVisionUsbState.inputInterface,
                                     firmwareCapabilitySummary = airVisionUsbState.firmwareCapabilities.summary,
                                     firmwareFeatureReadinessSummary = airVisionUsbState.firmwareCapabilities.featureReadinessSummary,
+                                    firmwareSyncSummary = airVisionFirmwareSyncPlan.summary,
                                     diagnosticsText = airVisionUsbState.diagnosticsText,
                                 ),
                                 style = mobileCallout,
@@ -2279,6 +2286,7 @@ private fun airVisionUsbStatusText(
     inputInterface: Boolean,
     firmwareCapabilitySummary: String,
     firmwareFeatureReadinessSummary: String,
+    firmwareSyncSummary: String,
     diagnosticsText: String,
 ): String {
     val interfaces =
@@ -2293,6 +2301,7 @@ private fun airVisionUsbStatusText(
         interfaces.takeIf { it.isNotBlank() }?.let { "interfaces: $it" },
         firmwareCapabilitySummary.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
         firmwareFeatureReadinessSummary.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
+        firmwareSyncSummary.takeIf { it.isNotBlank() },
         diagnosticsText.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
     ).joinToString("\n")
 }

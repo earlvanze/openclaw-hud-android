@@ -94,6 +94,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val root = Json.parseToJsonElement(encoded).jsonObject
         val usb = root.getValue("usb").jsonObject
         val firmwareCapabilities = usb.getValue("firmwareCapabilities").jsonObject
+        val firmwareSync = root.getValue("firmwareSync").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
         val hudRuntime = root.getValue("hudRuntime").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
@@ -107,9 +108,15 @@ class AirVisionDiagnosticsSnapshotTest {
             captureTargets
                 .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "ipd" }
                 .jsonObject
+        val firmwareSyncItems = firmwareSync.getValue("items").jsonArray
+        val brightnessSync = firmwareSyncItems.first().jsonObject
+        val ipdSync =
+            firmwareSyncItems
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "ipd" }
+                .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("9", root.getValue("version").jsonPrimitive.content)
+        assertEquals("10", root.getValue("version").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)
@@ -182,6 +189,22 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("interrupt", firstEndpoint.getValue("typeLabel").jsonPrimitive.content)
         assertEquals("eye_care", activeProfile.getValue("splendidMode").jsonPrimitive.content)
         assertEquals("67", activeProfile.getValue("ipdMm").jsonPrimitive.content)
+        assertEquals("7", firmwareSync.getValue("pendingHardwareSyncCount").jsonPrimitive.content)
+        assertEquals("7", firmwareSync.getValue("androidAppliedCount").jsonPrimitive.content)
+        assertEquals(
+            "firmware sync: 7 Android-applied, 7 pending ASUS HID sync",
+            firmwareSync.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals("brightness", brightnessSync.getValue("feature").jsonPrimitive.content)
+        assertEquals("72%", brightnessSync.getValue("desiredValue").jsonPrimitive.content)
+        assertEquals("software HUD dimming", brightnessSync.getValue("androidEffect").jsonPrimitive.content)
+        assertEquals("true", brightnessSync.getValue("hardwareSyncPending").jsonPrimitive.content)
+        assertEquals("capture pending", brightnessSync.getValue("hardwareSyncStatus").jsonPrimitive.content)
+        assertEquals("67 mm", ipdSync.getValue("desiredValue").jsonPrimitive.content)
+        assertEquals(
+            "IPD=67 mm (capture pending)",
+            ipdSync.getValue("summary").jsonPrimitive.content,
+        )
         assertEquals("8", hudRuntime.getValue("transcriptEntryCount").jsonPrimitive.content)
         assertEquals("5", hudRuntime.getValue("captionEntryCount").jsonPrimitive.content)
         assertEquals("true", hudRuntime.getValue("colorPreviewOverlaysEnabled").jsonPrimitive.content)
@@ -258,11 +281,28 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
                 .getValue("hudRuntime")
                 .jsonObject
+        val firmwareSync =
+            Json.parseToJsonElement(encoded)
+                .jsonObject
+                .getValue("firmwareSync")
+                .jsonObject
+        val firmwareSyncItems = firmwareSync.getValue("items").jsonArray
+        val ipdSync =
+            firmwareSyncItems
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "ipd" }
+                .jsonObject
+        val threeDSync =
+            firmwareSyncItems
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "3d_mode" }
+                .jsonObject
 
         assertEquals("3", hudRuntime.getValue("transcriptEntryCount").jsonPrimitive.content)
         assertEquals("2", hudRuntime.getValue("captionEntryCount").jsonPrimitive.content)
         assertEquals("false", hudRuntime.getValue("colorPreviewOverlaysEnabled").jsonPrimitive.content)
         assertEquals("false", hudRuntime.getValue("ipdAdjustmentEnabled").jsonPrimitive.content)
         assertEquals("false", hudRuntime.getValue("threeDModeAvailable").jsonPrimitive.content)
+        assertEquals("67 mm (locked by Light Load Mode)", ipdSync.getValue("desiredValue").jsonPrimitive.content)
+        assertEquals("off (locked by Light Load Mode)", threeDSync.getValue("desiredValue").jsonPrimitive.content)
+        assertEquals("waiting for writable HID", ipdSync.getValue("hardwareSyncStatus").jsonPrimitive.content)
     }
 }
