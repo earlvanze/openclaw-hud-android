@@ -27,6 +27,7 @@ class AirVisionDiagnosticsSnapshotTest {
                                 deviceName = "/dev/bus/usb/001/002",
                                 vendorProduct = "0x0b05:0x1b3c",
                                 serialNumber = "private-device-serial",
+                                firmwareVersion = "USB descriptor 1.02",
                             ),
                         hidControlInterface = true,
                         audioInterface = true,
@@ -93,6 +94,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val encoded = AirVisionDiagnosticsSnapshots.encode(snapshot)
         val root = Json.parseToJsonElement(encoded).jsonObject
         val usb = root.getValue("usb").jsonObject
+        val deviceInfo = usb.getValue("deviceInfo").jsonObject
         val firmwareCapabilities = usb.getValue("firmwareCapabilities").jsonObject
         val firmwareSync = root.getValue("firmwareSync").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
@@ -117,6 +119,7 @@ class AirVisionDiagnosticsSnapshotTest {
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
         assertEquals("11", root.getValue("version").jsonPrimitive.content)
+        assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)

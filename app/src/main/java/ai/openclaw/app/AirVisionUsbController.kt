@@ -296,7 +296,7 @@ data class AirVisionUsbDeviceInfo(
                 deviceName?.takeIf { it.isNotBlank() }?.let { "device path: $it" },
                 serialNumber?.takeIf { it.isNotBlank() }?.let { "serial: $it" }
                     ?: serialStatus?.takeIf { it.isNotBlank() }?.let { "serial: $it" },
-                "firmware: ${firmwareVersion?.takeIf { it.isNotBlank() } ?: "pending ASUS HID protocol"}",
+                "firmware/version: ${firmwareVersion?.takeIf { it.isNotBlank() } ?: "pending ASUS HID protocol"}",
             ).joinToString("\n")
 }
 
@@ -499,8 +499,17 @@ private fun UsbDevice.airVisionDeviceInfo(permissionGranted: Boolean): AirVision
         vendorProduct = vendorProductLabel(),
         serialNumber = serialNumber,
         serialStatus = serialStatus,
+        firmwareVersion = usbDescriptorVersion(),
     )
 }
+
+private fun UsbDevice.usbDescriptorVersion(): String? =
+    runCatching {
+        version
+            .trim()
+            .takeIf { it.isNotEmpty() }
+            ?.let { "USB descriptor $it" }
+    }.getOrNull()
 
 private fun UsbDevice.hasInterfaceClass(interfaceClass: Int): Boolean = interfaces().any { it.interfaceClass == interfaceClass }
 
