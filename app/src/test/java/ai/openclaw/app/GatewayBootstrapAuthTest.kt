@@ -221,6 +221,40 @@ class GatewayBootstrapAuthTest {
         assertNull(authStore.loadToken(deviceId, "operator"))
     }
 
+    @Test
+    fun setForeground_canSkipPreferredGatewayReconnectOnce() {
+        val app = RuntimeEnvironment.getApplication()
+        val securePrefs =
+            app.getSharedPreferences(
+                "openclaw.node.secure.test.${UUID.randomUUID()}",
+                android.content.Context.MODE_PRIVATE,
+            )
+        val prefs = SecurePrefs(app, securePrefsOverride = securePrefs)
+        prefs.setManualEnabled(true)
+        prefs.setManualHost("gateway.example")
+        prefs.setManualPort(18789)
+        val runtime =
+            NodeRuntime(
+                app,
+                prefs,
+                tlsFingerprintProbe = { _, _ ->
+                    GatewayTlsProbeResult(failure = GatewayTlsProbeFailure.TLS_UNAVAILABLE)
+                },
+            )
+
+        runtime.setForeground(true, reconnectPreferredGateway = false)
+
+        assertEquals("Offline", runtime.statusText.value)
+        assertNull(runtime.pendingGatewayTrust.value)
+
+        runtime.setForeground(true)
+
+        assertEquals(
+            "Failed: public hosts require wss:// or Tailscale Serve. No TLS endpoint detected.",
+            waitForStatusText(runtime),
+        )
+    }
+
     private fun waitForGatewayTrustPrompt(runtime: NodeRuntime): NodeRuntime.GatewayTrustPrompt {
         repeat(50) {
             runtime.pendingGatewayTrust.value?.let { return it }

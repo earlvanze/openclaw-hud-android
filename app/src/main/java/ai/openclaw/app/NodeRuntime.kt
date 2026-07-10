@@ -766,10 +766,15 @@ class NodeRuntime(
         updateHomeCanvasState()
     }
 
-    fun setForeground(value: Boolean) {
+    fun setForeground(
+        value: Boolean,
+        reconnectPreferredGateway: Boolean = true,
+    ) {
         _isForeground.value = value
         if (value) {
-            reconnectPreferredGatewayOnForeground()
+            if (reconnectPreferredGateway) {
+                reconnectPreferredGatewayOnForeground()
+            }
         } else {
             stopActiveVoiceSession()
         }

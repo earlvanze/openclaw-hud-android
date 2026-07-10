@@ -34,6 +34,7 @@ class MainViewModel(
     private val prefs = nodeApp.prefs
     private val runtimeRef = MutableStateFlow<NodeRuntime?>(null)
     private var foreground = true
+    private var suppressNextForegroundGatewayReconnect = false
     private val _requestedHomeDestination = MutableStateFlow<HomeDestination?>(null)
     val requestedHomeDestination: StateFlow<HomeDestination?> = _requestedHomeDestination
     private val _chatDraft = MutableStateFlow<String?>(null)
@@ -47,10 +48,10 @@ class MainViewModel(
     private val _airVisionIdentifyToken = MutableStateFlow(0L)
     val airVisionIdentifyToken: StateFlow<Long> = _airVisionIdentifyToken
 
-    private fun ensureRuntime(): NodeRuntime {
+    private fun ensureRuntime(reconnectPreferredGatewayOnForeground: Boolean = true): NodeRuntime {
         runtimeRef.value?.let { return it }
         val runtime = nodeApp.ensureRuntime()
-        runtime.setForeground(foreground)
+        runtime.setForeground(foreground, reconnectPreferredGateway = reconnectPreferredGatewayOnForeground)
         runtimeRef.value = runtime
         return runtime
     }
@@ -192,13 +193,23 @@ class MainViewModel(
 
     fun setForeground(value: Boolean) {
         foreground = value
+        val reconnectPreferredGateway =
+            if (value && suppressNextForegroundGatewayReconnect) {
+                suppressNextForegroundGatewayReconnect = false
+                false
+            } else {
+                true
+            }
+        val existingRuntime = runtimeRef.value
         val runtime =
             if (value && prefs.onboardingCompleted.value) {
-                ensureRuntime()
+                existingRuntime ?: ensureRuntime(reconnectPreferredGatewayOnForeground = reconnectPreferredGateway)
             } else {
-                runtimeRef.value
+                existingRuntime
             }
-        runtime?.setForeground(value)
+        if (runtime === existingRuntime) {
+            runtime?.setForeground(value, reconnectPreferredGateway = reconnectPreferredGateway)
+        }
     }
 
     fun setDisplayName(value: String) {
@@ -348,12 +359,15 @@ class MainViewModel(
         _requestedHomeDestination.value = if (BuildConfig.OPENCLAW_DEFAULT_HUD) null else HomeDestination.Connect
 
         if (request.autoConnect) {
+            suppressNextForegroundGatewayReconnect = false
             connect(
                 GatewayEndpoint.manual(host = config.host, port = config.port),
                 token = config.token.ifEmpty { null },
                 bootstrapToken = config.bootstrapToken.ifEmpty { null },
                 password = config.password.ifEmpty { null },
             )
+        } else {
+            suppressNextForegroundGatewayReconnect = true
         }
         return true
     }
