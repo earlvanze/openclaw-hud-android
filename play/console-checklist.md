@@ -45,7 +45,9 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 - Run `node scripts/test-play-screenshot-tools.mjs` after changes to screenshot
   capture, conversion, or final submission validation.
 - Keep the initial release status as `draft` until screenshots, policy forms, and tester access are verified.
-- Fill `play/app-content-answers.json` `finalSubmission` fields, then run
+- Fill `play/app-content-answers.json` `finalSubmission` fields, including
+  `finalSubmission.consoleEvidence` source/date/notes for each completed Play
+  Console blocker, then run
   `node scripts/verify-play-submission-package.mjs --final` before the first
   `--commit`. The publish helper runs this final verifier again in `--commit`
   mode before creating a Play edit or uploading a bundle.
@@ -55,7 +57,7 @@ Current local status:
 - Latest signed HUD AAB builds successfully from `main`:
   `build/release-bundles/openclaw-2026.7.10-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `9275ed0e5704edd4d1869505112e2b2fb04f102ea1506a9085d7f8631de7a8e9`
+  `6b32827e7f03f64ae7fe18e3f2ef7963103ce9154355c66c3465cc4ac719ffa4`
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -92,9 +94,10 @@ Current local status:
   deletion, and Data safety. Keep it aligned with the final Play Console forms.
 - `play/app-content-answers.json` also tracks final external readiness fields
   for hosted privacy URL, app creation, internal testers, reviewer access, and
-  phone screenshots. These are intentionally incomplete until Play Console is
-  configured. Local screenshot paths are validated by the final submission
-  verifier before commit publishing.
+  phone screenshots. Each completed Play Console blocker also needs
+  source/date/notes evidence under `finalSubmission.consoleEvidence`. These are
+  intentionally incomplete until Play Console is configured. Local screenshot
+  paths are validated by the final submission verifier before commit publishing.
 - `docs/privacy-policy.html` is the generated GitHub Pages privacy-policy page.
   It is published at
   `https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html` and

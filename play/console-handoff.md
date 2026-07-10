@@ -12,16 +12,16 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.10-hud-release.aab`
-- SHA-256: `9275ed0e5704edd4d1869505112e2b2fb04f102ea1506a9085d7f8631de7a8e9`
+- SHA-256: `6b32827e7f03f64ae7fe18e3f2ef7963103ce9154355c66c3465cc4ac719ffa4`
 - Version: 2026.7.10 (2026071001)
 
 ## Remaining Console Blockers
 
-- [ ] Create app in Play Console
-- [ ] Configure internal testers
-- [ ] Configure reviewer app access
+- [ ] Create app in Play Console (evidence: not recorded)
+- [ ] Configure internal testers (evidence: not recorded)
+- [ ] Configure reviewer app access (evidence: not recorded)
 
-These flags live in `play/app-content-answers.json` under `finalSubmission`. Flip them only after the matching Google Play Console setup is complete.
+These flags and evidence entries live in `play/app-content-answers.json` under `finalSubmission`. Flip a flag only after the matching Google Play Console setup is complete, and record `source`, `verifiedAt`, and `notes` evidence before final publish.
 
 ## Store Listing
 

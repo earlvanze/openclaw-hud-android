@@ -96,6 +96,11 @@
     "appCreatedInPlayConsole": false,
     "internalTestersConfiguredInPlayConsole": false,
     "reviewerAccessConfiguredInPlayConsole": false,
+    "consoleEvidence": {
+      "appCreatedInPlayConsole": null,
+      "internalTestersConfiguredInPlayConsole": null,
+      "reviewerAccessConfiguredInPlayConsole": null
+    },
     "phoneScreenshots": [
       "play/screenshots/phone/hud-demo.png",
       "play/screenshots/phone/settings-demo.png"

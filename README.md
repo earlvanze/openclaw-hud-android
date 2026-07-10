@@ -446,14 +446,16 @@ external Play Console artifacts have been filled into
 `play/app-content-answers.json` under `finalSubmission`. The normal verifier is
 the local draft gate; `--final` is expected to fail until the Play app exists,
 the hosted privacy policy URL is public, at least two phone screenshots are
-recorded, internal testers are configured, and reviewer access instructions have
-been entered in Play Console. The final verifier also fetches the public
-privacy URL and checks that it matches the generated policy page. When
-screenshot entries are local paths, `--final` also validates that the files are
-JPEG or 24-bit PNG without alpha, no larger than 8 MiB, at least 320 px on the
-shortest side, no larger than 3840 px on the longest side, and no more than 2:1
-in either orientation. The publish helper runs this final verifier automatically
-in `--commit` mode before contacting the Google Play edit/upload API.
+recorded, internal testers are configured, reviewer access instructions have
+been entered in Play Console, and each completed Play Console blocker has
+`finalSubmission.consoleEvidence` source/date/notes metadata. The final verifier
+also fetches the public privacy URL and checks that it matches the generated
+policy page. When screenshot entries are local paths, `--final` also validates
+that the files are JPEG or 24-bit PNG without alpha, no larger than 8 MiB, at
+least 320 px on the shortest side, no larger than 3840 px on the longest side,
+and no more than 2:1 in either orientation. The publish helper runs this final
+verifier automatically in `--commit` mode before contacting the Google Play
+edit/upload API.
 
 ## Kotlin Lint + Format
 

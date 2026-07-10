@@ -40,6 +40,18 @@ function jsonBlock(value) {
   return ["```json", JSON.stringify(value, null, 2), "```"].join("\n");
 }
 
+function evidenceLine(evidence) {
+  if (evidence === null || typeof evidence !== "object" || Array.isArray(evidence)) {
+    return "evidence: not recorded";
+  }
+  const parts = [
+    evidence.verifiedAt?.trim() ? `verifiedAt=${evidence.verifiedAt.trim()}` : null,
+    evidence.source?.trim() ? `source=${evidence.source.trim()}` : null,
+    evidence.notes?.trim() ? `notes=${evidence.notes.trim()}` : null,
+  ].filter(Boolean);
+  return parts.length > 0 ? parts.join("; ") : "evidence: not recorded";
+}
+
 async function latestSignedHudReleaseBundle() {
   const files = await readdir(releaseOutputDir).catch(() => []);
   const candidates = [];
@@ -108,11 +120,20 @@ async function render() {
   const fullDescription = await readTrimmed("play/listings/en-US/full-description.txt");
   const releaseNotes = await readTrimmed("play/listings/en-US/release-notes.txt");
   const finalSubmission = appContent.finalSubmission ?? {};
+  const consoleEvidence = finalSubmission.consoleEvidence ?? {};
 
   const blockers = [
-    ["Create app in Play Console", finalSubmission.appCreatedInPlayConsole === true],
-    ["Configure internal testers", finalSubmission.internalTestersConfiguredInPlayConsole === true],
-    ["Configure reviewer app access", finalSubmission.reviewerAccessConfiguredInPlayConsole === true],
+    ["Create app in Play Console", "appCreatedInPlayConsole", finalSubmission.appCreatedInPlayConsole === true],
+    [
+      "Configure internal testers",
+      "internalTestersConfiguredInPlayConsole",
+      finalSubmission.internalTestersConfiguredInPlayConsole === true,
+    ],
+    [
+      "Configure reviewer app access",
+      "reviewerAccessConfiguredInPlayConsole",
+      finalSubmission.reviewerAccessConfiguredInPlayConsole === true,
+    ],
   ];
 
   return `${[
@@ -137,9 +158,9 @@ async function render() {
     "",
     "## Remaining Console Blockers",
     "",
-    ...blockers.map(([label, done]) => `- ${checkbox(done)} ${label}`),
+    ...blockers.map(([label, key, done]) => `- ${checkbox(done)} ${label} (${evidenceLine(consoleEvidence[key])})`),
     "",
-    "These flags live in `play/app-content-answers.json` under `finalSubmission`. Flip them only after the matching Google Play Console setup is complete.",
+    "These flags and evidence entries live in `play/app-content-answers.json` under `finalSubmission`. Flip a flag only after the matching Google Play Console setup is complete, and record `source`, `verifiedAt`, and `notes` evidence before final publish.",
     "",
     "## Store Listing",
     "",

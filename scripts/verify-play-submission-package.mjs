@@ -38,6 +38,11 @@ const screenshotMaxDimension = 3840;
 const screenshotMinVisiblePixelRatio = 0.002;
 const screenshotMinGreenAccentPixelRatio = 0.0002;
 const hostedPolicyFetchTimeoutMs = 15_000;
+const finalConsoleEvidenceKeys = [
+  "appCreatedInPlayConsole",
+  "internalTestersConfiguredInPlayConsole",
+  "reviewerAccessConfiguredInPlayConsole",
+];
 const pngSignature = Buffer.from("89504e470d0a1a0a", "hex");
 const corePrivacyDisclosures = [
   "OpenClaw HUD connects your Android device to an OpenClaw gateway that you configure",
@@ -562,6 +567,7 @@ async function verifyFinalSubmissionReadiness(
   if (finalSubmission.reviewerAccessConfiguredInPlayConsole !== true) {
     problems.push("finalSubmission.reviewerAccessConfiguredInPlayConsole must be true after App access review instructions/codes are entered in Play Console.");
   }
+  verifyFinalConsoleEvidence(finalSubmission, problems);
   const phoneScreenshots = Array.isArray(finalSubmission.phoneScreenshots) ? finalSubmission.phoneScreenshots : [];
   if (phoneScreenshots.length < 2) {
     problems.push("finalSubmission.phoneScreenshots must list at least two Play Console phone screenshots.");
@@ -580,6 +586,28 @@ async function verifyFinalSubmissionReadiness(
   );
   if (problems.length > 0) {
     throw new Error(["Final Play submission readiness failed:", ...problems.map((problem) => `- ${problem}`)].join("\n"));
+  }
+}
+
+function verifyFinalConsoleEvidence(finalSubmission, problems) {
+  const evidence = finalSubmission.consoleEvidence ?? {};
+  for (const key of finalConsoleEvidenceKeys) {
+    if (finalSubmission[key] !== true) continue;
+    const entry = evidence[key];
+    const prefix = `finalSubmission.consoleEvidence.${key}`;
+    if (entry === null || typeof entry !== "object" || Array.isArray(entry)) {
+      problems.push(`${prefix} must record source, verifiedAt, and notes before ${key} is true.`);
+      continue;
+    }
+    if (typeof entry.source !== "string" || entry.source.trim() === "") {
+      problems.push(`${prefix}.source must describe the Play Console page, account, or artifact used as evidence.`);
+    }
+    if (typeof entry.verifiedAt !== "string" || !/^\d{4}-\d{2}-\d{2}$/u.test(entry.verifiedAt.trim())) {
+      problems.push(`${prefix}.verifiedAt must be a YYYY-MM-DD date.`);
+    }
+    if (typeof entry.notes !== "string" || entry.notes.trim() === "") {
+      problems.push(`${prefix}.notes must summarize what was verified.`);
+    }
   }
 }
 

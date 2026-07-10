@@ -156,6 +156,31 @@ try {
       ].join("\n"),
     );
   }
+
+  const missingEvidenceAppContent = JSON.parse(originalAppContent);
+  missingEvidenceAppContent.finalSubmission = {
+    ...missingEvidenceAppContent.finalSubmission,
+    hostedPrivacyPolicyUrl: "https://example.com/openclaw-hud-privacy",
+    appCreatedInPlayConsole: true,
+    internalTestersConfiguredInPlayConsole: true,
+    reviewerAccessConfiguredInPlayConsole: true,
+    consoleEvidence: {},
+  };
+  const missingEvidencePath = join(tempDir, "missing-console-evidence-app-content.json");
+  await writeFile(missingEvidencePath, `${JSON.stringify(missingEvidenceAppContent, null, 2)}\n`);
+  const missingEvidence = runVerifier(["--app-content", missingEvidencePath, "--final", "--skip-hosted-privacy-url-fetch"]);
+  if (
+    missingEvidence.status === 0 ||
+    !outputText(missingEvidence).includes("finalSubmission.consoleEvidence.appCreatedInPlayConsole")
+  ) {
+    throw new Error(
+      [
+        "Expected final verifier to reject completed Play Console blockers without evidence metadata.",
+        `status=${missingEvidence.status}`,
+        outputText(missingEvidence),
+      ].join("\n"),
+    );
+  }
 } finally {
   await writeFile(handoffPath, originalHandoff);
   await writeFile(appContentPath, originalAppContent);

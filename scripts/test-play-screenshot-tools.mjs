@@ -174,6 +174,23 @@ async function writeFinalAppContent(path, screenshotPath) {
     appCreatedInPlayConsole: true,
     internalTestersConfiguredInPlayConsole: true,
     reviewerAccessConfiguredInPlayConsole: true,
+    consoleEvidence: {
+      appCreatedInPlayConsole: {
+        source: "Synthetic Play Console verifier test",
+        verifiedAt: "2026-07-10",
+        notes: "Synthetic app-created flag evidence for screenshot regression coverage.",
+      },
+      internalTestersConfiguredInPlayConsole: {
+        source: "Synthetic Play Console verifier test",
+        verifiedAt: "2026-07-10",
+        notes: "Synthetic internal-testers flag evidence for screenshot regression coverage.",
+      },
+      reviewerAccessConfiguredInPlayConsole: {
+        source: "Synthetic Play Console verifier test",
+        verifiedAt: "2026-07-10",
+        notes: "Synthetic reviewer-access flag evidence for screenshot regression coverage.",
+      },
+    },
     phoneScreenshots: [screenshotPath, screenshotPath],
     notes: "Synthetic screenshot verifier regression test.",
   };
