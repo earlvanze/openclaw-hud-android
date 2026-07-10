@@ -51,4 +51,60 @@ class AirVisionHudControlsTest {
             AirVisionHudMediaKeyAction.fromRawValue(" NONE "),
         )
     }
+
+    @Test
+    fun singleTapCommandDefaultsToClearableNotificationDismiss() {
+        assertEquals(
+            AirVisionHudTouchCommand.DismissNotification("maps:1"),
+            airVisionHudSingleTapCommand(
+                action = AirVisionHudTouchAction.DismissNotification,
+                notificationKey = "maps:1",
+                notificationClearable = true,
+            ),
+        )
+        assertEquals(
+            null,
+            airVisionHudSingleTapCommand(
+                action = AirVisionHudTouchAction.DismissNotification,
+                notificationKey = "maps:1",
+                notificationClearable = false,
+            ),
+        )
+        assertEquals(
+            AirVisionHudTouchCommand.ToggleMic,
+            airVisionHudSingleTapCommand(
+                action = AirVisionHudTouchAction.ToggleMic,
+                notificationKey = "maps:1",
+                notificationClearable = true,
+            ),
+        )
+    }
+
+    @Test
+    fun doubleTapCommandDefaultsToMicAndCanClearNotifications() {
+        assertEquals(
+            AirVisionHudTouchCommand.ToggleMic,
+            airVisionHudDoubleTapCommand(
+                action = AirVisionHudDoubleTapAction.ToggleMic,
+                notificationKey = "maps:1",
+                notificationClearable = true,
+            ),
+        )
+        assertEquals(
+            AirVisionHudTouchCommand.DismissNotification("maps:1"),
+            airVisionHudDoubleTapCommand(
+                action = AirVisionHudDoubleTapAction.DismissNotification,
+                notificationKey = "maps:1",
+                notificationClearable = true,
+            ),
+        )
+        assertEquals(
+            null,
+            airVisionHudDoubleTapCommand(
+                action = AirVisionHudDoubleTapAction.DismissNotification,
+                notificationKey = "maps:1",
+                notificationClearable = false,
+            ),
+        )
+    }
 }

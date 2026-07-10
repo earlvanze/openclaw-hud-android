@@ -81,3 +81,41 @@ data class AirVisionHudControls(
     val brightnessKeyAction: AirVisionHudKeyAction = AirVisionHudKeyAction.ScrollChat,
     val mediaKeyAction: AirVisionHudMediaKeyAction = AirVisionHudMediaKeyAction.DoubleTapToggleMic,
 )
+
+internal sealed interface AirVisionHudTouchCommand {
+    data object ToggleMic : AirVisionHudTouchCommand
+
+    data class DismissNotification(
+        val key: String,
+    ) : AirVisionHudTouchCommand
+}
+
+internal fun airVisionHudSingleTapCommand(
+    action: AirVisionHudTouchAction,
+    notificationKey: String?,
+    notificationClearable: Boolean,
+): AirVisionHudTouchCommand? =
+    when (action) {
+        AirVisionHudTouchAction.None -> null
+        AirVisionHudTouchAction.DismissNotification -> dismissNotificationCommand(notificationKey, notificationClearable)
+        AirVisionHudTouchAction.ToggleMic -> AirVisionHudTouchCommand.ToggleMic
+    }
+
+internal fun airVisionHudDoubleTapCommand(
+    action: AirVisionHudDoubleTapAction,
+    notificationKey: String?,
+    notificationClearable: Boolean,
+): AirVisionHudTouchCommand? =
+    when (action) {
+        AirVisionHudDoubleTapAction.None -> null
+        AirVisionHudDoubleTapAction.ToggleMic -> AirVisionHudTouchCommand.ToggleMic
+        AirVisionHudDoubleTapAction.DismissNotification -> dismissNotificationCommand(notificationKey, notificationClearable)
+    }
+
+private fun dismissNotificationCommand(
+    notificationKey: String?,
+    notificationClearable: Boolean,
+): AirVisionHudTouchCommand? =
+    notificationKey
+        ?.takeIf { notificationClearable }
+        ?.let { AirVisionHudTouchCommand.DismissNotification(it) }

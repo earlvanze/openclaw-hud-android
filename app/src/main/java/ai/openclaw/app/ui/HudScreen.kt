@@ -6,10 +6,13 @@ import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionHudDoubleTapAction
 import ai.openclaw.app.AirVisionHudPlacement
 import ai.openclaw.app.AirVisionHudSwipeAction
+import ai.openclaw.app.AirVisionHudTouchCommand
 import ai.openclaw.app.AirVisionHudTouchAction
 import ai.openclaw.app.AirVisionSplendidMode
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.TranslationCaptionMode
+import ai.openclaw.app.airVisionHudDoubleTapCommand
+import ai.openclaw.app.airVisionHudSingleTapCommand
 import ai.openclaw.app.chat.ChatMessage
 import ai.openclaw.app.openNativeCaptionSettings
 import ai.openclaw.app.voice.VoiceConversationEntry
@@ -581,16 +584,14 @@ private fun performHudSingleTapAction(
     notificationLine: HudNotificationLine?,
     viewModel: MainViewModel,
 ) {
-    when (action) {
-        AirVisionHudTouchAction.None -> Unit
-        AirVisionHudTouchAction.DismissNotification -> {
-            val line = notificationLine
-            if (line?.isClearable == true) {
-                viewModel.dismissNotification(line.key)
-            }
-        }
-        AirVisionHudTouchAction.ToggleMic -> viewModel.toggleMicEnabled()
-    }
+    performHudTouchCommand(
+        airVisionHudSingleTapCommand(
+            action = action,
+            notificationKey = notificationLine?.key,
+            notificationClearable = notificationLine?.isClearable == true,
+        ),
+        viewModel = viewModel,
+    )
 }
 
 private fun performHudDoubleTapAction(
@@ -598,15 +599,24 @@ private fun performHudDoubleTapAction(
     notificationLine: HudNotificationLine?,
     viewModel: MainViewModel,
 ) {
-    when (action) {
-        AirVisionHudDoubleTapAction.None -> Unit
-        AirVisionHudDoubleTapAction.ToggleMic -> viewModel.toggleMicEnabled()
-        AirVisionHudDoubleTapAction.DismissNotification -> {
-            val line = notificationLine
-            if (line?.isClearable == true) {
-                viewModel.dismissNotification(line.key)
-            }
-        }
+    performHudTouchCommand(
+        airVisionHudDoubleTapCommand(
+            action = action,
+            notificationKey = notificationLine?.key,
+            notificationClearable = notificationLine?.isClearable == true,
+        ),
+        viewModel = viewModel,
+    )
+}
+
+private fun performHudTouchCommand(
+    command: AirVisionHudTouchCommand?,
+    viewModel: MainViewModel,
+) {
+    when (command) {
+        null -> Unit
+        AirVisionHudTouchCommand.ToggleMic -> viewModel.toggleMicEnabled()
+        is AirVisionHudTouchCommand.DismissNotification -> viewModel.dismissNotification(command.key)
     }
 }
 
