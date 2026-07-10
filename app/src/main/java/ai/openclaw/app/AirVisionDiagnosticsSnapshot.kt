@@ -11,6 +11,7 @@ data class AirVisionDiagnosticsSnapshot(
     val usb: AirVisionDiagnosticsUsb,
     val activeProfile: AirVisionBackupDisplayProfile,
     val firmwareSync: AirVisionDiagnosticsFirmwareSyncPlan,
+    val firmwareUpdate: AirVisionDiagnosticsFirmwareUpdate,
     val hudRuntime: AirVisionDiagnosticsHudRuntime,
     val windowsCompatibility: AirVisionDiagnosticsWindowsCompatibility,
     val hudControls: AirVisionBackupHudControls,
@@ -121,6 +122,17 @@ data class AirVisionDiagnosticsFirmwareSyncItem(
 )
 
 @Serializable
+data class AirVisionDiagnosticsFirmwareUpdate(
+    val androidFirmwareUpdateSupported: Boolean,
+    val windowsFirmwareUpdateRequired: Boolean,
+    val androidUpdateCheckAvailable: Boolean,
+    val detectedVersionContext: String?,
+    val recommendedExternalAdapterFirmware: String,
+    val summary: String,
+    val limitations: List<String>,
+)
+
+@Serializable
 data class AirVisionDiagnosticsDeviceInfo(
     val manufacturerName: String?,
     val productName: String?,
@@ -192,7 +204,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 14
+    const val VERSION = 15
 
     private val json =
         Json {
@@ -275,6 +287,25 @@ object AirVisionDiagnosticsSnapshots {
                         capabilities = usbState.firmwareCapabilities,
                         captureResults = firmwareCaptureResults,
                     ).toDiagnostics(),
+            firmwareUpdate =
+                AirVisionDiagnosticsFirmwareUpdate(
+                    androidFirmwareUpdateSupported = false,
+                    windowsFirmwareUpdateRequired = true,
+                    androidUpdateCheckAvailable = false,
+                    detectedVersionContext = usbState.deviceInfo.firmwareVersion,
+                    recommendedExternalAdapterFirmware = "1.0.7.1 or later for PS5/HDMI adapter use",
+                    summary =
+                        usbState.deviceInfo.firmwareVersion
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { "Android can report $it, but AirVision firmware update checks and installs require the ASUS Windows app." }
+                            ?: "AirVision firmware update checks and installs require the ASUS Windows app; Android stays read-only.",
+                    limitations =
+                        listOf(
+                            "ASUS firmware updates are performed through the AirVision Windows app.",
+                            "Phone or tablet firmware update is not supported by the ASUS workflow.",
+                            "Android diagnostics can export USB descriptor context but cannot confirm a newer ASUS firmware package.",
+                        ),
+                ),
             hudRuntime =
                 AirVisionDiagnosticsHudRuntime(
                     transcriptEntryCount = AirVisionDisplaySettings.hudTranscriptEntryCount(displaySettings.lightLoadModeEnabled),

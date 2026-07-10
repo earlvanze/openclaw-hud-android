@@ -102,6 +102,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val deviceInfo = usb.getValue("deviceInfo").jsonObject
         val firmwareCapabilities = usb.getValue("firmwareCapabilities").jsonObject
         val firmwareSync = root.getValue("firmwareSync").jsonObject
+        val firmwareUpdate = root.getValue("firmwareUpdate").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
         val hudRuntime = root.getValue("hudRuntime").jsonObject
         val windowsCompatibility = root.getValue("windowsCompatibility").jsonObject
@@ -131,7 +132,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("14", root.getValue("version").jsonPrimitive.content)
+        assertEquals("15", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -256,6 +257,22 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals(
             "IPD=67 mm (capture pending)",
             ipdSync.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals("false", firmwareUpdate.getValue("androidFirmwareUpdateSupported").jsonPrimitive.content)
+        assertEquals("true", firmwareUpdate.getValue("windowsFirmwareUpdateRequired").jsonPrimitive.content)
+        assertEquals("false", firmwareUpdate.getValue("androidUpdateCheckAvailable").jsonPrimitive.content)
+        assertEquals("USB descriptor 1.02", firmwareUpdate.getValue("detectedVersionContext").jsonPrimitive.content)
+        assertEquals(
+            "1.0.7.1 or later for PS5/HDMI adapter use",
+            firmwareUpdate.getValue("recommendedExternalAdapterFirmware").jsonPrimitive.content,
+        )
+        assertEquals(
+            "Android can report USB descriptor 1.02, but AirVision firmware update checks and installs require the ASUS Windows app.",
+            firmwareUpdate.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals(
+            "Phone or tablet firmware update is not supported by the ASUS workflow.",
+            firmwareUpdate.getValue("limitations").jsonArray[1].jsonPrimitive.content,
         )
         assertEquals("8", hudRuntime.getValue("transcriptEntryCount").jsonPrimitive.content)
         assertEquals("5", hudRuntime.getValue("captionEntryCount").jsonPrimitive.content)

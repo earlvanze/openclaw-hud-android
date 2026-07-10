@@ -481,6 +481,7 @@ async function verifyReadmeAirVisionParity() {
     "| App Preferences |",
     "| Device Information |",
     "| Firmware link |",
+    "| Firmware update |",
     "| Identify |",
     "| Multi-screen desktop layouts |",
   ]);

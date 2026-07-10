@@ -832,6 +832,18 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
+                        headlineContent = { Text("Firmware Updates", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                airVisionFirmwareUpdateStatusText(airVisionUsbState.deviceInfo.firmwareVersion),
+                                style = mobileCallout,
+                            )
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
                         headlineContent = { Text("Diagnostics Export", style = mobileHeadline) },
                         supportingContent = {
                             Text(
@@ -2387,6 +2399,16 @@ private fun airVisionUsbStatusText(
         diagnosticsText.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
     ).joinToString("\n")
 }
+
+private fun airVisionFirmwareUpdateStatusText(firmwareVersion: String?): String =
+    listOfNotNull(
+        "Firmware update checks and installs require the ASUS AirVision Windows app.",
+        firmwareVersion
+            ?.takeIf { it.isNotBlank() }
+            ?.let { "Android-visible version context: $it" }
+            ?: "Android-visible firmware version is pending ASUS HID protocol.",
+        "Use Windows/Cyber with the M1 connected for ASUS firmware updates; Android firmware writes stay blocked.",
+    ).joinToString("\n")
 
 data class InstalledApp(
     val label: String,

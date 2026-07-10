@@ -82,6 +82,7 @@ const validReadme = [
   "| App Preferences | Startup, language, speaker, captions, backup, policy, and support links. |",
   "| Device Information | USB identity details. |",
   "| Firmware link | USB diagnostics and protocol capture state. |",
+  "| Firmware update | Windows-only update workflow status. |",
   "| Identify | Temporary HUD marker. |",
   "| Multi-screen desktop layouts | Configurable external-display targeting. |",
   "",
