@@ -125,6 +125,10 @@ data class AirVisionDiagnosticsDeviceInfo(
     val productName: String?,
     val deviceName: String?,
     val vendorProduct: String?,
+    val deviceClass: Int?,
+    val deviceSubclass: Int?,
+    val deviceProtocol: Int?,
+    val interfaceCount: Int?,
     val serialStatus: String?,
     val firmwareVersion: String?,
 )
@@ -175,7 +179,7 @@ data class AirVisionDiagnosticsHudRuntime(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 11
+    const val VERSION = 12
 
     private val json =
         Json {
@@ -220,6 +224,10 @@ object AirVisionDiagnosticsSnapshots {
                             productName = usbState.deviceInfo.productName,
                             deviceName = usbState.deviceInfo.deviceName,
                             vendorProduct = usbState.deviceInfo.vendorProduct,
+                            deviceClass = usbState.deviceInfo.deviceClass,
+                            deviceSubclass = usbState.deviceInfo.deviceSubclass,
+                            deviceProtocol = usbState.deviceInfo.deviceProtocol,
+                            interfaceCount = usbState.deviceInfo.interfaceCount,
                             serialStatus = usbState.deviceInfo.serialStatus ?: usbState.deviceInfo.serialNumber?.let { "available" },
                             firmwareVersion = usbState.deviceInfo.firmwareVersion,
                         ),

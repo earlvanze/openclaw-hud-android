@@ -130,6 +130,10 @@ class AirVisionUsbControllerTest {
                         productName = "AirVision M1",
                         deviceName = "/dev/bus/usb/001/002",
                         vendorProduct = "0x0b05:0x1b3c",
+                        deviceClass = 0,
+                        deviceSubclass = 0,
+                        deviceProtocol = 0,
+                        interfaceCount = 4,
                         serialStatus = "grant USB access",
                         firmwareVersion = "USB descriptor 1.02",
                     ),
@@ -141,6 +145,8 @@ class AirVisionUsbControllerTest {
             product: AirVision M1
             usb id: 0x0b05:0x1b3c
             device path: /dev/bus/usb/001/002
+            device class: per-interface class=0 sub=0 proto=0
+            interfaces: 4
             serial: grant USB access
             firmware/version: USB descriptor 1.02
             """.trimIndent(),

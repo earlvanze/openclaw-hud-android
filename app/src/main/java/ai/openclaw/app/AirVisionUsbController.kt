@@ -52,16 +52,7 @@ data class AirVisionUsbInterfaceInfo(
     val endpoints: List<AirVisionUsbEndpointInfo>,
 ) {
     val classLabel: String
-        get() =
-            when (interfaceClass) {
-                UsbConstants.USB_CLASS_AUDIO -> "audio"
-                UsbConstants.USB_CLASS_HID -> "hid"
-                UsbConstants.USB_CLASS_HUB -> "hub"
-                UsbConstants.USB_CLASS_MASS_STORAGE -> "storage"
-                UsbConstants.USB_CLASS_PER_INTERFACE -> "per-interface"
-                UsbConstants.USB_CLASS_VENDOR_SPEC -> "vendor"
-                else -> "class-$interfaceClass"
-            }
+        get() = usbClassLabel(interfaceClass)
 
     val summary: String
         get() {
@@ -283,10 +274,24 @@ data class AirVisionUsbDeviceInfo(
     val productName: String? = null,
     val deviceName: String? = null,
     val vendorProduct: String? = null,
+    val deviceClass: Int? = null,
+    val deviceSubclass: Int? = null,
+    val deviceProtocol: Int? = null,
+    val interfaceCount: Int? = null,
     val serialNumber: String? = null,
     val serialStatus: String? = null,
     val firmwareVersion: String? = null,
 ) {
+    val deviceClassSummary: String?
+        get() =
+            deviceClass?.let { classValue ->
+                buildList {
+                    add("${usbClassLabel(classValue)} class=$classValue")
+                    deviceSubclass?.let { add("sub=$it") }
+                    deviceProtocol?.let { add("proto=$it") }
+                }.joinToString(" ")
+            }
+
     val summary: String
         get() =
             listOfNotNull(
@@ -294,6 +299,8 @@ data class AirVisionUsbDeviceInfo(
                 productName?.takeIf { it.isNotBlank() }?.let { "product: $it" },
                 vendorProduct?.takeIf { it.isNotBlank() }?.let { "usb id: $it" },
                 deviceName?.takeIf { it.isNotBlank() }?.let { "device path: $it" },
+                deviceClassSummary?.let { "device class: $it" },
+                interfaceCount?.let { "interfaces: $it" },
                 serialNumber?.takeIf { it.isNotBlank() }?.let { "serial: $it" }
                     ?: serialStatus?.takeIf { it.isNotBlank() }?.let { "serial: $it" },
                 "firmware/version: ${firmwareVersion?.takeIf { it.isNotBlank() } ?: "pending ASUS HID protocol"}",
@@ -497,6 +504,10 @@ private fun UsbDevice.airVisionDeviceInfo(permissionGranted: Boolean): AirVision
         productName = productName,
         deviceName = deviceName,
         vendorProduct = vendorProductLabel(),
+        deviceClass = deviceClass,
+        deviceSubclass = deviceSubclass,
+        deviceProtocol = deviceProtocol,
+        interfaceCount = interfaceCount,
         serialNumber = serialNumber,
         serialStatus = serialStatus,
         firmwareVersion = usbDescriptorVersion(),
@@ -510,6 +521,17 @@ private fun UsbDevice.usbDescriptorVersion(): String? =
             .takeIf { it.isNotEmpty() }
             ?.let { "USB descriptor $it" }
     }.getOrNull()
+
+private fun usbClassLabel(interfaceClass: Int): String =
+    when (interfaceClass) {
+        UsbConstants.USB_CLASS_AUDIO -> "audio"
+        UsbConstants.USB_CLASS_HID -> "hid"
+        UsbConstants.USB_CLASS_HUB -> "hub"
+        UsbConstants.USB_CLASS_MASS_STORAGE -> "storage"
+        UsbConstants.USB_CLASS_PER_INTERFACE -> "per-interface"
+        UsbConstants.USB_CLASS_VENDOR_SPEC -> "vendor"
+        else -> "class-$interfaceClass"
+    }
 
 private fun UsbDevice.hasInterfaceClass(interfaceClass: Int): Boolean = interfaces().any { it.interfaceClass == interfaceClass }
 

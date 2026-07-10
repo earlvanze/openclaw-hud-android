@@ -26,6 +26,10 @@ class AirVisionDiagnosticsSnapshotTest {
                                 productName = "AirVision M1",
                                 deviceName = "/dev/bus/usb/001/002",
                                 vendorProduct = "0x0b05:0x1b3c",
+                                deviceClass = 0,
+                                deviceSubclass = 0,
+                                deviceProtocol = 0,
+                                interfaceCount = 4,
                                 serialNumber = "private-device-serial",
                                 firmwareVersion = "USB descriptor 1.02",
                             ),
@@ -118,8 +122,12 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("11", root.getValue("version").jsonPrimitive.content)
+        assertEquals("12", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
+        assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
+        assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
+        assertEquals("0", deviceInfo.getValue("deviceProtocol").jsonPrimitive.content)
+        assertEquals("4", deviceInfo.getValue("interfaceCount").jsonPrimitive.content)
         assertEquals("true", usb.getValue("firmwareControlReady").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasWritableHidReports").jsonPrimitive.content)
         assertEquals("true", firmwareCapabilities.getValue("hasInterruptReportPath").jsonPrimitive.content)
