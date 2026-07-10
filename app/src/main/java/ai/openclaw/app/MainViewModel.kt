@@ -5,6 +5,7 @@ import ai.openclaw.app.chat.ChatModelChoice
 import ai.openclaw.app.chat.ChatPendingToolCall
 import ai.openclaw.app.chat.ChatSessionEntry
 import ai.openclaw.app.chat.OutgoingAttachment
+import ai.openclaw.app.gateway.DeviceIdentityStore
 import ai.openclaw.app.gateway.GatewayEndpoint
 import ai.openclaw.app.node.CameraCaptureManager
 import ai.openclaw.app.node.CanvasController
@@ -249,7 +250,7 @@ class MainViewModel(
     }
 
     fun resetGatewaySetupAuth() {
-        ensureRuntime().resetGatewaySetupAuth()
+        runtimeRef.value?.resetGatewaySetupAuth() ?: clearStoredGatewaySetupAuth()
     }
 
     fun setOnboardingCompleted(value: Boolean) {
@@ -338,17 +339,12 @@ class MainViewModel(
     }
 
     fun handleGatewaySetupLaunch(request: GatewaySetupLaunchRequest): Boolean {
-        val config = resolveGatewaySetupLaunchConfig(request) ?: return false
-
-        resetGatewaySetupAuth()
-        prefs.setManualEnabled(true)
-        prefs.setManualHost(config.host)
-        prefs.setManualPort(config.port)
-        prefs.setManualTls(config.tls)
-        prefs.setGatewayBootstrapToken(config.bootstrapToken)
-        prefs.setGatewayToken(config.token)
-        prefs.setGatewayPassword(config.password)
-        setOnboardingCompleted(true)
+        val config =
+            applyGatewaySetupLaunchConfig(
+                prefs = prefs,
+                deviceId = gatewaySetupDeviceId(),
+                request = request,
+            ) ?: return false
         _requestedHomeDestination.value = if (BuildConfig.OPENCLAW_DEFAULT_HUD) null else HomeDestination.Connect
 
         if (request.autoConnect) {
@@ -361,6 +357,12 @@ class MainViewModel(
         }
         return true
     }
+
+    private fun clearStoredGatewaySetupAuth() {
+        clearGatewaySetupAuthForDevice(prefs, gatewaySetupDeviceId())
+    }
+
+    private fun gatewaySetupDeviceId(): String = DeviceIdentityStore(getApplication()).loadOrCreate().deviceId
 
     fun handlePlayReviewDemoLaunch(request: PlayReviewDemoLaunchRequest) {
         prefs.setAirVisionDemoModeEnabled(true)

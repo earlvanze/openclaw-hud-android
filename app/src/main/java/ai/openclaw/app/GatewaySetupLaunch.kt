@@ -1,5 +1,6 @@
 package ai.openclaw.app
 
+import ai.openclaw.app.gateway.DeviceAuthStore
 import ai.openclaw.app.ui.decodeGatewaySetupCode
 import ai.openclaw.app.ui.parseGatewayEndpointResult
 import android.content.Intent
@@ -54,4 +55,32 @@ fun resolveGatewaySetupLaunchConfig(request: GatewaySetupLaunchRequest): Gateway
         token = setup.token.orEmpty().trim(),
         password = setup.password.orEmpty().trim(),
     )
+}
+
+fun applyGatewaySetupLaunchConfig(
+    prefs: SecurePrefs,
+    deviceId: String,
+    request: GatewaySetupLaunchRequest,
+): GatewaySetupLaunchConfig? {
+    val config = resolveGatewaySetupLaunchConfig(request) ?: return null
+    clearGatewaySetupAuthForDevice(prefs, deviceId)
+    prefs.setManualEnabled(true)
+    prefs.setManualHost(config.host)
+    prefs.setManualPort(config.port)
+    prefs.setManualTls(config.tls)
+    prefs.setGatewayBootstrapToken(config.bootstrapToken)
+    prefs.setGatewayToken(config.token)
+    prefs.setGatewayPassword(config.password)
+    prefs.setOnboardingCompleted(true)
+    return config
+}
+
+fun clearGatewaySetupAuthForDevice(
+    prefs: SecurePrefs,
+    deviceId: String,
+) {
+    prefs.clearGatewaySetupAuth()
+    val deviceAuthStore = DeviceAuthStore(prefs)
+    deviceAuthStore.clearToken(deviceId, "node")
+    deviceAuthStore.clearToken(deviceId, "operator")
 }

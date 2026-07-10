@@ -1,5 +1,7 @@
 package ai.openclaw.app
 
+import ai.openclaw.app.gateway.DeviceAuthStore
+import android.content.Context
 import android.content.Intent
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -7,9 +9,11 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.Base64
+import java.util.UUID
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
@@ -86,6 +90,54 @@ class GatewaySetupLaunchTest {
             )
 
         assertNull(resolved)
+    }
+
+    @Test
+    fun handleSetupLaunchReplacesStaleLocalEndpointWithoutAutoConnect() {
+        val context = RuntimeEnvironment.getApplication()
+        val securePrefs =
+            context.getSharedPreferences(
+                "openclaw.node.secure.test.${UUID.randomUUID()}",
+                Context.MODE_PRIVATE,
+            )
+        val prefs = SecurePrefs(context, securePrefsOverride = securePrefs)
+        val deviceId = "fold-7"
+        val deviceAuthStore = DeviceAuthStore(prefs)
+        prefs.setManualEnabled(true)
+        prefs.setManualHost("127.0.0.1")
+        prefs.setManualPort(18789)
+        prefs.setManualTls(false)
+        prefs.setGatewayBootstrapToken("stale-bootstrap")
+        prefs.setGatewayToken("stale-token")
+        prefs.setGatewayPassword("stale-password")
+        deviceAuthStore.saveToken(deviceId, "node", "stale-node-token")
+        deviceAuthStore.saveToken(deviceId, "operator", "stale-operator-token")
+        val setupCode =
+            encodeSetupCode(
+                """{"url":"ws://100.88.253.107:45219","bootstrapToken":" cyber-bootstrap "}""",
+            )
+
+        val config =
+            applyGatewaySetupLaunchConfig(
+                prefs = prefs,
+                deviceId = deviceId,
+                request = GatewaySetupLaunchRequest(setupCode = setupCode, autoConnect = false),
+            )
+
+        requireNotNull(config)
+        assertEquals("100.88.253.107", config.host)
+        assertEquals(45219, config.port)
+        assertFalse(config.tls)
+        assertTrue(prefs.manualEnabled.value)
+        assertEquals("100.88.253.107", prefs.manualHost.value)
+        assertEquals(45219, prefs.manualPort.value)
+        assertFalse(prefs.manualTls.value)
+        assertEquals("cyber-bootstrap", prefs.gatewayBootstrapToken.value)
+        assertEquals("", prefs.gatewayToken.value)
+        assertNull(prefs.loadGatewayPassword())
+        assertTrue(prefs.onboardingCompleted.value)
+        assertNull(deviceAuthStore.loadToken(deviceId, "node"))
+        assertNull(deviceAuthStore.loadToken(deviceId, "operator"))
     }
 
     private fun encodeSetupCode(json: String): String =
