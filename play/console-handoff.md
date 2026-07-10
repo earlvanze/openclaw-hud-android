@@ -12,7 +12,7 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.10-hud-release.aab`
-- SHA-256: `105621d4c6c19e190727247cbaff428467bb50da5bd2b841a2c7c3e87f3b14f5`
+- SHA-256: `88e5833816d29b52047da19b925b5c7d2a5949e3f971b7d0186a74272b7507cb`
 - Version: 2026.7.10 (2026071001)
 
 ## Remaining Console Blockers
@@ -43,7 +43,7 @@ Key features:
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - Speaker routing support for AirVision M1 audio devices
-- AirVision HUD per-mode profile controls for view mode, custom profile labels, copy-to-custom actions, JSON backup/import, external-display target, placement, physical main screen visibility, safe area, display identification, software brightness, virtual distance, IPD calibration, Eye Care filtering, 3D Mode, gesture/hotkey behavior, brightness-key chat/brightness/distance controls, profile reset, and low-overhead preferences
+- AirVision HUD per-mode profile controls for view mode, custom profile labels, copy-to-custom actions, JSON backup/import, external-display target, placement, physical main screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, IPD calibration, Eye Care filtering, 3D Mode, gesture/hotkey behavior, brightness-key chat/brightness/distance controls, profile reset, and low-overhead preferences
 - AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
 - Optional USB firmware-link detection, device identity, descriptor diagnostics, readable/writable HID report-path summaries, per-feature firmware-apply readiness, desired firmware-sync state, and protocol-capture targets for AirVision M1 hardware status
 - Agent and provider/model controls for OpenClaw sessions
@@ -52,10 +52,10 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 
 Release notes:
 
-Initial AirVision M1 HUD release candidate:
-- Minimal green-on-black Samsung DeX presentation.
+AirVision M1 HUD release candidate:
+- Minimal green/black Samsung DeX presentation.
 - Compact chat, notifications, voice controls, and captions.
-- Per-mode M1 tuning profiles with backup/import, brightness, distance, IPD, Eye Care, gestures, and hotkeys.
+- Per-mode M1 tuning profiles with backup/import, brightness, distance, HUD scale, IPD, Eye Care, gestures, and hotkeys.
 - USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
 - In-app privacy policy under App Preferences.
 - Play HUD build removes SMS and Call Log permissions.
