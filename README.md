@@ -267,7 +267,9 @@ To pair on first launch, pass a setup code directly or from a local file:
 ```
 
 The setup launch stores the gateway endpoint/auth, marks onboarding complete for
-the HUD package, and starts connecting immediately.
+the HUD package, and starts connecting immediately by default. Add
+`--no-auto-connect` when you want to import the setup code without opening a
+gateway session on launch.
 
 Recent live validation command:
 
@@ -582,7 +584,9 @@ openclaw devices approve <requestId>
 ```
 
 For HUD pairing, prefer `scripts/install-launch-hud.sh --setup-json ...` so the
-HUD package is marked onboarded and starts connecting immediately.
+HUD package is marked onboarded and starts connecting immediately. Add
+`--no-auto-connect` to store the setup code without opening a gateway session on
+launch.
 
 ## Permissions
 
