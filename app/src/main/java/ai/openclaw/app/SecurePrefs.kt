@@ -60,6 +60,8 @@ class SecurePrefs(
         private const val AIR_VISION_CUSTOM_2_LABEL_KEY = "airVision.profile.custom2.label"
         private const val AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY = "airVision.physicalMainScreenVisible"
         private const val AIR_VISION_DEMO_MODE_ENABLED_KEY = "airVision.demoModeEnabled"
+        private const val AIR_VISION_FIRMWARE_CAPTURE_RESULTS_JSON_KEY =
+            "airVision.firmware.captureResults.json"
     }
 
     private val appContext = context.applicationContext
@@ -234,6 +236,10 @@ class SecurePrefs(
     private val _airVisionDemoModeEnabled =
         MutableStateFlow(plainPrefs.getBoolean(AIR_VISION_DEMO_MODE_ENABLED_KEY, false))
     val airVisionDemoModeEnabled: StateFlow<Boolean> = _airVisionDemoModeEnabled
+
+    private val _airVisionFirmwareCaptureResultsSummary =
+        MutableStateFlow(loadAirVisionFirmwareCaptureResultsSummary())
+    val airVisionFirmwareCaptureResultsSummary: StateFlow<String?> = _airVisionFirmwareCaptureResultsSummary
 
     private val _translationCaptionSourceLanguage =
         MutableStateFlow(
@@ -821,6 +827,21 @@ class SecurePrefs(
         return true
     }
 
+    fun importAirVisionFirmwareCaptureResults(raw: String): AirVisionFirmwareCaptureResultsSummary {
+        val trimmed = raw.trim()
+        val summary = AirVisionFirmwareCaptureResultFiles.summarize(trimmed)
+        plainPrefs.edit {
+            putString(AIR_VISION_FIRMWARE_CAPTURE_RESULTS_JSON_KEY, trimmed)
+        }
+        _airVisionFirmwareCaptureResultsSummary.value = summary.displayText
+        return summary
+    }
+
+    fun clearAirVisionFirmwareCaptureResults() {
+        plainPrefs.edit { remove(AIR_VISION_FIRMWARE_CAPTURE_RESULTS_JSON_KEY) }
+        _airVisionFirmwareCaptureResultsSummary.value = null
+    }
+
     fun exportAirVisionProfileBackup(): String =
         AirVisionProfileBackups.encode(
             AirVisionProfileBackup(
@@ -986,6 +1007,20 @@ class SecurePrefs(
         }
 
         return resolved
+    }
+
+    private fun loadAirVisionFirmwareCaptureResultsSummary(): String? {
+        val raw =
+            plainPrefs
+                .getString(AIR_VISION_FIRMWARE_CAPTURE_RESULTS_JSON_KEY, null)
+                ?.trim()
+                ?.takeIf(String::isNotEmpty) ?: return null
+        return runCatching {
+            AirVisionFirmwareCaptureResultFiles.summarize(raw).displayText
+        }.getOrElse {
+            plainPrefs.edit { remove(AIR_VISION_FIRMWARE_CAPTURE_RESULTS_JSON_KEY) }
+            null
+        }
     }
 
     private fun loadLocationMode(): LocationMode {

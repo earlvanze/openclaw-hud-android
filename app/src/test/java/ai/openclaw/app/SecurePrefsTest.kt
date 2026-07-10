@@ -8,6 +8,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -684,6 +685,61 @@ class SecurePrefsTest {
         prefs.setAirVisionViewMode(AirVisionViewMode.Gaming)
         assertEquals(true, SecurePrefs(context).airVisionPhysicalMainScreenVisible.value)
     }
+
+    @Test
+    fun airVisionFirmwareCaptureResults_persistSanitizedSummaryOnlyOutsideProfileBackup() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        val summary = prefs.importAirVisionFirmwareCaptureResults(airVisionCaptureResultsJson())
+
+        assertEquals("capture results: 0 validated, 0 write-enabled, 7 blocked", summary.summary)
+        assertEquals(
+            "capture results: 0 validated, 0 write-enabled, 7 blocked; host=Cyber, tool=USBPcap/Wireshark",
+            prefs.airVisionFirmwareCaptureResultsSummary.value,
+        )
+
+        val reloaded = SecurePrefs(context)
+        assertEquals(
+            "capture results: 0 validated, 0 write-enabled, 7 blocked; host=Cyber, tool=USBPcap/Wireshark",
+            reloaded.airVisionFirmwareCaptureResultsSummary.value,
+        )
+        assertFalse(reloaded.exportAirVisionProfileBackup().contains("firmwareCaptureResults"))
+    }
+
+    @Test
+    fun airVisionFirmwareCaptureResults_rejectsInvalidImportWithoutReplacingExistingSummary() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.importAirVisionFirmwareCaptureResults(airVisionCaptureResultsJson())
+
+        val error =
+            assertThrows(IllegalArgumentException::class.java) {
+                prefs.importAirVisionFirmwareCaptureResults(
+                    airVisionCaptureResultsJson(
+                        overridesByRawKey =
+                            mapOf(
+                                "brightness" to
+                                    """
+                                    "writePayloadSummary": "token=do-not-store",
+                                    "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+                                    """.trimIndent(),
+                            ),
+                    ),
+                )
+            }
+
+        assertEquals(true, error.message.orEmpty().contains("secret-shaped"))
+        assertEquals(
+            "capture results: 0 validated, 0 write-enabled, 7 blocked; host=Cyber, tool=USBPcap/Wireshark",
+            prefs.airVisionFirmwareCaptureResultsSummary.value,
+        )
+    }
 }
 
 private fun backupProfileJson(
@@ -707,3 +763,67 @@ private fun backupProfileJson(
       "lightLoadModeEnabled": false
     }
     """.trimIndent()
+
+private fun airVisionCaptureResultsJson(
+    overridesByRawKey: Map<String, String> = emptyMap(),
+): String =
+    """
+    {
+      "schema": "openclaw.airvision.firmwareCaptureResults",
+      "version": 1,
+      "payloadPolicy": "Sanitized summaries only.",
+      "source": {
+        "windowsHost": "Cyber",
+        "captureTool": "USBPcap/Wireshark",
+        "asusAirVisionAppVersion": null,
+        "androidDiagnosticsExportSha256": null,
+        "notes": "test"
+      },
+      "features": [
+        ${AirVisionFirmwareFeature.entries.joinToString(",\n") { feature ->
+        airVisionCaptureResultFeatureJson(feature, overridesByRawKey[feature.rawValue])
+    }}
+      ]
+    }
+    """.trimIndent()
+
+private fun airVisionCaptureResultFeatureJson(
+    feature: AirVisionFirmwareFeature,
+    overrideFields: String?,
+): String {
+    val overrideKeys =
+        overrideFields
+            ?.lineSequence()
+            ?.mapNotNull { line ->
+                line
+                    .trim()
+                    .substringBefore(":", missingDelimiterValue = "")
+                    .trim('"')
+                    .takeIf(String::isNotBlank)
+            }?.toSet()
+            .orEmpty()
+    val defaults =
+        linkedMapOf(
+            "status" to "\"pending\"",
+            "writeReportId" to "null",
+            "writeEndpoint" to "null",
+            "writePayloadSummary" to "null",
+            "readbackReportId" to "null",
+            "readbackEndpoint" to "null",
+            "readbackPayloadSummary" to "null",
+            "checksumFramingNotes" to "null",
+            "visibleStateConfirmed" to "false",
+            "captureReferences" to "[]",
+            "androidEnablementDecision" to "\"blocked\"",
+            "blockerReason" to "\"Windows ASUS HID protocol capture has not been validated.\"",
+        ).filterKeys { it !in overrideKeys }
+    val fields =
+        listOf(
+            "\"rawKey\": \"${feature.rawValue}\"",
+            "\"label\": \"${feature.label}\"",
+            "\"probeValues\": [${feature.captureProbeValues.joinToString(", ") { "\"$it\"" }}]",
+        ) +
+            defaults.map { (key, value) -> "\"$key\": $value" } +
+            listOfNotNull(overrideFields)
+    return "{\n${fields.joinToString(",\n")}\n}"
+}

@@ -56,7 +56,10 @@ data class AirVisionFirmwareCaptureResultsSummary(
     val blockedFeatureCount: Int,
     val sourceSummary: String,
     val summary: String,
-)
+) {
+    val displayText: String
+        get() = "$summary; $sourceSummary"
+}
 
 object AirVisionFirmwareCaptureResultFiles {
     const val SCHEMA = "openclaw.airvision.firmwareCaptureResults"
