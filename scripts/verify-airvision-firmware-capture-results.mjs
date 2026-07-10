@@ -230,6 +230,7 @@ function validateResults(results, features) {
         throw new Error(`${label} contains a secret or raw-serial-shaped assignment; keep private values out of capture results.`);
       }
 
+      const hasCaptureReferenceDigest = result.captureReferences.some((reference) => isFilled(reference.sha256));
       const hasCompleteEvidence =
         result.status === "validated" &&
         isFilled(result.writeReportId) &&
@@ -240,10 +241,12 @@ function validateResults(results, features) {
         isFilled(result.readbackPayloadSummary) &&
         isFilled(result.checksumFramingNotes) &&
         result.visibleStateConfirmed === true &&
-        result.captureReferences.length > 0;
+        hasCaptureReferenceDigest;
 
       if (result.androidEnablementDecision === "enable_android_write" && !hasCompleteEvidence) {
-        throw new Error(`${label} cannot enable Android writes without validated write/readback/checksum/visible-state evidence.`);
+        throw new Error(
+          `${label} cannot enable Android writes without validated write/readback/checksum/visible-state evidence and a SHA-256 capture reference.`,
+        );
       }
       if (result.androidEnablementDecision === "blocked" && !isFilled(result.blockerReason)) {
         throw new Error(`${label}.blockerReason is required while Android enablement is blocked.`);

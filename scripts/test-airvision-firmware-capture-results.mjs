@@ -52,6 +52,31 @@ try {
   await writeFile(unsafePath, `${JSON.stringify(unsafeEnablement, null, 2)}\n`);
   expectFailure("unsafe enablement", runVerifier(unsafePath), "cannot enable Android writes without validated");
 
+  const missingCaptureDigest = structuredClone(template);
+  Object.assign(missingCaptureDigest.features[0], {
+    status: "validated",
+    writeReportId: "0x05",
+    writeEndpoint: "out if=2 interrupt addr=0x2 max=64 int=1",
+    writePayloadSummary: "brightness byte changes only; sanitized",
+    readbackReportId: "0x85",
+    readbackEndpoint: "in if=1 interrupt addr=0x81 max=32 int=4",
+    readbackPayloadSummary: "readback brightness byte matched; sanitized",
+    checksumFramingNotes: "xor checksum observed; sanitized",
+    visibleStateConfirmed: true,
+    captureReferences: [
+      {
+        file: "airvision-brightness-summary.txt",
+        sha256: null,
+        notes: "sanitized summary only",
+      },
+    ],
+    androidEnablementDecision: "enable_android_write",
+    blockerReason: null,
+  });
+  const missingCaptureDigestPath = join(tempDir, "missing-capture-digest.json");
+  await writeFile(missingCaptureDigestPath, `${JSON.stringify(missingCaptureDigest, null, 2)}\n`);
+  expectFailure("missing capture digest", runVerifier(missingCaptureDigestPath), "SHA-256 capture reference");
+
   const secretShaped = structuredClone(template);
   secretShaped.features[0].blockerReason = "token=abc123 should not be committed";
   const secretPath = join(tempDir, "secret-shaped.json");

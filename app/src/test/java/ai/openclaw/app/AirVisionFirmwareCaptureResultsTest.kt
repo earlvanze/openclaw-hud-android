@@ -91,6 +91,43 @@ class AirVisionFirmwareCaptureResultsTest {
     }
 
     @Test
+    fun decode_rejectsValidatedWriteEvidenceWithoutCaptureDigest() {
+        val unsafe =
+            pendingResultsJson(
+                overridesByRawKey =
+                    mapOf(
+                        "brightness" to
+                            """
+                            "status": "validated",
+                            "writeReportId": "0x05",
+                            "writeEndpoint": "out if=2 interrupt addr=0x2 max=64 int=1",
+                            "writePayloadSummary": "brightness byte changes only; sanitized",
+                            "readbackReportId": "0x85",
+                            "readbackEndpoint": "in if=1 interrupt addr=0x81 max=32 int=4",
+                            "readbackPayloadSummary": "readback brightness byte matched; sanitized",
+                            "checksumFramingNotes": "xor checksum observed; sanitized",
+                            "visibleStateConfirmed": true,
+                            "captureReferences": [
+                              {
+                                "file": "airvision-brightness-summary.txt",
+                                "sha256": null,
+                                "notes": "sanitized summary only"
+                              }
+                            ],
+                            "androidEnablementDecision": "enable_android_write",
+                            "blockerReason": null
+                            """.trimIndent(),
+                    ),
+            )
+
+        val error =
+            runCatching { AirVisionFirmwareCaptureResultFiles.decode(unsafe) }
+                .exceptionOrNull()
+
+        assertTrue(error?.message.orEmpty().contains("SHA-256 capture reference"))
+    }
+
+    @Test
     fun decode_rejectsSecretShapedAssignments() {
         val unsafe =
             pendingResultsJson(

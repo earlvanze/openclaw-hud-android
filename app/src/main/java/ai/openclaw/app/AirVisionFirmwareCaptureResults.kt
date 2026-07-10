@@ -145,6 +145,8 @@ object AirVisionFirmwareCaptureResultFiles {
                 requireSanitizedText(reference.file, "features[$index].captureReferences[$referenceIndex].file")
                 requireSanitizedText(reference.notes, "features[$index].captureReferences[$referenceIndex].notes")
             }
+            val hasCaptureReferenceDigest =
+                result.captureReferences.any { !it.sha256.isNullOrBlank() }
             val completeEvidence =
                 result.status == "validated" &&
                     isFilled(result.writeReportId) &&
@@ -155,9 +157,9 @@ object AirVisionFirmwareCaptureResultFiles {
                     isFilled(result.readbackPayloadSummary) &&
                     isFilled(result.checksumFramingNotes) &&
                     result.visibleStateConfirmed &&
-                    result.captureReferences.isNotEmpty()
+                    hasCaptureReferenceDigest
             require(result.androidEnablementDecision != "enable_android_write" || completeEvidence) {
-                "Feature ${result.rawKey} cannot enable Android writes without validated write/readback/checksum/visible-state evidence."
+                "Feature ${result.rawKey} cannot enable Android writes without validated write/readback/checksum/visible-state evidence and a SHA-256 capture reference."
             }
             require(result.androidEnablementDecision != "blocked" || isFilled(result.blockerReason)) {
                 "Feature ${result.rawKey} needs a blocker reason while Android writes are blocked."
