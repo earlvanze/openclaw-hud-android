@@ -335,12 +335,14 @@ async function verifyListing(listingDir, language) {
     "AirVision M1",
     "HID report-path summaries",
     "per-feature firmware-apply readiness",
+    "desired firmware-sync state",
     "protocol-capture targets",
   ]);
   requireIncludes("Release notes", releaseNotes, [
     "USB firmware-link diagnostics",
     "HID report paths",
     "feature readiness",
+    "desired firmware-sync state",
     "protocol-capture targets",
   ]);
 
