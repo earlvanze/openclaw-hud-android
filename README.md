@@ -155,7 +155,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
 | App Preferences | Implemented with startup view, AirVision companion language preference with Android locale application, speaker state, Samsung/native captions preference, OpenClaw translation caption source/target languages, demo mode, JSON profile backup/import, software version/build display, EULA note, in-app privacy policy, official FAQ/tutorial, product registration, and ASUS support links. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, device class/subclass/protocol, interface count, serial availability, USB descriptor version when Android exposes it, and firmware protocol status. Actual ASUS HID firmware version still needs vendor protocol support. |
-| Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, derived readable/writable HID report-path capability summaries with endpoint packet sizes, per-feature firmware-apply readiness for Windows-style controls, per-feature Windows protocol-capture targets for brightness/distance/IPD/Splendid/Eye Care/Motion Sync/3D Mode, USB interface/endpoint diagnostics for protocol capture work, and a JSON diagnostics export that omits raw USB serial values. |
+| Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, derived readable/writable HID report-path capability summaries with endpoint packet sizes, per-feature firmware-apply readiness for Windows-style controls, per-feature Windows protocol-capture targets for View Mode/brightness/distance/IPD/Splendid/Eye Care/Motion Sync/Light Load/3D Mode, USB interface/endpoint diagnostics for protocol capture work, and a JSON diagnostics export that omits raw USB serial values. |
 | Identify | Implemented as a temporary `HUD 1` marker on the Android Presentation display. |
 | Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports configurable external-display targeting, per-mode placement, per-mode physical main screen visibility, and safe-area layout profiles for the M1 presentation. |
 
@@ -181,13 +181,13 @@ captured and validated.
 
 `play/airvision-firmware-capture-plan.md` is a generated offline worksheet for
 the next Windows/Cyber capture session. It is derived from the app's canonical
-AirVision firmware feature list and records probe sequences for brightness,
-screen distance, IPD, Splendid, blue-light filter, Motion Sync, and 3D Mode,
-plus acceptance criteria and a per-feature capture-result template for report
-IDs, payload lengths, endpoints, sanitized payload summaries,
-checksum/framing notes, visible-state confirmation, and the Android
-firmware-write enablement decision. Raw payload bytes stay in private capture
-files and are intentionally rejected by the checked-in results verifier.
+AirVision firmware feature list and records probe sequences for View Mode,
+brightness, screen distance, IPD, Splendid, blue-light filter, Motion Sync,
+Light Load Mode, and 3D Mode, plus acceptance criteria and a per-feature
+capture-result template for report IDs, payload lengths, endpoints, sanitized
+payload summaries, checksum/framing notes, visible-state confirmation, and the
+Android firmware-write enablement decision. Raw payload bytes stay in private
+capture files and are intentionally rejected by the checked-in results verifier.
 `play/airvision-firmware-capture-results.json` is the machine-checked sanitized
 capture-results file. It starts with every feature blocked and must stay free of
 raw USBPcap dumps, raw USB serial numbers, tokens, and temporary review

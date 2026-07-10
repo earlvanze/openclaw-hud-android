@@ -45,8 +45,12 @@ class AirVisionFirmwareSyncPlanTest {
         assertEquals(AirVisionFirmwareFeature.entries.size, plan.androidAppliedCount)
         assertEquals(0, plan.firmwareWriteAllowedCount)
         assertEquals(AirVisionFirmwareFeature.entries.size, plan.blockedFirmwareWriteCount)
-        assertEquals("firmware sync: 7 Android-applied, 7 pending ASUS HID sync", plan.summary)
-        assertEquals("firmware writes: 0 enabled, 7 blocked pending validated capture results", plan.writeGateSummary)
+        assertEquals("firmware sync: 9 Android-applied, 9 pending ASUS HID sync", plan.summary)
+        assertEquals("firmware writes: 0 enabled, 9 blocked pending validated capture results", plan.writeGateSummary)
+        assertEquals(
+            "Working",
+            plan.items.first { it.feature == AirVisionFirmwareFeature.ViewMode }.desiredValue,
+        )
         assertEquals(
             "Brightness=64% (capture pending)",
             plan.items.first { it.feature == AirVisionFirmwareFeature.Brightness }.summary,
@@ -93,6 +97,10 @@ class AirVisionFirmwareSyncPlanTest {
         assertEquals(
             "off (locked by Light Load Mode)",
             plan.items.first { it.feature == AirVisionFirmwareFeature.ThreeDMode }.desiredValue,
+        )
+        assertEquals(
+            "on",
+            plan.items.first { it.feature == AirVisionFirmwareFeature.LightLoadMode }.desiredValue,
         )
         assertTrue(plan.items.all { it.hardwareSyncStatus == "waiting for writable HID" })
     }

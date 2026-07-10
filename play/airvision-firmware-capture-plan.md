@@ -22,15 +22,27 @@ Generated from `AirVisionFirmwareFeature` in `AirVisionUsbController.kt`. Run `n
 
 | Feature | Raw key | Android status | Probe values |
 | --- | --- | --- | --- |
+| View Mode | `view_mode` | per-mode HUD profile active | working -> gaming -> infinity |
 | Brightness | `brightness` | software HUD dimming active | 20% -> 50% -> 80% |
 | Screen distance | `screen_distance` | virtual HUD distance scaling active | 50 cm -> 100 cm -> 150 cm |
 | IPD | `ipd` | profile calibration stored | 60 mm -> 67 mm -> 72 mm |
 | Splendid | `splendid` | HUD color preview active | standard -> theater -> eye_care |
 | Blue Light Filter | `blue_light_filter` | Eye Care warm overlay active | 0% -> 50% -> 100% |
 | Motion Sync | `motion_sync` | profile preference stored | off -> on |
+| Light Load Mode | `light_load_mode` | low-overhead HUD profile active | off -> on |
 | 3D Mode | `3d_mode` | profile preference stored | off -> on |
 
 ## Per-Feature Capture Checklist
+
+### View Mode
+
+- Raw key: `view_mode`
+- Probe values: working -> gaming -> infinity
+- Capture notes:
+  - Start a fresh USB capture.
+  - Change View Mode through the probe values in order, pausing briefly after each value.
+  - Save the capture with the feature key and value sequence in the filename.
+  - Record any matching writable HID report path from the Android diagnostics export.
 
 ### Brightness
 
@@ -92,6 +104,16 @@ Generated from `AirVisionFirmwareFeature` in `AirVisionUsbController.kt`. Run `n
   - Save the capture with the feature key and value sequence in the filename.
   - Record any matching writable HID report path from the Android diagnostics export.
 
+### Light Load Mode
+
+- Raw key: `light_load_mode`
+- Probe values: off -> on
+- Capture notes:
+  - Start a fresh USB capture.
+  - Change Light Load Mode through the probe values in order, pausing briefly after each value.
+  - Save the capture with the feature key and value sequence in the filename.
+  - Record any matching writable HID report path from the Android diagnostics export.
+
 ### 3D Mode
 
 - Raw key: `3d_mode`
@@ -106,14 +128,16 @@ Generated from `AirVisionFirmwareFeature` in `AirVisionUsbController.kt`. Run `n
 
 | Feature | Write report ID | Write payload summary | Readback report ID | Readback payload summary | Checksum/framing notes | ASUS UI + M1 visible confirmation | Android enablement decision |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| View Mode | pending | pending | pending | pending | pending | pending | blocked |
 | Brightness | pending | pending | pending | pending | pending | pending | blocked |
 | Screen distance | pending | pending | pending | pending | pending | pending | blocked |
 | IPD | pending | pending | pending | pending | pending | pending | blocked |
 | Splendid | pending | pending | pending | pending | pending | pending | blocked |
 | Blue Light Filter | pending | pending | pending | pending | pending | pending | blocked |
 | Motion Sync | pending | pending | pending | pending | pending | pending | blocked |
+| Light Load Mode | pending | pending | pending | pending | pending | pending | blocked |
 | 3D Mode | pending | pending | pending | pending | pending | pending | blocked |
 
 ## Generated Metadata
 
-- Feature count: 7
+- Feature count: 9

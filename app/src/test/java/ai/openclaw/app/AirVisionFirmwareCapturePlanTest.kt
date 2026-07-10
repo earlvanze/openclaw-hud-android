@@ -61,16 +61,19 @@ class AirVisionFirmwareCapturePlanTest {
         assertTrue(markdown.startsWith("# AirVision M1 Firmware Protocol Capture Plan"))
         assertTrue(markdown.contains("- Capture readiness: writable HID report path detected"))
         assertTrue(markdown.contains("## Desired Firmware Sync"))
-        assertTrue(markdown.contains("firmware sync: 7 Android-applied, 7 pending ASUS HID sync"))
+        assertTrue(markdown.contains("firmware sync: 9 Android-applied, 9 pending ASUS HID sync"))
         assertTrue(
             markdown.contains(
                 "| Brightness | 64% | software HUD dimming | capture pending | " +
                     "Writable HID path detected, but ASUS vendor report payloads are not validated. |",
             ),
         )
+        assertTrue(markdown.contains("| View Mode | Working | per-mode HUD profile | capture pending |"))
+        assertTrue(markdown.contains("| Light Load Mode | off | low-overhead HUD profile | capture pending |"))
         assertTrue(markdown.contains("| IPD | 67 mm | profile calibration | capture pending |"))
         assertTrue(markdown.contains("- Desired value: 35%"))
         assertTrue(markdown.contains("- Hardware sync: capture pending"))
+        assertTrue(markdown.contains("| View Mode | `view_mode` | per-mode HUD profile active | working -> gaming -> infinity |"))
         assertTrue(markdown.contains("| IPD | `ipd` | profile calibration stored | 60 mm -> 67 mm -> 72 mm |"))
         assertTrue(markdown.contains("out if=2 interrupt addr=0x2 max=64 int=1"))
         assertTrue(markdown.contains("in if=2 interrupt addr=0x81 max=32 int=4"))
@@ -130,6 +133,7 @@ class AirVisionFirmwareCapturePlanTest {
 
         assertTrue(markdown.contains("| IPD | 67 mm (locked by Light Load Mode) |"))
         assertTrue(markdown.contains("| Blue Light Filter | off (requires Eye Care) |"))
+        assertTrue(markdown.contains("| Light Load Mode | on |"))
         assertTrue(markdown.contains("| 3D Mode | off (locked by Light Load Mode) |"))
         assertTrue(markdown.contains("- Hardware sync: waiting for writable HID"))
         assertTrue(

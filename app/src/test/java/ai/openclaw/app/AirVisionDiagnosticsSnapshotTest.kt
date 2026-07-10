@@ -111,12 +111,19 @@ class AirVisionDiagnosticsSnapshotTest {
         val firstFeatureReadiness = firmwareCapabilities.getValue("featureReadiness").jsonArray.first().jsonObject
         val captureTargets = firmwareCapabilities.getValue("captureTargets").jsonArray
         val firstCaptureTarget = captureTargets.first().jsonObject
+        val brightnessCaptureTarget =
+            captureTargets
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "brightness" }
+                .jsonObject
         val ipdCaptureTarget =
             captureTargets
                 .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "ipd" }
                 .jsonObject
         val firmwareSyncItems = firmwareSync.getValue("items").jsonArray
-        val brightnessSync = firmwareSyncItems.first().jsonObject
+        val brightnessSync =
+            firmwareSyncItems
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "brightness" }
+                .jsonObject
         val ipdSync =
             firmwareSyncItems
                 .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "ipd" }
@@ -145,23 +152,23 @@ class AirVisionDiagnosticsSnapshotTest {
             "firmware reports: writable: out if=2 interrupt addr=0x1 max=64 int=1, interrupt out=1, max out=64",
             firmwareCapabilities.getValue("summary").jsonPrimitive.content,
         )
-        assertEquals("brightness", firstFeatureReadiness.getValue("feature").jsonPrimitive.content)
-        assertEquals("Brightness", firstFeatureReadiness.getValue("label").jsonPrimitive.content)
-        assertEquals("software HUD dimming active", firstFeatureReadiness.getValue("androidStatus").jsonPrimitive.content)
+        assertEquals("view_mode", firstFeatureReadiness.getValue("feature").jsonPrimitive.content)
+        assertEquals("View Mode", firstFeatureReadiness.getValue("label").jsonPrimitive.content)
+        assertEquals("per-mode HUD profile active", firstFeatureReadiness.getValue("androidStatus").jsonPrimitive.content)
         assertEquals("false", firstFeatureReadiness.getValue("firmwareApplyReady").jsonPrimitive.content)
         assertEquals(
             "ASUS HID protocol capture pending",
             firstFeatureReadiness.getValue("firmwareApplyStatus").jsonPrimitive.content,
         )
         assertEquals(
-            "Brightness: ASUS HID protocol capture pending",
+            "View Mode: ASUS HID protocol capture pending",
             firstFeatureReadiness.getValue("summary").jsonPrimitive.content,
         )
-        assertEquals("brightness", firstCaptureTarget.getValue("feature").jsonPrimitive.content)
-        assertEquals("Brightness", firstCaptureTarget.getValue("label").jsonPrimitive.content)
+        assertEquals("view_mode", firstCaptureTarget.getValue("feature").jsonPrimitive.content)
+        assertEquals("View Mode", firstCaptureTarget.getValue("label").jsonPrimitive.content)
         assertEquals("true", firstCaptureTarget.getValue("captureReady").jsonPrimitive.content)
         assertEquals(
-            listOf("20%", "50%", "80%"),
+            listOf("working", "gaming", "infinity"),
             firstCaptureTarget.getValue("suggestedProbeValues").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals(
@@ -169,30 +176,38 @@ class AirVisionDiagnosticsSnapshotTest {
             firstCaptureTarget.getValue("writeReportPathSummaries").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals(
-            "Brightness: capture 20% -> 50% -> 80% on out if=2 interrupt addr=0x1 max=64 int=1",
+            "View Mode: capture working -> gaming -> infinity on out if=2 interrupt addr=0x1 max=64 int=1",
             firstCaptureTarget.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals(
+            "Brightness: capture 20% -> 50% -> 80% on out if=2 interrupt addr=0x1 max=64 int=1",
+            brightnessCaptureTarget.getValue("summary").jsonPrimitive.content,
         )
         assertEquals(
             "IPD: capture 60 mm -> 67 mm -> 72 mm on out if=2 interrupt addr=0x1 max=64 int=1",
             ipdCaptureTarget.getValue("summary").jsonPrimitive.content,
         )
         assertEquals(
-            "firmware apply: Brightness: ASUS HID protocol capture pending; " +
+            "firmware apply: View Mode: ASUS HID protocol capture pending; " +
+                "Brightness: ASUS HID protocol capture pending; " +
                 "Screen distance: ASUS HID protocol capture pending; " +
                 "IPD: ASUS HID protocol capture pending; " +
                 "Splendid: ASUS HID protocol capture pending; " +
                 "Blue Light Filter: ASUS HID protocol capture pending; " +
                 "Motion Sync: ASUS HID protocol capture pending; " +
+                "Light Load Mode: ASUS HID protocol capture pending; " +
                 "3D Mode: ASUS HID protocol capture pending",
             firmwareCapabilities.getValue("featureReadinessSummary").jsonPrimitive.content,
         )
         assertEquals(
-            "firmware capture: Brightness: capture 20% -> 50% -> 80% on out if=2 interrupt addr=0x1 max=64 int=1; " +
+            "firmware capture: View Mode: capture working -> gaming -> infinity on out if=2 interrupt addr=0x1 max=64 int=1; " +
+                "Brightness: capture 20% -> 50% -> 80% on out if=2 interrupt addr=0x1 max=64 int=1; " +
                 "Screen distance: capture 50 cm -> 100 cm -> 150 cm on out if=2 interrupt addr=0x1 max=64 int=1; " +
                 "IPD: capture 60 mm -> 67 mm -> 72 mm on out if=2 interrupt addr=0x1 max=64 int=1; " +
                 "Splendid: capture standard -> theater -> eye_care on out if=2 interrupt addr=0x1 max=64 int=1; " +
                 "Blue Light Filter: capture 0% -> 50% -> 100% on out if=2 interrupt addr=0x1 max=64 int=1; " +
                 "Motion Sync: capture off -> on on out if=2 interrupt addr=0x1 max=64 int=1; " +
+                "Light Load Mode: capture off -> on on out if=2 interrupt addr=0x1 max=64 int=1; " +
                 "3D Mode: capture off -> on on out if=2 interrupt addr=0x1 max=64 int=1",
             firmwareCapabilities.getValue("capturePlanSummary").jsonPrimitive.content,
         )
@@ -201,16 +216,16 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("interrupt", firstEndpoint.getValue("typeLabel").jsonPrimitive.content)
         assertEquals("eye_care", activeProfile.getValue("splendidMode").jsonPrimitive.content)
         assertEquals("67", activeProfile.getValue("ipdMm").jsonPrimitive.content)
-        assertEquals("7", firmwareSync.getValue("pendingHardwareSyncCount").jsonPrimitive.content)
-        assertEquals("7", firmwareSync.getValue("androidAppliedCount").jsonPrimitive.content)
+        assertEquals("9", firmwareSync.getValue("pendingHardwareSyncCount").jsonPrimitive.content)
+        assertEquals("9", firmwareSync.getValue("androidAppliedCount").jsonPrimitive.content)
         assertEquals("0", firmwareSync.getValue("firmwareWriteAllowedCount").jsonPrimitive.content)
-        assertEquals("7", firmwareSync.getValue("blockedFirmwareWriteCount").jsonPrimitive.content)
+        assertEquals("9", firmwareSync.getValue("blockedFirmwareWriteCount").jsonPrimitive.content)
         assertEquals(
-            "firmware sync: 7 Android-applied, 7 pending ASUS HID sync",
+            "firmware sync: 9 Android-applied, 9 pending ASUS HID sync",
             firmwareSync.getValue("summary").jsonPrimitive.content,
         )
         assertEquals(
-            "firmware writes: 0 enabled, 7 blocked pending validated capture results",
+            "firmware writes: 0 enabled, 9 blocked pending validated capture results",
             firmwareSync.getValue("writeGateSummary").jsonPrimitive.content,
         )
         assertEquals("brightness", brightnessSync.getValue("feature").jsonPrimitive.content)
@@ -333,6 +348,10 @@ class AirVisionDiagnosticsSnapshotTest {
             firmwareSyncItems
                 .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "3d_mode" }
                 .jsonObject
+        val lightLoadSync =
+            firmwareSyncItems
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "light_load_mode" }
+                .jsonObject
 
         assertEquals("3", hudRuntime.getValue("transcriptEntryCount").jsonPrimitive.content)
         assertEquals("2", hudRuntime.getValue("captionEntryCount").jsonPrimitive.content)
@@ -340,6 +359,8 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("false", hudRuntime.getValue("ipdAdjustmentEnabled").jsonPrimitive.content)
         assertEquals("false", hudRuntime.getValue("threeDModeAvailable").jsonPrimitive.content)
         assertEquals("67 mm (locked by Light Load Mode)", ipdSync.getValue("desiredValue").jsonPrimitive.content)
+        assertEquals("on", lightLoadSync.getValue("desiredValue").jsonPrimitive.content)
+        assertEquals("low-overhead HUD profile", lightLoadSync.getValue("androidEffect").jsonPrimitive.content)
         assertEquals("off (locked by Light Load Mode)", threeDSync.getValue("desiredValue").jsonPrimitive.content)
         assertEquals("waiting for writable HID", ipdSync.getValue("hardwareSyncStatus").jsonPrimitive.content)
     }

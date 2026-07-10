@@ -531,8 +531,12 @@ async function verifyGeneratedAirVisionFirmwareCapturePlan() {
     "Write payload summary",
     "Readback payload summary",
     "Android enablement decision",
+    "| View Mode | `view_mode` | per-mode HUD profile active | working -> gaming -> infinity |",
+    "| Light Load Mode | `light_load_mode` | low-overhead HUD profile active | off -> on |",
+    "| View Mode | pending | pending | pending | pending | pending | pending | blocked |",
     "| Brightness | pending | pending | pending | pending | pending | pending | blocked |",
     "| IPD | pending | pending | pending | pending | pending | pending | blocked |",
+    "| Light Load Mode | pending | pending | pending | pending | pending | pending | blocked |",
   ]);
   runChecked(
     process.execPath,
@@ -542,8 +546,10 @@ async function verifyGeneratedAirVisionFirmwareCapturePlan() {
   const captureResults = await readFile(airVisionFirmwareCaptureResultsPath, "utf8");
   requireIncludes("AirVision firmware capture results", captureResults, [
     '"schema": "openclaw.airvision.firmwareCaptureResults"',
+    '"rawKey": "view_mode"',
     '"rawKey": "brightness"',
     '"rawKey": "ipd"',
+    '"rawKey": "light_load_mode"',
     '"androidEnablementDecision": "blocked"',
     "Windows ASUS HID protocol capture has not been validated.",
   ]);

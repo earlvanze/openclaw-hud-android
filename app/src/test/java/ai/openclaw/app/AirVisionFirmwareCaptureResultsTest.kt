@@ -14,7 +14,7 @@ class AirVisionFirmwareCaptureResultsTest {
         assertEquals(0, summary.writeEnabledFeatureCount)
         assertEquals(AirVisionFirmwareFeature.entries.size, summary.blockedFeatureCount)
         assertEquals("host=Cyber, tool=USBPcap/Wireshark", summary.sourceSummary)
-        assertEquals("capture results: 0 validated, 0 write-enabled, 7 blocked", summary.summary)
+        assertEquals("capture results: 0 validated, 0 write-enabled, 9 blocked", summary.summary)
     }
 
     @Test
@@ -87,7 +87,7 @@ class AirVisionFirmwareCaptureResultsTest {
 
         assertEquals(1, summary.validatedFeatureCount)
         assertEquals(1, summary.writeEnabledFeatureCount)
-        assertEquals(6, summary.blockedFeatureCount)
+        assertEquals(AirVisionFirmwareFeature.entries.size - 1, summary.blockedFeatureCount)
     }
 
     @Test

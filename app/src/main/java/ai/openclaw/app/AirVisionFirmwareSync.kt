@@ -136,6 +136,7 @@ object AirVisionFirmwareSyncPlans {
 
     private fun AirVisionFirmwareFeature.desiredValueFor(settings: AirVisionDisplaySettings): String =
         when (this) {
+            AirVisionFirmwareFeature.ViewMode -> settings.viewMode.label
             AirVisionFirmwareFeature.Brightness -> "${settings.brightnessPercent}%"
             AirVisionFirmwareFeature.ScreenDistance -> "${settings.distanceCm} cm"
             AirVisionFirmwareFeature.Ipd ->
@@ -152,6 +153,7 @@ object AirVisionFirmwareSyncPlans {
                     "off (requires Eye Care)"
                 }
             AirVisionFirmwareFeature.MotionSync -> if (settings.motionSyncEnabled) "on" else "off"
+            AirVisionFirmwareFeature.LightLoadMode -> if (settings.lightLoadModeEnabled) "on" else "off"
             AirVisionFirmwareFeature.ThreeDMode ->
                 if (settings.threeDModeAvailable && settings.threeDModeEnabled) {
                     "on"
@@ -164,6 +166,7 @@ object AirVisionFirmwareSyncPlans {
 
     private fun AirVisionFirmwareFeature.androidEffectFor(settings: AirVisionDisplaySettings): String =
         when (this) {
+            AirVisionFirmwareFeature.ViewMode -> "per-mode HUD profile"
             AirVisionFirmwareFeature.Brightness -> "software HUD dimming"
             AirVisionFirmwareFeature.ScreenDistance -> "virtual HUD scaling"
             AirVisionFirmwareFeature.Ipd ->
@@ -180,6 +183,7 @@ object AirVisionFirmwareSyncPlans {
                     "inactive until Eye Care mode"
                 }
             AirVisionFirmwareFeature.MotionSync -> "profile preference"
+            AirVisionFirmwareFeature.LightLoadMode -> "low-overhead HUD profile"
             AirVisionFirmwareFeature.ThreeDMode ->
                 if (settings.threeDModeAvailable) {
                     "profile preference"

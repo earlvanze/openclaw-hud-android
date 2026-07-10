@@ -11,6 +11,27 @@
   },
   "features": [
     {
+      "rawKey": "view_mode",
+      "label": "View Mode",
+      "status": "pending",
+      "probeValues": [
+        "working",
+        "gaming",
+        "infinity"
+      ],
+      "writeReportId": null,
+      "writeEndpoint": null,
+      "writePayloadSummary": null,
+      "readbackReportId": null,
+      "readbackEndpoint": null,
+      "readbackPayloadSummary": null,
+      "checksumFramingNotes": null,
+      "visibleStateConfirmed": false,
+      "captureReferences": [],
+      "androidEnablementDecision": "blocked",
+      "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+    },
+    {
       "rawKey": "brightness",
       "label": "Brightness",
       "status": "pending",
@@ -118,6 +139,26 @@
     {
       "rawKey": "motion_sync",
       "label": "Motion Sync",
+      "status": "pending",
+      "probeValues": [
+        "off",
+        "on"
+      ],
+      "writeReportId": null,
+      "writeEndpoint": null,
+      "writePayloadSummary": null,
+      "readbackReportId": null,
+      "readbackEndpoint": null,
+      "readbackPayloadSummary": null,
+      "checksumFramingNotes": null,
+      "visibleStateConfirmed": false,
+      "captureReferences": [],
+      "androidEnablementDecision": "blocked",
+      "blockerReason": "Windows ASUS HID protocol capture has not been validated."
+    },
+    {
+      "rawKey": "light_load_mode",
+      "label": "Light Load Mode",
       "status": "pending",
       "probeValues": [
         "off",

@@ -102,6 +102,12 @@ enum class AirVisionFirmwareFeature(
     val captureProbeValues: List<String>,
     val requiresWritableHid: Boolean = true,
 ) {
+    ViewMode(
+        rawValue = "view_mode",
+        label = "View Mode",
+        androidStatus = "per-mode HUD profile active",
+        captureProbeValues = listOf("working", "gaming", "infinity"),
+    ),
     Brightness(
         rawValue = "brightness",
         label = "Brightness",
@@ -136,6 +142,12 @@ enum class AirVisionFirmwareFeature(
         rawValue = "motion_sync",
         label = "Motion Sync",
         androidStatus = "profile preference stored",
+        captureProbeValues = listOf("off", "on"),
+    ),
+    LightLoadMode(
+        rawValue = "light_load_mode",
+        label = "Light Load Mode",
+        androidStatus = "low-overhead HUD profile active",
         captureProbeValues = listOf("off", "on"),
     ),
     ThreeDMode(

@@ -244,13 +244,13 @@ class AirVisionUsbControllerTest {
         )
         assertEquals(AirVisionFirmwareFeature.entries.size, capabilities.featureReadiness.size)
         assertEquals(
-            "Brightness: ASUS HID protocol capture pending",
+            "View Mode: ASUS HID protocol capture pending",
             capabilities.featureReadiness.first().summary,
         )
         assertEquals(AirVisionFirmwareFeature.entries.size, capabilities.captureTargets.size)
         assertTrue(capabilities.captureTargets.all { it.captureReady })
         assertEquals(
-            listOf("20%", "50%", "80%"),
+            listOf("working", "gaming", "infinity"),
             capabilities.captureTargets.first().suggestedProbeValues,
         )
         assertEquals(
@@ -258,7 +258,7 @@ class AirVisionUsbControllerTest {
             capabilities.captureTargets.first().writeReportPathSummaries,
         )
         assertEquals(
-            "Brightness: capture 20% -> 50% -> 80% on out if=2 interrupt addr=0x2 max=64 int=1",
+            "View Mode: capture working -> gaming -> infinity on out if=2 interrupt addr=0x2 max=64 int=1",
             capabilities.captureTargets.first().summary,
         )
         assertEquals(
@@ -268,16 +268,19 @@ class AirVisionUsbControllerTest {
         assertTrue(capabilities.featureReadiness.all { !it.firmwareApplyReady })
         assertTrue(capabilities.featureReadiness.all { it.detail.contains("writable HID path detected") })
         assertEquals(
-            "firmware apply: Brightness: ASUS HID protocol capture pending; " +
+            "firmware apply: View Mode: ASUS HID protocol capture pending; " +
+                "Brightness: ASUS HID protocol capture pending; " +
                 "Screen distance: ASUS HID protocol capture pending; " +
                 "IPD: ASUS HID protocol capture pending; " +
                 "Splendid: ASUS HID protocol capture pending; " +
                 "Blue Light Filter: ASUS HID protocol capture pending; " +
                 "Motion Sync: ASUS HID protocol capture pending; " +
+                "Light Load Mode: ASUS HID protocol capture pending; " +
                 "3D Mode: ASUS HID protocol capture pending",
             capabilities.featureReadinessSummary,
         )
-        assertTrue(capabilities.capturePlanSummary.startsWith("firmware capture: Brightness: capture"))
+        assertTrue(capabilities.capturePlanSummary.startsWith("firmware capture: View Mode: capture"))
+        assertTrue(capabilities.capturePlanSummary.contains("Brightness: capture 20% -> 50% -> 80%"))
         assertTrue(capabilities.capturePlanSummary.contains("IPD: capture 60 mm -> 67 mm -> 72 mm"))
     }
 
@@ -301,7 +304,7 @@ class AirVisionUsbControllerTest {
         assertEquals("firmware reports: no HID report endpoints exposed", state.firmwareCapabilities.summary)
         assertTrue(state.firmwareCapabilities.captureTargets.all { !it.captureReady })
         assertEquals(
-            "Brightness: waiting for writable HID report path",
+            "View Mode: waiting for writable HID report path",
             state.firmwareCapabilities.captureTargets.first().summary,
         )
         assertTrue(
