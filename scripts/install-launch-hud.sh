@@ -13,6 +13,8 @@ SETUP_ACTION="ai.openclaw.app.action.SETUP_GATEWAY"
 SETUP_EXTRA="setup_code"
 AUTO_CONNECT_EXTRA="auto_connect"
 HIDE_DEX_TASKBAR="${OPENCLAW_HUD_HIDE_DEX_TASKBAR:-true}"
+# New task + clear task prevents stale DeX/freeform launches from reusing the previous HUD task.
+PRESENTATION_ACTIVITY_FLAGS=(--display 0 --windowingMode 1 -f 0x10008000 --activity-reset-task-if-needed)
 
 WINDOWS_ADB="/mnt/c/Users/digit/AppData/Local/Microsoft/WinGet/Packages/Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe/platform-tools/adb.exe"
 if [[ -n "${ADB:-}" ]]; then
@@ -127,6 +129,22 @@ hide_dex_taskbar() {
     "$ADB_BIN" -s "$SERIAL" shell cmd statusbar collapse || true
 }
 
+start_hud_activity() {
+    local display_mode="$1"
+    shift
+    local start_args=("$@")
+    if [[ -n "$SETUP_CODE" ]]; then
+        "$ADB_BIN" -s "$SERIAL" shell am start "${start_args[@]}" \
+            -a "$SETUP_ACTION" \
+            -n "$COMPONENT" \
+            --es "$SETUP_EXTRA" "$SETUP_CODE" \
+            --ez "$AUTO_CONNECT_EXTRA" "$AUTO_CONNECT"
+    else
+        "$ADB_BIN" -s "$SERIAL" shell am start "${start_args[@]}" -n "$COMPONENT"
+    fi
+    echo "Started HUD activity using $display_mode launch args: ${start_args[*]}"
+}
+
 echo "Using ADB: $ADB_BIN"
 echo "Using device: $SERIAL"
 echo "Installing: $APK_PATH"
@@ -166,20 +184,12 @@ elif [[ "$resolved_display" == "external" ]]; then
 fi
 
 if [[ "$resolved_display" == "default" ]]; then
-    echo "Launching on default display"
-    if [[ -n "$SETUP_CODE" ]]; then
-        "$ADB_BIN" -s "$SERIAL" shell am start --display 0 -a "$SETUP_ACTION" -n "$COMPONENT" --es "$SETUP_EXTRA" "$SETUP_CODE" --ez "$AUTO_CONNECT_EXTRA" "$AUTO_CONNECT"
-    else
-        "$ADB_BIN" -s "$SERIAL" shell am start --display 0 -n "$COMPONENT"
-    fi
+    echo "Launching presentation HUD on default phone display"
+    start_hud_activity "presentation/default" "${PRESENTATION_ACTIVITY_FLAGS[@]}"
 else
     echo "Launching HUD on display $resolved_display"
     "$ADB_BIN" -s "$SERIAL" shell settings put global external_display_audio_output 1 || true
-    if [[ -n "$SETUP_CODE" ]]; then
-        "$ADB_BIN" -s "$SERIAL" shell am start --display "$resolved_display" -a "$SETUP_ACTION" -n "$COMPONENT" --es "$SETUP_EXTRA" "$SETUP_CODE" --ez "$AUTO_CONNECT_EXTRA" "$AUTO_CONNECT"
-    else
-        "$ADB_BIN" -s "$SERIAL" shell am start --display "$resolved_display" -n "$COMPONENT"
-    fi
+    start_hud_activity "forced-display" --display "$resolved_display"
 fi
 
 "$ADB_BIN" -s "$SERIAL" shell dumpsys package "$PACKAGE_NAME" |

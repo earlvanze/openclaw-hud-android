@@ -80,7 +80,9 @@ does not request SMS or Call Log permissions, and opens directly to the HUD tab.
 `scripts/install-launch-hud.sh` now defaults to `--display presentation`.
 Presentation mode starts the Android Activity on display 0 and lets
 `HudPresentation` render the external HUD display. This avoids forcing the app
-into Samsung DeX/freeform mode by default.
+into Samsung DeX/freeform mode by default. Presentation launches also clear any
+stale HUD task and request fullscreen windowing on display 0 so a previous
+forced DeX/freeform launch is less likely to bleed into the next HUD start.
 
 Display modes:
 
