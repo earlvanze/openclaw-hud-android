@@ -1,9 +1,14 @@
 package ai.openclaw.app
 
 object AirVisionFirmwareCapturePlans {
-    fun renderMarkdown(usbState: AirVisionUsbState): String {
+    fun renderMarkdown(
+        usbState: AirVisionUsbState,
+        displaySettings: AirVisionDisplaySettings = AirVisionDisplaySettings(),
+    ): String {
         val capabilities = usbState.firmwareCapabilities
         val targets = capabilities.captureTargets.associateBy { it.feature }
+        val syncPlan = AirVisionFirmwareSyncPlans.fromSettings(displaySettings, capabilities)
+        val syncItems = syncPlan.items.associateBy { it.feature }
         val lines =
             buildList {
                 add("# AirVision M1 Firmware Protocol Capture Plan")
@@ -30,6 +35,21 @@ object AirVisionFirmwareCapturePlans {
                         }
                     }",
                 )
+                add("")
+                add("## Desired Firmware Sync")
+                add("")
+                add(syncPlan.summary)
+                add("")
+                add("| Feature | Desired value | Android effect | Hardware sync | Blocked reason |")
+                add("| --- | --- | --- | --- | --- |")
+                AirVisionFirmwareFeature.entries.forEach { feature ->
+                    val item = syncItems.getValue(feature)
+                    add(
+                        "| ${feature.label.escapeTableCell()} | ${item.desiredValue.escapeTableCell()} | " +
+                            "${item.androidEffect.escapeTableCell()} | ${item.hardwareSyncStatus.escapeTableCell()} | " +
+                            "${item.blockedReason.escapeTableCell()} |",
+                    )
+                }
                 add("")
                 add("## Capture Setup")
                 add("")
@@ -68,6 +88,12 @@ object AirVisionFirmwareCapturePlans {
                     val target = targets.getValue(feature)
                     add("### ${feature.label}")
                     add("")
+                    syncItems[feature]?.let { item ->
+                        add("- Desired value: ${item.desiredValue}")
+                        add("- Android effect: ${item.androidEffect}")
+                        add("- Hardware sync: ${item.hardwareSyncStatus}")
+                        add("- Blocked reason: ${item.blockedReason}")
+                    }
                     add("- Raw key: `${feature.rawValue}`")
                     add("- Probe values: ${feature.captureProbeValues.joinToString(" -> ")}")
                     add("- Capture ready: ${yesNo(target.captureReady)}")
