@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,6 +10,8 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
 const handoffPath = join(androidDir, "play", "console-handoff.md");
 const appContentPath = join(androidDir, "play", "app-content-answers.json");
+const consoleChecklistPath = join(androidDir, "play", "console-checklist.md");
+const releaseOutputDir = join(androidDir, "build", "release-bundles");
 const verifierArgs = ["scripts/verify-play-submission-package.mjs"];
 
 function runVerifier(extraArgs = []) {
@@ -24,8 +26,19 @@ function outputText(result) {
   return `${result.stdout}\n${result.stderr}`.trim();
 }
 
+async function hasSignedHudReleaseBundle() {
+  const files = await readdir(releaseOutputDir).catch(() => []);
+  for (const file of files) {
+    if (!file.endsWith("-hud-release.aab")) continue;
+    const info = await stat(join(releaseOutputDir, file)).catch(() => null);
+    if (info?.isFile()) return true;
+  }
+  return false;
+}
+
 const originalHandoff = await readFile(handoffPath, "utf8");
 const originalAppContent = await readFile(appContentPath, "utf8");
+const originalConsoleChecklist = await readFile(consoleChecklistPath, "utf8");
 const tempDir = await mkdtemp(join(tmpdir(), "openclaw-play-submission-verifier-"));
 
 try {
@@ -57,6 +70,27 @@ try {
 
   await writeFile(handoffPath, originalHandoff);
 
+  if (await hasSignedHudReleaseBundle()) {
+    await writeFile(
+      consoleChecklistPath,
+      originalConsoleChecklist.replace(/[a-f0-9]{64}/u, "0".repeat(64)),
+    );
+    const staleChecklist = runVerifier();
+    if (
+      staleChecklist.status === 0 ||
+      !outputText(staleChecklist).includes("Console checklist latest signed HUD AAB is missing required text")
+    ) {
+      throw new Error(
+        [
+          "Expected submission verifier to reject a stale signed HUD AAB checksum in the console checklist.",
+          `status=${staleChecklist.status}`,
+          outputText(staleChecklist),
+        ].join("\n"),
+      );
+    }
+    await writeFile(consoleChecklistPath, originalConsoleChecklist);
+  }
+
   const appContent = JSON.parse(originalAppContent);
   appContent.sensitivePermissions = {
     ...appContent.sensitivePermissions,
@@ -80,6 +114,7 @@ try {
 } finally {
   await writeFile(handoffPath, originalHandoff);
   await writeFile(appContentPath, originalAppContent);
+  await writeFile(consoleChecklistPath, originalConsoleChecklist);
   await rm(tempDir, { recursive: true, force: true });
 }
 

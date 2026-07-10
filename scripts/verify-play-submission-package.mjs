@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { readFile, stat } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { inflateSync } from "node:zlib";
@@ -27,6 +28,7 @@ const defaultDataSafetyNotesPath = join(androidDir, "play", "data-safety-notes.m
 const defaultConsoleChecklistPath = join(androidDir, "play", "console-checklist.md");
 const defaultListingDir = join(androidDir, "play", "listings", "en-US");
 const renderConsoleHandoffScriptPath = join(scriptDir, "render-play-console-handoff.mjs");
+const releaseOutputDir = join(androidDir, "build", "release-bundles");
 
 const expectedPackage = "ai.openclaw.app.hud";
 const expectedSchema = "openclaw.play.app-content";
@@ -137,6 +139,29 @@ async function requireFile(path, label) {
   return info.size;
 }
 
+async function sha256Hex(path) {
+  return createHash("sha256").update(await readFile(path)).digest("hex");
+}
+
+async function latestSignedHudReleaseBundle() {
+  const files = await readdir(releaseOutputDir).catch(() => []);
+  const candidates = [];
+  for (const file of files) {
+    if (!file.endsWith("-hud-release.aab")) continue;
+    const path = join(releaseOutputDir, file);
+    const info = await stat(path);
+    if (info.isFile()) {
+      candidates.push({
+        path,
+        relativePath: `build/release-bundles/${file}`,
+        mtimeMs: info.mtimeMs,
+      });
+    }
+  }
+  candidates.sort((a, b) => b.mtimeMs - a.mtimeMs);
+  return candidates[0] ?? null;
+}
+
 function openingTags(xml, tagName) {
   return [...xml.matchAll(new RegExp(`<${tagName}\\b[^>]*>`, "gu"))].map((match) => match[0]);
 }
@@ -231,6 +256,18 @@ function verifyGeneratedConsoleHandoff(args) {
     throw new Error(`Generated Play Console handoff is stale or invalid: ${detail}`);
   }
   return true;
+}
+
+async function verifyConsoleChecklistSignedBundle(consoleChecklist) {
+  const bundle = await latestSignedHudReleaseBundle();
+  if (!bundle) return null;
+
+  const hash = await sha256Hex(bundle.path);
+  requireIncludes("Console checklist latest signed HUD AAB", consoleChecklist, [
+    bundle.relativePath,
+    hash,
+  ]);
+  return { ...bundle, sha256: hash };
 }
 
 function requireArrayIncludes(label, values, expected) {
@@ -640,6 +677,7 @@ async function main() {
 
   await verifyListing(args.listingDir);
   const generatedConsoleHandoffVerified = verifyGeneratedConsoleHandoff(args);
+  const signedBundleChecklist = await verifyConsoleChecklistSignedBundle(consoleChecklist);
   verifyAppContentShape(appContent);
   if (args.final) {
     await verifyFinalSubmissionReadiness(appContent, hostedPrivacyPolicyPage, {
@@ -701,6 +739,9 @@ async function main() {
   console.log(`In-app privacy policy: ${args.inAppPrivacyPolicy}`);
   console.log(`App-content answers: ${args.appContent}`);
   if (generatedConsoleHandoffVerified) console.log("Play Console handoff: verified");
+  if (signedBundleChecklist) {
+    console.log(`Signed HUD AAB checklist: verified ${signedBundleChecklist.relativePath}`);
+  }
   console.log(`Play submission package verifier passed (${args.final ? "final" : "draft"} mode).`);
 }
 
