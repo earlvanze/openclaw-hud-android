@@ -64,12 +64,13 @@ Current local status:
   English listing copy, release notes character limits, and local Play
   submission packet. It refuses stale local artifacts when HUD source/build
   inputs are dirty or newer than the selected AAB.
-- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account
-  earlvanze@gmail.com --auth-check` verifies the selected local OAuth publisher
-  account before any Play API request.
-- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account
-  earl@earlbnb.com --auth-check` verifies the alternate allowed OAuth publisher
-  account before any Play API request.
+- OAuth publishing is restricted to `earlvanze@gmail.com` or
+  `earl@earlbnb.com`; `--auth-check` verifies the selected account before any
+  Play API request once that account is authenticated locally.
+- Current Cyber gcloud auth state still needs OAuth login for both allowed
+  publisher accounts. `--auth-check` currently fails early for
+  `earlvanze@gmail.com` and `earl@earlbnb.com` because only the existing service
+  account is authenticated locally.
 - `node scripts/publish-play-internal.mjs --commit` is guarded by
   `node scripts/verify-play-submission-package.mjs --final` before any Play API
   upload.
