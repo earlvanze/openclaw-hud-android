@@ -258,7 +258,7 @@ function verifyGeneratedConsoleHandoff(args) {
   return true;
 }
 
-async function verifyConsoleChecklistSignedBundle(consoleChecklist) {
+async function verifyConsoleChecklistSignedBundle(consoleChecklist, consoleHandoff = null) {
   const bundle = await latestSignedHudReleaseBundle();
   if (!bundle) return null;
 
@@ -267,6 +267,13 @@ async function verifyConsoleChecklistSignedBundle(consoleChecklist) {
     bundle.relativePath,
     hash,
   ]);
+  if (consoleHandoff !== null) {
+    requireIncludes("Play Console handoff latest signed HUD AAB", consoleHandoff, [
+      "## Signed Bundle",
+      bundle.relativePath,
+      hash,
+    ]);
+  }
   return { ...bundle, sha256: hash };
 }
 
@@ -674,10 +681,14 @@ async function main() {
   const settingsSheet = await readText(args.settingsSheet);
   const dataSafetyNotes = await readText(args.dataSafetyNotes);
   const consoleChecklist = await readText(args.consoleChecklist);
+  const consoleHandoff =
+    isDefaultPath(args.appContent, defaultAppContentPath) && isDefaultPath(args.listingDir, defaultListingDir)
+      ? await readText(join(androidDir, "play", "console-handoff.md"))
+      : null;
 
+  const signedBundleChecklist = await verifyConsoleChecklistSignedBundle(consoleChecklist, consoleHandoff);
   await verifyListing(args.listingDir);
   const generatedConsoleHandoffVerified = verifyGeneratedConsoleHandoff(args);
-  const signedBundleChecklist = await verifyConsoleChecklistSignedBundle(consoleChecklist);
   verifyAppContentShape(appContent);
   if (args.final) {
     await verifyFinalSubmissionReadiness(appContent, hostedPrivacyPolicyPage, {

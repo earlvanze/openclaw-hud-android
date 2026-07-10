@@ -1,12 +1,24 @@
 #!/usr/bin/env node
 
-import { readFile, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
 const outputPath = join(androidDir, "play", "console-handoff.md");
+const releaseOutputDir = join(androidDir, "build", "release-bundles");
+const manifestPath = join(
+  androidDir,
+  "app",
+  "build",
+  "intermediates",
+  "packaged_manifests",
+  "hudRelease",
+  "processHudReleaseManifestForPackage",
+  "AndroidManifest.xml",
+);
 
 async function readText(path) {
   return readFile(join(androidDir, path), "utf8");
@@ -24,9 +36,45 @@ function jsonBlock(value) {
   return ["```json", JSON.stringify(value, null, 2), "```"].join("\n");
 }
 
+async function latestSignedHudReleaseBundle() {
+  const files = await readdir(releaseOutputDir).catch(() => []);
+  const candidates = [];
+  for (const file of files) {
+    if (!file.endsWith("-hud-release.aab")) continue;
+    const path = join(releaseOutputDir, file);
+    const info = await stat(path);
+    if (info.isFile()) {
+      candidates.push({
+        file,
+        path,
+        relativePath: `build/release-bundles/${file}`,
+        size: info.size,
+        mtimeMs: info.mtimeMs,
+      });
+    }
+  }
+  candidates.sort((a, b) => b.mtimeMs - a.mtimeMs);
+  const bundle = candidates[0] ?? null;
+  if (!bundle) return null;
+  return {
+    ...bundle,
+    sha256: createHash("sha256").update(await readFile(bundle.path)).digest("hex"),
+  };
+}
+
+async function hudManifestVersion() {
+  const manifest = await readFile(manifestPath, "utf8").catch(() => "");
+  return {
+    versionName: manifest.match(/\bandroid:versionName\s*=\s*"([^"]+)"/u)?.[1] ?? "unknown",
+    versionCode: manifest.match(/\bandroid:versionCode\s*=\s*"([^"]+)"/u)?.[1] ?? "unknown",
+  };
+}
+
 async function render() {
   const appContent = JSON.parse(await readText("play/app-content-answers.json"));
   const screenshotManifest = JSON.parse(await readText("play/screenshots/phone/manifest.json"));
+  const bundle = await latestSignedHudReleaseBundle();
+  const version = await hudManifestVersion();
   const title = await readTrimmed("play/listings/en-US/title.txt");
   const shortDescription = await readTrimmed("play/listings/en-US/short-description.txt");
   const fullDescription = await readTrimmed("play/listings/en-US/full-description.txt");
@@ -50,6 +98,15 @@ async function render() {
     "- Initial track: `internal`",
     "- Initial release status: `draft`",
     "- OAuth publisher accounts allowed by helper: `earlvanze@gmail.com`, `earl@earlbnb.com`",
+    "",
+    "## Signed Bundle",
+    "",
+    bundle
+      ? `- AAB: \`${bundle.relativePath}\``
+      : "- AAB: missing; run `node scripts/build-release-aab.mjs --flavor hud --skip-version-bump`",
+    bundle ? `- SHA-256: \`${bundle.sha256}\`` : "- SHA-256: missing",
+    bundle ? `- Size: ${bundle.size} bytes` : "- Size: missing",
+    `- Version: ${version.versionName} (${version.versionCode})`,
     "",
     "## Remaining Console Blockers",
     "",

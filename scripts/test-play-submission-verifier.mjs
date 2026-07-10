@@ -72,6 +72,25 @@ try {
 
   if (await hasSignedHudReleaseBundle()) {
     await writeFile(
+      handoffPath,
+      originalHandoff.replace(/[a-f0-9]{64}/u, "0".repeat(64)),
+    );
+    const staleHandoffBundle = runVerifier();
+    if (
+      staleHandoffBundle.status === 0 ||
+      !outputText(staleHandoffBundle).includes("Play Console handoff latest signed HUD AAB is missing required text")
+    ) {
+      throw new Error(
+        [
+          "Expected submission verifier to reject a stale signed HUD AAB checksum in the Play Console handoff.",
+          `status=${staleHandoffBundle.status}`,
+          outputText(staleHandoffBundle),
+        ].join("\n"),
+      );
+    }
+    await writeFile(handoffPath, originalHandoff);
+
+    await writeFile(
       consoleChecklistPath,
       originalConsoleChecklist.replace(/[a-f0-9]{64}/u, "0".repeat(64)),
     );
