@@ -34,7 +34,9 @@ jobs:
           ./gradlew --no-daemon --max-workers=1 \
             :app:lintHudRelease \
             :app:testHudDebugUnitTest \
+            :app:testThirdPartyDebugUnitTest \
             :app:assembleHudDebug \
+            :app:assembleThirdPartyDebug \
             :app:bundleHudRelease \
             -POPENCLAW_ANDROID_ALLOW_UNSIGNED_RELEASE=true
           node scripts/verify-play-hud-release.mjs \
@@ -47,6 +49,8 @@ jobs:
           bash -n scripts/diagnose-hud-presentation.sh
           bash -n scripts/install-launch-hud.sh
           node scripts/test-install-launch-hud.mjs
+          bash -n scripts/install-launch-node.sh
+          node scripts/test-install-launch-node.mjs
           bash -n scripts/capture-play-screenshots.sh
           node scripts/test-play-screenshot-tools.mjs
           node scripts/render-play-screenshots.mjs --check

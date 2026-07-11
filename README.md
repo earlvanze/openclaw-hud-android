@@ -63,9 +63,17 @@ Third-party debug flavor:
 
 ```bash
 ./gradlew :app:assembleThirdPartyDebug
-./gradlew :app:installThirdPartyDebug
+./scripts/install-launch-node.sh --serial <adb-serial>
 ./gradlew :app:testThirdPartyDebugUnitTest
 ```
+
+The Node installer defaults to the full sideload `thirdParty` flavor
+(`ai.openclaw.app`, labeled **OpenClaw Node**) and launches the phone app on the
+primary display. Pass `--flavor play` to install the Play-safe Node build, set
+`OPENCLAW_NODE_APK`, or pass `--apk` to pin a specific APK. It accepts the same
+`--setup-code`, `--setup-code-file`, `--setup-json`, and `--no-auto-connect`
+pairing flags as the HUD installer, but it does not apply HUD presentation,
+DeX taskbar, or external-display audio mutations.
 
 AirVision / HUD debug flavor:
 
@@ -102,6 +110,9 @@ Samsung external-display audio output when an external display is present.
 test that keeps the default path pinned to presentation launch args, verifies
 the explicit forced-display fallback still works, and covers the no-external
 display case.
+`node scripts/test-install-launch-node.mjs` covers the parallel Node install
+flow, including Play/full-flavor selection, setup-code forwarding, and the
+absence of HUD-only display mutations.
 
 When the M1/Fold is available, capture the current presentation placement,
 DeX/taskbar state, display topology, audio route hints, and recent HUD logs with:
