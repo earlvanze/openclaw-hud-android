@@ -102,6 +102,76 @@ object AirVisionProfileBackups {
         return backup
     }
 
+    fun resolve(raw: String): AirVisionResolvedProfileBackup {
+        val backup = decode(raw)
+        val activeViewMode = requireViewMode(backup.activeViewMode)
+        val resolvedProfiles = backup.profiles.map(::settingsFromProfile)
+        val duplicatedModes =
+            resolvedProfiles
+                .groupingBy { it.viewMode }
+                .eachCount()
+                .filterValues { it > 1 }
+                .keys
+        require(duplicatedModes.isEmpty()) {
+            "Profile backup includes duplicate profiles: ${duplicatedModes.joinToString { it.label }}."
+        }
+        val profileByMode = resolvedProfiles.associateBy { it.viewMode }
+        val missingModes = AirVisionViewMode.entries.filterNot { profileByMode.containsKey(it) }
+        require(missingModes.isEmpty()) {
+            "Profile backup is missing: ${missingModes.joinToString { it.label }}."
+        }
+        val activeSettings = checkNotNull(profileByMode[activeViewMode])
+
+        return AirVisionResolvedProfileBackup(
+            backup = backup,
+            activeViewMode = activeViewMode,
+            activeSettings = activeSettings,
+            profileByMode = profileByMode,
+            labels = labelsFromBackup(backup.customLabels),
+            controls = controlsFromBackup(backup.hudControls),
+            appPreferences = appPreferencesFromBackup(backup.appPreferences),
+        )
+    }
+
+    fun preview(raw: String): AirVisionProfileBackupPreview {
+        val resolved = resolve(raw)
+        val active = resolved.activeSettings
+        val preferences = resolved.appPreferences
+        val labels = resolved.labels
+        val controls = resolved.controls
+        val profileLabels =
+            AirVisionViewMode.entries.joinToString {
+                labels.labelFor(it)
+            }
+        val details =
+            listOf(
+                "Version ${resolved.backup.version}; ${resolved.profileByMode.size} profiles: $profileLabels",
+                "Active: ${labels.labelFor(resolved.activeViewMode)}",
+                "Brightness ${active.brightnessPercent}%, distance ${active.distanceCm} cm, HUD scale ${active.hudScalePercent}%, IPD ${active.ipdMm} mm",
+                "Splendid ${active.splendidMode.label}, Eye Care ${active.blueLightFilterPercent}%, ${active.hudPlacement.label}",
+                "Single tap ${controls.singleTapAction.label}; double tap ${controls.doubleTapAction.label}; swipe ${controls.swipeAction.label}",
+                "Brightness key ${controls.brightnessKeyAction.label}; media key ${controls.mediaKeyAction.label}",
+                "Startup ${preferences.startupDestination.label}; display target ${preferences.hudDisplayTarget.label}; language ${preferences.language.label}",
+            )
+        val warnings =
+            buildList {
+                if (active.lightLoadModeEnabled) {
+                    add("Light Load is enabled; IPD and 3D controls stay locked for this active profile.")
+                }
+                if (!preferences.speakerEnabled) {
+                    add("Speaker is disabled in this backup.")
+                }
+                if (preferences.demoModeEnabled) {
+                    add("Demo Mode is enabled in this backup.")
+                }
+            }
+        return AirVisionProfileBackupPreview(
+            title = "Apply ${labels.labelFor(resolved.activeViewMode)} AirVision profile backup?",
+            details = details,
+            warnings = warnings,
+        )
+    }
+
     fun profileFromSettings(settings: AirVisionDisplaySettings): AirVisionBackupDisplayProfile =
         AirVisionBackupDisplayProfile(
             viewMode = settings.viewMode.rawValue,
@@ -257,4 +327,20 @@ data class AirVisionBackupResolvedAppPreferences(
     val nativeCaptionsEnabled: Boolean,
     val translationCaptionSourceLanguage: String,
     val translationCaptionTargetLanguage: String,
+)
+
+data class AirVisionResolvedProfileBackup(
+    val backup: AirVisionProfileBackup,
+    val activeViewMode: AirVisionViewMode,
+    val activeSettings: AirVisionDisplaySettings,
+    val profileByMode: Map<AirVisionViewMode, AirVisionDisplaySettings>,
+    val labels: AirVisionCustomProfileLabels,
+    val controls: AirVisionHudControls,
+    val appPreferences: AirVisionBackupResolvedAppPreferences,
+)
+
+data class AirVisionProfileBackupPreview(
+    val title: String,
+    val details: List<String>,
+    val warnings: List<String>,
 )

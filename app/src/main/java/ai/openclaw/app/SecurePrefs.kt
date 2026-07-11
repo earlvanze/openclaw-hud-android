@@ -902,29 +902,13 @@ class SecurePrefs(
         AirVisionProfileBackups.encode(airVisionProfileBackupSnapshot())
 
     fun importAirVisionProfileBackup(raw: String) {
-        val backup = AirVisionProfileBackups.decode(raw)
-        val activeViewMode = AirVisionProfileBackups.requireViewMode(backup.activeViewMode)
-        val resolvedProfiles = backup.profiles.map(AirVisionProfileBackups::settingsFromProfile)
-        val duplicatedModes =
-            resolvedProfiles
-                .groupingBy { it.viewMode }
-                .eachCount()
-                .filterValues { it > 1 }
-                .keys
-        require(duplicatedModes.isEmpty()) {
-            "Profile backup includes duplicate profiles: ${duplicatedModes.joinToString { it.label }}."
-        }
-        val profileByMode =
-            resolvedProfiles.associateBy { it.viewMode }
-        val missingModes = AirVisionViewMode.entries.filterNot { profileByMode.containsKey(it) }
-        require(missingModes.isEmpty()) {
-            "Profile backup is missing: ${missingModes.joinToString { it.label }}."
-        }
-
-        val labels = AirVisionProfileBackups.labelsFromBackup(backup.customLabels)
-        val controls = AirVisionProfileBackups.controlsFromBackup(backup.hudControls)
-        val appPreferences = AirVisionProfileBackups.appPreferencesFromBackup(backup.appPreferences)
-        val activeSettings = checkNotNull(profileByMode[activeViewMode])
+        val resolved = AirVisionProfileBackups.resolve(raw)
+        val activeViewMode = resolved.activeViewMode
+        val profileByMode = resolved.profileByMode
+        val labels = resolved.labels
+        val controls = resolved.controls
+        val appPreferences = resolved.appPreferences
+        val activeSettings = resolved.activeSettings
 
         plainPrefs.edit {
             putString(AIR_VISION_VIEW_MODE_KEY, activeViewMode.rawValue)

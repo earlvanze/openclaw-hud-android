@@ -10,6 +10,7 @@ import ai.openclaw.app.AirVisionHudMediaKeyAction
 import ai.openclaw.app.AirVisionHudPlacement
 import ai.openclaw.app.AirVisionHudSwipeAction
 import ai.openclaw.app.AirVisionHudTouchAction
+import ai.openclaw.app.AirVisionProfileBackupPreview
 import ai.openclaw.app.AirVisionSplendidMode
 import ai.openclaw.app.AirVisionStartupDestination
 import ai.openclaw.app.AirVisionViewMode
@@ -194,6 +195,8 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val appBuild = remember { BuildConfig.VERSION_CODE.toString() }
     var showAirVisionLegalNote by remember { mutableStateOf(false) }
     var showPrivacyPolicy by remember { mutableStateOf(false) }
+    var pendingAirVisionProfileImportRaw by remember { mutableStateOf<String?>(null) }
+    var pendingAirVisionProfileImportPreview by remember { mutableStateOf<AirVisionProfileBackupPreview?>(null) }
     var assistantRoleAvailable by remember(context) { mutableStateOf(isAssistantRoleAvailable(context)) }
     var assistantRoleHeld by remember(context) { mutableStateOf(isAssistantRoleHeld(context)) }
     val listItemColors =
@@ -244,6 +247,60 @@ fun SettingsSheet(viewModel: MainViewModel) {
             confirmButton = {
                 TextButton(onClick = { showPrivacyPolicy = false }) {
                     Text("Close", color = mobileAccent)
+                }
+            },
+        )
+    }
+
+    val importPreview = pendingAirVisionProfileImportPreview
+    val importRaw = pendingAirVisionProfileImportRaw
+    if (importPreview != null && importRaw != null) {
+        AlertDialog(
+            onDismissRequest = {
+                pendingAirVisionProfileImportPreview = null
+                pendingAirVisionProfileImportRaw = null
+            },
+            containerColor = mobileCardSurface,
+            title = {
+                Text(importPreview.title, style = mobileTitle2, color = mobileText)
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    importPreview.details.forEach { detail ->
+                        Text("- $detail", style = mobileCallout, color = mobileTextSecondary)
+                    }
+                    importPreview.warnings.forEach { warning ->
+                        Text("- $warning", style = mobileCallout, color = mobileWarning)
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val imported = viewModel.importAirVisionProfileBackup(importRaw)
+                        Toast
+                            .makeText(
+                                context,
+                                if (imported) "Imported AirVision profile backup" else "AirVision import failed",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        pendingAirVisionProfileImportPreview = null
+                        pendingAirVisionProfileImportRaw = null
+                    },
+                    colors = settingsPrimaryButtonColors(),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text("Apply", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        pendingAirVisionProfileImportPreview = null
+                        pendingAirVisionProfileImportRaw = null
+                    },
+                ) {
+                    Text("Cancel", color = mobileAccent)
                 }
             },
         )
@@ -526,23 +583,19 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionProfileImportLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
-            val imported =
-                runCatching {
-                    context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { reader ->
-                        reader.readText()
-                    } ?: error("Unable to open profile backup file.")
-                }.map { raw ->
-                    viewModel.importAirVisionProfileBackup(raw)
-                }.getOrElse { error ->
-                    viewModel.showHudTransientMessage("AirVision import failed: ${error.message.orEmpty()}")
-                    false
-                }
-            Toast
-                .makeText(
-                    context,
-                    if (imported) "Imported AirVision profile backup" else "AirVision import failed",
-                    Toast.LENGTH_SHORT,
-                ).show()
+            runCatching {
+                context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { reader ->
+                    reader.readText()
+                } ?: error("Unable to open profile backup file.")
+            }.map { raw ->
+                val preview = viewModel.previewAirVisionProfileBackup(raw)
+                pendingAirVisionProfileImportRaw = raw
+                pendingAirVisionProfileImportPreview = preview
+                viewModel.showHudTransientMessage("Validated AirVision profile backup")
+            }.getOrElse { error ->
+                viewModel.showHudTransientMessage("AirVision import failed: ${error.message.orEmpty()}")
+                Toast.makeText(context, "AirVision import failed", Toast.LENGTH_SHORT).show()
+            }
         }
 
     DisposableEffect(lifecycleOwner, context) {

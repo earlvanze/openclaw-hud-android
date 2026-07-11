@@ -512,6 +512,9 @@ class MainViewModel(
 
     fun exportAirVisionProfileBackup(): String = prefs.exportAirVisionProfileBackup()
 
+    fun previewAirVisionProfileBackup(raw: String): AirVisionProfileBackupPreview =
+        AirVisionProfileBackups.preview(raw)
+
     fun exportAirVisionFirmwareCapturePlan(): String =
         AirVisionFirmwareCapturePlans.renderMarkdown(
             usbState = airVisionUsbState.value,
