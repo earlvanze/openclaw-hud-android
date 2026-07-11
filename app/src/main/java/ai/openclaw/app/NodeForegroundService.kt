@@ -25,7 +25,12 @@ class NodeForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         ensureChannel()
-        val initial = buildNotification(title = "OpenClaw Node", text = "Starting…")
+        val appName = getString(R.string.app_name)
+        val initial =
+            buildNotification(
+                title = nodeForegroundNotificationTitle(appName, connected = false),
+                text = "Starting…",
+            )
         startForegroundWithTypes(notification = initial)
 
         val runtime = (application as NodeApp).peekRuntime()
@@ -44,7 +49,7 @@ class NodeForegroundService : Service() {
                 ) { status, server, connected, micEnabled, micListening ->
                     Quint(status, server, connected, micEnabled, micListening)
                 }.collect { (status, server, connected, micEnabled, micListening) ->
-                    val title = if (connected) "OpenClaw Node · Connected" else "OpenClaw Node"
+                    val title = nodeForegroundNotificationTitle(appName, connected)
                     val micSuffix =
                         if (micEnabled) {
                             if (micListening) " · Mic: Listening" else " · Mic: Pending"
@@ -86,13 +91,14 @@ class NodeForegroundService : Service() {
 
     private fun ensureChannel() {
         val mgr = getSystemService(NotificationManager::class.java)
+        val appName = getString(R.string.app_name)
         val channel =
             NotificationChannel(
                 CHANNEL_ID,
                 "Connection",
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
-                description = "OpenClaw node connection status"
+                description = "$appName connection status"
                 setShowBadge(false)
             }
         mgr.createNotificationChannel(channel)
@@ -175,3 +181,8 @@ private data class Quint<A, B, C, D, E>(
     val fourth: D,
     val fifth: E,
 )
+
+internal fun nodeForegroundNotificationTitle(
+    appName: String,
+    connected: Boolean,
+): String = if (connected) "$appName · Connected" else appName

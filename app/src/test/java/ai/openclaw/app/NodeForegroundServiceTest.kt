@@ -30,7 +30,26 @@ class NodeForegroundServiceTest {
         assertEquals(expectedFlags, savedIntent.flags and expectedFlags)
     }
 
+    @Test
+    fun foregroundTitleUsesCurrentFlavorAppLabel() {
+        val service = Robolectric.buildService(NodeForegroundService::class.java).get()
+        val appName = service.getString(R.string.app_name)
+
+        assertEquals(appName, nodeForegroundNotificationTitle(appName, connected = false))
+        assertEquals("$appName · Connected", nodeForegroundNotificationTitle(appName, connected = true))
+
+        val notification = buildNotification(service, title = appName)
+        assertEquals(appName, notification.extras.getCharSequence(Notification.EXTRA_TITLE))
+    }
+
     private fun buildNotification(service: NodeForegroundService): Notification {
+        return buildNotification(service, title = "Title")
+    }
+
+    private fun buildNotification(
+        service: NodeForegroundService,
+        title: String,
+    ): Notification {
         val method =
             NodeForegroundService::class.java.getDeclaredMethod(
                 "buildNotification",
@@ -38,6 +57,6 @@ class NodeForegroundServiceTest {
                 String::class.java,
             )
         method.isAccessible = true
-        return method.invoke(service, "Title", "Text") as Notification
+        return method.invoke(service, title, "Text") as Notification
     }
 }
