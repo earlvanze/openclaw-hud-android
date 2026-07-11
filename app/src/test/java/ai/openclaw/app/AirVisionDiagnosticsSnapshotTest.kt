@@ -139,7 +139,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("25", root.getValue("version").jsonPrimitive.content)
+        assertEquals("26", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -390,6 +390,7 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", profileBackup.getValue("includesRuntimeProfiles").jsonPrimitive.content)
         assertEquals(AirVisionViewMode.entries.size, profileBackup.getValue("profiles").jsonArray.size)
         assertEquals(AirVisionViewMode.entries.size, profileBackup.getValue("runtimeProfiles").jsonArray.size)
+        assertEquals(AirVisionViewMode.entries.size, profileBackup.getValue("runtimeSummaries").jsonArray.size)
         assertEquals(
             "eye_care",
             profileBackup
@@ -423,6 +424,32 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonPrimitive
                 .content,
         )
+        val workingRuntimeSummary =
+            profileBackup
+                .getValue("runtimeSummaries")
+                .jsonArray
+                .first { it.jsonObject.getValue("viewMode").jsonPrimitive.content == "working" }
+                .jsonObject
+        assertEquals("Working", workingRuntimeSummary.getValue("label").jsonPrimitive.content)
+        assertEquals("120", workingRuntimeSummary.getValue("effectiveHudScalePercent").jsonPrimitive.content)
+        assertEquals("8", workingRuntimeSummary.getValue("hudTranscriptEntryCount").jsonPrimitive.content)
+        assertEquals("5", workingRuntimeSummary.getValue("hudCaptionEntryCount").jsonPrimitive.content)
+        assertEquals("true", workingRuntimeSummary.getValue("colorPreviewOverlaysEnabled").jsonPrimitive.content)
+        assertEquals("true", workingRuntimeSummary.getValue("brightnessDimmingEnabled").jsonPrimitive.content)
+        assertEquals("true", workingRuntimeSummary.getValue("ipdAdjustmentEnabled").jsonPrimitive.content)
+        assertEquals("true", workingRuntimeSummary.getValue("threeDModeAvailable").jsonPrimitive.content)
+        assertEquals("true", workingRuntimeSummary.getValue("blueLightFilterAvailable").jsonPrimitive.content)
+        assertEquals(
+            "Working: effective HUD scale 120%, transcript 8, captions 5",
+            workingRuntimeSummary.getValue("summary").jsonPrimitive.content,
+        )
+        val customRuntimeSummary =
+            profileBackup
+                .getValue("runtimeSummaries")
+                .jsonArray
+                .first { it.jsonObject.getValue("viewMode").jsonPrimitive.content == "custom1" }
+                .jsonObject
+        assertEquals("Walk HUD", customRuntimeSummary.getValue("label").jsonPrimitive.content)
         assertEquals(
             listOf(
                 "view mode profiles",
@@ -432,6 +459,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 "speaker and captions preferences",
                 "translation caption languages",
                 "demo mode preference",
+                "derived runtime summaries",
             ),
             profileBackup.getValue("restoreScope").jsonArray.map { it.jsonPrimitive.content },
         )
@@ -583,6 +611,7 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("working", profileBackup.getValue("activeViewMode").jsonPrimitive.content)
         assertEquals(1, profileBackup.getValue("profiles").jsonArray.size)
         assertEquals(1, profileBackup.getValue("runtimeProfiles").jsonArray.size)
+        assertEquals(1, profileBackup.getValue("runtimeSummaries").jsonArray.size)
     }
 
     @Test

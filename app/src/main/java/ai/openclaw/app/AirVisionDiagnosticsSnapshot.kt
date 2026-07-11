@@ -259,7 +259,23 @@ data class AirVisionDiagnosticsProfileBackup(
     val includesRuntimeProfiles: Boolean,
     val profiles: List<AirVisionBackupDisplayProfile>,
     val runtimeProfiles: List<AirVisionBackupRuntimeProfile>,
+    val runtimeSummaries: List<AirVisionDiagnosticsProfileRuntimeSummary>,
     val restoreScope: List<String>,
+    val summary: String,
+)
+
+@Serializable
+data class AirVisionDiagnosticsProfileRuntimeSummary(
+    val viewMode: String,
+    val label: String,
+    val effectiveHudScalePercent: Int,
+    val hudTranscriptEntryCount: Int,
+    val hudCaptionEntryCount: Int,
+    val colorPreviewOverlaysEnabled: Boolean,
+    val brightnessDimmingEnabled: Boolean,
+    val ipdAdjustmentEnabled: Boolean,
+    val threeDModeAvailable: Boolean,
+    val blueLightFilterAvailable: Boolean,
     val summary: String,
 )
 
@@ -309,7 +325,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 25
+    const val VERSION = 26
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -353,6 +369,19 @@ object AirVisionDiagnosticsSnapshots {
         val backupRuntimeProfiles =
             profileBackup?.runtimeProfiles
                 ?: listOf(AirVisionProfileBackups.runtimeProfileFromSettings(displaySettings))
+        val backupCustomLabels =
+            profileBackup?.customLabels
+                ?: AirVisionBackupCustomLabels(
+                    custom1 = AirVisionViewMode.Custom1.label,
+                    custom2 = AirVisionViewMode.Custom2.label,
+                )
+        val backupRuntimeSummaries =
+            backupProfiles.map { profile ->
+                profileRuntimeSummary(
+                    profile = profile,
+                    labels = backupCustomLabels,
+                )
+            }
         val exportedProfileCount = backupProfiles.size
         val exportedRuntimeProfileCount = backupRuntimeProfiles.size
         val profileModes = backupProfiles.map { it.viewMode }.toSet()
@@ -472,12 +501,7 @@ object AirVisionDiagnosticsSnapshots {
                     currentVersion = AirVisionProfileBackups.VERSION,
                     supportedVersions = SUPPORTED_PROFILE_BACKUP_VERSIONS,
                     activeViewMode = profileBackup?.activeViewMode ?: displaySettings.viewMode.rawValue,
-                    customLabels =
-                        profileBackup?.customLabels
-                            ?: AirVisionBackupCustomLabels(
-                                custom1 = AirVisionViewMode.Custom1.label,
-                                custom2 = AirVisionViewMode.Custom2.label,
-                            ),
+                    customLabels = backupCustomLabels,
                     exportedProfileCount = exportedProfileCount,
                     exportedRuntimeProfileCount = exportedRuntimeProfileCount,
                     expectedProfileCount = expectedProfileCount,
@@ -487,6 +511,7 @@ object AirVisionDiagnosticsSnapshots {
                     includesRuntimeProfiles = exportedRuntimeProfileCount == expectedProfileCount,
                     profiles = backupProfiles,
                     runtimeProfiles = backupRuntimeProfiles,
+                    runtimeSummaries = backupRuntimeSummaries,
                     restoreScope =
                         listOf(
                             "view mode profiles",
@@ -496,6 +521,7 @@ object AirVisionDiagnosticsSnapshots {
                             "speaker and captions preferences",
                             "translation caption languages",
                             "demo mode preference",
+                            "derived runtime summaries",
                         ),
                     summary =
                         "profile backup v${AirVisionProfileBackups.VERSION}: $exportedProfileCount/$expectedProfileCount profiles, " +
@@ -620,6 +646,35 @@ object AirVisionDiagnosticsSnapshots {
                             TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
                         ),
                 ),
+        )
+    }
+
+    private fun profileRuntimeSummary(
+        profile: AirVisionBackupDisplayProfile,
+        labels: AirVisionBackupCustomLabels,
+    ): AirVisionDiagnosticsProfileRuntimeSummary {
+        val mode = AirVisionViewMode.fromRawValue(profile.viewMode)
+        val runtime = AirVisionProfileBackups.runtimeProfileFromSettings(AirVisionProfileBackups.settingsFromProfile(profile))
+        val label =
+            when (mode) {
+                AirVisionViewMode.Custom1 -> labels.custom1
+                AirVisionViewMode.Custom2 -> labels.custom2
+                else -> mode.label
+            }
+        return AirVisionDiagnosticsProfileRuntimeSummary(
+            viewMode = mode.rawValue,
+            label = label,
+            effectiveHudScalePercent = runtime.effectiveHudScalePercent,
+            hudTranscriptEntryCount = runtime.hudTranscriptEntryCount,
+            hudCaptionEntryCount = runtime.hudCaptionEntryCount,
+            colorPreviewOverlaysEnabled = runtime.colorPreviewOverlaysEnabled,
+            brightnessDimmingEnabled = runtime.brightnessDimmingEnabled,
+            ipdAdjustmentEnabled = runtime.ipdAdjustmentEnabled,
+            threeDModeAvailable = runtime.threeDModeAvailable,
+            blueLightFilterAvailable = runtime.blueLightFilterAvailable,
+            summary =
+                "$label: effective HUD scale ${runtime.effectiveHudScalePercent}%, " +
+                    "transcript ${runtime.hudTranscriptEntryCount}, captions ${runtime.hudCaptionEntryCount}",
         )
     }
 

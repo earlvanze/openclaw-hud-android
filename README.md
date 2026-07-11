@@ -186,7 +186,8 @@ candidate counts, selected display identity, profile backup/restore readiness,
 imported firmware-capture-results provenance, safety counts, protocol-ready
 feature labels, blocked feature labels/reasons, payload-safety preview text,
 and the live M1 write-test checklist,
-all saved AirVision profile values, runtime profile metadata,
+all saved AirVision profile values, runtime profile metadata, compact per-profile
+runtime summaries,
 fit/clarity/text-size guidance,
 Android demo/offline reviewer experience state, Windows-only cursor/3DoF and
 Unity mirror-window capability status, Android Cast/Display mirror fallback
