@@ -1044,7 +1044,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Windows App Handoff", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                "Save current AirVision profile values and ASUS Windows app apply steps for Cyber sessions.",
+                                "Save current AirVision profile values, derived HUD runtime state, and ASUS Windows app apply steps for Cyber sessions.",
                                 style = mobileCallout,
                             )
                         },
