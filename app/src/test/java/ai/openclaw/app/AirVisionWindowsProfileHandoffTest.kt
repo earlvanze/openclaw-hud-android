@@ -19,11 +19,11 @@ class AirVisionWindowsProfileHandoffTest {
                             ),
                         hudControls =
                             AirVisionBackupHudControls(
-                                singleTapAction = "clear_notification",
+                                singleTapAction = "dismiss_notification",
                                 doubleTapAction = "toggle_mic",
                                 swipeAction = "scroll_chat",
                                 brightnessKeyAction = "adjust_brightness",
-                                mediaKeyAction = "toggle_mic",
+                                mediaKeyAction = "double_tap_toggle_mic",
                             ),
                         appPreferences =
                             AirVisionBackupAppPreferences(
@@ -31,6 +31,10 @@ class AirVisionWindowsProfileHandoffTest {
                                 startupDestination = "hud",
                                 hudDisplayTarget = "airvision_preferred",
                                 demoModeEnabled = true,
+                                speakerEnabled = false,
+                                nativeCaptionsEnabled = true,
+                                translationCaptionSourceLanguage = "auto",
+                                translationCaptionTargetLanguage = "es",
                             ),
                         profiles =
                             listOf(
@@ -98,6 +102,20 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("### Walking HUD"))
         assertTrue(markdown.contains("- IPD: 69 mm (locked by Light Load Mode)"))
         assertTrue(markdown.contains("- 3D Mode: off (locked by Light Load Mode)"))
+        assertTrue(markdown.contains("## Android HUD Controls"))
+        assertTrue(markdown.contains("- Single tap: Dismiss notification"))
+        assertTrue(markdown.contains("- Double tap: Toggle mic"))
+        assertTrue(markdown.contains("- Swipe: Scroll chat"))
+        assertTrue(markdown.contains("- Brightness key: Adjust brightness"))
+        assertTrue(markdown.contains("- Media key: Double-tap mic"))
+        assertTrue(markdown.contains("## Android App Preferences"))
+        assertTrue(markdown.contains("- Startup view: HUD"))
+        assertTrue(markdown.contains("- HUD display target: AirVision Preferred"))
+        assertTrue(markdown.contains("- Companion language: System"))
+        assertTrue(markdown.contains("- Speaker output: off"))
+        assertTrue(markdown.contains("- Samsung/native captions: on"))
+        assertTrue(markdown.contains("- Translation captions: Auto -> Spanish"))
+        assertTrue(markdown.contains("- Demo Mode: on"))
         assertTrue(markdown.contains("Open the ASUS AirVision Windows app on Cyber"))
         assertTrue(markdown.contains("true panel preset writes"))
         assertTrue(markdown.contains("- Connected: yes"))

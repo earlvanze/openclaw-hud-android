@@ -40,6 +40,14 @@ object AirVisionWindowsProfileHandoffs {
                     addProfile(profile, profileBackup.customLabels, includeHeading = true)
                     add("")
                 }
+                add("## Android HUD Controls")
+                add("")
+                addControls(profileBackup.hudControls)
+                add("")
+                add("## Android App Preferences")
+                add("")
+                addPreferences(profileBackup.appPreferences)
+                add("")
                 add("## Windows/Cyber Apply Checklist")
                 add("")
                 add("- Open the ASUS AirVision Windows app on Cyber or another Windows host.")
@@ -121,6 +129,38 @@ object AirVisionWindowsProfileHandoffs {
         add("- Android HUD placement: ${AirVisionHudPlacement.fromRawValue(profile.hudPlacement).label}")
         add("- Android safe area: ${profile.safeAreaPercent}%")
         add("- Android physical main screen visible: ${yesNo(profile.physicalMainScreenVisible)}")
+    }
+
+    private fun MutableList<String>.addControls(controls: AirVisionBackupHudControls) {
+        add("- Single tap: ${AirVisionHudTouchAction.fromRawValue(controls.singleTapAction).label}")
+        add("- Double tap: ${AirVisionHudDoubleTapAction.fromRawValue(controls.doubleTapAction).label}")
+        add("- Swipe: ${AirVisionHudSwipeAction.fromRawValue(controls.swipeAction).label}")
+        add("- Brightness key: ${AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction).label}")
+        add("- Media key: ${AirVisionHudMediaKeyAction.fromRawValue(controls.mediaKeyAction).label}")
+    }
+
+    private fun MutableList<String>.addPreferences(preferences: AirVisionBackupAppPreferences) {
+        val sourceLanguage =
+            TranslationCaptionMode.languageFor(
+                TranslationCaptionMode.normalizeLanguageCode(
+                    preferences.translationCaptionSourceLanguage,
+                    TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
+                ),
+            )
+        val targetLanguage =
+            TranslationCaptionMode.languageFor(
+                TranslationCaptionMode.normalizeLanguageCode(
+                    preferences.translationCaptionTargetLanguage,
+                    TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
+                ),
+            )
+        add("- Startup view: ${AirVisionStartupDestination.fromRawValue(preferences.startupDestination).label}")
+        add("- HUD display target: ${AirVisionHudDisplayTarget.fromRawValue(preferences.hudDisplayTarget).label}")
+        add("- Companion language: ${AirVisionAppLanguage.fromRawValue(preferences.language).label}")
+        add("- Speaker output: ${onOff(preferences.speakerEnabled)}")
+        add("- Samsung/native captions: ${onOff(preferences.nativeCaptionsEnabled)}")
+        add("- Translation captions: ${sourceLanguage.label} -> ${targetLanguage.label}")
+        add("- Demo Mode: ${onOff(preferences.demoModeEnabled)}")
     }
 
     private fun profileDisplayLabel(

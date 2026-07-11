@@ -12,7 +12,7 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.10-hud-release.aab`
-- SHA-256: `38df7454acf772b24e3fe2886266ed05deafed2bb0c8edf7c25dbbbd61606908`
+- SHA-256: `674474f2993600533a30a3b6cf0ca08f6048813694aa21335ccaaaf419404dd8`
 - Version: 2026.7.10 (2026071001)
 
 ## Remaining Console Blockers
@@ -44,7 +44,7 @@ Key features:
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - Speaker routing support for AirVision M1 audio devices
 - AirVision HUD per-mode profile controls for view mode, custom profile labels, copy-to-custom actions, JSON backup/import with confirmation preview, external-display target, placement, physical main screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, IPD calibration, Eye Care filtering, 3D Mode, gesture/hotkey behavior, brightness-key chat/brightness/distance controls, profile reset, and low-overhead preferences
-- AirVision Windows app handoff export for applying saved Android profile values during ASUS AirVision sessions on Cyber or another Windows host
+- AirVision Windows app handoff export for applying saved Android profile values and reviewing HUD controls/preferences during ASUS AirVision sessions on Cyber or another Windows host
 - AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
 - Optional USB firmware-link detection, device identity, descriptor diagnostics, readable/writable HID report-path summaries, per-feature firmware-apply readiness, desired firmware-sync state, protocol-capture targets, and sanitized capture-results import preview for AirVision M1 hardware status
 - Agent and provider/model controls for OpenClaw sessions
