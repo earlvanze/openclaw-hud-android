@@ -178,6 +178,27 @@ try {
     );
   }
 
+  const missingCapabilityStatesAppContent = JSON.parse(originalAppContent);
+  missingCapabilityStatesAppContent.reviewEvidence = {
+    ...missingCapabilityStatesAppContent.reviewEvidence,
+    airVisionCompanionCapabilityStates: [],
+  };
+  const missingCapabilityStatesPath = join(tempDir, "missing-airvision-capability-states-app-content.json");
+  await writeFile(missingCapabilityStatesPath, `${JSON.stringify(missingCapabilityStatesAppContent, null, 2)}\n`);
+  const missingCapabilityStates = runVerifier(["--app-content", missingCapabilityStatesPath]);
+  if (
+    missingCapabilityStates.status === 0 ||
+    !outputText(missingCapabilityStates).includes("AirVision companion capability states must list")
+  ) {
+    throw new Error(
+      [
+        "Expected submission verifier to reject missing AirVision companion capability states.",
+        `status=${missingCapabilityStates.status}`,
+        outputText(missingCapabilityStates),
+      ].join("\n"),
+    );
+  }
+
   const missingEvidenceAppContent = JSON.parse(originalAppContent);
   missingEvidenceAppContent.finalSubmission = {
     ...missingEvidenceAppContent.finalSubmission,
