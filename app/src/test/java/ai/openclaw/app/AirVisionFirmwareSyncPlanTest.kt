@@ -46,7 +46,15 @@ class AirVisionFirmwareSyncPlanTest {
         assertEquals(0, plan.firmwareWriteAllowedCount)
         assertEquals(AirVisionFirmwareFeature.entries.size, plan.blockedFirmwareWriteCount)
         assertEquals("firmware sync: 9 Android-applied, 9 pending ASUS HID sync", plan.summary)
-        assertEquals("firmware writes: 0 enabled, 9 blocked pending validated capture results", plan.writeGateSummary)
+        assertEquals("firmware writes: read-only; 0/9 validated captures, 0 protocol-ready, 9 blocked", plan.writeGateSummary)
+        assertEquals("read_only_capture_pending", plan.writeGate.status)
+        assertEquals(false, plan.writeGate.firmwareWritesEnabled)
+        assertEquals(0, plan.writeGate.validatedCaptureCount)
+        assertEquals(0, plan.writeGate.writeEnabledCaptureCount)
+        assertEquals(AirVisionFirmwareFeature.entries.size, plan.writeGate.blockedFeatureCount)
+        assertEquals(true, plan.writeGate.liveM1Required)
+        assertEquals(true, plan.writeGate.explicitUserConfirmationRequired)
+        assertTrue(plan.writeGate.nextStep.contains("Capture and validate ASUS HID report payloads"))
         assertEquals(
             "Working",
             plan.items.first { it.feature == AirVisionFirmwareFeature.ViewMode }.desiredValue,
@@ -142,6 +150,12 @@ class AirVisionFirmwareSyncPlanTest {
         assertTrue(brightness.blockedReason.contains("implementation remains disabled"))
         assertEquals(0, plan.firmwareWriteAllowedCount)
         assertEquals(AirVisionFirmwareFeature.entries.size, plan.blockedFirmwareWriteCount)
+        assertEquals("read_only_live_test_required", plan.writeGate.status)
+        assertEquals(false, plan.writeGate.firmwareWritesEnabled)
+        assertEquals(1, plan.writeGate.validatedCaptureCount)
+        assertEquals(1, plan.writeGate.writeEnabledCaptureCount)
+        assertEquals(AirVisionFirmwareFeature.entries.size, plan.writeGate.blockedFeatureCount)
+        assertTrue(plan.writeGate.nextStep.contains("live-tested with the M1 connected"))
     }
 }
 

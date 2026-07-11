@@ -2,6 +2,7 @@ package ai.openclaw.app
 
 data class AirVisionFirmwareSyncPlan(
     val items: List<AirVisionFirmwareSyncItem>,
+    val writeGate: AirVisionFirmwareWriteGate = AirVisionFirmwareWriteGate.fromItems(items),
 ) {
     val pendingHardwareSyncCount: Int
         get() = items.count { it.hardwareSyncPending }
@@ -25,16 +26,78 @@ data class AirVisionFirmwareSyncPlan(
             }
 
     val writeGateSummary: String
-        get() =
-            if (items.isEmpty()) {
-                "firmware writes: no Windows-style controls configured"
-            } else {
-                "firmware writes: $firmwareWriteAllowedCount enabled, " +
-                    "$blockedFirmwareWriteCount blocked pending validated capture results"
-            }
+        get() = writeGate.summary
 
     val detailSummary: String
         get() = "firmware desired state: ${items.joinToString("; ") { it.summary }}"
+}
+
+data class AirVisionFirmwareWriteGate(
+    val status: String,
+    val firmwareWritesEnabled: Boolean,
+    val validatedCaptureCount: Int,
+    val writeEnabledCaptureCount: Int,
+    val blockedFeatureCount: Int,
+    val liveM1Required: Boolean,
+    val explicitUserConfirmationRequired: Boolean,
+    val summary: String,
+    val nextStep: String,
+) {
+    companion object {
+        fun fromItems(items: List<AirVisionFirmwareSyncItem>): AirVisionFirmwareWriteGate {
+            if (items.isEmpty()) {
+                return AirVisionFirmwareWriteGate(
+                    status = "not_configured",
+                    firmwareWritesEnabled = false,
+                    validatedCaptureCount = 0,
+                    writeEnabledCaptureCount = 0,
+                    blockedFeatureCount = 0,
+                    liveM1Required = true,
+                    explicitUserConfirmationRequired = true,
+                    summary = "firmware writes: no Windows-style controls configured",
+                    nextStep = "Configure AirVision Windows-style controls before testing hardware writes.",
+                )
+            }
+
+            val validatedCaptureCount = items.count { it.captureResultStatus == "validated" }
+            val writeEnabledCaptureCount = items.count { it.androidEnablementDecision == "enable_android_write" }
+            val blockedFeatureCount = items.count { !it.firmwareWriteAllowed }
+            val total = items.size
+            val status =
+                when {
+                    writeEnabledCaptureCount > 0 -> "read_only_live_test_required"
+                    validatedCaptureCount > 0 -> "read_only_capture_review_required"
+                    items.any { it.hardwareSyncStatus == "capture pending" } -> "read_only_capture_pending"
+                    else -> "read_only_hid_path_pending"
+                }
+            val nextStep =
+                when (status) {
+                    "read_only_live_test_required" ->
+                        "Keep Android firmware writes disabled until the validated report sequence is implemented and live-tested with the M1 connected."
+                    "read_only_capture_review_required" ->
+                        "Review validated capture evidence and explicitly mark eligible features enable_android_write only after sanitized write/readback proof is complete."
+                    "read_only_capture_pending" ->
+                        "Capture and validate ASUS HID report payloads on Windows/Cyber for each Windows-style control."
+                    else ->
+                        "Reconnect the AirVision M1 and grant USB permission until Android exposes readable and writable HID report paths."
+                }
+            return AirVisionFirmwareWriteGate(
+                status = status,
+                firmwareWritesEnabled = false,
+                validatedCaptureCount = validatedCaptureCount,
+                writeEnabledCaptureCount = writeEnabledCaptureCount,
+                blockedFeatureCount = blockedFeatureCount,
+                liveM1Required = true,
+                explicitUserConfirmationRequired = true,
+                summary =
+                    "firmware writes: read-only; " +
+                        "$validatedCaptureCount/$total validated captures, " +
+                        "$writeEnabledCaptureCount protocol-ready, " +
+                        "$blockedFeatureCount blocked",
+                nextStep = nextStep,
+            )
+        }
+    }
 }
 
 data class AirVisionFirmwareSyncItem(

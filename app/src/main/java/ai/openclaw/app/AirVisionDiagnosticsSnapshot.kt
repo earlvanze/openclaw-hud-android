@@ -100,10 +100,24 @@ data class AirVisionDiagnosticsFirmwareSyncPlan(
     val androidAppliedCount: Int,
     val firmwareWriteAllowedCount: Int,
     val blockedFirmwareWriteCount: Int,
+    val writeGate: AirVisionDiagnosticsFirmwareWriteGate,
     val summary: String,
     val writeGateSummary: String,
     val detailSummary: String,
     val items: List<AirVisionDiagnosticsFirmwareSyncItem>,
+)
+
+@Serializable
+data class AirVisionDiagnosticsFirmwareWriteGate(
+    val status: String,
+    val firmwareWritesEnabled: Boolean,
+    val validatedCaptureCount: Int,
+    val writeEnabledCaptureCount: Int,
+    val blockedFeatureCount: Int,
+    val liveM1Required: Boolean,
+    val explicitUserConfirmationRequired: Boolean,
+    val summary: String,
+    val nextStep: String,
 )
 
 @Serializable
@@ -259,7 +273,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 21
+    const val VERSION = 22
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -628,10 +642,24 @@ object AirVisionDiagnosticsSnapshots {
             androidAppliedCount = androidAppliedCount,
             firmwareWriteAllowedCount = firmwareWriteAllowedCount,
             blockedFirmwareWriteCount = blockedFirmwareWriteCount,
+            writeGate = writeGate.toDiagnostics(),
             summary = summary,
             writeGateSummary = writeGateSummary,
             detailSummary = detailSummary,
             items = items.map { it.toDiagnostics() },
+        )
+
+    private fun AirVisionFirmwareWriteGate.toDiagnostics(): AirVisionDiagnosticsFirmwareWriteGate =
+        AirVisionDiagnosticsFirmwareWriteGate(
+            status = status,
+            firmwareWritesEnabled = firmwareWritesEnabled,
+            validatedCaptureCount = validatedCaptureCount,
+            writeEnabledCaptureCount = writeEnabledCaptureCount,
+            blockedFeatureCount = blockedFeatureCount,
+            liveM1Required = liveM1Required,
+            explicitUserConfirmationRequired = explicitUserConfirmationRequired,
+            summary = summary,
+            nextStep = nextStep,
         )
 
     private fun AirVisionFirmwareSyncItem.toDiagnostics(): AirVisionDiagnosticsFirmwareSyncItem =

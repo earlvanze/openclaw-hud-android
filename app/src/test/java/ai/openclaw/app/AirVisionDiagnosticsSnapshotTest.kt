@@ -104,6 +104,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val deviceInfo = usb.getValue("deviceInfo").jsonObject
         val firmwareCapabilities = usb.getValue("firmwareCapabilities").jsonObject
         val firmwareSync = root.getValue("firmwareSync").jsonObject
+        val firmwareWriteGate = firmwareSync.getValue("writeGate").jsonObject
         val firmwareUpdate = root.getValue("firmwareUpdate").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
         val hudRuntime = root.getValue("hudRuntime").jsonObject
@@ -137,7 +138,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("21", root.getValue("version").jsonPrimitive.content)
+        assertEquals("22", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -232,8 +233,26 @@ class AirVisionDiagnosticsSnapshotTest {
             firmwareSync.getValue("summary").jsonPrimitive.content,
         )
         assertEquals(
-            "firmware writes: 0 enabled, 9 blocked pending validated capture results",
+            "firmware writes: read-only; 0/9 validated captures, 0 protocol-ready, 9 blocked",
             firmwareSync.getValue("writeGateSummary").jsonPrimitive.content,
+        )
+        assertEquals("read_only_capture_pending", firmwareWriteGate.getValue("status").jsonPrimitive.content)
+        assertEquals("false", firmwareWriteGate.getValue("firmwareWritesEnabled").jsonPrimitive.content)
+        assertEquals("0", firmwareWriteGate.getValue("validatedCaptureCount").jsonPrimitive.content)
+        assertEquals("0", firmwareWriteGate.getValue("writeEnabledCaptureCount").jsonPrimitive.content)
+        assertEquals("9", firmwareWriteGate.getValue("blockedFeatureCount").jsonPrimitive.content)
+        assertEquals("true", firmwareWriteGate.getValue("liveM1Required").jsonPrimitive.content)
+        assertEquals("true", firmwareWriteGate.getValue("explicitUserConfirmationRequired").jsonPrimitive.content)
+        assertEquals(
+            "firmware writes: read-only; 0/9 validated captures, 0 protocol-ready, 9 blocked",
+            firmwareWriteGate.getValue("summary").jsonPrimitive.content,
+        )
+        assertTrue(
+            firmwareWriteGate
+                .getValue("nextStep")
+                .jsonPrimitive
+                .content
+                .contains("Capture and validate ASUS HID report payloads"),
         )
         assertEquals("brightness", brightnessSync.getValue("feature").jsonPrimitive.content)
         assertEquals("72%", brightnessSync.getValue("desiredValue").jsonPrimitive.content)
