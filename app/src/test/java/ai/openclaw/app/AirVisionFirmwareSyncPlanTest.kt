@@ -52,6 +52,14 @@ class AirVisionFirmwareSyncPlanTest {
         assertEquals(0, plan.writeGate.validatedCaptureCount)
         assertEquals(0, plan.writeGate.writeEnabledCaptureCount)
         assertEquals(AirVisionFirmwareFeature.entries.size, plan.writeGate.blockedFeatureCount)
+        assertEquals(emptyList<String>(), plan.writeGate.protocolReadyFeatureLabels)
+        assertEquals(AirVisionFirmwareFeature.entries.map { it.label }, plan.writeGate.blockedFeatureLabels)
+        assertEquals(AirVisionFirmwareFeature.entries.size, plan.writeGate.blockedFeatureSummaries.size)
+        assertTrue(plan.writeGate.blockedFeatureSummaries.first().contains("View Mode:"))
+        assertEquals(
+            "Reconnect the AirVision M1 to the Android device.",
+            plan.writeGate.liveTestChecklist.first(),
+        )
         assertEquals(true, plan.writeGate.liveM1Required)
         assertEquals(true, plan.writeGate.explicitUserConfirmationRequired)
         assertTrue(plan.writeGate.nextStep.contains("Capture and validate ASUS HID report payloads"))
@@ -155,6 +163,14 @@ class AirVisionFirmwareSyncPlanTest {
         assertEquals(1, plan.writeGate.validatedCaptureCount)
         assertEquals(1, plan.writeGate.writeEnabledCaptureCount)
         assertEquals(AirVisionFirmwareFeature.entries.size, plan.writeGate.blockedFeatureCount)
+        assertEquals(listOf("Brightness"), plan.writeGate.protocolReadyFeatureLabels)
+        assertEquals(AirVisionFirmwareFeature.entries.map { it.label }, plan.writeGate.blockedFeatureLabels)
+        assertTrue(
+            plan.writeGate.blockedFeatureSummaries
+                .first { it.startsWith("Brightness:") }
+                .contains("live M1 testing"),
+        )
+        assertTrue(plan.writeGate.liveTestChecklist.any { it.contains("Replay only one validated feature") })
         assertTrue(plan.writeGate.nextStep.contains("live-tested with the M1 connected"))
     }
 }

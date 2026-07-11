@@ -139,7 +139,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("23", root.getValue("version").jsonPrimitive.content)
+        assertEquals("24", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -242,6 +242,24 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("0", firmwareWriteGate.getValue("validatedCaptureCount").jsonPrimitive.content)
         assertEquals("0", firmwareWriteGate.getValue("writeEnabledCaptureCount").jsonPrimitive.content)
         assertEquals("9", firmwareWriteGate.getValue("blockedFeatureCount").jsonPrimitive.content)
+        assertEquals(emptyList<String>(), firmwareWriteGate.getValue("protocolReadyFeatureLabels").jsonArray.map { it.jsonPrimitive.content })
+        assertEquals(
+            AirVisionFirmwareFeature.entries.map { it.label },
+            firmwareWriteGate.getValue("blockedFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertTrue(
+            firmwareWriteGate
+                .getValue("blockedFeatureSummaries")
+                .jsonArray
+                .first()
+                .jsonPrimitive
+                .content
+                .startsWith("View Mode:"),
+        )
+        assertEquals(
+            "Reconnect the AirVision M1 to the Android device.",
+            firmwareWriteGate.getValue("liveTestChecklist").jsonArray.first().jsonPrimitive.content,
+        )
         assertEquals("true", firmwareWriteGate.getValue("liveM1Required").jsonPrimitive.content)
         assertEquals("true", firmwareWriteGate.getValue("explicitUserConfirmationRequired").jsonPrimitive.content)
         assertEquals(
@@ -587,6 +605,12 @@ class AirVisionDiagnosticsSnapshotTest {
 
         val root = Json.parseToJsonElement(encoded).jsonObject
         val firmwareCaptureResults = root.getValue("firmwareCaptureResults").jsonObject
+        val firmwareWriteGate =
+            root
+                .getValue("firmwareSync")
+                .jsonObject
+                .getValue("writeGate")
+                .jsonObject
         val source = firmwareCaptureResults.getValue("source").jsonObject
         val firmwareSyncItems =
             root
@@ -626,6 +650,29 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("validated", brightnessSync.getValue("captureResultStatus").jsonPrimitive.content)
         assertEquals("enable_android_write", brightnessSync.getValue("androidEnablementDecision").jsonPrimitive.content)
         assertEquals("false", brightnessSync.getValue("firmwareWriteAllowed").jsonPrimitive.content)
+        assertEquals(
+            listOf("Brightness"),
+            firmwareWriteGate.getValue("protocolReadyFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            AirVisionFirmwareFeature.entries.map { it.label },
+            firmwareWriteGate.getValue("blockedFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertTrue(
+            firmwareWriteGate
+                .getValue("blockedFeatureSummaries")
+                .jsonArray
+                .first { it.jsonPrimitive.content.startsWith("Brightness:") }
+                .jsonPrimitive
+                .content
+                .contains("live M1 testing"),
+        )
+        assertTrue(
+            firmwareWriteGate
+                .getValue("liveTestChecklist")
+                .jsonArray
+                .any { it.jsonPrimitive.content.contains("Read back the matching report") },
+        )
     }
 
     @Test

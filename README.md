@@ -177,7 +177,9 @@ capture evidence required before a write can be enabled, per-feature capture
 targets and probe values for future ASUS HID protocol validation, the active HUD
 profile, derived HUD runtime state, Android Presentation routing state, display
 candidate counts, selected display identity, profile backup/restore readiness,
-imported firmware-capture-results provenance and safety counts,
+imported firmware-capture-results provenance, safety counts, protocol-ready
+feature labels, blocked feature labels/reasons, and the live M1 write-test
+checklist,
 all saved AirVision profile values, runtime profile metadata,
 fit/clarity/text-size guidance,
 Android demo/offline reviewer experience state, Windows-only cursor/3DoF and
@@ -439,7 +441,9 @@ confirms App Bundle language splits stay disabled while the app uses runtime
 AirVision language switching. It also verifies that the generated AirVision
 firmware capture worksheet is current and still contains the safety criteria
 and per-feature blocked result rows needed before Android firmware writes can
-be enabled. The language split setting is
+be enabled. In-app capture-plan exports also include protocol-ready feature
+labels, blocked feature labels, and the live M1 write-test checklist so
+sanitized Windows evidence stays distinct from Android write enablement. The language split setting is
 intentional: Play
 can otherwise deliver only the install-time language resources, which breaks the
 in-app AirVision companion language menu. Run

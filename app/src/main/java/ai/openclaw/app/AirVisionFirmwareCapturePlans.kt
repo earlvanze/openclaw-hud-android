@@ -49,9 +49,17 @@ object AirVisionFirmwareCapturePlans {
                 add("- Validated captures: ${syncPlan.writeGate.validatedCaptureCount}/${syncPlan.items.size}")
                 add("- Protocol-ready captures: ${syncPlan.writeGate.writeEnabledCaptureCount}/${syncPlan.items.size}")
                 add("- Blocked features: ${syncPlan.writeGate.blockedFeatureCount}")
+                add("- Protocol-ready feature labels: ${syncPlan.writeGate.protocolReadyFeatureLabels.joinToString().ifBlank { "none" }}")
+                add("- Blocked feature labels: ${syncPlan.writeGate.blockedFeatureLabels.joinToString().ifBlank { "none" }}")
                 add("- Live M1 required before writes: ${yesNo(syncPlan.writeGate.liveM1Required)}")
                 add("- Explicit user confirmation required: ${yesNo(syncPlan.writeGate.explicitUserConfirmationRequired)}")
                 add("- Next step: ${syncPlan.writeGate.nextStep}")
+                add("")
+                add("### Live M1 Write-Test Checklist")
+                add("")
+                syncPlan.writeGate.liveTestChecklist.forEach { item ->
+                    add("- $item")
+                }
                 add("")
                 add("| Feature | Desired value | Android effect | Hardware sync | Blocked reason |")
                 add("| --- | --- | --- | --- | --- |")

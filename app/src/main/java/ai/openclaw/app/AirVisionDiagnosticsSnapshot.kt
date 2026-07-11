@@ -115,6 +115,10 @@ data class AirVisionDiagnosticsFirmwareWriteGate(
     val validatedCaptureCount: Int,
     val writeEnabledCaptureCount: Int,
     val blockedFeatureCount: Int,
+    val protocolReadyFeatureLabels: List<String>,
+    val blockedFeatureLabels: List<String>,
+    val blockedFeatureSummaries: List<String>,
+    val liveTestChecklist: List<String>,
     val liveM1Required: Boolean,
     val explicitUserConfirmationRequired: Boolean,
     val summary: String,
@@ -301,7 +305,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 23
+    const val VERSION = 24
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -686,6 +690,10 @@ object AirVisionDiagnosticsSnapshots {
             validatedCaptureCount = validatedCaptureCount,
             writeEnabledCaptureCount = writeEnabledCaptureCount,
             blockedFeatureCount = blockedFeatureCount,
+            protocolReadyFeatureLabels = protocolReadyFeatureLabels,
+            blockedFeatureLabels = blockedFeatureLabels,
+            blockedFeatureSummaries = blockedFeatureSummaries,
+            liveTestChecklist = liveTestChecklist,
             liveM1Required = liveM1Required,
             explicitUserConfirmationRequired = explicitUserConfirmationRequired,
             summary = summary,

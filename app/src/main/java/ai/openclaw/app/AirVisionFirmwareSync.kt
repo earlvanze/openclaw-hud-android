@@ -38,12 +38,25 @@ data class AirVisionFirmwareWriteGate(
     val validatedCaptureCount: Int,
     val writeEnabledCaptureCount: Int,
     val blockedFeatureCount: Int,
+    val protocolReadyFeatureLabels: List<String>,
+    val blockedFeatureLabels: List<String>,
+    val blockedFeatureSummaries: List<String>,
+    val liveTestChecklist: List<String>,
     val liveM1Required: Boolean,
     val explicitUserConfirmationRequired: Boolean,
     val summary: String,
     val nextStep: String,
 ) {
     companion object {
+        private val liveM1WriteTestChecklist =
+            listOf(
+                "Reconnect the AirVision M1 to the Android device.",
+                "Grant USB permission and confirm readable plus writable HID report paths.",
+                "Replay only one validated feature report sequence at a time.",
+                "Read back the matching report and verify checksum/framing.",
+                "Confirm the visible M1 state changed as expected before enabling the next feature.",
+            )
+
         fun fromItems(items: List<AirVisionFirmwareSyncItem>): AirVisionFirmwareWriteGate {
             if (items.isEmpty()) {
                 return AirVisionFirmwareWriteGate(
@@ -52,6 +65,10 @@ data class AirVisionFirmwareWriteGate(
                     validatedCaptureCount = 0,
                     writeEnabledCaptureCount = 0,
                     blockedFeatureCount = 0,
+                    protocolReadyFeatureLabels = emptyList(),
+                    blockedFeatureLabels = emptyList(),
+                    blockedFeatureSummaries = emptyList(),
+                    liveTestChecklist = liveM1WriteTestChecklist,
                     liveM1Required = true,
                     explicitUserConfirmationRequired = true,
                     summary = "firmware writes: no Windows-style controls configured",
@@ -62,6 +79,18 @@ data class AirVisionFirmwareWriteGate(
             val validatedCaptureCount = items.count { it.captureResultStatus == "validated" }
             val writeEnabledCaptureCount = items.count { it.androidEnablementDecision == "enable_android_write" }
             val blockedFeatureCount = items.count { !it.firmwareWriteAllowed }
+            val protocolReadyFeatureLabels =
+                items
+                    .filter { it.androidEnablementDecision == "enable_android_write" }
+                    .map { it.feature.label }
+            val blockedFeatureLabels =
+                items
+                    .filter { !it.firmwareWriteAllowed }
+                    .map { it.feature.label }
+            val blockedFeatureSummaries =
+                items
+                    .filter { !it.firmwareWriteAllowed }
+                    .map { "${it.feature.label}: ${it.blockedReason}" }
             val total = items.size
             val status =
                 when {
@@ -87,6 +116,10 @@ data class AirVisionFirmwareWriteGate(
                 validatedCaptureCount = validatedCaptureCount,
                 writeEnabledCaptureCount = writeEnabledCaptureCount,
                 blockedFeatureCount = blockedFeatureCount,
+                protocolReadyFeatureLabels = protocolReadyFeatureLabels,
+                blockedFeatureLabels = blockedFeatureLabels,
+                blockedFeatureSummaries = blockedFeatureSummaries,
+                liveTestChecklist = liveM1WriteTestChecklist,
                 liveM1Required = true,
                 explicitUserConfirmationRequired = true,
                 summary =

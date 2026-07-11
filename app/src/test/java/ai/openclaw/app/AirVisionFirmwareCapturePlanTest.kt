@@ -69,9 +69,18 @@ class AirVisionFirmwareCapturePlanTest {
         assertTrue(markdown.contains("- Validated captures: 0/9"))
         assertTrue(markdown.contains("- Protocol-ready captures: 0/9"))
         assertTrue(markdown.contains("- Blocked features: 9"))
+        assertTrue(markdown.contains("- Protocol-ready feature labels: none"))
+        assertTrue(
+            markdown.contains(
+                "- Blocked feature labels: View Mode, Brightness, Screen distance, IPD, Splendid, Blue Light Filter, Motion Sync, Light Load Mode, 3D Mode",
+            ),
+        )
         assertTrue(markdown.contains("- Live M1 required before writes: yes"))
         assertTrue(markdown.contains("- Explicit user confirmation required: yes"))
         assertTrue(markdown.contains("- Next step: Capture and validate ASUS HID report payloads"))
+        assertTrue(markdown.contains("### Live M1 Write-Test Checklist"))
+        assertTrue(markdown.contains("- Reconnect the AirVision M1 to the Android device."))
+        assertTrue(markdown.contains("- Read back the matching report and verify checksum/framing."))
         assertTrue(
             markdown.contains(
                 "| Brightness | 64% | software HUD dimming | capture pending | " +
@@ -132,6 +141,7 @@ class AirVisionFirmwareCapturePlanTest {
         assertTrue(markdown.contains("- Summary: firmware writes: read-only; 1/9 validated captures, 1 protocol-ready, 9 blocked"))
         assertTrue(markdown.contains("- Validated captures: 1/9"))
         assertTrue(markdown.contains("- Protocol-ready captures: 1/9"))
+        assertTrue(markdown.contains("- Protocol-ready feature labels: Brightness"))
         assertTrue(markdown.contains("- Next step: Keep Android firmware writes disabled until the validated report sequence"))
         assertTrue(
             markdown.contains(
