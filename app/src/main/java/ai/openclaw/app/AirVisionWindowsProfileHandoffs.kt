@@ -42,6 +42,14 @@ object AirVisionWindowsProfileHandoffs {
                     add("- Runtime profile unavailable because no active profile values were available.")
                 }
                 add("")
+                add("## Windows App Apply Matrix")
+                add("")
+                if (activeProfile != null) {
+                    addWindowsApplyMatrix(activeProfile, profileBackup)
+                } else {
+                    add("- Apply matrix unavailable because no active profile values were available.")
+                }
+                add("")
                 add("## All Saved Android Profiles")
                 add("")
                 profileBackup.profiles.sortedBy { AirVisionViewMode.fromRawValue(it.viewMode).ordinal }.forEach { profile ->
@@ -127,6 +135,72 @@ object AirVisionWindowsProfileHandoffs {
                 add("- AirVision M1 support: $SUPPORT_URL")
             }
         return lines.joinToString("\n") + "\n"
+    }
+
+    private fun MutableList<String>.addWindowsApplyMatrix(
+        profile: AirVisionBackupDisplayProfile,
+        profileBackup: AirVisionProfileBackup,
+    ) {
+        val mode = AirVisionViewMode.fromRawValue(profile.viewMode)
+        val splendidMode = AirVisionSplendidMode.fromRawValue(profile.splendidMode)
+        val placement = AirVisionHudPlacement.fromRawValue(profile.hudPlacement)
+        val displayTarget = AirVisionHudDisplayTarget.fromRawValue(profileBackup.appPreferences.hudDisplayTarget)
+        val controls = profileBackup.hudControls
+        add(
+            "- View Mode: Windows app target ${mode.label}; Android profile slot " +
+                "${profileDisplayLabel(mode, profileBackup.customLabels)}; live M1 proof required: no; firmware gate: no.",
+        )
+        add(
+            "- Brightness: Windows app target ${profile.brightnessPercent}%; Android effect software HUD dimming; " +
+                "live M1 proof required: yes; firmware gate: HID capture pending.",
+        )
+        add(
+            "- Screen distance: Windows app target ${profile.distanceCm} cm; Android effect virtual HUD distance scale; " +
+                "live M1 proof required: yes; firmware gate: HID capture pending.",
+        )
+        add(
+            "- IPD: Windows app target ${ipdValue(profile)}; Android effect stored calibration and fit guidance; " +
+                "live M1 proof required: yes; firmware gate: HID capture pending.",
+        )
+        add(
+            "- Splendid / Eye Care: Windows app target ${splendidMode.label}, blue-light ${blueLightFilterValue(profile)}; " +
+                "Android effect HUD color/warmth preview; live M1 proof required: yes; firmware gate: HID capture pending.",
+        )
+        add(
+            "- Motion Sync: Windows app target ${onOff(profile.motionSyncEnabled)}; Android effect stored desired state only; " +
+                "live M1 proof required: yes; firmware gate: HID capture pending.",
+        )
+        add(
+            "- Light Load Mode: Windows app target ${onOff(profile.lightLoadModeEnabled)}; Android effect " +
+                lightLoadAndroidEffect(profile) +
+                "; live M1 proof required: yes; firmware gate: HID capture pending.",
+        )
+        add(
+            "- 3D Mode: Windows app target ${threeDValue(profile)}; Android effect ${threeDAndroidEffect(profile)}; " +
+                "live M1 proof required: yes; firmware gate: HID capture pending.",
+        )
+        add(
+            "- Android HUD layout: Windows app target none; Android effect HUD scale ${profile.hudScalePercent}%, " +
+                "${placement.label}, safe area ${profile.safeAreaPercent}%, physical main screen ${yesNo(profile.physicalMainScreenVisible)}; " +
+                "live M1 proof required: no; firmware gate: no.",
+        )
+        add(
+            "- Display routing: Windows app target none; Android effect ${displayTarget.label}; " +
+                "live M1 proof required: yes for DeX/M1 topology; firmware gate: no.",
+        )
+        add(
+            "- Gesture and hotkey settings: Windows app target none; Android effect single tap " +
+                "${AirVisionHudTouchAction.fromRawValue(controls.singleTapAction).label}, double tap " +
+                "${AirVisionHudDoubleTapAction.fromRawValue(controls.doubleTapAction).label}, swipe " +
+                "${AirVisionHudSwipeAction.fromRawValue(controls.swipeAction).label}, brightness key " +
+                "${AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction).label}, media key " +
+                "${AirVisionHudMediaKeyAction.fromRawValue(controls.mediaKeyAction).label}; " +
+                "live M1 proof required: yes for firmware-delivered events; firmware gate: no.",
+        )
+        add(
+            "- Windows spatial/mirror features: Windows app target Cursor Follow, Center Cursor, 3DoF, or Unity mirror when needed; " +
+                "Android effect reports Windows-only state and offers Cast/Display fallback; live M1 proof required: Windows host; firmware gate: Windows-only.",
+        )
     }
 
     private fun MutableList<String>.addProfile(
@@ -302,6 +376,20 @@ object AirVisionWindowsProfileHandoffs {
             "off (locked by Light Load Mode)"
         } else {
             onOff(profile.threeDModeEnabled)
+        }
+
+    private fun lightLoadAndroidEffect(profile: AirVisionBackupDisplayProfile): String =
+        if (profile.lightLoadModeEnabled) {
+            "trimmed transcript/caption history and locked IPD/3D controls"
+        } else {
+            "full HUD history and unlocked IPD/3D controls"
+        }
+
+    private fun threeDAndroidEffect(profile: AirVisionBackupDisplayProfile): String =
+        if (profile.lightLoadModeEnabled) {
+            "locked off by Light Load Mode"
+        } else {
+            "stored desired state only"
         }
 
     private fun displayValue(
