@@ -55,7 +55,7 @@ From this repo root:
 
 ```bash
 ./gradlew :app:assemblePlayDebug
-./gradlew :app:installPlayDebug
+./scripts/install-launch-node.sh --serial <adb-serial> --flavor play
 ./gradlew :app:testPlayDebugUnitTest
 ```
 

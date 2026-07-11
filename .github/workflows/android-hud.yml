@@ -33,9 +33,13 @@ jobs:
         run: |
           ./gradlew --no-daemon --max-workers=1 \
             :app:lintHudRelease \
+            :app:lintPlayDebug \
+            :app:lintThirdPartyDebug \
             :app:testHudDebugUnitTest \
+            :app:testPlayDebugUnitTest \
             :app:testThirdPartyDebugUnitTest \
             :app:assembleHudDebug \
+            :app:assemblePlayDebug \
             :app:assembleThirdPartyDebug \
             :app:bundleHudRelease \
             -POPENCLAW_ANDROID_ALLOW_UNSIGNED_RELEASE=true
