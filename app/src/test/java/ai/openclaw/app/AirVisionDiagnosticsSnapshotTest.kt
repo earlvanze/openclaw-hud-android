@@ -113,6 +113,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val fitAndClarity = root.getValue("fitAndClarity").jsonObject
         val demoExperience = root.getValue("demoExperience").jsonObject
         val windowsCompatibility = root.getValue("windowsCompatibility").jsonObject
+        val windowsApplyMatrix = root.getValue("windowsApplyMatrix").jsonObject
         val companionParity = root.getValue("companionParity").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
@@ -140,7 +141,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("29", root.getValue("version").jsonPrimitive.content)
+        assertEquals("30", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -565,6 +566,49 @@ class AirVisionDiagnosticsSnapshotTest {
             "ASUS documents 3DoF support as Windows laptop only; phones do not support it.",
             windowsCompatibility.getValue("limitations").jsonArray[3].jsonPrimitive.content,
         )
+        assertEquals("12", windowsApplyMatrix.getValue("itemCount").jsonPrimitive.content)
+        assertEquals("9", windowsApplyMatrix.getValue("liveM1RequiredCount").jsonPrimitive.content)
+        assertEquals("7", windowsApplyMatrix.getValue("firmwareGatedCount").jsonPrimitive.content)
+        assertEquals("1", windowsApplyMatrix.getValue("windowsOnlyCount").jsonPrimitive.content)
+        assertEquals(
+            "Windows app apply matrix: 12 targets, 9 live-M1 proof, 7 firmware-gated, 1 Windows-only",
+            windowsApplyMatrix.getValue("summary").jsonPrimitive.content,
+        )
+        val windowsApplyItems = windowsApplyMatrix.getValue("items").jsonArray
+        val brightnessApply =
+            windowsApplyItems
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Brightness" }
+                .jsonObject
+        val layoutApply =
+            windowsApplyItems
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Android HUD layout" }
+                .jsonObject
+        val gestureApply =
+            windowsApplyItems
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Gesture and hotkey settings" }
+                .jsonObject
+        val spatialApply =
+            windowsApplyItems
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Windows spatial/mirror features" }
+                .jsonObject
+        assertEquals("72%", brightnessApply.getValue("windowsAppTarget").jsonPrimitive.content)
+        assertEquals("software HUD dimming", brightnessApply.getValue("androidEffect").jsonPrimitive.content)
+        assertEquals("true", brightnessApply.getValue("liveM1ProofRequired").jsonPrimitive.content)
+        assertEquals("HID capture pending", brightnessApply.getValue("firmwareGate").jsonPrimitive.content)
+        assertEquals("none", layoutApply.getValue("windowsAppTarget").jsonPrimitive.content)
+        assertEquals(
+            "HUD scale 120%, Upper Left, safe area 5%, physical main screen yes",
+            layoutApply.getValue("androidEffect").jsonPrimitive.content,
+        )
+        assertEquals("false", layoutApply.getValue("liveM1ProofRequired").jsonPrimitive.content)
+        assertEquals("none", layoutApply.getValue("firmwareGate").jsonPrimitive.content)
+        assertEquals(
+            "single tap Dismiss notification, double tap Toggle mic, swipe Scroll chat, brightness key Scroll chat, media key Double-tap mic",
+            gestureApply.getValue("androidEffect").jsonPrimitive.content,
+        )
+        assertEquals("Cursor Follow, Center Cursor, 3DoF, or Unity mirror when needed", spatialApply.getValue("windowsAppTarget").jsonPrimitive.content)
+        assertEquals("Windows-only", spatialApply.getValue("firmwareGate").jsonPrimitive.content)
+        assertEquals("true", spatialApply.getValue("windowsOnly").jsonPrimitive.content)
         assertEquals("7", companionParity.getValue("reviewableOfflineCount").jsonPrimitive.content)
         assertEquals("6", companionParity.getValue("m1OptionalCount").jsonPrimitive.content)
         assertEquals("3", companionParity.getValue("firmwareGatedCount").jsonPrimitive.content)

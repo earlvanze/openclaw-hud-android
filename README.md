@@ -187,13 +187,15 @@ candidate counts, selected display identity, profile backup/restore readiness,
 imported firmware-capture-results provenance, safety counts, protocol-ready
 feature labels, captured-review and pending evidence labels, blocked feature
 labels/reasons, source-evidence completeness warnings, payload-safety preview
-text, and the live M1 write-test checklist,
+text, the live M1 write-test checklist,
 all saved AirVision profile values, runtime profile metadata, compact per-profile
 runtime summaries,
 fit/clarity/text-size guidance,
 Android demo/offline reviewer experience state, Windows-only cursor/3DoF and
 Unity mirror-window capability status, Android Cast/Display mirror fallback
-actions, 18-feature companion parity-state counts for offline-reviewable, M1-optional,
+actions, a structured Windows app apply matrix that lists each ASUS Windows
+target alongside the Android effect, live-M1 proof requirement, firmware gate,
+and Windows-only state, 18-feature companion parity-state counts for offline-reviewable, M1-optional,
 firmware-gated, and Windows-only features, Windows-only firmware-update workflow
 status, gesture settings, and AirVision app preferences without gateway
 endpoints, auth tokens, chat history, or raw USB serial values. Settings ->

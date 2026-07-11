@@ -18,6 +18,7 @@ data class AirVisionDiagnosticsSnapshot(
     val fitAndClarity: AirVisionDiagnosticsFitAndClarity,
     val demoExperience: AirVisionDiagnosticsDemoExperience,
     val windowsCompatibility: AirVisionDiagnosticsWindowsCompatibility,
+    val windowsApplyMatrix: AirVisionDiagnosticsWindowsApplyMatrix,
     val companionParity: AirVisionDiagnosticsCompanionParity,
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
@@ -330,9 +331,30 @@ data class AirVisionDiagnosticsWindowsCompatibility(
     val limitations: List<String>,
 )
 
+@Serializable
+data class AirVisionDiagnosticsWindowsApplyMatrix(
+    val itemCount: Int,
+    val liveM1RequiredCount: Int,
+    val firmwareGatedCount: Int,
+    val windowsOnlyCount: Int,
+    val summary: String,
+    val items: List<AirVisionDiagnosticsWindowsApplyMatrixItem>,
+)
+
+@Serializable
+data class AirVisionDiagnosticsWindowsApplyMatrixItem(
+    val feature: String,
+    val windowsAppTarget: String,
+    val androidEffect: String,
+    val liveM1ProofRequired: Boolean,
+    val firmwareGate: String,
+    val windowsOnly: Boolean,
+    val summary: String,
+)
+
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 29
+    const val VERSION = 30
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -626,6 +648,13 @@ object AirVisionDiagnosticsSnapshots {
                             "M1 firmware can keep touchpad brightness swipe before Android receives a gesture event.",
                         ),
                 ),
+            windowsApplyMatrix =
+                windowsApplyMatrix(
+                    profile = fallbackProfile,
+                    labels = backupCustomLabels,
+                    controls = hudControls,
+                    displayTarget = hudDisplayTarget,
+                ),
             companionParity =
                 AirVisionCompanionParity.fromState(
                     hudControls = hudControls,
@@ -662,6 +691,203 @@ object AirVisionDiagnosticsSnapshots {
                 ),
         )
     }
+
+    private fun windowsApplyMatrix(
+        profile: AirVisionBackupDisplayProfile,
+        labels: AirVisionBackupCustomLabels,
+        controls: AirVisionHudControls,
+        displayTarget: AirVisionHudDisplayTarget,
+    ): AirVisionDiagnosticsWindowsApplyMatrix {
+        val mode = AirVisionViewMode.fromRawValue(profile.viewMode)
+        val splendidMode = AirVisionSplendidMode.fromRawValue(profile.splendidMode)
+        val placement = AirVisionHudPlacement.fromRawValue(profile.hudPlacement)
+        val items =
+            listOf(
+                windowsApplyItem(
+                    feature = "View Mode",
+                    windowsAppTarget = mode.label,
+                    androidEffect = "Android profile slot ${profileDisplayLabel(mode, labels)}",
+                    liveM1ProofRequired = false,
+                    firmwareGate = "none",
+                    windowsOnly = false,
+                ),
+                windowsApplyItem(
+                    feature = "Brightness",
+                    windowsAppTarget = "${profile.brightnessPercent}%",
+                    androidEffect = "software HUD dimming",
+                    liveM1ProofRequired = true,
+                    firmwareGate = "HID capture pending",
+                    windowsOnly = false,
+                ),
+                windowsApplyItem(
+                    feature = "Screen distance",
+                    windowsAppTarget = "${profile.distanceCm} cm",
+                    androidEffect = "virtual HUD distance scale",
+                    liveM1ProofRequired = true,
+                    firmwareGate = "HID capture pending",
+                    windowsOnly = false,
+                ),
+                windowsApplyItem(
+                    feature = "IPD",
+                    windowsAppTarget = ipdValue(profile),
+                    androidEffect = "stored calibration and fit guidance",
+                    liveM1ProofRequired = true,
+                    firmwareGate = "HID capture pending",
+                    windowsOnly = false,
+                ),
+                windowsApplyItem(
+                    feature = "Splendid / Eye Care",
+                    windowsAppTarget = "${splendidMode.label}, blue-light ${blueLightFilterValue(profile)}",
+                    androidEffect = "HUD color/warmth preview",
+                    liveM1ProofRequired = true,
+                    firmwareGate = "HID capture pending",
+                    windowsOnly = false,
+                ),
+                windowsApplyItem(
+                    feature = "Motion Sync",
+                    windowsAppTarget = onOff(profile.motionSyncEnabled),
+                    androidEffect = "stored desired state only",
+                    liveM1ProofRequired = true,
+                    firmwareGate = "HID capture pending",
+                    windowsOnly = false,
+                ),
+                windowsApplyItem(
+                    feature = "Light Load Mode",
+                    windowsAppTarget = onOff(profile.lightLoadModeEnabled),
+                    androidEffect = lightLoadAndroidEffect(profile),
+                    liveM1ProofRequired = true,
+                    firmwareGate = "HID capture pending",
+                    windowsOnly = false,
+                ),
+                windowsApplyItem(
+                    feature = "3D Mode",
+                    windowsAppTarget = threeDValue(profile),
+                    androidEffect = threeDAndroidEffect(profile),
+                    liveM1ProofRequired = true,
+                    firmwareGate = "HID capture pending",
+                    windowsOnly = false,
+                ),
+                windowsApplyItem(
+                    feature = "Android HUD layout",
+                    windowsAppTarget = "none",
+                    androidEffect =
+                        "HUD scale ${profile.hudScalePercent}%, ${placement.label}, safe area ${profile.safeAreaPercent}%, " +
+                            "physical main screen ${yesNo(profile.physicalMainScreenVisible)}",
+                    liveM1ProofRequired = false,
+                    firmwareGate = "none",
+                    windowsOnly = false,
+                ),
+                windowsApplyItem(
+                    feature = "Display routing",
+                    windowsAppTarget = "none",
+                    androidEffect = displayTarget.label,
+                    liveM1ProofRequired = true,
+                    firmwareGate = "none",
+                    windowsOnly = false,
+                ),
+                windowsApplyItem(
+                    feature = "Gesture and hotkey settings",
+                    windowsAppTarget = "none",
+                    androidEffect =
+                        "single tap ${controls.singleTapAction.label}, double tap ${controls.doubleTapAction.label}, " +
+                            "swipe ${controls.swipeAction.label}, brightness key ${controls.brightnessKeyAction.label}, " +
+                            "media key ${controls.mediaKeyAction.label}",
+                    liveM1ProofRequired = true,
+                    firmwareGate = "none",
+                    windowsOnly = false,
+                ),
+                windowsApplyItem(
+                    feature = "Windows spatial/mirror features",
+                    windowsAppTarget = "Cursor Follow, Center Cursor, 3DoF, or Unity mirror when needed",
+                    androidEffect = "reports Windows-only state and offers Cast/Display fallback",
+                    liveM1ProofRequired = false,
+                    firmwareGate = "Windows-only",
+                    windowsOnly = true,
+                ),
+            )
+        val liveM1RequiredCount = items.count { it.liveM1ProofRequired }
+        val firmwareGatedCount = items.count { it.firmwareGate == "HID capture pending" }
+        val windowsOnlyCount = items.count { it.windowsOnly }
+        return AirVisionDiagnosticsWindowsApplyMatrix(
+            itemCount = items.size,
+            liveM1RequiredCount = liveM1RequiredCount,
+            firmwareGatedCount = firmwareGatedCount,
+            windowsOnlyCount = windowsOnlyCount,
+            summary =
+                "Windows app apply matrix: ${items.size} targets, $liveM1RequiredCount live-M1 proof, " +
+                    "$firmwareGatedCount firmware-gated, $windowsOnlyCount Windows-only",
+            items = items,
+        )
+    }
+
+    private fun windowsApplyItem(
+        feature: String,
+        windowsAppTarget: String,
+        androidEffect: String,
+        liveM1ProofRequired: Boolean,
+        firmwareGate: String,
+        windowsOnly: Boolean,
+    ): AirVisionDiagnosticsWindowsApplyMatrixItem =
+        AirVisionDiagnosticsWindowsApplyMatrixItem(
+            feature = feature,
+            windowsAppTarget = windowsAppTarget,
+            androidEffect = androidEffect,
+            liveM1ProofRequired = liveM1ProofRequired,
+            firmwareGate = firmwareGate,
+            windowsOnly = windowsOnly,
+            summary =
+                "$feature: Windows target $windowsAppTarget; Android effect $androidEffect; " +
+                    "live M1 proof ${yesNo(liveM1ProofRequired)}; firmware gate $firmwareGate",
+        )
+
+    private fun profileDisplayLabel(
+        mode: AirVisionViewMode,
+        labels: AirVisionBackupCustomLabels,
+    ): String =
+        when (mode) {
+            AirVisionViewMode.Custom1 -> labels.custom1
+            AirVisionViewMode.Custom2 -> labels.custom2
+            else -> mode.label
+        }
+
+    private fun blueLightFilterValue(profile: AirVisionBackupDisplayProfile): String =
+        if (AirVisionSplendidMode.fromRawValue(profile.splendidMode) == AirVisionSplendidMode.EyeCare) {
+            "${profile.blueLightFilterPercent}%"
+        } else {
+            "off (requires Eye Care)"
+        }
+
+    private fun ipdValue(profile: AirVisionBackupDisplayProfile): String =
+        if (profile.lightLoadModeEnabled) {
+            "${profile.ipdMm} mm (locked by Light Load Mode)"
+        } else {
+            "${profile.ipdMm} mm"
+        }
+
+    private fun threeDValue(profile: AirVisionBackupDisplayProfile): String =
+        if (profile.lightLoadModeEnabled) {
+            "off (locked by Light Load Mode)"
+        } else {
+            onOff(profile.threeDModeEnabled)
+        }
+
+    private fun lightLoadAndroidEffect(profile: AirVisionBackupDisplayProfile): String =
+        if (profile.lightLoadModeEnabled) {
+            "trimmed transcript/caption history and locked IPD/3D controls"
+        } else {
+            "full HUD history and unlocked IPD/3D controls"
+        }
+
+    private fun threeDAndroidEffect(profile: AirVisionBackupDisplayProfile): String =
+        if (profile.lightLoadModeEnabled) {
+            "locked off by Light Load Mode"
+        } else {
+            "stored desired state only"
+        }
+
+    private fun onOff(value: Boolean): String = if (value) "on" else "off"
+
+    private fun yesNo(value: Boolean): String = if (value) "yes" else "no"
 
     private fun profileRuntimeSummary(
         profile: AirVisionBackupDisplayProfile,
