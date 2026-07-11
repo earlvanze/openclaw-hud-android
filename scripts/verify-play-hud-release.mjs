@@ -487,6 +487,10 @@ async function verifyReadmeAirVisionParity() {
     "| Identify |",
     "| Multi-screen desktop layouts |",
   ]);
+  requireIncludes("README AirVision offline reviewer mode", readme, [
+    "without a live gateway or live M1",
+    "Android demo/offline reviewer experience",
+  ]);
   requireIncludes("README HUD walking defaults", readme, [
     "single-tap clears the current",
     "double-tap toggles mic",

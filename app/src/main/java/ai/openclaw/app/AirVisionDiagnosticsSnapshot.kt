@@ -198,6 +198,9 @@ data class AirVisionDiagnosticsDemoExperience(
     val androidDemoModeEnabled: Boolean,
     val windowsDemoShortcutAvailable: Boolean,
     val reviewerAccessReady: Boolean,
+    val liveGatewayRequiredForReview: Boolean,
+    val liveM1RequiredForReview: Boolean,
+    val offlineReviewSurfaces: List<String>,
     val summary: String,
     val limitations: List<String>,
 )
@@ -217,7 +220,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 17
+    const val VERSION = 18
 
     private val json =
         Json {
@@ -359,11 +362,21 @@ object AirVisionDiagnosticsSnapshots {
                     androidDemoModeEnabled = demoModeEnabled,
                     windowsDemoShortcutAvailable = false,
                     reviewerAccessReady = demoModeEnabled,
+                    liveGatewayRequiredForReview = false,
+                    liveM1RequiredForReview = false,
+                    offlineReviewSurfaces =
+                        listOf(
+                            "minimal green-on-black HUD",
+                            "sample chat and assistant status",
+                            "sample notification and caption text",
+                            "AirVision profile/settings review",
+                            "diagnostics export flow",
+                        ),
                     summary =
                         if (demoModeEnabled) {
-                            "Android Demo Mode is enabled for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway."
+                            "Android Demo Mode is enabled for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway or live M1."
                         } else {
-                            "Android Demo Mode is available for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway."
+                            "Android Demo Mode is available for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway or live M1."
                         },
                     limitations =
                         listOf(

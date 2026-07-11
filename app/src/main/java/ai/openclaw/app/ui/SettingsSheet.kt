@@ -1386,7 +1386,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Demo Mode", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                "Shows a deterministic AirVision HUD sample for Play review, tutorials, screenshots, and fit checks without a live gateway. ASUS Windows demo shortcut state stays Windows-only.",
+                                "Shows a deterministic AirVision HUD sample for Play review, tutorials, screenshots, and fit checks without a live gateway or live M1. ASUS Windows demo shortcut state stays Windows-only.",
                                 style = mobileCallout,
                             )
                         },

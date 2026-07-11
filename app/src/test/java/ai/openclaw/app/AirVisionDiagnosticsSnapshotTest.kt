@@ -133,7 +133,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("17", root.getValue("version").jsonPrimitive.content)
+        assertEquals("18", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -299,8 +299,20 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", demoExperience.getValue("androidDemoModeEnabled").jsonPrimitive.content)
         assertEquals("false", demoExperience.getValue("windowsDemoShortcutAvailable").jsonPrimitive.content)
         assertEquals("true", demoExperience.getValue("reviewerAccessReady").jsonPrimitive.content)
+        assertEquals("false", demoExperience.getValue("liveGatewayRequiredForReview").jsonPrimitive.content)
+        assertEquals("false", demoExperience.getValue("liveM1RequiredForReview").jsonPrimitive.content)
         assertEquals(
-            "Android Demo Mode is enabled for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway.",
+            listOf(
+                "minimal green-on-black HUD",
+                "sample chat and assistant status",
+                "sample notification and caption text",
+                "AirVision profile/settings review",
+                "diagnostics export flow",
+            ),
+            demoExperience.getValue("offlineReviewSurfaces").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            "Android Demo Mode is enabled for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway or live M1.",
             demoExperience.getValue("summary").jsonPrimitive.content,
         )
         assertEquals(
@@ -361,8 +373,10 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", demoExperience.getValue("androidDemoModeAvailable").jsonPrimitive.content)
         assertEquals("false", demoExperience.getValue("androidDemoModeEnabled").jsonPrimitive.content)
         assertEquals("false", demoExperience.getValue("reviewerAccessReady").jsonPrimitive.content)
+        assertEquals("false", demoExperience.getValue("liveGatewayRequiredForReview").jsonPrimitive.content)
+        assertEquals("false", demoExperience.getValue("liveM1RequiredForReview").jsonPrimitive.content)
         assertEquals(
-            "Android Demo Mode is available for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway.",
+            "Android Demo Mode is available for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway or live M1.",
             demoExperience.getValue("summary").jsonPrimitive.content,
         )
     }
