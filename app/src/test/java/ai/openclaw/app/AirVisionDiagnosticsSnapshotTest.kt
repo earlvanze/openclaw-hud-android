@@ -312,6 +312,18 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("0", firmwareCaptureResults.getValue("validatedFeatureCount").jsonPrimitive.content)
         assertEquals("0", firmwareCaptureResults.getValue("writeEnabledFeatureCount").jsonPrimitive.content)
         assertEquals("0", firmwareCaptureResults.getValue("blockedFeatureCount").jsonPrimitive.content)
+        assertEquals(
+            emptyList<String>(),
+            firmwareCaptureResults.getValue("writeEnabledFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            emptyList<String>(),
+            firmwareCaptureResults.getValue("blockedFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            "No capture results imported; Android firmware writes remain blocked.",
+            firmwareCaptureResults.getValue("safetyPreviewText").jsonPrimitive.content,
+        )
         assertEquals("source=pending", firmwareCaptureResults.getValue("sourceSummary").jsonPrimitive.content)
         assertEquals(
             "capture results: not imported",
@@ -640,6 +652,24 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("1", firmwareCaptureResults.getValue("validatedFeatureCount").jsonPrimitive.content)
         assertEquals("1", firmwareCaptureResults.getValue("writeEnabledFeatureCount").jsonPrimitive.content)
         assertEquals("8", firmwareCaptureResults.getValue("blockedFeatureCount").jsonPrimitive.content)
+        assertEquals(
+            listOf("Brightness"),
+            firmwareCaptureResults.getValue("writeEnabledFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertTrue(
+            firmwareCaptureResults
+                .getValue("blockedFeatureLabels")
+                .jsonArray
+                .map { it.jsonPrimitive.content }
+                .contains("IPD"),
+        )
+        assertTrue(
+            firmwareCaptureResults
+                .getValue("safetyPreviewText")
+                .jsonPrimitive
+                .content
+                .contains("raw USB captures"),
+        )
         assertEquals("Cyber", source.getValue("windowsHost").jsonPrimitive.content)
         assertEquals("USBPcap/Wireshark", source.getValue("captureTool").jsonPrimitive.content)
         assertEquals("1.0.12.0", source.getValue("asusAirVisionAppVersion").jsonPrimitive.content)

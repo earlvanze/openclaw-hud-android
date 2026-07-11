@@ -184,8 +184,8 @@ targets and probe values for future ASUS HID protocol validation, the active HUD
 profile, derived HUD runtime state, Android Presentation routing state, display
 candidate counts, selected display identity, profile backup/restore readiness,
 imported firmware-capture-results provenance, safety counts, protocol-ready
-feature labels, blocked feature labels/reasons, and the live M1 write-test
-checklist,
+feature labels, blocked feature labels/reasons, payload-safety preview text,
+and the live M1 write-test checklist,
 all saved AirVision profile values, runtime profile metadata,
 fit/clarity/text-size guidance,
 Android demo/offline reviewer experience state, Windows-only cursor/3DoF and
