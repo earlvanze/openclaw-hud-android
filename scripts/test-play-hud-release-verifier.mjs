@@ -82,7 +82,7 @@ const validReadme = [
   "| Cursor Follow / Center Cursor / 3DoF | Windows-only capability status plus Android distance hotkey substitute. |",
   "| Unity mirror window / projected glasses view | Windows-only mirror window status plus Android sharing fallback. |",
   "| Demo Mode / Tutorials | Android deterministic review mode without a live gateway or live M1 plus Windows tutorial shortcut status. |",
-  "| Companion parity states | Diagnostics and Windows App Handoff render offline-reviewable, M1-optional, firmware-gated, and Windows-only feature state counts. |",
+  "| Companion parity states | Settings, diagnostics, and Windows App Handoff render offline-reviewable, M1-optional, firmware-gated, and Windows-only feature state counts. |",
   "| App Preferences | Startup, language, speaker, captions, backup, policy, and support links. |",
   "| Windows app profile handoff | ASUS Windows app apply steps and privacy reminders. |",
   "| Device Information | USB identity details. |",
@@ -98,11 +98,24 @@ const validReadme = [
   "`play/airvision-firmware-capture-results.json` is the machine-checked sanitized capture-results file. Android firmware writes remain blocked until evidence is validated.",
 ].join("\n");
 
+const validSettingsSheet = [
+  "package ai.openclaw.app.ui",
+  "import ai.openclaw.app.AirVisionCompanionParity",
+  "val airVisionCompanionParity = AirVisionCompanionParity.fromState(...)",
+  'headlineContent = { Text("Companion Parity", style = mobileHeadline) }',
+  "airVisionCompanionParitySettingsText(airVisionCompanionParity)",
+  '\"reviewable_offline\" -> \"offline-reviewable\"',
+  '\"m1_optional\" -> \"M1-optional\"',
+  '\"firmware_gated\" -> \"firmware-gated\"',
+  '\"windows_only\" -> \"Windows-only\"',
+].join("\n");
+
 function runVerifier(
   gradlePath,
   localePath,
   listingDir,
   readmePath,
+  settingsSheetPath,
 ) {
   const args = [scriptPath, "--bundle", bundlePath, "--skip-signature"];
   if (listingDir) args.push("--listing-dir", listingDir);
@@ -116,6 +129,7 @@ function runVerifier(
         OPENCLAW_ANDROID_GRADLE_BUILD_PATH: gradlePath,
         OPENCLAW_ANDROID_AIRVISION_APP_LOCALE_PATH: localePath,
         ...(readmePath ? { OPENCLAW_ANDROID_README_PATH: readmePath } : {}),
+        ...(settingsSheetPath ? { OPENCLAW_ANDROID_SETTINGS_SHEET_PATH: settingsSheetPath } : {}),
       },
     },
   );
@@ -138,6 +152,7 @@ function runListingVerifier(
   localePath,
   listingDir,
   readmePath,
+  settingsSheetPath,
 ) {
   return spawnSync(
     process.execPath,
@@ -149,6 +164,7 @@ function runListingVerifier(
         OPENCLAW_ANDROID_GRADLE_BUILD_PATH: gradlePath,
         OPENCLAW_ANDROID_AIRVISION_APP_LOCALE_PATH: localePath,
         ...(readmePath ? { OPENCLAW_ANDROID_README_PATH: readmePath } : {}),
+        ...(settingsSheetPath ? { OPENCLAW_ANDROID_SETTINGS_SHEET_PATH: settingsSheetPath } : {}),
       },
     },
   );
@@ -161,11 +177,13 @@ async function main() {
     const gradlePath = join(tempDir, "build.gradle.kts");
     const listingPath = join(tempDir, "listings");
     const readmePath = join(tempDir, "README.md");
+    const settingsSheetPath = join(tempDir, "SettingsSheet.kt");
     await writeFile(localePath, localeSource);
     await writeFile(readmePath, validReadme);
+    await writeFile(settingsSheetPath, validSettingsSheet);
 
     await writeFile(gradlePath, gradleWithLanguageSplitsEnabled);
-    const failing = runVerifier(gradlePath, localePath, null, readmePath);
+    const failing = runVerifier(gradlePath, localePath, null, readmePath, settingsSheetPath);
     if (failing.status === 0 || !failing.stderr.includes("language splits")) {
       throw new Error(
         [
@@ -177,7 +195,7 @@ async function main() {
     }
 
     await writeFile(gradlePath, gradleWithLanguageSplitsDisabled);
-    const passing = runVerifier(gradlePath, localePath, null, readmePath);
+    const passing = runVerifier(gradlePath, localePath, null, readmePath, settingsSheetPath);
     if (passing.status !== 0) {
       throw new Error(
         [
@@ -190,7 +208,7 @@ async function main() {
     }
 
     await writeListing(listingPath);
-    const listingPassing = runListingVerifier(gradlePath, localePath, listingPath, readmePath);
+    const listingPassing = runListingVerifier(gradlePath, localePath, listingPath, readmePath, settingsSheetPath);
     if (listingPassing.status !== 0) {
       throw new Error(
         [
@@ -205,7 +223,7 @@ async function main() {
     await writeListing(listingPath, {
       "release-notes.txt": "Initial AirVision M1 HUD release candidate.",
     });
-    const listingFailing = runListingVerifier(gradlePath, localePath, listingPath, readmePath);
+    const listingFailing = runListingVerifier(gradlePath, localePath, listingPath, readmePath, settingsSheetPath);
     if (listingFailing.status === 0 || !listingFailing.stderr.includes("required Play listing text")) {
       throw new Error(
         [
@@ -219,7 +237,7 @@ async function main() {
 
     await writeListing(listingPath);
     await writeFile(readmePath, validReadme.replace("| IPD | Calibration value. |", ""));
-    const readmeFailing = runListingVerifier(gradlePath, localePath, listingPath, readmePath);
+    const readmeFailing = runListingVerifier(gradlePath, localePath, listingPath, readmePath, settingsSheetPath);
     if (readmeFailing.status === 0 || !readmeFailing.stderr.includes("README Windows AirVision feature matrix")) {
       throw new Error(
         [
@@ -227,6 +245,23 @@ async function main() {
           `status=${readmeFailing.status}`,
           `stderr=${readmeFailing.stderr.trim()}`,
           `stdout=${readmeFailing.stdout.trim()}`,
+        ].join("\n"),
+      );
+    }
+
+    await writeFile(readmePath, validReadme);
+    await writeFile(settingsSheetPath, "package ai.openclaw.app.ui\nfun SettingsSheet() = Unit\n");
+    const settingsFailing = runListingVerifier(gradlePath, localePath, listingPath, readmePath, settingsSheetPath);
+    if (
+      settingsFailing.status === 0 ||
+      !settingsFailing.stderr.includes("Settings AirVision companion parity")
+    ) {
+      throw new Error(
+        [
+          "Expected verifier to reject Settings text that omits visible companion parity.",
+          `status=${settingsFailing.status}`,
+          `stderr=${settingsFailing.stderr.trim()}`,
+          `stdout=${settingsFailing.stdout.trim()}`,
         ].join("\n"),
       );
     }

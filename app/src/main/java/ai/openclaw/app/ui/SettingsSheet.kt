@@ -1,7 +1,9 @@
 package ai.openclaw.app.ui
 
 import ai.openclaw.app.AirVisionAppLanguage
+import ai.openclaw.app.AirVisionCompanionParity
 import ai.openclaw.app.AirVisionDisplaySettings
+import ai.openclaw.app.AirVisionDiagnosticsCompanionParity
 import ai.openclaw.app.AirVisionFirmwareCaptureResultsSummary
 import ai.openclaw.app.AirVisionFirmwareSyncPlans
 import ai.openclaw.app.AirVisionHudDisplayTarget
@@ -125,12 +127,29 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
     val airVisionFirmwareCaptureResults by viewModel.airVisionFirmwareCaptureResults.collectAsState()
     val airVisionFirmwareCaptureResultsSummary by viewModel.airVisionFirmwareCaptureResultsSummary.collectAsState()
+    val nativeCaptionsEnabled by viewModel.nativeCaptionsEnabled.collectAsState()
+    val translationCaptionSourceLanguage by viewModel.translationCaptionSourceLanguage.collectAsState()
+    val translationCaptionTargetLanguage by viewModel.translationCaptionTargetLanguage.collectAsState()
     val airVisionFirmwareSyncPlan =
         AirVisionFirmwareSyncPlans.fromSettings(
             settings = airVisionDisplaySettings,
             capabilities = airVisionUsbState.firmwareCapabilities,
             captureResults = airVisionFirmwareCaptureResults,
         )
+    val airVisionCompanionParity =
+        remember(
+            airVisionHudControls,
+            nativeCaptionsEnabled,
+            translationCaptionSourceLanguage,
+            translationCaptionTargetLanguage,
+        ) {
+            AirVisionCompanionParity.fromState(
+                hudControls = airVisionHudControls,
+                nativeCaptionsEnabled = nativeCaptionsEnabled,
+                translationCaptionSourceLanguage = translationCaptionSourceLanguage,
+                translationCaptionTargetLanguage = translationCaptionTargetLanguage,
+            )
+        }
 
     var notificationQuietStartDraft by remember(notificationForwardingQuietStart) {
         mutableStateOf(notificationForwardingQuietStart)
@@ -1624,6 +1643,18 @@ fun SettingsSheet(viewModel: MainViewModel) {
                             }
                         },
                     )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Companion Parity", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                airVisionCompanionParitySettingsText(airVisionCompanionParity),
+                                style = mobileCallout,
+                            )
+                        },
+                    )
                 }
             }
             item {
@@ -2719,6 +2750,24 @@ private fun airVisionFirmwareUpdateStatusText(firmwareVersion: String?): String 
             ?: "Android-visible firmware version is pending ASUS HID protocol.",
         "Use Windows/Cyber with the M1 connected for ASUS firmware updates; Android firmware writes stay blocked.",
     ).joinToString("\n")
+
+private fun airVisionCompanionParitySettingsText(parity: AirVisionDiagnosticsCompanionParity): String =
+    buildList {
+        add(parity.summary)
+        parity.entries.forEach { entry ->
+            add("${entry.feature}: ${airVisionCompanionParityStateLabel(entry.androidState)}")
+        }
+        add("Live M1 required for hardware proof: ${parity.liveM1RequiredCount}; firmware protocol gated: ${parity.firmwareGatedCount}.")
+    }.joinToString("\n")
+
+private fun airVisionCompanionParityStateLabel(state: String): String =
+    when (state) {
+        "reviewable_offline" -> "offline-reviewable"
+        "m1_optional" -> "M1-optional"
+        "firmware_gated" -> "firmware-gated"
+        "windows_only" -> "Windows-only"
+        else -> state
+    }
 
 private fun airVisionFitAndClarityText(settings: AirVisionDisplaySettings): String {
     val effectiveHudScalePercent =

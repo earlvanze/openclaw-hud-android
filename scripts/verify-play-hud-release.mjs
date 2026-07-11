@@ -52,6 +52,9 @@ const airVisionFirmwareCaptureResultsPath = join(androidDir, "play", "airvision-
 const readmePath =
   process.env.OPENCLAW_ANDROID_README_PATH?.trim() ||
   join(androidDir, "README.md");
+const settingsSheetPath =
+  process.env.OPENCLAW_ANDROID_SETTINGS_SHEET_PATH?.trim() ||
+  join(androidDir, "app", "src", "main", "java", "ai", "openclaw", "app", "ui", "SettingsSheet.kt");
 
 const expectedPackage = "ai.openclaw.app.hud";
 const expectedPermissions = [
@@ -586,6 +589,20 @@ async function verifyGeneratedAirVisionFirmwareCapturePlan() {
   ]);
 }
 
+async function verifySettingsAirVisionParity() {
+  const settingsSheet = await readFile(settingsSheetPath, "utf8");
+  requireIncludes("Settings AirVision companion parity", settingsSheet, [
+    "AirVisionCompanionParity.fromState",
+    'headlineContent = { Text("Companion Parity"',
+    "airVisionCompanionParitySettingsText",
+    "offline-reviewable",
+    "M1-optional",
+    "firmware-gated",
+    "Windows-only",
+  ]);
+  return { path: settingsSheetPath };
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const bundlePath = args.bundle ?? (await latestHudBundle());
@@ -594,6 +611,7 @@ async function main() {
   const listing = await verifyListing(args.listingDir, args.language);
   const localeBundleConfig = await verifyRuntimeLocaleBundleConfig();
   const readmeParity = await verifyReadmeAirVisionParity();
+  const settingsParity = await verifySettingsAirVisionParity();
   await verifyGeneratedAirVisionFirmwareCapturePlan();
 
   console.log(`Bundle: ${bundle.path} (${bundle.size} bytes)`);
@@ -610,6 +628,7 @@ async function main() {
     console.log("Runtime locale delivery: App Bundle language splits disabled");
   }
   console.log(`README AirVision parity: ${readmeParity.path}`);
+  console.log(`Settings AirVision parity: ${settingsParity.path}`);
   console.log("AirVision firmware capture plan/results: current");
   console.log("Play HUD release verifier passed.");
 }
