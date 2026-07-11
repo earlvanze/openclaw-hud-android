@@ -535,6 +535,7 @@ class MainViewModel(
                 translationCaptionSourceLanguage = translationCaptionSourceLanguage.value,
                 translationCaptionTargetLanguage = translationCaptionTargetLanguage.value,
                 firmwareCaptureResults = airVisionFirmwareCaptureResults.value,
+                profileBackup = prefs.airVisionProfileBackupSnapshot(),
             ),
         )
 

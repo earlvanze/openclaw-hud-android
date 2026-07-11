@@ -861,44 +861,45 @@ class SecurePrefs(
         _airVisionFirmwareCaptureResultsSummary.value = null
     }
 
-    fun exportAirVisionProfileBackup(): String =
-        AirVisionProfileBackups.encode(
-            AirVisionProfileBackup(
-                activeViewMode = _airVisionDisplaySettings.value.viewMode.rawValue,
-                customLabels =
-                    AirVisionBackupCustomLabels(
-                        custom1 = _airVisionCustomProfileLabels.value.custom1,
-                        custom2 = _airVisionCustomProfileLabels.value.custom2,
-                    ),
-                hudControls =
-                    AirVisionBackupHudControls(
-                        singleTapAction = _airVisionHudControls.value.singleTapAction.rawValue,
-                        doubleTapAction = _airVisionHudControls.value.doubleTapAction.rawValue,
-                        swipeAction = _airVisionHudControls.value.swipeAction.rawValue,
-                        brightnessKeyAction = _airVisionHudControls.value.brightnessKeyAction.rawValue,
-                        mediaKeyAction = _airVisionHudControls.value.mediaKeyAction.rawValue,
-                    ),
-                appPreferences =
-                    AirVisionBackupAppPreferences(
-                        language = _airVisionAppLanguage.value.rawValue,
-                        startupDestination = _airVisionStartupDestination.value.rawValue,
-                        hudDisplayTarget = _airVisionHudDisplayTarget.value.rawValue,
-                        demoModeEnabled = _airVisionDemoModeEnabled.value,
-                        speakerEnabled = _speakerEnabled.value,
-                        nativeCaptionsEnabled = _nativeCaptionsEnabled.value,
-                        translationCaptionSourceLanguage = _translationCaptionSourceLanguage.value,
-                        translationCaptionTargetLanguage = _translationCaptionTargetLanguage.value,
-                    ),
-                runtimeProfiles =
-                    AirVisionViewMode.entries.map { mode ->
-                        AirVisionProfileBackups.runtimeProfileFromSettings(loadAirVisionDisplaySettings(mode))
-                    },
-                profiles =
-                    AirVisionViewMode.entries.map { mode ->
-                        AirVisionProfileBackups.profileFromSettings(loadAirVisionDisplaySettings(mode))
-                    },
-            ),
+    fun airVisionProfileBackupSnapshot(): AirVisionProfileBackup =
+        AirVisionProfileBackup(
+            activeViewMode = _airVisionDisplaySettings.value.viewMode.rawValue,
+            customLabels =
+                AirVisionBackupCustomLabels(
+                    custom1 = _airVisionCustomProfileLabels.value.custom1,
+                    custom2 = _airVisionCustomProfileLabels.value.custom2,
+                ),
+            hudControls =
+                AirVisionBackupHudControls(
+                    singleTapAction = _airVisionHudControls.value.singleTapAction.rawValue,
+                    doubleTapAction = _airVisionHudControls.value.doubleTapAction.rawValue,
+                    swipeAction = _airVisionHudControls.value.swipeAction.rawValue,
+                    brightnessKeyAction = _airVisionHudControls.value.brightnessKeyAction.rawValue,
+                    mediaKeyAction = _airVisionHudControls.value.mediaKeyAction.rawValue,
+                ),
+            appPreferences =
+                AirVisionBackupAppPreferences(
+                    language = _airVisionAppLanguage.value.rawValue,
+                    startupDestination = _airVisionStartupDestination.value.rawValue,
+                    hudDisplayTarget = _airVisionHudDisplayTarget.value.rawValue,
+                    demoModeEnabled = _airVisionDemoModeEnabled.value,
+                    speakerEnabled = _speakerEnabled.value,
+                    nativeCaptionsEnabled = _nativeCaptionsEnabled.value,
+                    translationCaptionSourceLanguage = _translationCaptionSourceLanguage.value,
+                    translationCaptionTargetLanguage = _translationCaptionTargetLanguage.value,
+                ),
+            runtimeProfiles =
+                AirVisionViewMode.entries.map { mode ->
+                    AirVisionProfileBackups.runtimeProfileFromSettings(loadAirVisionDisplaySettings(mode))
+                },
+            profiles =
+                AirVisionViewMode.entries.map { mode ->
+                    AirVisionProfileBackups.profileFromSettings(loadAirVisionDisplaySettings(mode))
+                },
         )
+
+    fun exportAirVisionProfileBackup(): String =
+        AirVisionProfileBackups.encode(airVisionProfileBackupSnapshot())
 
     fun importAirVisionProfileBackup(raw: String) {
         val backup = AirVisionProfileBackups.decode(raw)

@@ -494,6 +494,8 @@ async function verifyReadmeAirVisionParity() {
   ]);
   requireIncludes("README AirVision profile backup diagnostics", readme, [
     "profile backup/restore readiness",
+    "all saved AirVision profile values",
+    "runtime profile metadata",
   ]);
   requireIncludes("README AirVision fit and clarity guidance", readme, [
     "53.5-74.5 mm IPD range",

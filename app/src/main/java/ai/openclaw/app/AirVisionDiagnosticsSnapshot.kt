@@ -199,6 +199,8 @@ data class AirVisionDiagnosticsProfileBackup(
     val schema: String,
     val currentVersion: Int,
     val supportedVersions: List<Int>,
+    val activeViewMode: String,
+    val customLabels: AirVisionBackupCustomLabels,
     val exportedProfileCount: Int,
     val exportedRuntimeProfileCount: Int,
     val expectedProfileCount: Int,
@@ -206,6 +208,8 @@ data class AirVisionDiagnosticsProfileBackup(
     val includesHudControls: Boolean,
     val includesAppPreferences: Boolean,
     val includesRuntimeProfiles: Boolean,
+    val profiles: List<AirVisionBackupDisplayProfile>,
+    val runtimeProfiles: List<AirVisionBackupRuntimeProfile>,
     val restoreScope: List<String>,
     val summary: String,
 )
@@ -255,7 +259,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 20
+    const val VERSION = 21
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -283,6 +287,7 @@ object AirVisionDiagnosticsSnapshots {
         translationCaptionSourceLanguage: String = TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
         translationCaptionTargetLanguage: String = TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
         firmwareCaptureResults: AirVisionFirmwareCaptureResults? = null,
+        profileBackup: AirVisionProfileBackup? = null,
     ): AirVisionDiagnosticsSnapshot {
         val effectiveHudScalePercent =
             (
@@ -293,8 +298,17 @@ object AirVisionDiagnosticsSnapshots {
             ).toInt()
         val currentIpdWithinAsusRange = displaySettings.ipdMm.toDouble() in ASUS_MIN_IPD_MM..ASUS_MAX_IPD_MM
         val expectedProfileCount = AirVisionViewMode.entries.size
-        val exportedProfileCount = expectedProfileCount
-        val exportedRuntimeProfileCount = expectedProfileCount
+        val fallbackProfile = AirVisionProfileBackups.profileFromSettings(displaySettings)
+        val backupProfiles = profileBackup?.profiles ?: listOf(fallbackProfile)
+        val backupRuntimeProfiles =
+            profileBackup?.runtimeProfiles
+                ?: listOf(AirVisionProfileBackups.runtimeProfileFromSettings(displaySettings))
+        val exportedProfileCount = backupProfiles.size
+        val exportedRuntimeProfileCount = backupRuntimeProfiles.size
+        val profileModes = backupProfiles.map { it.viewMode }.toSet()
+        val completeProfileSet =
+            AirVisionViewMode.entries.all { it.rawValue in profileModes } &&
+                exportedProfileCount == expectedProfileCount
 
         return AirVisionDiagnosticsSnapshot(
             usb =
@@ -405,13 +419,22 @@ object AirVisionDiagnosticsSnapshots {
                     schema = AirVisionProfileBackups.SCHEMA,
                     currentVersion = AirVisionProfileBackups.VERSION,
                     supportedVersions = SUPPORTED_PROFILE_BACKUP_VERSIONS,
+                    activeViewMode = profileBackup?.activeViewMode ?: displaySettings.viewMode.rawValue,
+                    customLabels =
+                        profileBackup?.customLabels
+                            ?: AirVisionBackupCustomLabels(
+                                custom1 = AirVisionViewMode.Custom1.label,
+                                custom2 = AirVisionViewMode.Custom2.label,
+                            ),
                     exportedProfileCount = exportedProfileCount,
                     exportedRuntimeProfileCount = exportedRuntimeProfileCount,
                     expectedProfileCount = expectedProfileCount,
-                    completeProfileSet = exportedProfileCount == expectedProfileCount,
+                    completeProfileSet = completeProfileSet,
                     includesHudControls = true,
                     includesAppPreferences = true,
                     includesRuntimeProfiles = exportedRuntimeProfileCount == expectedProfileCount,
+                    profiles = backupProfiles,
+                    runtimeProfiles = backupRuntimeProfiles,
                     restoreScope =
                         listOf(
                             "view mode profiles",

@@ -12,6 +12,14 @@ import org.junit.Test
 class AirVisionDiagnosticsSnapshotTest {
     @Test
     fun fromState_exportsUsbDescriptorsAndCurrentAirVisionSettings() {
+        val displaySettings =
+            AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working).copy(
+                splendidMode = AirVisionSplendidMode.EyeCare,
+                brightnessPercent = 72,
+                blueLightFilterPercent = 40,
+                hudScalePercent = 120,
+                ipdMm = 67,
+            )
         val snapshot =
             AirVisionDiagnosticsSnapshots.fromState(
                 usbState =
@@ -56,14 +64,7 @@ class AirVisionDiagnosticsSnapshotTest {
                                 ),
                             ),
                     ),
-                displaySettings =
-                    AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working).copy(
-                        splendidMode = AirVisionSplendidMode.EyeCare,
-                        brightnessPercent = 72,
-                        blueLightFilterPercent = 40,
-                        hudScalePercent = 120,
-                        ipdMm = 67,
-                    ),
+                displaySettings = displaySettings,
                 hudControls =
                     AirVisionHudControls(
                         singleTapAction = AirVisionHudTouchAction.DismissNotification,
@@ -94,6 +95,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 nativeCaptionsEnabled = true,
                 translationCaptionSourceLanguage = "pt-BR",
                 translationCaptionTargetLanguage = "ja",
+                profileBackup = diagnosticsProfileBackup(displaySettings),
             )
 
         val encoded = AirVisionDiagnosticsSnapshots.encode(snapshot)
@@ -135,7 +137,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("20", root.getValue("version").jsonPrimitive.content)
+        assertEquals("21", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -303,6 +305,16 @@ class AirVisionDiagnosticsSnapshotTest {
             listOf("1", "2", "3", "4"),
             profileBackup.getValue("supportedVersions").jsonArray.map { it.jsonPrimitive.content },
         )
+        assertEquals("working", profileBackup.getValue("activeViewMode").jsonPrimitive.content)
+        assertEquals(
+            "Walk HUD",
+            profileBackup
+                .getValue("customLabels")
+                .jsonObject
+                .getValue("custom1")
+                .jsonPrimitive
+                .content,
+        )
         assertEquals("5", profileBackup.getValue("exportedProfileCount").jsonPrimitive.content)
         assertEquals("5", profileBackup.getValue("exportedRuntimeProfileCount").jsonPrimitive.content)
         assertEquals("5", profileBackup.getValue("expectedProfileCount").jsonPrimitive.content)
@@ -310,6 +322,41 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", profileBackup.getValue("includesHudControls").jsonPrimitive.content)
         assertEquals("true", profileBackup.getValue("includesAppPreferences").jsonPrimitive.content)
         assertEquals("true", profileBackup.getValue("includesRuntimeProfiles").jsonPrimitive.content)
+        assertEquals(AirVisionViewMode.entries.size, profileBackup.getValue("profiles").jsonArray.size)
+        assertEquals(AirVisionViewMode.entries.size, profileBackup.getValue("runtimeProfiles").jsonArray.size)
+        assertEquals(
+            "eye_care",
+            profileBackup
+                .getValue("profiles")
+                .jsonArray
+                .first { it.jsonObject.getValue("viewMode").jsonPrimitive.content == "working" }
+                .jsonObject
+                .getValue("splendidMode")
+                .jsonPrimitive
+                .content,
+        )
+        assertEquals(
+            "120",
+            profileBackup
+                .getValue("profiles")
+                .jsonArray
+                .first { it.jsonObject.getValue("viewMode").jsonPrimitive.content == "working" }
+                .jsonObject
+                .getValue("hudScalePercent")
+                .jsonPrimitive
+                .content,
+        )
+        assertEquals(
+            "120",
+            profileBackup
+                .getValue("runtimeProfiles")
+                .jsonArray
+                .first { it.jsonObject.getValue("viewMode").jsonPrimitive.content == "working" }
+                .jsonObject
+                .getValue("effectiveHudScalePercent")
+                .jsonPrimitive
+                .content,
+        )
         assertEquals(
             listOf(
                 "view mode profiles",
@@ -432,6 +479,36 @@ class AirVisionDiagnosticsSnapshotTest {
             "Android Demo Mode is available for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway or live M1.",
             demoExperience.getValue("summary").jsonPrimitive.content,
         )
+    }
+
+    @Test
+    fun fromState_marksProfileBackupIncompleteWithoutFullSnapshot() {
+        val encoded =
+            AirVisionDiagnosticsSnapshots.encode(
+                AirVisionDiagnosticsSnapshots.fromState(
+                    usbState = AirVisionUsbState(),
+                    displaySettings = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working),
+                    hudControls = AirVisionHudControls(),
+                    appLanguage = AirVisionAppLanguage.System,
+                    startupDestination = AirVisionStartupDestination.Hud,
+                    hudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
+                    demoModeEnabled = false,
+                ),
+            )
+
+        val profileBackup =
+            Json.parseToJsonElement(encoded)
+                .jsonObject
+                .getValue("profileBackup")
+                .jsonObject
+
+        assertEquals("1", profileBackup.getValue("exportedProfileCount").jsonPrimitive.content)
+        assertEquals("1", profileBackup.getValue("exportedRuntimeProfileCount").jsonPrimitive.content)
+        assertEquals("5", profileBackup.getValue("expectedProfileCount").jsonPrimitive.content)
+        assertEquals("false", profileBackup.getValue("completeProfileSet").jsonPrimitive.content)
+        assertEquals("working", profileBackup.getValue("activeViewMode").jsonPrimitive.content)
+        assertEquals(1, profileBackup.getValue("profiles").jsonArray.size)
+        assertEquals(1, profileBackup.getValue("runtimeProfiles").jsonArray.size)
     }
 
     @Test
@@ -577,5 +654,42 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("low-overhead HUD profile", lightLoadSync.getValue("androidEffect").jsonPrimitive.content)
         assertEquals("off (locked by Light Load Mode)", threeDSync.getValue("desiredValue").jsonPrimitive.content)
         assertEquals("waiting for writable HID", ipdSync.getValue("hardwareSyncStatus").jsonPrimitive.content)
+    }
+
+    private fun diagnosticsProfileBackup(activeSettings: AirVisionDisplaySettings): AirVisionProfileBackup {
+        val settingsByMode =
+            AirVisionViewMode.entries.map { mode ->
+                if (mode == activeSettings.viewMode) {
+                    activeSettings
+                } else {
+                    AirVisionDisplaySettings.defaultsForViewMode(mode)
+                }
+            }
+
+        return AirVisionProfileBackup(
+            activeViewMode = activeSettings.viewMode.rawValue,
+            customLabels = AirVisionBackupCustomLabels(custom1 = "Walk HUD", custom2 = "Desk HUD"),
+            hudControls =
+                AirVisionBackupHudControls(
+                    singleTapAction = AirVisionHudTouchAction.DismissNotification.rawValue,
+                    doubleTapAction = AirVisionHudDoubleTapAction.ToggleMic.rawValue,
+                    swipeAction = AirVisionHudSwipeAction.ScrollChat.rawValue,
+                    brightnessKeyAction = AirVisionHudKeyAction.ScrollChat.rawValue,
+                    mediaKeyAction = AirVisionHudMediaKeyAction.DoubleTapToggleMic.rawValue,
+                ),
+            appPreferences =
+                AirVisionBackupAppPreferences(
+                    language = AirVisionAppLanguage.Spanish.rawValue,
+                    startupDestination = AirVisionStartupDestination.Hud.rawValue,
+                    hudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred.rawValue,
+                    demoModeEnabled = true,
+                    speakerEnabled = false,
+                    nativeCaptionsEnabled = true,
+                    translationCaptionSourceLanguage = "pt",
+                    translationCaptionTargetLanguage = "ja",
+                ),
+            runtimeProfiles = settingsByMode.map(AirVisionProfileBackups::runtimeProfileFromSettings),
+            profiles = settingsByMode.map(AirVisionProfileBackups::profileFromSettings),
+        )
     }
 }
