@@ -382,6 +382,11 @@ Flavor-specific direct Gradle tasks:
 ./gradlew :app:bundleThirdPartyRelease
 ```
 
+GitHub Actions gates all three release bundle variants with the same unsigned
+release flag used for local CI verification, so HUD, Play-safe Node, and full
+third-party Node release minification/package regressions are caught before
+pushes are treated as good.
+
 Google Play internal-track publishing helper:
 
 ```bash

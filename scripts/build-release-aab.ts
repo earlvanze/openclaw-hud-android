@@ -45,6 +45,43 @@ type ParsedVersionMatches = {
   versionCodeMatch: RegExpMatchArray;
 };
 
+type ParsedArgs = {
+  variants: Array<(typeof releaseVariants)[number]>;
+  skipVersionBump: boolean;
+};
+
+function parseArgs(argv: string[]): ParsedArgs {
+  const selected: string[] = [];
+  let skipVersionBump = false;
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--flavor") {
+      const flavor = argv[++index];
+      if (!flavor) throw new Error("--flavor requires hud, play, or third-party");
+      selected.push(flavor);
+    } else if (arg === "--skip-version-bump") {
+      skipVersionBump = true;
+    } else if (arg === "--help" || arg === "-h") {
+      console.log("Usage: scripts/build-release-aab.ts [--flavor hud|play|third-party] [--skip-version-bump]");
+      process.exit(0);
+    } else {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+  }
+
+  const variants =
+    selected.length === 0
+      ? [...releaseVariants]
+      : selected.map((name) => {
+          const variant = releaseVariants.find((candidate) => candidate.flavorName === name);
+          if (!variant) throw new Error(`Unknown flavor: ${name}`);
+          return variant;
+        });
+
+  return { variants, skipVersionBump };
+}
+
 function formatVersionName(date: Date): string {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
@@ -124,29 +161,44 @@ async function copyBundle(sourcePath: string, destinationPath: string): Promise<
 }
 
 async function main() {
+  const { variants, skipVersionBump } = parseArgs(process.argv.slice(2));
   const buildGradleFile = Bun.file(buildGradlePath);
   const originalText = await buildGradleFile.text();
-  const nextVersion = resolveNextVersion(originalText, new Date());
-  const updatedText = updateBuildGradleVersions(originalText, nextVersion);
+  const currentVersionMatches = parseVersionMatches(originalText);
+  let nextVersion: VersionState = {
+    versionName: currentVersionMatches.versionNameMatch[1] ?? "",
+    versionCode: Number.parseInt(currentVersionMatches.versionCodeMatch[1] ?? "", 10),
+  };
 
-  if (updatedText === originalText) {
-    throw new Error("Android version bump produced no change");
+  if (!Number.isInteger(nextVersion.versionCode)) {
+    throw new Error(`Invalid Android versionCode in ${buildGradlePath}`);
   }
 
-  console.log(`Android versionName -> ${nextVersion.versionName}`);
-  console.log(`Android versionCode -> ${nextVersion.versionCode}`);
+  if (!skipVersionBump) {
+    nextVersion = resolveNextVersion(originalText, new Date());
+    const updatedText = updateBuildGradleVersions(originalText, nextVersion);
 
-  await Bun.write(buildGradlePath, updatedText);
+    if (updatedText === originalText) {
+      throw new Error("Android version bump produced no change");
+    }
+
+    await Bun.write(buildGradlePath, updatedText);
+  }
+
+  console.log(`Android versionName: ${nextVersion.versionName}`);
+  console.log(`Android versionCode: ${nextVersion.versionCode}`);
+  console.log(`Release flavors: ${variants.map((variant) => variant.flavorName).join(", ")}`);
+
   await $`mkdir -p ${releaseOutputDir}`;
 
   try {
-    await $`./gradlew ${releaseVariants[0].gradleTask} ${releaseVariants[1].gradleTask}`.cwd(androidDir);
+    await $`./gradlew ${variants.map((variant) => variant.gradleTask)}`.cwd(androidDir);
   } catch (error) {
-    await Bun.write(buildGradlePath, originalText);
+    if (!skipVersionBump) await Bun.write(buildGradlePath, originalText);
     throw error;
   }
 
-  for (const variant of releaseVariants) {
+  for (const variant of variants) {
     const outputPath = join(
       releaseOutputDir,
       `openclaw-${nextVersion.versionName}-${variant.flavorName}-release.aab`,

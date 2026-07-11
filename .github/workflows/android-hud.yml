@@ -42,6 +42,8 @@ jobs:
             :app:assemblePlayDebug \
             :app:assembleThirdPartyDebug \
             :app:bundleHudRelease \
+            :app:bundlePlayRelease \
+            :app:bundleThirdPartyRelease \
             -POPENCLAW_ANDROID_ALLOW_UNSIGNED_RELEASE=true
           node scripts/verify-play-hud-release.mjs \
             --bundle app/build/outputs/bundle/hudRelease/app-hud-release.aab \
