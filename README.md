@@ -177,6 +177,7 @@ capture evidence required before a write can be enabled, per-feature capture
 targets and probe values for future ASUS HID protocol validation, the active HUD
 profile, derived HUD runtime state, Android Presentation routing state, display
 candidate counts, selected display identity, profile backup/restore readiness,
+imported firmware-capture-results provenance and safety counts,
 all saved AirVision profile values, runtime profile metadata,
 fit/clarity/text-size guidance,
 Android demo/offline reviewer experience state, Windows-only cursor/3DoF and

@@ -105,6 +105,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val firmwareCapabilities = usb.getValue("firmwareCapabilities").jsonObject
         val firmwareSync = root.getValue("firmwareSync").jsonObject
         val firmwareWriteGate = firmwareSync.getValue("writeGate").jsonObject
+        val firmwareCaptureResults = root.getValue("firmwareCaptureResults").jsonObject
         val firmwareUpdate = root.getValue("firmwareUpdate").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
         val hudRuntime = root.getValue("hudRuntime").jsonObject
@@ -138,7 +139,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("22", root.getValue("version").jsonPrimitive.content)
+        assertEquals("23", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -281,6 +282,22 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals(
             "IPD=67 mm (capture pending)",
             ipdSync.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals("false", firmwareCaptureResults.getValue("imported").jsonPrimitive.content)
+        assertEquals(
+            "openclaw.airvision.firmwareCaptureResults",
+            firmwareCaptureResults.getValue("schema").jsonPrimitive.content,
+        )
+        assertEquals("0", firmwareCaptureResults.getValue("featureCount").jsonPrimitive.content)
+        assertEquals("9", firmwareCaptureResults.getValue("expectedFeatureCount").jsonPrimitive.content)
+        assertEquals("false", firmwareCaptureResults.getValue("completeFeatureSet").jsonPrimitive.content)
+        assertEquals("0", firmwareCaptureResults.getValue("validatedFeatureCount").jsonPrimitive.content)
+        assertEquals("0", firmwareCaptureResults.getValue("writeEnabledFeatureCount").jsonPrimitive.content)
+        assertEquals("0", firmwareCaptureResults.getValue("blockedFeatureCount").jsonPrimitive.content)
+        assertEquals("source=pending", firmwareCaptureResults.getValue("sourceSummary").jsonPrimitive.content)
+        assertEquals(
+            "capture results: not imported",
+            firmwareCaptureResults.getValue("summary").jsonPrimitive.content,
         )
         assertEquals("false", firmwareUpdate.getValue("androidFirmwareUpdateSupported").jsonPrimitive.content)
         assertEquals("true", firmwareUpdate.getValue("windowsFirmwareUpdateRequired").jsonPrimitive.content)
@@ -531,6 +548,87 @@ class AirVisionDiagnosticsSnapshotTest {
     }
 
     @Test
+    fun fromState_exportsImportedFirmwareCaptureResultsProvenance() {
+        val encoded =
+            AirVisionDiagnosticsSnapshots.encode(
+                AirVisionDiagnosticsSnapshots.fromState(
+                    usbState = AirVisionUsbState(),
+                    displaySettings = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working),
+                    hudControls = AirVisionHudControls(),
+                    appLanguage = AirVisionAppLanguage.System,
+                    startupDestination = AirVisionStartupDestination.Hud,
+                    hudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
+                    demoModeEnabled = false,
+                    firmwareCaptureResults =
+                        AirVisionFirmwareCaptureResults(
+                            schema = AirVisionFirmwareCaptureResultFiles.SCHEMA,
+                            version = AirVisionFirmwareCaptureResultFiles.VERSION,
+                            payloadPolicy = "Sanitized summaries only.",
+                            source =
+                                AirVisionFirmwareCaptureResultsSource(
+                                    windowsHost = "Cyber",
+                                    captureTool = "USBPcap/Wireshark",
+                                    asusAirVisionAppVersion = "1.0.12.0",
+                                    androidDiagnosticsExportSha256 =
+                                        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                                    notes = "validated brightness pass",
+                                ),
+                            features =
+                                AirVisionFirmwareFeature.entries.map { feature ->
+                                    if (feature == AirVisionFirmwareFeature.Brightness) {
+                                        validatedBrightnessCaptureResult(feature)
+                                    } else {
+                                        pendingCaptureResult(feature)
+                                    }
+                                },
+                        ),
+                ),
+            )
+
+        val root = Json.parseToJsonElement(encoded).jsonObject
+        val firmwareCaptureResults = root.getValue("firmwareCaptureResults").jsonObject
+        val source = firmwareCaptureResults.getValue("source").jsonObject
+        val firmwareSyncItems =
+            root
+                .getValue("firmwareSync")
+                .jsonObject
+                .getValue("items")
+                .jsonArray
+        val brightnessSync =
+            firmwareSyncItems
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "brightness" }
+                .jsonObject
+
+        assertEquals("true", firmwareCaptureResults.getValue("imported").jsonPrimitive.content)
+        assertEquals("1", firmwareCaptureResults.getValue("version").jsonPrimitive.content)
+        assertEquals("Sanitized summaries only.", firmwareCaptureResults.getValue("payloadPolicy").jsonPrimitive.content)
+        assertEquals("9", firmwareCaptureResults.getValue("featureCount").jsonPrimitive.content)
+        assertEquals("9", firmwareCaptureResults.getValue("expectedFeatureCount").jsonPrimitive.content)
+        assertEquals("true", firmwareCaptureResults.getValue("completeFeatureSet").jsonPrimitive.content)
+        assertEquals("1", firmwareCaptureResults.getValue("validatedFeatureCount").jsonPrimitive.content)
+        assertEquals("1", firmwareCaptureResults.getValue("writeEnabledFeatureCount").jsonPrimitive.content)
+        assertEquals("8", firmwareCaptureResults.getValue("blockedFeatureCount").jsonPrimitive.content)
+        assertEquals("Cyber", source.getValue("windowsHost").jsonPrimitive.content)
+        assertEquals("USBPcap/Wireshark", source.getValue("captureTool").jsonPrimitive.content)
+        assertEquals("1.0.12.0", source.getValue("asusAirVisionAppVersion").jsonPrimitive.content)
+        assertEquals(
+            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            source.getValue("androidDiagnosticsExportSha256").jsonPrimitive.content,
+        )
+        assertEquals(
+            "capture results: 1 validated, 1 write-enabled, 8 blocked",
+            firmwareCaptureResults.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals(
+            "capture results: 1 validated, 1 write-enabled, 8 blocked; host=Cyber, tool=USBPcap/Wireshark, asusApp=1.0.12.0, diagnosticsSha256=bbbbbbbbbbbb...",
+            firmwareCaptureResults.getValue("displayText").jsonPrimitive.content,
+        )
+        assertEquals("validated", brightnessSync.getValue("captureResultStatus").jsonPrimitive.content)
+        assertEquals("enable_android_write", brightnessSync.getValue("androidEnablementDecision").jsonPrimitive.content)
+        assertEquals("false", brightnessSync.getValue("firmwareWriteAllowed").jsonPrimitive.content)
+    }
+
+    @Test
     fun fromState_marksDistanceHotkeySubstituteWhenMapped() {
         val encoded =
             AirVisionDiagnosticsSnapshots.encode(
@@ -711,4 +809,39 @@ class AirVisionDiagnosticsSnapshotTest {
             profiles = settingsByMode.map(AirVisionProfileBackups::profileFromSettings),
         )
     }
+
+    private fun pendingCaptureResult(feature: AirVisionFirmwareFeature): AirVisionFirmwareCaptureResult =
+        AirVisionFirmwareCaptureResult(
+            rawKey = feature.rawValue,
+            label = feature.label,
+            status = "pending",
+            probeValues = feature.captureProbeValues,
+            androidEnablementDecision = "blocked",
+            blockerReason = "Windows ASUS HID protocol capture has not been validated.",
+        )
+
+    private fun validatedBrightnessCaptureResult(feature: AirVisionFirmwareFeature): AirVisionFirmwareCaptureResult =
+        AirVisionFirmwareCaptureResult(
+            rawKey = feature.rawValue,
+            label = feature.label,
+            status = "validated",
+            probeValues = feature.captureProbeValues,
+            writeReportId = "0x05",
+            writeEndpoint = "out if=2 interrupt addr=0x2 max=64 int=1",
+            writePayloadSummary = "brightness byte changes only; sanitized",
+            readbackReportId = "0x85",
+            readbackEndpoint = "in if=1 interrupt addr=0x81 max=32 int=4",
+            readbackPayloadSummary = "readback brightness byte matched; sanitized",
+            checksumFramingNotes = "xor checksum observed; sanitized",
+            visibleStateConfirmed = true,
+            captureReferences =
+                listOf(
+                    AirVisionFirmwareCaptureReference(
+                        file = "airvision-brightness-summary.txt",
+                        sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        notes = "sanitized summary only",
+                    ),
+                ),
+            androidEnablementDecision = "enable_android_write",
+        )
 }

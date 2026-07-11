@@ -11,6 +11,7 @@ data class AirVisionDiagnosticsSnapshot(
     val usb: AirVisionDiagnosticsUsb,
     val activeProfile: AirVisionBackupDisplayProfile,
     val firmwareSync: AirVisionDiagnosticsFirmwareSyncPlan,
+    val firmwareCaptureResults: AirVisionDiagnosticsFirmwareCaptureResults,
     val firmwareUpdate: AirVisionDiagnosticsFirmwareUpdate,
     val hudRuntime: AirVisionDiagnosticsHudRuntime,
     val profileBackup: AirVisionDiagnosticsProfileBackup,
@@ -136,6 +137,33 @@ data class AirVisionDiagnosticsFirmwareSyncItem(
     val requiredEvidence: List<String>,
     val blockedReason: String,
     val summary: String,
+)
+
+@Serializable
+data class AirVisionDiagnosticsFirmwareCaptureResults(
+    val imported: Boolean,
+    val schema: String,
+    val version: Int?,
+    val payloadPolicy: String?,
+    val source: AirVisionDiagnosticsFirmwareCaptureResultsSource?,
+    val featureCount: Int,
+    val expectedFeatureCount: Int,
+    val completeFeatureSet: Boolean,
+    val validatedFeatureCount: Int,
+    val writeEnabledFeatureCount: Int,
+    val blockedFeatureCount: Int,
+    val sourceSummary: String,
+    val summary: String,
+    val displayText: String,
+)
+
+@Serializable
+data class AirVisionDiagnosticsFirmwareCaptureResultsSource(
+    val windowsHost: String?,
+    val captureTool: String?,
+    val asusAirVisionAppVersion: String?,
+    val androidDiagnosticsExportSha256: String?,
+    val notes: String?,
 )
 
 @Serializable
@@ -273,7 +301,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 22
+    const val VERSION = 23
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -323,6 +351,7 @@ object AirVisionDiagnosticsSnapshots {
         val completeProfileSet =
             AirVisionViewMode.entries.all { it.rawValue in profileModes } &&
                 exportedProfileCount == expectedProfileCount
+        val firmwareCaptureResultsDiagnostics = firmwareCaptureResults.toDiagnostics()
 
         return AirVisionDiagnosticsSnapshot(
             usb =
@@ -381,6 +410,7 @@ object AirVisionDiagnosticsSnapshots {
                         capabilities = usbState.firmwareCapabilities,
                         captureResults = firmwareCaptureResults,
                     ).toDiagnostics(),
+            firmwareCaptureResults = firmwareCaptureResultsDiagnostics,
             firmwareUpdate =
                 AirVisionDiagnosticsFirmwareUpdate(
                     androidFirmwareUpdateSupported = false,
@@ -679,4 +709,51 @@ object AirVisionDiagnosticsSnapshots {
             blockedReason = blockedReason,
             summary = summary,
         )
+
+    private fun AirVisionFirmwareCaptureResults?.toDiagnostics(): AirVisionDiagnosticsFirmwareCaptureResults {
+        val expectedFeatureCount = AirVisionFirmwareFeature.entries.size
+        if (this == null) {
+            return AirVisionDiagnosticsFirmwareCaptureResults(
+                imported = false,
+                schema = AirVisionFirmwareCaptureResultFiles.SCHEMA,
+                version = null,
+                payloadPolicy = null,
+                source = null,
+                featureCount = 0,
+                expectedFeatureCount = expectedFeatureCount,
+                completeFeatureSet = false,
+                validatedFeatureCount = 0,
+                writeEnabledFeatureCount = 0,
+                blockedFeatureCount = 0,
+                sourceSummary = "source=pending",
+                summary = "capture results: not imported",
+                displayText = "capture results: not imported; source=pending",
+            )
+        }
+
+        val summary = AirVisionFirmwareCaptureResultFiles.summarize(this)
+        return AirVisionDiagnosticsFirmwareCaptureResults(
+            imported = true,
+            schema = schema,
+            version = version,
+            payloadPolicy = payloadPolicy,
+            source =
+                AirVisionDiagnosticsFirmwareCaptureResultsSource(
+                    windowsHost = source.windowsHost,
+                    captureTool = source.captureTool,
+                    asusAirVisionAppVersion = source.asusAirVisionAppVersion,
+                    androidDiagnosticsExportSha256 = source.androidDiagnosticsExportSha256,
+                    notes = source.notes,
+                ),
+            featureCount = summary.featureCount,
+            expectedFeatureCount = expectedFeatureCount,
+            completeFeatureSet = summary.featureCount == expectedFeatureCount,
+            validatedFeatureCount = summary.validatedFeatureCount,
+            writeEnabledFeatureCount = summary.writeEnabledFeatureCount,
+            blockedFeatureCount = summary.blockedFeatureCount,
+            sourceSummary = summary.sourceSummary,
+            summary = summary.summary,
+            displayText = summary.displayText,
+        )
+    }
 }
