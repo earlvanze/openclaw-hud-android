@@ -298,10 +298,11 @@ gesture/hotkey settings, display targeting, startup view, language preference,
 speaker state, Samsung/native captions preference, OpenClaw translation caption
 source/target languages, demo mode, and derived HUD runtime metadata such as Light Load limits and
 locked control availability. Import validates the same AirVision-only schema,
-previews the active profile, profile slots, gesture mappings, startup target,
-display target, language, speaker state, native caption state, translation
-caption languages, derived active-runtime HUD scale/transcript/caption capacity,
-overlay/dimming state, and Light Load/demo/speaker/runtime-metadata warnings before applying,
+previews the active profile, profile slots, all-profile runtime summaries,
+gesture mappings, startup target, display target, language, speaker state,
+native caption state, translation caption languages, derived active-runtime HUD
+scale/transcript/caption capacity, overlay/dimming state, and
+profile-specific Light Load/demo/speaker/runtime-metadata warnings before applying,
 accepts legacy v1/v2 backups, requires every viewing-mode profile slot exactly
 once, and never includes gateway endpoints, auth tokens, accounts, chat history,
 or other OpenClaw runtime state.

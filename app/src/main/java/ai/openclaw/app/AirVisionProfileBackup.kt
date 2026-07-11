@@ -140,10 +140,9 @@ object AirVisionProfileBackups {
         val labels = resolved.labels
         val controls = resolved.controls
         val runtime = runtimeProfileFromSettings(active)
-        val importedRuntime =
-            resolved.backup.runtimeProfiles.firstOrNull {
-                it.viewMode.trim().lowercase() == resolved.activeViewMode.rawValue
-            }
+        val runtimeByMode = resolved.profileByMode.mapValues { (_, settings) -> runtimeProfileFromSettings(settings) }
+        val importedRuntimeByMode =
+            resolved.backup.runtimeProfiles.associateBy { it.viewMode.trim().lowercase() }
         val sourceLanguage =
             TranslationCaptionMode.languageFor(preferences.translationCaptionSourceLanguage)
         val targetLanguage =
@@ -164,6 +163,11 @@ object AirVisionProfileBackups {
                     "transcript ${runtime.hudTranscriptEntryCount}, captions ${runtime.hudCaptionEntryCount}",
                 "Runtime overlays ${enabledDisabled(runtime.colorPreviewOverlaysEnabled)}; " +
                     "brightness dimming ${enabledDisabled(runtime.brightnessDimmingEnabled)}",
+                *runtimeSummaryDetails(
+                    modes = AirVisionViewMode.entries,
+                    labels = labels,
+                    runtimeByMode = runtimeByMode,
+                ).toTypedArray(),
                 "Startup ${preferences.startupDestination.label}; display target ${preferences.hudDisplayTarget.label}; language ${preferences.language.label}",
                 "Speaker ${enabledDisabled(preferences.speakerEnabled)}; " +
                     "Samsung/native captions ${enabledDisabled(preferences.nativeCaptionsEnabled)}; " +
@@ -179,11 +183,31 @@ object AirVisionProfileBackups {
                         "Runtime metadata is missing; HUD runtime behavior will be recalculated from " +
                             "profile values.",
                     )
-                } else if (importedRuntime == null || !runtimeMatches(importedRuntime, runtime)) {
-                    add(
-                        "Runtime metadata is stale; HUD runtime behavior will be recalculated from " +
-                            "profile values.",
-                    )
+                } else {
+                    val missingRuntimeModes =
+                        AirVisionViewMode.entries.filter { mode ->
+                            importedRuntimeByMode[mode.rawValue] == null
+                        }
+                    val staleRuntimeModes =
+                        AirVisionViewMode.entries.filter { mode ->
+                            val importedRuntime = importedRuntimeByMode[mode.rawValue]
+                            val derivedRuntime = runtimeByMode[mode]
+                            importedRuntime != null && derivedRuntime != null && !runtimeMatches(importedRuntime, derivedRuntime)
+                        }
+                    if (missingRuntimeModes.isNotEmpty()) {
+                        add(
+                            "Runtime metadata is missing for " +
+                                missingRuntimeModes.joinToString { labels.labelFor(it) } +
+                                "; HUD runtime behavior will be recalculated from profile values.",
+                        )
+                    }
+                    if (staleRuntimeModes.isNotEmpty()) {
+                        add(
+                            "Runtime metadata is stale for " +
+                                staleRuntimeModes.joinToString { labels.labelFor(it) } +
+                                "; HUD runtime behavior will be recalculated from profile values.",
+                        )
+                    }
                 }
                 if (!preferences.speakerEnabled) {
                     add("Speaker is disabled in this backup.")
@@ -345,6 +369,19 @@ object AirVisionProfileBackups {
             ?: throw IllegalArgumentException("Unsupported AirVision HUD display target: $rawValue")
 
     private fun enabledDisabled(value: Boolean): String = if (value) "enabled" else "disabled"
+
+    private fun runtimeSummaryDetails(
+        modes: List<AirVisionViewMode>,
+        labels: AirVisionCustomProfileLabels,
+        runtimeByMode: Map<AirVisionViewMode, AirVisionBackupRuntimeProfile>,
+    ): List<String> =
+        modes.mapNotNull { mode ->
+            val runtime = runtimeByMode[mode] ?: return@mapNotNull null
+            "Runtime ${labels.labelFor(mode)}: effective HUD scale ${runtime.effectiveHudScalePercent}%, " +
+                "transcript ${runtime.hudTranscriptEntryCount}, captions ${runtime.hudCaptionEntryCount}, " +
+                "overlays ${enabledDisabled(runtime.colorPreviewOverlaysEnabled)}, " +
+                "dimming ${enabledDisabled(runtime.brightnessDimmingEnabled)}"
+        }
 
     private fun runtimeMatches(
         imported: AirVisionBackupRuntimeProfile,

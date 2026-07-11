@@ -22,6 +22,10 @@ class AirVisionProfileBackupPreviewTest {
         assertTrue(preview.details.any { it.contains("transcript 3, captions 2") })
         assertTrue(preview.details.any { it.contains("Runtime overlays disabled") })
         assertTrue(preview.details.any { it.contains("brightness dimming enabled") })
+        assertTrue(preview.details.any { it.contains("Runtime Working: effective HUD scale 110%") })
+        assertTrue(preview.details.any { it.contains("Runtime Walk HUD: effective HUD scale 84%") })
+        assertTrue(preview.details.any { it.contains("Runtime Walk HUD") && it.contains("transcript 3, captions 2") })
+        assertTrue(preview.details.any { it.contains("Runtime Desk HUD: effective HUD scale 125%") })
         assertTrue(preview.details.any { it.contains("Startup HUD") })
         assertTrue(preview.details.any { it.contains("display target AirVision Preferred") })
         assertTrue(preview.details.any { it.contains("Speaker disabled") })
@@ -52,7 +56,8 @@ class AirVisionProfileBackupPreviewTest {
 
         assertTrue(preview.details.any { it.contains("Runtime effective HUD scale") })
         assertTrue(preview.details.any { it.contains("transcript 3, captions 2") })
-        assertTrue(preview.warnings.any { it.contains("Runtime metadata is stale") })
+        assertTrue(preview.warnings.any { it.contains("Runtime metadata is missing for Working") })
+        assertTrue(preview.warnings.any { it.contains("Runtime metadata is stale for Walk HUD") })
     }
 
     @Test

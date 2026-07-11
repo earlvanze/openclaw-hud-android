@@ -12,8 +12,8 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.11-hud-release.aab`
-- SHA-256: `d693d797bd9b1119e5dcaa2a1f25d078e4ca5e90a4c45e166f0cb3069a624aa8`
-- Version: 2026.7.11 (2026071103)
+- SHA-256: `a4fd70f3529c3557cfe532a11135132199ff600bb55189e9aa714661e3230fe9`
+- Version: 2026.7.11 (2026071104)
 
 ## Remaining Console Blockers
 
@@ -43,7 +43,7 @@ Key features:
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - Speaker routing support for AirVision M1 audio devices
-- AirVision HUD per-mode profile controls for view mode, custom profile labels, copy-to-custom actions, JSON backup/import with confirmation preview, external-display target, placement, physical main screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, IPD calibration, Eye Care filtering, 3D Mode, gesture/hotkey behavior, brightness-key chat/brightness/distance controls, profile reset, and low-overhead preferences
+- AirVision HUD per-mode profile controls for view mode, custom profile labels, copy-to-custom actions, JSON backup/import with all-profile runtime preview, external-display target, placement, physical main screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, IPD calibration, Eye Care filtering, 3D Mode, gesture/hotkey behavior, brightness-key chat/brightness/distance controls, profile reset, and low-overhead preferences
 - AirVision Windows app handoff export for applying saved Android profile values and reviewing active HUD runtime scale/caption capacity, all-profile runtime summaries, runtime metadata freshness, HUD controls, Windows-only spatial/mirror capability status, and companion preferences during ASUS AirVision sessions on Cyber or another Windows host
 - AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
 - Optional USB firmware-link detection, device identity, descriptor diagnostics, readable/writable HID report-path summaries, per-feature firmware-apply readiness, desired firmware-sync state, protocol-capture targets, sanitized capture-results import preview, and firmware-update handoff provenance for AirVision M1 hardware status
