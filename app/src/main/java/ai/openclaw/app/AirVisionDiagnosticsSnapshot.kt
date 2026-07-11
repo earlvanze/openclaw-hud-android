@@ -18,6 +18,7 @@ data class AirVisionDiagnosticsSnapshot(
     val fitAndClarity: AirVisionDiagnosticsFitAndClarity,
     val demoExperience: AirVisionDiagnosticsDemoExperience,
     val windowsCompatibility: AirVisionDiagnosticsWindowsCompatibility,
+    val companionParity: AirVisionDiagnosticsCompanionParity,
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
 )
@@ -331,7 +332,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 28
+    const val VERSION = 29
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -624,6 +625,13 @@ object AirVisionDiagnosticsSnapshots {
                             "ASUS documents 3DoF support as Windows laptop only; phones do not support it.",
                             "M1 firmware can keep touchpad brightness swipe before Android receives a gesture event.",
                         ),
+                ),
+            companionParity =
+                AirVisionCompanionParity.fromState(
+                    hudControls = hudControls,
+                    nativeCaptionsEnabled = nativeCaptionsEnabled,
+                    translationCaptionSourceLanguage = translationCaptionSourceLanguage,
+                    translationCaptionTargetLanguage = translationCaptionTargetLanguage,
                 ),
             hudControls =
                 AirVisionBackupHudControls(

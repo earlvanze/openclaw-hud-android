@@ -56,6 +56,10 @@ object AirVisionWindowsProfileHandoffs {
                 add("")
                 addWindowsOnlyControls(profileBackup.hudControls)
                 add("")
+                add("## Android Companion Parity States")
+                add("")
+                addCompanionParity(profileBackup.hudControls, profileBackup.appPreferences)
+                add("")
                 add("## Android App Preferences")
                 add("")
                 addPreferences(profileBackup.appPreferences)
@@ -79,6 +83,7 @@ object AirVisionWindowsProfileHandoffs {
                     "- Review the Windows-only spatial and mirror section before expecting Cursor Follow, " +
                         "Center Cursor, 3DoF, or Unity mirror behavior on Android.",
                 )
+                add("- Review Android companion parity states before treating M1-optional or firmware-gated features as live hardware support.")
                 add(
                     "- After changing ASUS Windows app settings, reconnect the M1 to Android and export " +
                         "diagnostics or profile backup again.",
@@ -214,6 +219,17 @@ object AirVisionWindowsProfileHandoffs {
         add(
             "- M1 touch hardware passthrough: firmware may keep brightness/media behavior before Android receives gesture events",
         )
+    }
+
+    private fun MutableList<String>.addCompanionParity(
+        controls: AirVisionBackupHudControls,
+        preferences: AirVisionBackupAppPreferences,
+    ) {
+        val parity = AirVisionCompanionParity.fromBackup(controls, preferences)
+        add("- ${parity.summary}")
+        parity.entries.forEach { entry ->
+            add("- ${entry.feature}: ${entry.androidState}; ${entry.evidence}")
+        }
     }
 
     private fun MutableList<String>.addPreferences(preferences: AirVisionBackupAppPreferences) {

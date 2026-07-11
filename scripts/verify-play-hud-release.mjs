@@ -481,6 +481,7 @@ async function verifyReadmeAirVisionParity() {
     "| Cursor Follow / Center Cursor / 3DoF |",
     "| Unity mirror window / projected glasses view |",
     "| Demo Mode / Tutorials |",
+    "| Companion parity states |",
     "| App Preferences |",
     "| Windows app profile handoff |",
     "| Device Information |",
@@ -502,6 +503,11 @@ async function verifyReadmeAirVisionParity() {
     "Windows App Handoff",
     "ASUS Windows app apply steps",
     "omitting raw USB serial values",
+  ]);
+  requireIncludes("README AirVision companion parity states", readme, [
+    "companion parity-state counts",
+    "offline-reviewable, M1-optional",
+    "firmware-gated, and Windows-only",
   ]);
   requireIncludes("README AirVision fit and clarity guidance", readme, [
     "53.5-74.5 mm IPD range",

@@ -143,6 +143,14 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("- Android distance hotkey fallback: off"))
         assertTrue(markdown.contains("Android Cast, Android Display settings, or Samsung DeX screen sharing outside the HUD"))
         assertTrue(markdown.contains("firmware may keep brightness/media behavior before Android receives gesture events"))
+        assertTrue(markdown.contains("## Android Companion Parity States"))
+        assertTrue(
+            markdown.contains(
+                "- AirVision companion parity: 3 offline-reviewable, 1 M1-optional, 1 firmware-gated, 2 Windows-only",
+            ),
+        )
+        assertTrue(markdown.contains("- Captions and translation: reviewable_offline; Native captions preference is on"))
+        assertTrue(markdown.contains("- Firmware apply and update: firmware_gated; Android firmware writes"))
         assertTrue(markdown.contains("## Android App Preferences"))
         assertTrue(markdown.contains("- Startup view: HUD"))
         assertTrue(markdown.contains("- HUD display target: AirVision Preferred"))
@@ -152,6 +160,7 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("- Translation captions: Auto -> Spanish"))
         assertTrue(markdown.contains("- Demo Mode: on"))
         assertTrue(markdown.contains("Open the ASUS AirVision Windows app on Cyber"))
+        assertTrue(markdown.contains("Review Android companion parity states"))
         assertTrue(markdown.contains("true panel preset writes"))
         assertTrue(markdown.contains("- Connected: yes"))
         assertTrue(markdown.contains("- USB ID: 0x0b05:0x1b3c"))
@@ -239,6 +248,7 @@ class AirVisionWindowsProfileHandoffTest {
 
         assertTrue(markdown.contains("- Android distance hotkey fallback: mapped to M1 brightness keys"))
         assertFalse(markdown.contains("- Android distance hotkey fallback: off"))
+        assertTrue(markdown.contains("Android maps the distance hotkey concept to M1 brightness-key virtual-distance changes"))
         assertTrue(markdown.contains("- Embedded runtime metadata: missing; recalculated from active profile values"))
     }
 

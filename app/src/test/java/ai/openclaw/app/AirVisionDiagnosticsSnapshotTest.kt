@@ -113,6 +113,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val fitAndClarity = root.getValue("fitAndClarity").jsonObject
         val demoExperience = root.getValue("demoExperience").jsonObject
         val windowsCompatibility = root.getValue("windowsCompatibility").jsonObject
+        val companionParity = root.getValue("companionParity").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
@@ -139,7 +140,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("28", root.getValue("version").jsonPrimitive.content)
+        assertEquals("29", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -564,6 +565,34 @@ class AirVisionDiagnosticsSnapshotTest {
             "ASUS documents 3DoF support as Windows laptop only; phones do not support it.",
             windowsCompatibility.getValue("limitations").jsonArray[3].jsonPrimitive.content,
         )
+        assertEquals("3", companionParity.getValue("reviewableOfflineCount").jsonPrimitive.content)
+        assertEquals("1", companionParity.getValue("m1OptionalCount").jsonPrimitive.content)
+        assertEquals("1", companionParity.getValue("firmwareGatedCount").jsonPrimitive.content)
+        assertEquals("2", companionParity.getValue("windowsOnlyCount").jsonPrimitive.content)
+        assertEquals("2", companionParity.getValue("liveM1RequiredCount").jsonPrimitive.content)
+        assertEquals("7", companionParity.getValue("playReviewableOfflineCount").jsonPrimitive.content)
+        assertEquals(
+            "AirVision companion parity: 3 offline-reviewable, 1 M1-optional, 1 firmware-gated, 2 Windows-only",
+            companionParity.getValue("summary").jsonPrimitive.content,
+        )
+        val companionParityEntries = companionParity.getValue("entries").jsonArray
+        assertEquals(7, companionParityEntries.size)
+        val captionsParity =
+            companionParityEntries
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Captions and translation" }
+                .jsonObject
+        val firmwareParity =
+            companionParityEntries
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Firmware apply and update" }
+                .jsonObject
+        assertEquals("reviewable_offline", captionsParity.getValue("androidState").jsonPrimitive.content)
+        assertEquals(
+            "Native captions preference is on; OpenClaw translation captions are Portuguese -> Japanese.",
+            captionsParity.getValue("evidence").jsonPrimitive.content,
+        )
+        assertEquals("firmware_gated", firmwareParity.getValue("androidState").jsonPrimitive.content)
+        assertEquals("true", firmwareParity.getValue("liveM1Required").jsonPrimitive.content)
+        assertEquals("true", firmwareParity.getValue("firmwareProtocolRequired").jsonPrimitive.content)
         assertEquals("es", appPreferences.getValue("language").jsonPrimitive.content)
         assertEquals("false", appPreferences.getValue("speakerEnabled").jsonPrimitive.content)
         assertEquals("true", appPreferences.getValue("nativeCaptionsEnabled").jsonPrimitive.content)
@@ -807,6 +836,11 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
                 .getValue("windowsCompatibility")
                 .jsonObject
+        val companionParity =
+            Json.parseToJsonElement(encoded)
+                .jsonObject
+                .getValue("companionParity")
+                .jsonObject
 
         assertEquals("true", windowsCompatibility.getValue("distanceHotkeyMapped").jsonPrimitive.content)
         assertEquals(
@@ -816,6 +850,19 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals(
             "Android maps virtual-distance adjustment to M1 brightness key events; Windows cursor-follow, center-cursor, Unity mirror window, and 3DoF remain unavailable on Android.",
             windowsCompatibility.getValue("summary").jsonPrimitive.content,
+        )
+        assertTrue(
+            companionParity
+                .getValue("entries")
+                .jsonArray
+                .first {
+                    it.jsonObject.getValue("feature").jsonPrimitive.content ==
+                        "Cursor Follow, Center Cursor, and 3DoF"
+                }.jsonObject
+                .getValue("evidence")
+                .jsonPrimitive
+                .content
+                .contains("distance hotkey concept"),
         )
     }
 
