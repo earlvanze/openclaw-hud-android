@@ -52,6 +52,11 @@ function evidenceLine(evidence) {
   return parts.length > 0 ? parts.join("; ") : "evidence: not recorded";
 }
 
+function linesFromArray(values, prefix = "- ") {
+  if (!Array.isArray(values)) return [];
+  return values.map((value) => `${prefix}${value}`);
+}
+
 async function latestSignedHudReleaseBundle() {
   const files = await readdir(releaseOutputDir).catch(() => []);
   const candidates = [];
@@ -121,6 +126,7 @@ async function render() {
   const releaseNotes = await readTrimmed("play/listings/en-US/release-notes.txt");
   const finalSubmission = appContent.finalSubmission ?? {};
   const consoleEvidence = finalSubmission.consoleEvidence ?? {};
+  const reviewEvidence = appContent.reviewEvidence ?? {};
 
   const blockers = [
     ["Create app in Play Console", "appCreatedInPlayConsole", finalSubmission.appCreatedInPlayConsole === true],
@@ -192,6 +198,21 @@ async function render() {
     "## App Access",
     "",
     appContent.appAccess.reviewAccessInstructions,
+    "",
+    "## AirVision Companion Review Evidence",
+    "",
+    "These steps exercise the Windows-like AirVision companion controls that can be reviewed from the Android HUD build without a live gateway or live M1.",
+    "",
+    ...linesFromArray(reviewEvidence.airVisionCompanionReviewSteps),
+    "",
+    reviewEvidence.airVisionCompanionReviewNotes ?? "",
+    "",
+    "Reviewer evidence sources:",
+    "",
+    `- Release verifier: \`${reviewEvidence.releaseVerifier}\``,
+    `- Submission verifier: \`${reviewEvidence.submissionVerifier}\``,
+    `- Screenshot capture: \`${reviewEvidence.screenshotCapture}\``,
+    `- CI workflow: \`${reviewEvidence.ciWorkflow}\``,
     "",
     "## App Content Answers",
     "",

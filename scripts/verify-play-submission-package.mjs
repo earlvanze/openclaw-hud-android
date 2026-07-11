@@ -644,6 +644,23 @@ function verifyAppContentShape(appContent) {
     throw new Error("App access instructions must document Demo Mode review access.");
   }
   requireArrayIncludes(
+    "AirVision companion review steps",
+    appContent.reviewEvidence?.airVisionCompanionReviewSteps ?? [],
+    [
+      "Settings > AirVision M1 > App Preferences > Demo Mode",
+      "Settings > AirVision M1 > Windows Spatial & Mirror Controls > Cast",
+      "Settings > AirVision M1 > Windows Spatial & Mirror Controls > Display",
+      "Settings > AirVision M1 > Firmware Updates > Export",
+      "Settings > AirVision M1 > Diagnostics Export > Export",
+    ],
+  );
+  requireIncludes("AirVision companion review notes", appContent.reviewEvidence?.airVisionCompanionReviewNotes ?? "", [
+    "without a live gateway or live M1",
+    "Cast and Display",
+    "omit raw USB serial values",
+    "Android firmware writes remain blocked",
+  ]);
+  requireArrayIncludes(
     "Data safety not-collected list",
     appContent.dataSafety?.notCollected ?? [],
     ["Advertising ID", "Precise location", "Contacts", "Calendar", "SMS", "Call logs", "Photos and videos"],
@@ -762,6 +779,7 @@ async function main() {
     "App access",
     "Target audience",
     "Data deletion",
+    "AirVision Companion Review Evidence",
     "in-app privacy",
     "capture-play-screenshots",
     "render-privacy-policy-site",

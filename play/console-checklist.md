@@ -40,7 +40,9 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
   `play/screenshots/phone/manifest.json`.
 - Use `play/console-handoff.md` as the generated copy/paste packet for Play
   Console listing, App content, screenshots, app access, and remaining external
-  readiness flags. Keep it current with
+  readiness flags. Its `AirVision Companion Review Evidence` section lists the
+  offline Demo Mode, Cast/Display fallback, firmware-update handoff, and
+  diagnostics-export steps reviewers can verify without a live M1. Keep it current with
   `node scripts/render-play-console-handoff.mjs --check`.
 - Run `node scripts/test-play-screenshot-tools.mjs` after changes to screenshot
   capture, conversion, or final submission validation.
@@ -89,7 +91,8 @@ Current local status:
   actually complete.
 - `node scripts/render-play-console-handoff.mjs --check` verifies the generated
   Play Console handoff packet against the current listing copy, app-content
-  answers, privacy URL, and screenshot manifest.
+  answers, privacy URL, screenshot manifest, and AirVision companion review
+  evidence.
 - `node scripts/verify-airvision-firmware-capture-results.mjs` and
   `node scripts/test-airvision-firmware-capture-results.mjs` pass against the
   structured AirVision firmware capture-results gate. Android firmware writes

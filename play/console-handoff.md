@@ -78,6 +78,25 @@ Use the tracked fallback screenshots when live Fold/M1 capture is unavailable. T
 
 OpenClaw HUD can be reviewed without a live gateway by opening Settings > AirVision M1 > App Preferences and enabling Demo Mode. Gateway pairing is optional for the HUD surface. If Google Play review needs live gateway features, provide a temporary setup code or demo gateway credentials in the Play Console App access form only; do not store those credentials in this repository.
 
+## AirVision Companion Review Evidence
+
+These steps exercise the Windows-like AirVision companion controls that can be reviewed from the Android HUD build without a live gateway or live M1.
+
+- Settings > AirVision M1 > App Preferences > Demo Mode
+- Settings > AirVision M1 > Windows Spatial & Mirror Controls > Cast
+- Settings > AirVision M1 > Windows Spatial & Mirror Controls > Display
+- Settings > AirVision M1 > Firmware Updates > Export
+- Settings > AirVision M1 > Diagnostics Export > Export
+
+Demo Mode lets reviewers verify the AirVision companion HUD without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
+
+Reviewer evidence sources:
+
+- Release verifier: `node scripts/verify-play-hud-release.mjs`
+- Submission verifier: `node scripts/verify-play-submission-package.mjs`
+- Screenshot capture: `scripts/capture-play-screenshots.sh`
+- CI workflow: `.github/workflows/android-hud.yml`
+
 ## App Content Answers
 
 - Ads: does not contain ads

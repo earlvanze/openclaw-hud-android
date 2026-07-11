@@ -209,6 +209,11 @@ try {
   }
 
   const evidenceTemplate = runEvidenceTemplate(["--verified-at", "2026-07-10", "--json-only"]);
+  const renderedEvidence = JSON.parse(evidenceTemplate.stdout);
+  const reviewerEvidenceNotes = renderedEvidence.reviewerAccessConfiguredInPlayConsole?.notes ?? "";
+  if (!reviewerEvidenceNotes.includes("AirVision Companion Review Evidence")) {
+    throw new Error(`Expected reviewer evidence notes to mention AirVision Companion Review Evidence:\n${reviewerEvidenceNotes}`);
+  }
   const completeEvidenceAppContent = JSON.parse(originalAppContent);
   completeEvidenceAppContent.finalSubmission = {
     ...completeEvidenceAppContent.finalSubmission,
@@ -216,7 +221,7 @@ try {
     appCreatedInPlayConsole: true,
     internalTestersConfiguredInPlayConsole: true,
     reviewerAccessConfiguredInPlayConsole: true,
-    consoleEvidence: JSON.parse(evidenceTemplate.stdout),
+    consoleEvidence: renderedEvidence,
   };
   const completeEvidencePath = join(tempDir, "complete-console-evidence-app-content.json");
   await writeFile(completeEvidencePath, `${JSON.stringify(completeEvidenceAppContent, null, 2)}\n`);

@@ -468,9 +468,12 @@ policy, in-app privacy policy source, data-safety notes, console checklist, and
 English listing files. With the default repository paths it also verifies that
 the generated Play Console handoff packet is current. When a locally signed HUD
 AAB exists in `build/release-bundles/`, it also verifies that the console
-checklist names the latest signed bundle and SHA-256. It is a drift guard for
-Play Console form prep; the final hosted privacy-policy URL, screenshots, tester
-access, and any reviewer setup codes still belong in Play Console.
+checklist names the latest signed bundle and SHA-256. It also checks the
+structured AirVision Companion Review Evidence used in `play/console-handoff.md`
+so offline reviewer steps for Demo Mode, Cast/Display mirror fallback, firmware
+update handoff export, and diagnostics export stay present. It is a drift guard
+for Play Console form prep; the final hosted privacy-policy URL, screenshots,
+tester access, and any reviewer setup codes still belong in Play Console.
 
 Use `node scripts/verify-play-submission-package.mjs --final` only when the
 external Play Console artifacts have been filled into
@@ -492,7 +495,9 @@ Use `node scripts/render-play-console-evidence-template.mjs --verified-at
 YYYY-MM-DD --json-only` after each external Play Console blocker is actually
 complete to generate copyable `finalSubmission.consoleEvidence` JSON. The helper
 does not flip readiness booleans; it only renders the source/date/notes evidence
-shape that the final verifier requires.
+shape that the final verifier requires. The reviewer-access evidence notes refer
+to the generated handoff's AirVision Companion Review Evidence section so Play
+review can verify the AirVision controls without a live M1.
 
 ## Kotlin Lint + Format
 

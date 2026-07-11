@@ -25,7 +25,8 @@ const evidenceTemplates = [
     key: "reviewerAccessConfiguredInPlayConsole",
     label: "Configure reviewer app access",
     source: () => "Google Play Console > Policy and programs > App content > App access",
-    notes: () => "Verified App access contains Demo Mode review instructions and any temporary live-gateway access details needed by reviewers.",
+    notes: () =>
+      "Verified App access contains Demo Mode review instructions, the AirVision Companion Review Evidence steps from play/console-handoff.md, and any temporary live-gateway access details needed by reviewers.",
   },
 ];
 
