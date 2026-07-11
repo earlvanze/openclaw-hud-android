@@ -554,6 +554,11 @@ class MainViewModel(
             },
         )
 
+    fun clearAirVisionFirmwareCaptureResults() {
+        prefs.clearAirVisionFirmwareCaptureResults()
+        showHudTransientMessage("Cleared AirVision capture results")
+    }
+
     fun importAirVisionProfileBackup(raw: String): Boolean =
         runCatching {
             prefs.importAirVisionProfileBackup(raw)

@@ -809,6 +809,25 @@ class SecurePrefsTest {
             prefs.airVisionFirmwareCaptureResultsSummary.value,
         )
     }
+
+    @Test
+    fun airVisionFirmwareCaptureResults_clearRemovesPersistedEvidence() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.importAirVisionFirmwareCaptureResults(airVisionCaptureResultsJson())
+        assertEquals(AirVisionFirmwareFeature.entries.size, prefs.airVisionFirmwareCaptureResults.value?.features?.size)
+
+        prefs.clearAirVisionFirmwareCaptureResults()
+
+        assertNull(prefs.airVisionFirmwareCaptureResults.value)
+        assertNull(prefs.airVisionFirmwareCaptureResultsSummary.value)
+        val reloaded = SecurePrefs(context)
+        assertNull(reloaded.airVisionFirmwareCaptureResults.value)
+        assertNull(reloaded.airVisionFirmwareCaptureResultsSummary.value)
+    }
 }
 
 private fun backupProfileJson(

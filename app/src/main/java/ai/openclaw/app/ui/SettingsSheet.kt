@@ -791,16 +791,26 @@ fun SettingsSheet(viewModel: MainViewModel) {
                             )
                         },
                         trailingContent = {
-                            Button(
-                                onClick = {
-                                    airVisionFirmwareCaptureResultsImportLauncher.launch(
-                                        arrayOf("application/json", "text/*"),
-                                    )
-                                },
-                                colors = settingsPrimaryButtonColors(),
-                                shape = RoundedCornerShape(14.dp),
-                            ) {
-                                Text("Import", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (airVisionFirmwareCaptureResultsSummary != null) {
+                                    TextButton(
+                                        onClick = viewModel::clearAirVisionFirmwareCaptureResults,
+                                        shape = RoundedCornerShape(14.dp),
+                                    ) {
+                                        Text("Clear", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                                    }
+                                }
+                                Button(
+                                    onClick = {
+                                        airVisionFirmwareCaptureResultsImportLauncher.launch(
+                                            arrayOf("application/json", "text/*"),
+                                        )
+                                    },
+                                    colors = settingsPrimaryButtonColors(),
+                                    shape = RoundedCornerShape(14.dp),
+                                ) {
+                                    Text("Import", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                                }
                             }
                         },
                     )

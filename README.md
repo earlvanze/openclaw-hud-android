@@ -212,7 +212,9 @@ schema and safety evidence locally, records a compact summary in Settings, and
 persists the parsed result for Settings and diagnostics. The imported evidence
 can mark a feature's capture result and Android enablement decision as
 validated, but firmware writes remain disabled until an Android HID write path
-is implemented and live-tested with the M1.
+is implemented and live-tested with the M1. The same row includes a Clear
+action so stale or wrong Windows/Cyber evidence can be removed without
+reinstalling the app.
 The Android app can also export a live copy from Settings -> AirVision M1 ->
 Firmware Capture Plan, including the phone's current readable/writable HID
 report-path status when the M1 is connected plus the active AirVision profile's
