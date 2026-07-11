@@ -145,6 +145,7 @@ object AirVisionWindowsProfileHandoffs {
         add("- Android HUD placement: ${AirVisionHudPlacement.fromRawValue(profile.hudPlacement).label}")
         add("- Android safe area: ${profile.safeAreaPercent}%")
         add("- Android physical main screen visible: ${yesNo(profile.physicalMainScreenVisible)}")
+        addRuntimeSummary(profile)
     }
 
     private fun MutableList<String>.addRuntime(
@@ -172,6 +173,20 @@ object AirVisionWindowsProfileHandoffs {
                     runtimeMatches(importedRuntime, runtime) -> "current"
                     else -> "stale; recalculated from active profile values"
                 },
+        )
+    }
+
+    private fun MutableList<String>.addRuntimeSummary(profile: AirVisionBackupDisplayProfile) {
+        val runtime = runtimeProfileForProfile(profile)
+        add(
+            "- Android runtime summary: effective HUD scale ${runtime.effectiveHudScalePercent}%, " +
+                "transcript ${runtime.hudTranscriptEntryCount}, captions ${runtime.hudCaptionEntryCount}, " +
+                "overlays ${onOff(runtime.colorPreviewOverlaysEnabled)}, dimming ${onOff(runtime.brightnessDimmingEnabled)}",
+        )
+        add(
+            "- Android runtime controls: IPD ${availableUnavailable(runtime.ipdAdjustmentEnabled)}, " +
+                "3D ${availableUnavailable(runtime.threeDModeAvailable)}, " +
+                "Eye Care ${availableUnavailable(runtime.blueLightFilterAvailable)}",
         )
     }
 
@@ -286,4 +301,6 @@ object AirVisionWindowsProfileHandoffs {
     private fun onOff(value: Boolean): String = if (value) "on" else "off"
 
     private fun yesNo(value: Boolean): String = if (value) "yes" else "no"
+
+    private fun availableUnavailable(value: Boolean): String = if (value) "available" else "unavailable"
 }

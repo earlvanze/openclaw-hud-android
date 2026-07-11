@@ -104,6 +104,12 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("- Android HUD placement: Upper Center"))
         assertTrue(markdown.contains("- Android safe area: 7%"))
         assertTrue(markdown.contains("- Android physical main screen visible: no"))
+        assertTrue(
+            markdown.contains(
+                "- Android runtime summary: effective HUD scale 98%, transcript 8, captions 5, overlays on, dimming on",
+            ),
+        )
+        assertTrue(markdown.contains("- Android runtime controls: IPD available, 3D available, Eye Care available"))
         assertTrue(markdown.contains("## Active Android Runtime"))
         assertTrue(markdown.contains("- Effective HUD scale: 98%"))
         assertTrue(markdown.contains("- Transcript entries: 8"))
@@ -117,6 +123,12 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("### Walking HUD"))
         assertTrue(markdown.contains("- IPD: 69 mm (locked by Light Load Mode)"))
         assertTrue(markdown.contains("- 3D Mode: off (locked by Light Load Mode)"))
+        assertTrue(
+            markdown.contains(
+                "- Android runtime summary: effective HUD scale 130%, transcript 3, captions 2, overlays off, dimming off",
+            ),
+        )
+        assertTrue(markdown.contains("- Android runtime controls: IPD unavailable, 3D unavailable, Eye Care unavailable"))
         assertTrue(markdown.contains("## Android HUD Controls"))
         assertTrue(markdown.contains("- Single tap: Dismiss notification"))
         assertTrue(markdown.contains("- Double tap: Toggle mic"))
