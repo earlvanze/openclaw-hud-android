@@ -139,6 +139,11 @@ object AirVisionProfileBackups {
         val preferences = resolved.appPreferences
         val labels = resolved.labels
         val controls = resolved.controls
+        val runtime = runtimeProfileFromSettings(active)
+        val importedRuntime =
+            resolved.backup.runtimeProfiles.firstOrNull {
+                it.viewMode.trim().lowercase() == resolved.activeViewMode.rawValue
+            }
         val sourceLanguage =
             TranslationCaptionMode.languageFor(preferences.translationCaptionSourceLanguage)
         val targetLanguage =
@@ -155,6 +160,10 @@ object AirVisionProfileBackups {
                 "Splendid ${active.splendidMode.label}, Eye Care ${active.blueLightFilterPercent}%, ${active.hudPlacement.label}",
                 "Single tap ${controls.singleTapAction.label}; double tap ${controls.doubleTapAction.label}; swipe ${controls.swipeAction.label}",
                 "Brightness key ${controls.brightnessKeyAction.label}; media key ${controls.mediaKeyAction.label}",
+                "Runtime effective HUD scale ${runtime.effectiveHudScalePercent}%, " +
+                    "transcript ${runtime.hudTranscriptEntryCount}, captions ${runtime.hudCaptionEntryCount}",
+                "Runtime overlays ${enabledDisabled(runtime.colorPreviewOverlaysEnabled)}; " +
+                    "brightness dimming ${enabledDisabled(runtime.brightnessDimmingEnabled)}",
                 "Startup ${preferences.startupDestination.label}; display target ${preferences.hudDisplayTarget.label}; language ${preferences.language.label}",
                 "Speaker ${enabledDisabled(preferences.speakerEnabled)}; " +
                     "Samsung/native captions ${enabledDisabled(preferences.nativeCaptionsEnabled)}; " +
@@ -164,6 +173,17 @@ object AirVisionProfileBackups {
             buildList {
                 if (active.lightLoadModeEnabled) {
                     add("Light Load is enabled; IPD and 3D controls stay locked for this active profile.")
+                }
+                if (resolved.backup.runtimeProfiles.isEmpty()) {
+                    add(
+                        "Runtime metadata is missing; HUD runtime behavior will be recalculated from " +
+                            "profile values.",
+                    )
+                } else if (importedRuntime == null || !runtimeMatches(importedRuntime, runtime)) {
+                    add(
+                        "Runtime metadata is stale; HUD runtime behavior will be recalculated from " +
+                            "profile values.",
+                    )
                 }
                 if (!preferences.speakerEnabled) {
                     add("Speaker is disabled in this backup.")
@@ -325,6 +345,20 @@ object AirVisionProfileBackups {
             ?: throw IllegalArgumentException("Unsupported AirVision HUD display target: $rawValue")
 
     private fun enabledDisabled(value: Boolean): String = if (value) "enabled" else "disabled"
+
+    private fun runtimeMatches(
+        imported: AirVisionBackupRuntimeProfile,
+        derived: AirVisionBackupRuntimeProfile,
+    ): Boolean =
+        imported.viewMode.trim().lowercase() == derived.viewMode &&
+            imported.ipdAdjustmentEnabled == derived.ipdAdjustmentEnabled &&
+            imported.threeDModeAvailable == derived.threeDModeAvailable &&
+            imported.blueLightFilterAvailable == derived.blueLightFilterAvailable &&
+            imported.hudTranscriptEntryCount == derived.hudTranscriptEntryCount &&
+            imported.hudCaptionEntryCount == derived.hudCaptionEntryCount &&
+            imported.effectiveHudScalePercent == derived.effectiveHudScalePercent &&
+            imported.colorPreviewOverlaysEnabled == derived.colorPreviewOverlaysEnabled &&
+            imported.brightnessDimmingEnabled == derived.brightnessDimmingEnabled
 }
 
 data class AirVisionBackupResolvedAppPreferences(

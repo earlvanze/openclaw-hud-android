@@ -18,14 +18,41 @@ class AirVisionProfileBackupPreviewTest {
         assertTrue(preview.details.any { it.contains("IPD 67 mm") })
         assertTrue(preview.details.any { it.contains("Single tap Dismiss notification") })
         assertTrue(preview.details.any { it.contains("double tap Toggle mic") })
+        assertTrue(preview.details.any { it.contains("Runtime effective HUD scale") })
+        assertTrue(preview.details.any { it.contains("transcript 3, captions 2") })
+        assertTrue(preview.details.any { it.contains("Runtime overlays disabled") })
+        assertTrue(preview.details.any { it.contains("brightness dimming enabled") })
         assertTrue(preview.details.any { it.contains("Startup HUD") })
         assertTrue(preview.details.any { it.contains("display target AirVision Preferred") })
         assertTrue(preview.details.any { it.contains("Speaker disabled") })
         assertTrue(preview.details.any { it.contains("Samsung/native captions enabled") })
         assertTrue(preview.details.any { it.contains("translation captions Auto -> Spanish") })
         assertTrue(preview.warnings.any { it.contains("Light Load is enabled") })
+        assertTrue(preview.warnings.any { it.contains("Runtime metadata is missing") })
         assertTrue(preview.warnings.any { it.contains("Speaker is disabled") })
         assertTrue(preview.warnings.any { it.contains("Demo Mode is enabled") })
+    }
+
+    @Test
+    fun preview_warnsWhenRuntimeMetadataIsStale() {
+        val preview =
+            AirVisionProfileBackups.preview(
+                profileBackupJson(
+                    runtimeProfiles =
+                        listOf(
+                            runtimeProfileJson(
+                                viewMode = "custom1",
+                                effectiveHudScalePercent = 999,
+                                hudTranscriptEntryCount = 99,
+                                hudCaptionEntryCount = 99,
+                            ),
+                        ),
+                ),
+            )
+
+        assertTrue(preview.details.any { it.contains("Runtime effective HUD scale") })
+        assertTrue(preview.details.any { it.contains("transcript 3, captions 2") })
+        assertTrue(preview.warnings.any { it.contains("Runtime metadata is stale") })
     }
 
     @Test
@@ -51,6 +78,7 @@ class AirVisionProfileBackupPreviewTest {
 
 private fun profileBackupJson(
     activeViewMode: String = "custom1",
+    runtimeProfiles: List<String> = emptyList(),
     profiles: List<String> =
         listOf(
             profileJson("working"),
@@ -83,10 +111,32 @@ private fun profileBackupJson(
         "translationCaptionSourceLanguage": "auto",
         "translationCaptionTargetLanguage": "es"
       },
-      "runtimeProfiles": [],
+      "runtimeProfiles": [
+        ${runtimeProfiles.joinToString(",\n")}
+      ],
       "profiles": [
         ${profiles.joinToString(",\n")}
       ]
+    }
+    """.trimIndent()
+
+private fun runtimeProfileJson(
+    viewMode: String,
+    effectiveHudScalePercent: Int,
+    hudTranscriptEntryCount: Int,
+    hudCaptionEntryCount: Int,
+): String =
+    """
+    {
+      "viewMode": "$viewMode",
+      "ipdAdjustmentEnabled": false,
+      "threeDModeAvailable": false,
+      "blueLightFilterAvailable": true,
+      "hudTranscriptEntryCount": $hudTranscriptEntryCount,
+      "hudCaptionEntryCount": $hudCaptionEntryCount,
+      "effectiveHudScalePercent": $effectiveHudScalePercent,
+      "colorPreviewOverlaysEnabled": false,
+      "brightnessDimmingEnabled": true
     }
     """.trimIndent()
 

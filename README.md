@@ -298,7 +298,8 @@ source/target languages, demo mode, and derived HUD runtime metadata such as Lig
 locked control availability. Import validates the same AirVision-only schema,
 previews the active profile, profile slots, gesture mappings, startup target,
 display target, language, speaker state, native caption state, translation
-caption languages, and Light Load/demo/speaker warnings before applying,
+caption languages, derived active-runtime HUD scale/transcript/caption capacity,
+overlay/dimming state, and Light Load/demo/speaker/runtime-metadata warnings before applying,
 accepts legacy v1/v2 backups, requires every viewing-mode profile slot exactly
 once, and never includes gateway endpoints, auth tokens, accounts, chat history,
 or other OpenClaw runtime state.
