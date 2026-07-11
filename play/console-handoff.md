@@ -12,7 +12,7 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.10-hud-release.aab`
-- SHA-256: `674474f2993600533a30a3b6cf0ca08f6048813694aa21335ccaaaf419404dd8`
+- SHA-256: `6e7f0a4b2a2bc683f83f605369ec15d6b233ce17c72239dc0e7e945cc5dfeb57`
 - Version: 2026.7.10 (2026071001)
 
 ## Remaining Console Blockers
