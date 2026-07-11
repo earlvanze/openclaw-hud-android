@@ -662,6 +662,7 @@ function verifyAppContentShape(appContent) {
     "omit raw USB serial values",
     "Android firmware writes remain blocked",
   ]);
+  verifyAirVisionCompanionCapabilityStates(appContent.reviewEvidence?.airVisionCompanionCapabilityStates ?? []);
   requireArrayIncludes(
     "Data safety not-collected list",
     appContent.dataSafety?.notCollected ?? [],
@@ -669,6 +670,41 @@ function verifyAppContentShape(appContent) {
   );
   const dataTypes = (appContent.dataSafety?.collectedData ?? []).map((entry) => entry.playType);
   requireArrayIncludes("Data safety collected data types", dataTypes, ["Audio", "App activity", "App info and performance"]);
+}
+
+function verifyAirVisionCompanionCapabilityStates(states) {
+  if (!Array.isArray(states) || states.length < 5) {
+    throw new Error("AirVision companion capability states must list the offline, M1-optional, and firmware-gated review states.");
+  }
+  const labels = states.map((entry) => entry.capability);
+  requireArrayIncludes("AirVision companion capability labels", labels, [
+    "HUD presentation and DeX display targeting",
+    "Windows-like profile controls",
+    "USB firmware-link diagnostics",
+    "Firmware apply and update",
+    "Samsung/native captions and OpenClaw translation fallback",
+  ]);
+  const stateNames = states.map((entry) => entry.state);
+  requireArrayIncludes("AirVision companion capability state names", stateNames, [
+    "Reviewable offline",
+    "M1 optional for review",
+    "Firmware-gated",
+  ]);
+  for (const entry of states) {
+    const prefix = `AirVision companion capability state ${entry.capability ?? "(missing capability)"}`;
+    if (typeof entry.capability !== "string" || entry.capability.trim() === "") {
+      throw new Error(`${prefix} must include a non-empty capability.`);
+    }
+    if (typeof entry.state !== "string" || entry.state.trim() === "") {
+      throw new Error(`${prefix} must include a non-empty state.`);
+    }
+    if (typeof entry.reviewPath !== "string" || entry.reviewPath.trim() === "") {
+      throw new Error(`${prefix} must include a non-empty reviewPath.`);
+    }
+    if (typeof entry.evidence !== "string" || entry.evidence.trim() === "") {
+      throw new Error(`${prefix} must include non-empty evidence.`);
+    }
+  }
 }
 
 function verifyManifestAgainstAppContent(xml, appContent) {

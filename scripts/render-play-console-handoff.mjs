@@ -57,6 +57,15 @@ function linesFromArray(values, prefix = "- ") {
   return values.map((value) => `${prefix}${value}`);
 }
 
+function capabilityStateLines(values) {
+  if (!Array.isArray(values)) return [];
+  return values.flatMap((value) => [
+    `- ${value.capability}: ${value.state}`,
+    `  Review path: ${value.reviewPath}`,
+    `  Evidence: ${value.evidence}`,
+  ]);
+}
+
 async function latestSignedHudReleaseBundle() {
   const files = await readdir(releaseOutputDir).catch(() => []);
   const candidates = [];
@@ -204,6 +213,10 @@ async function render() {
     "These steps exercise the Windows-like AirVision companion controls that can be reviewed from the Android HUD build without a live gateway or live M1.",
     "",
     ...linesFromArray(reviewEvidence.airVisionCompanionReviewSteps),
+    "",
+    "Capability states:",
+    "",
+    ...capabilityStateLines(reviewEvidence.airVisionCompanionCapabilityStates),
     "",
     reviewEvidence.airVisionCompanionReviewNotes ?? "",
     "",

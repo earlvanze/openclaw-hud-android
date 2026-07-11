@@ -90,6 +90,24 @@ These steps exercise the Windows-like AirVision companion controls that can be r
 - Settings > AirVision M1 > Windows App Handoff > Export
 - Settings > AirVision M1 > Diagnostics Export > Export
 
+Capability states:
+
+- HUD presentation and DeX display targeting: Reviewable offline
+  Review path: Enable Demo Mode, then open the HUD tab or launch the HUD presentation.
+  Evidence: Fallback screenshots and CI exercise the phone review path; live M1 testing is only needed before claiming display-specific framing on hardware.
+- Windows-like profile controls: Reviewable offline
+  Review path: Settings > AirVision M1 profile controls, profile backup/import, and Windows App Handoff export.
+  Evidence: Saved Android values, per-profile runtime summaries, and export text are generated without raw USB serials.
+- USB firmware-link diagnostics: M1 optional for review
+  Review path: Settings > AirVision M1 > Firmware Link and Diagnostics Export.
+  Evidence: Offline demo shows blocked/write-readiness states; connected M1 adds live descriptor and HID report-path context.
+- Firmware apply and update: Firmware-gated
+  Review path: Settings > AirVision M1 > Firmware Updates > Export.
+  Evidence: Android write actions remain blocked until sanitized ASUS HID capture evidence and live M1 write tests are both present.
+- Samsung/native captions and OpenClaw translation fallback: Reviewable offline
+  Review path: Voice tab caption controls and Samsung/native caption launcher.
+  Evidence: Native captioning is delegated to Android/Samsung UI; OpenClaw fallback defaults to sage-router fast profile with thinking off.
+
 Demo Mode lets reviewers verify the AirVision companion HUD without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
 
 Reviewer evidence sources:

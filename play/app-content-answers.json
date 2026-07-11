@@ -98,6 +98,38 @@
       "Settings > AirVision M1 > Windows App Handoff > Export",
       "Settings > AirVision M1 > Diagnostics Export > Export"
     ],
+    "airVisionCompanionCapabilityStates": [
+      {
+        "capability": "HUD presentation and DeX display targeting",
+        "state": "Reviewable offline",
+        "reviewPath": "Enable Demo Mode, then open the HUD tab or launch the HUD presentation.",
+        "evidence": "Fallback screenshots and CI exercise the phone review path; live M1 testing is only needed before claiming display-specific framing on hardware."
+      },
+      {
+        "capability": "Windows-like profile controls",
+        "state": "Reviewable offline",
+        "reviewPath": "Settings > AirVision M1 profile controls, profile backup/import, and Windows App Handoff export.",
+        "evidence": "Saved Android values, per-profile runtime summaries, and export text are generated without raw USB serials."
+      },
+      {
+        "capability": "USB firmware-link diagnostics",
+        "state": "M1 optional for review",
+        "reviewPath": "Settings > AirVision M1 > Firmware Link and Diagnostics Export.",
+        "evidence": "Offline demo shows blocked/write-readiness states; connected M1 adds live descriptor and HID report-path context."
+      },
+      {
+        "capability": "Firmware apply and update",
+        "state": "Firmware-gated",
+        "reviewPath": "Settings > AirVision M1 > Firmware Updates > Export.",
+        "evidence": "Android write actions remain blocked until sanitized ASUS HID capture evidence and live M1 write tests are both present."
+      },
+      {
+        "capability": "Samsung/native captions and OpenClaw translation fallback",
+        "state": "Reviewable offline",
+        "reviewPath": "Voice tab caption controls and Samsung/native caption launcher.",
+        "evidence": "Native captioning is delegated to Android/Samsung UI; OpenClaw fallback defaults to sage-router fast profile with thinking off."
+      }
+    ],
     "airVisionCompanionReviewNotes": "Demo Mode lets reviewers verify the AirVision companion HUD without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists."
   },
   "finalSubmission": {
