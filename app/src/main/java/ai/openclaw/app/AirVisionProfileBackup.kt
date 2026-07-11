@@ -139,6 +139,10 @@ object AirVisionProfileBackups {
         val preferences = resolved.appPreferences
         val labels = resolved.labels
         val controls = resolved.controls
+        val sourceLanguage =
+            TranslationCaptionMode.languageFor(preferences.translationCaptionSourceLanguage)
+        val targetLanguage =
+            TranslationCaptionMode.languageFor(preferences.translationCaptionTargetLanguage)
         val profileLabels =
             AirVisionViewMode.entries.joinToString {
                 labels.labelFor(it)
@@ -152,6 +156,9 @@ object AirVisionProfileBackups {
                 "Single tap ${controls.singleTapAction.label}; double tap ${controls.doubleTapAction.label}; swipe ${controls.swipeAction.label}",
                 "Brightness key ${controls.brightnessKeyAction.label}; media key ${controls.mediaKeyAction.label}",
                 "Startup ${preferences.startupDestination.label}; display target ${preferences.hudDisplayTarget.label}; language ${preferences.language.label}",
+                "Speaker ${enabledDisabled(preferences.speakerEnabled)}; " +
+                    "Samsung/native captions ${enabledDisabled(preferences.nativeCaptionsEnabled)}; " +
+                    "translation captions ${sourceLanguage.label} -> ${targetLanguage.label}",
             )
         val warnings =
             buildList {
@@ -316,6 +323,8 @@ object AirVisionProfileBackups {
     private fun requireHudDisplayTarget(rawValue: String): AirVisionHudDisplayTarget =
         AirVisionHudDisplayTarget.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }
             ?: throw IllegalArgumentException("Unsupported AirVision HUD display target: $rawValue")
+
+    private fun enabledDisabled(value: Boolean): String = if (value) "enabled" else "disabled"
 }
 
 data class AirVisionBackupResolvedAppPreferences(
