@@ -12,7 +12,7 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.10-hud-release.aab`
-- SHA-256: `5abd14f923f19384c8857c22a3c65353620c1fa52f610ad5fe7a0d34e8b7b643`
+- SHA-256: `26ef46de8f794b4b749c201d79b4db26db5ff4d737aa46b52df0de0431d2e3ad`
 - Version: 2026.7.10 (2026071001)
 
 ## Remaining Console Blockers
@@ -44,6 +44,7 @@ Key features:
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - Speaker routing support for AirVision M1 audio devices
 - AirVision HUD per-mode profile controls for view mode, custom profile labels, copy-to-custom actions, JSON backup/import, external-display target, placement, physical main screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, IPD calibration, Eye Care filtering, 3D Mode, gesture/hotkey behavior, brightness-key chat/brightness/distance controls, profile reset, and low-overhead preferences
+- AirVision Windows app handoff export for applying saved Android profile values during ASUS AirVision sessions on Cyber or another Windows host
 - AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
 - Optional USB firmware-link detection, device identity, descriptor diagnostics, readable/writable HID report-path summaries, per-feature firmware-apply readiness, desired firmware-sync state, and protocol-capture targets for AirVision M1 hardware status
 - Agent and provider/model controls for OpenClaw sessions
@@ -86,9 +87,10 @@ These steps exercise the Windows-like AirVision companion controls that can be r
 - Settings > AirVision M1 > Windows Spatial & Mirror Controls > Cast
 - Settings > AirVision M1 > Windows Spatial & Mirror Controls > Display
 - Settings > AirVision M1 > Firmware Updates > Export
+- Settings > AirVision M1 > Windows App Handoff > Export
 - Settings > AirVision M1 > Diagnostics Export > Export
 
-Demo Mode lets reviewers verify the AirVision companion HUD without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
+Demo Mode lets reviewers verify the AirVision companion HUD without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
 
 Reviewer evidence sources:
 

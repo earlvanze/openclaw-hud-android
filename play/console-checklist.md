@@ -41,8 +41,8 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 - Use `play/console-handoff.md` as the generated copy/paste packet for Play
   Console listing, App content, screenshots, app access, and remaining external
   readiness flags. Its `AirVision Companion Review Evidence` section lists the
-  offline Demo Mode, Cast/Display fallback, firmware-update handoff, and
-  diagnostics-export steps reviewers can verify without a live M1. Keep it current with
+  offline Demo Mode, Cast/Display fallback, firmware-update handoff, Windows app
+  profile handoff, and diagnostics-export steps reviewers can verify without a live M1. Keep it current with
   `node scripts/render-play-console-handoff.mjs --check`.
 - Run `node scripts/test-play-screenshot-tools.mjs` after changes to screenshot
   capture, conversion, or final submission validation.
@@ -59,7 +59,7 @@ Current local status:
 - Latest signed HUD AAB builds successfully from `main`:
   `build/release-bundles/openclaw-2026.7.10-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `5abd14f923f19384c8857c22a3c65353620c1fa52f610ad5fe7a0d34e8b7b643`
+  `26ef46de8f794b4b749c201d79b4db26db5ff4d737aa46b52df0de0431d2e3ad`
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
