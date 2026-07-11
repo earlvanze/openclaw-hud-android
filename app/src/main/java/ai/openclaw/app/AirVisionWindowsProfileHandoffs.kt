@@ -44,6 +44,10 @@ object AirVisionWindowsProfileHandoffs {
                 add("")
                 addControls(profileBackup.hudControls)
                 add("")
+                add("## Windows-Only Spatial & Mirror Controls")
+                add("")
+                addWindowsOnlyControls(profileBackup.hudControls)
+                add("")
                 add("## Android App Preferences")
                 add("")
                 addPreferences(profileBackup.appPreferences)
@@ -62,6 +66,10 @@ object AirVisionWindowsProfileHandoffs {
                 add(
                     "- Use Android HUD scale, placement, safe area, and physical-main-screen values only " +
                         "for OpenClaw HUD layout; they are not ASUS firmware settings.",
+                )
+                add(
+                    "- Review the Windows-only spatial and mirror section before expecting Cursor Follow, " +
+                        "Center Cursor, 3DoF, or Unity mirror behavior on Android.",
                 )
                 add(
                     "- After changing ASUS Windows app settings, reconnect the M1 to Android and export " +
@@ -137,6 +145,24 @@ object AirVisionWindowsProfileHandoffs {
         add("- Swipe: ${AirVisionHudSwipeAction.fromRawValue(controls.swipeAction).label}")
         add("- Brightness key: ${AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction).label}")
         add("- Media key: ${AirVisionHudMediaKeyAction.fromRawValue(controls.mediaKeyAction).label}")
+    }
+
+    private fun MutableList<String>.addWindowsOnlyControls(controls: AirVisionBackupHudControls) {
+        val brightnessKeyAction = AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction)
+        add("- Cursor Follow: Windows AirVision app only")
+        add("- Center Cursor: Windows AirVision app only")
+        add("- 3DoF: Windows laptop/AirVision app only")
+        add("- Unity mirror window / Ctrl+Alt+E: Windows AirVision app only")
+        add(
+            "- Android distance hotkey fallback: " +
+                if (brightnessKeyAction == AirVisionHudKeyAction.AdjustDistance) "mapped to M1 brightness keys" else "off",
+        )
+        add(
+            "- Android mirror fallback: use Android Cast, Android Display settings, or Samsung DeX screen sharing outside the HUD",
+        )
+        add(
+            "- M1 touch hardware passthrough: firmware may keep brightness/media behavior before Android receives gesture events",
+        )
     }
 
     private fun MutableList<String>.addPreferences(preferences: AirVisionBackupAppPreferences) {

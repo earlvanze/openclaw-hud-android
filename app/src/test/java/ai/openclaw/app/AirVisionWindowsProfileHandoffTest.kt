@@ -108,6 +108,14 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("- Swipe: Scroll chat"))
         assertTrue(markdown.contains("- Brightness key: Adjust brightness"))
         assertTrue(markdown.contains("- Media key: Double-tap mic"))
+        assertTrue(markdown.contains("## Windows-Only Spatial & Mirror Controls"))
+        assertTrue(markdown.contains("- Cursor Follow: Windows AirVision app only"))
+        assertTrue(markdown.contains("- Center Cursor: Windows AirVision app only"))
+        assertTrue(markdown.contains("- 3DoF: Windows laptop/AirVision app only"))
+        assertTrue(markdown.contains("- Unity mirror window / Ctrl+Alt+E: Windows AirVision app only"))
+        assertTrue(markdown.contains("- Android distance hotkey fallback: off"))
+        assertTrue(markdown.contains("Android Cast, Android Display settings, or Samsung DeX screen sharing outside the HUD"))
+        assertTrue(markdown.contains("firmware may keep brightness/media behavior before Android receives gesture events"))
         assertTrue(markdown.contains("## Android App Preferences"))
         assertTrue(markdown.contains("- Startup view: HUD"))
         assertTrue(markdown.contains("- HUD display target: AirVision Preferred"))
@@ -162,5 +170,46 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("- Connected: no"))
         assertTrue(markdown.contains("- USB ID: not detected"))
         assertTrue(markdown.contains("- Serial status: not captured"))
+    }
+
+    @Test
+    fun renderMarkdown_marksDistanceHotkeyFallbackWhenMappedToBrightnessKeys() {
+        val markdown =
+            AirVisionWindowsProfileHandoffs.renderMarkdown(
+                profileBackup =
+                    AirVisionProfileBackup(
+                        activeViewMode = AirVisionViewMode.Working.rawValue,
+                        customLabels =
+                            AirVisionBackupCustomLabels(
+                                custom1 = AirVisionViewMode.Custom1.label,
+                                custom2 = AirVisionViewMode.Custom2.label,
+                            ),
+                        hudControls =
+                            AirVisionBackupHudControls(
+                                singleTapAction = "dismiss_notification",
+                                doubleTapAction = "toggle_mic",
+                                swipeAction = "scroll_chat",
+                                brightnessKeyAction = "adjust_distance",
+                                mediaKeyAction = "double_tap_toggle_mic",
+                            ),
+                        appPreferences =
+                            AirVisionBackupAppPreferences(
+                                language = "system",
+                                startupDestination = "hud",
+                                hudDisplayTarget = "airvision_preferred",
+                                demoModeEnabled = false,
+                            ),
+                        profiles =
+                            listOf(
+                                AirVisionProfileBackups.profileFromSettings(
+                                    AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working),
+                                ),
+                            ),
+                    ),
+                usbState = AirVisionUsbState(),
+            )
+
+        assertTrue(markdown.contains("- Android distance hotkey fallback: mapped to M1 brightness keys"))
+        assertFalse(markdown.contains("- Android distance hotkey fallback: off"))
     }
 }
