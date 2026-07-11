@@ -505,6 +505,12 @@ async function verifyReadmeAirVisionParity() {
   requireIncludes("README AirVision Windows app handoff", readme, [
     "Windows App Handoff",
     "ASUS Windows app apply steps",
+    "ASUS AirVision 1.0.7.1",
+    "build/settings-key evidence",
+    "VirtualSpaceDistance",
+    "SoftwareIPD",
+    "DisplaySplendidMode",
+    "DistanceHotkey",
     "omitting raw USB serial values",
   ]);
   requireIncludes("README AirVision companion parity states", readme, [

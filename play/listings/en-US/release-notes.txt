@@ -1,7 +1,7 @@
 AirVision M1 HUD release candidate:
 - Green/black Samsung DeX HUD.
 - Compact chat, notifications, voice, and captions.
-- 18-feature AirVision parity catalog for profiles, brightness, IPD, gestures, firmware gates, Windows-only handoff, and display routing.
+- 18-feature AirVision parity catalog with Cyber-observed ASUS settings-key evidence.
 - USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
 - In-app privacy policy under App Preferences.
 - Play HUD build removes SMS and Call Log permissions.

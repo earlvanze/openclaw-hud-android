@@ -113,6 +113,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val fitAndClarity = root.getValue("fitAndClarity").jsonObject
         val demoExperience = root.getValue("demoExperience").jsonObject
         val windowsCompatibility = root.getValue("windowsCompatibility").jsonObject
+        val windowsAppEvidence = root.getValue("windowsAppEvidence").jsonObject
         val windowsApplyMatrix = root.getValue("windowsApplyMatrix").jsonObject
         val companionParity = root.getValue("companionParity").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
@@ -141,7 +142,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("30", root.getValue("version").jsonPrimitive.content)
+        assertEquals("31", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -565,6 +566,50 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals(
             "ASUS documents 3DoF support as Windows laptop only; phones do not support it.",
             windowsCompatibility.getValue("limitations").jsonArray[3].jsonPrimitive.content,
+        )
+        assertEquals("ASUS AirVision", windowsAppEvidence.getValue("appName").jsonPrimitive.content)
+        assertEquals("1.0.7.1", windowsAppEvidence.getValue("observedVersion").jsonPrimitive.content)
+        assertEquals("20250414_112726", windowsAppEvidence.getValue("observedBuildTime").jsonPrimitive.content)
+        assertEquals("1.0.0.1", windowsAppEvidence.getValue("observedSdkVersion").jsonPrimitive.content)
+        assertEquals("hidapi 0.14.0", windowsAppEvidence.getValue("observedHidLibrary").jsonPrimitive.content)
+        assertEquals("2", windowsAppEvidence.getValue("settingsDataVersion").jsonPrimitive.content)
+        assertEquals(
+            "Evidence keeps feature names, version/build metadata, and settings keys only; it omits raw HID bytes, serials, and user-specific paths.",
+            windowsAppEvidence.getValue("privacyBoundary").jsonPrimitive.content,
+        )
+        val windowsSettingMappings = windowsAppEvidence.getValue("settingMappings").jsonArray
+        assertEquals(12, windowsSettingMappings.size)
+        val distanceMapping =
+            windowsSettingMappings
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Screen distance" }
+                .jsonObject
+        val brightnessMapping =
+            windowsSettingMappings
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Brightness" }
+                .jsonObject
+        val gestureMapping =
+            windowsSettingMappings
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Gesture and hotkey settings" }
+                .jsonObject
+        assertEquals(
+            listOf("VirtualSpaceDistance", "DistanceHotkey"),
+            distanceMapping.getValue("observedSettingKeys").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            "VirtualSpaceDistance=255, DistanceHotkey=69,4",
+            distanceMapping.getValue("observedDefault").jsonPrimitive.content,
+        )
+        assertEquals(
+            listOf("SET_BRIGHTNESS", "GlassesBrightness", "BrightnessChanged"),
+            brightnessMapping.getValue("observedSettingKeys").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            "Android key delivery depends on firmware passthrough; brightness swipes may remain panel-owned.",
+            gestureMapping.getValue("captureImplication").jsonPrimitive.content,
+        )
+        assertEquals(
+            "ASUS AirVision 1.0.7.1 build 20250414_112726; 12 Windows setting mappings documented for Android handoff and capture planning.",
+            windowsAppEvidence.getValue("summary").jsonPrimitive.content,
         )
         assertEquals("12", windowsApplyMatrix.getValue("itemCount").jsonPrimitive.content)
         assertEquals("9", windowsApplyMatrix.getValue("liveM1RequiredCount").jsonPrimitive.content)

@@ -92,8 +92,8 @@ const validReadme = [
   "| Multi-screen desktop layouts | Configurable external-display targeting. |",
   "",
   "Captions default to Samsung/Android native captioning. The OpenClaw fallback forces thinking off, prefers sage-router/fast, and labels alternating turns as `S1` / `S2`.",
-  "Diagnostics exports include Android demo/offline reviewer experience state, profile backup/restore readiness, all saved AirVision profile values, runtime profile metadata, and companion parity-state counts for offline-reviewable, M1-optional, firmware-gated, and Windows-only features.",
-  "Windows App Handoff exports ASUS Windows app apply steps while omitting raw USB serial values.",
+  "Diagnostics exports include Android demo/offline reviewer experience state, profile backup/restore readiness, all saved AirVision profile values, runtime profile metadata, Cyber-observed ASUS AirVision 1.0.7.1 build/settings-key evidence for VirtualSpaceDistance, SoftwareIPD, DisplaySplendidMode, EyeCareLevel, PreventMotionBlur, IsEcoMode, CenterCursorHotkey, and DistanceHotkey, and companion parity-state counts for offline-reviewable, M1-optional, firmware-gated, and Windows-only features.",
+  "Windows App Handoff exports ASUS Windows app apply steps, ASUS AirVision 1.0.7.1 build/settings-key evidence, VirtualSpaceDistance, SoftwareIPD, DisplaySplendidMode, DistanceHotkey, and privacy reminders while omitting raw USB serial values.",
   "Profile Backup exports gesture/hotkey settings, speaker state, Samsung/native captions preference, and OpenClaw translation caption settings, and never includes gateway endpoints, auth tokens, or chat history.",
   "`play/airvision-firmware-capture-results.json` is the machine-checked sanitized capture-results file. Android firmware writes remain blocked until evidence is validated.",
 ].join("\n");

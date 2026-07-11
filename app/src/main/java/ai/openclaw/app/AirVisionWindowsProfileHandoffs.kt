@@ -50,6 +50,10 @@ object AirVisionWindowsProfileHandoffs {
                     add("- Apply matrix unavailable because no active profile values were available.")
                 }
                 add("")
+                add("## Installed Windows App Evidence")
+                add("")
+                addWindowsAppEvidence()
+                add("")
                 add("## All Saved Android Profiles")
                 add("")
                 profileBackup.profiles.sortedBy { AirVisionViewMode.fromRawValue(it.viewMode).ordinal }.forEach { profile ->
@@ -201,6 +205,30 @@ object AirVisionWindowsProfileHandoffs {
             "- Windows spatial/mirror features: Windows app target Cursor Follow, Center Cursor, 3DoF, or Unity mirror when needed; " +
                 "Android effect reports Windows-only state and offers Cast/Display fallback; live M1 proof required: Windows host; firmware gate: Windows-only.",
         )
+    }
+
+    private fun MutableList<String>.addWindowsAppEvidence() {
+        val evidence = AirVisionWindowsAppEvidence.diagnostics
+        add("- App: ${evidence.appName} ${evidence.observedVersion}")
+        add("- Build time: ${evidence.observedBuildTime}")
+        add("- SDK: ${evidence.observedSdkVersion}")
+        add("- HID library: ${evidence.observedHidLibrary}")
+        add("- Settings data version: ${evidence.settingsDataVersion}")
+        add("- Source: ${evidence.sourceSummary}")
+        add("- Boundary: ${evidence.privacyBoundary}")
+        evidence.settingMappings.forEach { mapping ->
+            val keys =
+                if (mapping.observedSettingKeys.isEmpty()) {
+                    "none"
+                } else {
+                    mapping.observedSettingKeys.joinToString(", ")
+                }
+            add(
+                "- ${mapping.feature}: ${mapping.windowsSurface}; keys: $keys; " +
+                    "observed default: ${mapping.observedDefault}; Android mapping: ${mapping.androidMapping}; " +
+                    "capture: ${mapping.captureImplication}",
+            )
+        }
     }
 
     private fun MutableList<String>.addProfile(

@@ -133,6 +133,30 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("- Display routing: Windows app target none; Android effect AirVision Preferred; live M1 proof required: yes for DeX/M1 topology; firmware gate: no."))
         assertTrue(markdown.contains("- Gesture and hotkey settings: Windows app target none; Android effect single tap Dismiss notification, double tap Toggle mic, swipe Scroll chat, brightness key Adjust brightness, media key Double-tap mic; live M1 proof required: yes for firmware-delivered events; firmware gate: no."))
         assertTrue(markdown.contains("- Windows spatial/mirror features: Windows app target Cursor Follow, Center Cursor, 3DoF, or Unity mirror when needed; Android effect reports Windows-only state and offers Cast/Display fallback; live M1 proof required: Windows host; firmware gate: Windows-only."))
+        assertTrue(markdown.contains("## Installed Windows App Evidence"))
+        assertTrue(markdown.contains("- App: ASUS AirVision 1.0.7.1"))
+        assertTrue(markdown.contains("- Build time: 20250414_112726"))
+        assertTrue(markdown.contains("- SDK: 1.0.0.1"))
+        assertTrue(markdown.contains("- HID library: hidapi 0.14.0"))
+        assertTrue(markdown.contains("- Settings data version: 2"))
+        assertTrue(markdown.contains("Observed from the Cyber-installed ASUS AirVision Windows app ReleaseInfo, SDK strings, and Data/Settings.json."))
+        assertTrue(markdown.contains("it omits raw HID bytes, serials, and user-specific paths"))
+        assertTrue(
+            markdown.contains(
+                "- Screen distance: Virtual space distance setting and hotkey; keys: VirtualSpaceDistance, DistanceHotkey; observed default: VirtualSpaceDistance=255, DistanceHotkey=69,4; Android mapping: virtual HUD distance scale; capture: Capture distance changes at near, middle, and far probe values.",
+            ),
+        )
+        assertTrue(
+            markdown.contains(
+                "- IPD: Software IPD setting; keys: SoftwareIPD; observed default: SoftwareIPD=635 in tenths of millimeters; Android mapping: stored IPD calibration and fit guidance; capture: Capture 60 mm, 67 mm, and 72 mm writes and readback before enabling Android firmware apply.",
+            ),
+        )
+        assertTrue(
+            markdown.contains(
+                "- Brightness: ASUS_AirVision_SDK HID brightness API; keys: SET_BRIGHTNESS, GlassesBrightness, BrightnessChanged;",
+            ),
+        )
+        assertTrue(markdown.contains("- Android HUD layout: OpenClaw Android Presentation-only layout; keys: none; observed default: not an ASUS Windows app setting"))
         assertTrue(markdown.contains("### Walking HUD"))
         assertTrue(markdown.contains("- IPD: 69 mm (locked by Light Load Mode)"))
         assertTrue(markdown.contains("- 3D Mode: off (locked by Light Load Mode)"))

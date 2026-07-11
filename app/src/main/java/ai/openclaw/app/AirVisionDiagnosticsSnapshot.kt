@@ -18,6 +18,7 @@ data class AirVisionDiagnosticsSnapshot(
     val fitAndClarity: AirVisionDiagnosticsFitAndClarity,
     val demoExperience: AirVisionDiagnosticsDemoExperience,
     val windowsCompatibility: AirVisionDiagnosticsWindowsCompatibility,
+    val windowsAppEvidence: AirVisionDiagnosticsWindowsAppEvidence,
     val windowsApplyMatrix: AirVisionDiagnosticsWindowsApplyMatrix,
     val companionParity: AirVisionDiagnosticsCompanionParity,
     val hudControls: AirVisionBackupHudControls,
@@ -354,7 +355,7 @@ data class AirVisionDiagnosticsWindowsApplyMatrixItem(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 30
+    const val VERSION = 31
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -648,6 +649,7 @@ object AirVisionDiagnosticsSnapshots {
                             "M1 firmware can keep touchpad brightness swipe before Android receives a gesture event.",
                         ),
                 ),
+            windowsAppEvidence = AirVisionWindowsAppEvidence.diagnostics,
             windowsApplyMatrix =
                 windowsApplyMatrix(
                     profile = fallbackProfile,

@@ -658,6 +658,8 @@ function verifyAppContentShape(appContent) {
   requireIncludes("AirVision companion review notes", appContent.reviewEvidence?.airVisionCompanionReviewNotes ?? "", [
     "18-feature AirVision companion HUD catalog",
     "12-row Windows app apply matrix",
+    "ASUS AirVision 1.0.7.1",
+    "settings-key evidence",
     "without a live gateway or live M1",
     "Cast and Display",
     "Windows app handoff",
@@ -666,6 +668,7 @@ function verifyAppContentShape(appContent) {
   ]);
   verifyAirVisionCompanionCapabilityStates(appContent.reviewEvidence?.airVisionCompanionCapabilityStates ?? []);
   verifyAirVisionWindowsApplyMatrix(appContent.reviewEvidence?.airVisionWindowsApplyMatrixReview ?? []);
+  verifyAirVisionWindowsAppEvidence(appContent.reviewEvidence?.airVisionWindowsAppEvidenceReview);
   requireArrayIncludes(
     "Data safety not-collected list",
     appContent.dataSafety?.notCollected ?? [],
@@ -673,6 +676,40 @@ function verifyAppContentShape(appContent) {
   );
   const dataTypes = (appContent.dataSafety?.collectedData ?? []).map((entry) => entry.playType);
   requireArrayIncludes("Data safety collected data types", dataTypes, ["Audio", "App activity", "App info and performance"]);
+}
+
+function verifyAirVisionWindowsAppEvidence(evidence) {
+  if (!evidence || typeof evidence !== "object") {
+    throw new Error("AirVision Windows app evidence review must be recorded.");
+  }
+  requireIncludes("AirVision Windows app evidence app", evidence.app ?? "", ["ASUS AirVision", "1.0.7.1"]);
+  requireIncludes("AirVision Windows app evidence proof", evidence.proof ?? "", [
+    "Windows App Handoff",
+    "diagnostics export",
+    "settings-key evidence",
+    "without a live M1",
+  ]);
+  requireIncludes("AirVision Windows app evidence boundary", evidence.privacyBoundary ?? "", [
+    "omits raw HID bytes",
+    "raw USB serial values",
+    "auth tokens",
+    "chat history",
+  ]);
+  requireArrayIncludes("AirVision Windows app evidence settings keys", evidence.settingsKeys ?? [], [
+    "VirtualSpaceDistance",
+    "SoftwareIPD",
+    "DisplaySplendidMode",
+    "EyeCareLevel",
+    "PreventMotionBlur",
+    "IsEcoMode",
+    "CenterCursorHotkey",
+    "DistanceHotkey",
+  ]);
+  for (const field of ["buildTime", "sdk", "hidLibrary"]) {
+    if (typeof evidence[field] !== "string" || evidence[field].trim() === "") {
+      throw new Error(`AirVision Windows app evidence ${field} must be recorded.`);
+    }
+  }
 }
 
 function verifyAirVisionCompanionCapabilityStates(states) {

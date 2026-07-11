@@ -77,6 +77,23 @@ function windowsApplyMatrixLines(values) {
   ]);
 }
 
+function windowsAppEvidenceLines(value) {
+  if (!value || typeof value !== "object") return [];
+  const settingsKeys =
+    Array.isArray(value.settingsKeys) && value.settingsKeys.length > 0
+      ? value.settingsKeys.join(", ")
+      : "not recorded";
+  return [
+    `- App: ${value.app ?? "not recorded"}`,
+    `- Build time: ${value.buildTime ?? "not recorded"}`,
+    `- SDK: ${value.sdk ?? "not recorded"}`,
+    `- HID library: ${value.hidLibrary ?? "not recorded"}`,
+    `- Settings keys: ${settingsKeys}`,
+    `- Proof: ${value.proof ?? "not recorded"}`,
+    `- Boundary: ${value.privacyBoundary ?? "not recorded"}`,
+  ];
+}
+
 async function latestSignedHudReleaseBundle() {
   const files = await readdir(releaseOutputDir).catch(() => []);
   const candidates = [];
@@ -232,6 +249,10 @@ async function render() {
     "Windows app apply matrix:",
     "",
     ...windowsApplyMatrixLines(reviewEvidence.airVisionWindowsApplyMatrixReview),
+    "",
+    "Windows app settings-key evidence:",
+    "",
+    ...windowsAppEvidenceLines(reviewEvidence.airVisionWindowsAppEvidenceReview),
     "",
     reviewEvidence.airVisionCompanionReviewNotes ?? "",
     "",

@@ -12,8 +12,8 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.11-hud-release.aab`
-- SHA-256: `d13cb3f91ac7c742607dc630c7856f681c9c95ee3177b7f299b0720751a56e76`
-- Version: 2026.7.11 (2026071112)
+- SHA-256: `5d92e11d587922fc72dc6c2d4200ca7101f843250482ad1fbb77acb3578b5198`
+- Version: 2026.7.11 (2026071113)
 
 ## Remaining Console Blockers
 
@@ -44,7 +44,7 @@ Key features:
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - Speaker routing support for AirVision M1 audio devices
 - AirVision HUD per-mode profile controls for view mode, custom profile labels, copy-to-custom actions, JSON backup/import with all-profile runtime preview, external-display target, placement, physical main screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, IPD calibration, Eye Care filtering, 3D Mode, gesture/hotkey behavior, brightness-key chat/brightness/distance controls, profile reset, and low-overhead preferences
-- AirVision Windows app handoff export for applying saved Android profile values and reviewing active HUD runtime scale/caption capacity, all-profile runtime summaries, runtime metadata freshness, HUD controls, 18-feature companion parity states, Windows-only spatial/mirror capability status, and companion preferences during ASUS AirVision sessions on Cyber or another Windows host
+- AirVision Windows app handoff export for applying saved Android profile values and reviewing active HUD runtime scale/caption capacity, all-profile runtime summaries, runtime metadata freshness, HUD controls, 18-feature companion parity states, Cyber-observed ASUS AirVision 1.0.7.1 settings-key evidence, Windows-only spatial/mirror capability status, and companion preferences during ASUS AirVision sessions on Cyber or another Windows host
 - AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
 - Optional USB firmware-link detection, device identity, descriptor diagnostics, readable/writable HID report-path summaries, per-feature firmware-apply readiness, per-profile runtime summaries, desired firmware-sync state, protocol-capture targets, sanitized capture-results import preview with captured-review, pending, and source-evidence labels, and firmware-update handoff provenance for AirVision M1 hardware status
 - Agent and provider/model controls for OpenClaw sessions
@@ -56,7 +56,7 @@ Release notes:
 AirVision M1 HUD release candidate:
 - Green/black Samsung DeX HUD.
 - Compact chat, notifications, voice, and captions.
-- 18-feature AirVision parity catalog for profiles, brightness, IPD, gestures, firmware gates, Windows-only handoff, and display routing.
+- 18-feature AirVision parity catalog with Cyber-observed ASUS settings-key evidence.
 - USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
 - In-app privacy policy under App Preferences.
 - Play HUD build removes SMS and Call Log permissions.
@@ -210,7 +210,17 @@ Windows app apply matrix:
   Proof: Android fallback and Windows-only status are reviewable offline; ASUS spatial/mirror features remain Windows workflows.
   Firmware gate: Windows-only
 
-Demo Mode lets reviewers verify the 18-feature AirVision companion HUD catalog and 12-row Windows app apply matrix without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
+Windows app settings-key evidence:
+
+- App: ASUS AirVision 1.0.7.1
+- Build time: 20250414_112726
+- SDK: 1.0.0.1
+- HID library: hidapi 0.14.0
+- Settings keys: VirtualSpaceDistance, SoftwareIPD, DisplaySplendidMode, EyeCareLevel, PreventMotionBlur, IsEcoMode, CenterCursorHotkey, DistanceHotkey
+- Proof: Windows App Handoff and diagnostics export include Cyber-observed ASUS AirVision version/build/settings-key evidence for reviewer inspection without a live M1.
+- Boundary: The exported evidence omits raw HID bytes, raw USB serial values, user-specific paths, gateway endpoints, auth tokens, and chat history.
+
+Demo Mode lets reviewers verify the 18-feature AirVision companion HUD catalog, 12-row Windows app apply matrix, and Cyber-observed ASUS AirVision 1.0.7.1 settings-key evidence without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
 
 Reviewer evidence sources:
 
