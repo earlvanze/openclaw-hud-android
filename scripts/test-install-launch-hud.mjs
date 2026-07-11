@@ -131,11 +131,34 @@ async function runScenario(tempDir, name, args = [], extraEnv = {}) {
   return { result, lines };
 }
 
+async function runEnvApkScenario(tempDir) {
+  const logPath = join(tempDir, "env-apk.log");
+  const apkPath = join(tempDir, "env-selected-hud-debug.apk");
+  await writeFile(apkPath, "synthetic apk");
+  const result = runLaunch([], {
+    ...process.env,
+    ADB: join(tempDir, "adb"),
+    OPENCLAW_FAKE_ADB_LOG: logPath,
+    OPENCLAW_HUD_APK: apkPath,
+    ANDROID_SERIAL: "",
+  });
+  const lines = commandLines(await readFile(logPath, "utf8"));
+  return { result, lines, apkPath };
+}
+
 async function main() {
   const tempDir = await mkdtemp(join(tmpdir(), "openclaw-install-launch-hud-"));
   try {
     await mkdir(tempDir, { recursive: true });
     await writeFakeAdb(join(tempDir, "adb"));
+
+    const envApk = await runEnvApkScenario(tempDir);
+    assertIncludes(envApk.result.stdout, `Installing: ${envApk.apkPath}`, "env APK output");
+    assertIncludes(
+      findCommand(envApk.lines, "install"),
+      envApk.apkPath,
+      "env APK install command",
+    );
 
     const presentation = await runScenario(tempDir, "presentation");
     assertIncludes(

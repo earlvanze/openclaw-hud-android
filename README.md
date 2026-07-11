@@ -83,6 +83,9 @@ Presentation mode starts the Android Activity on display 0 and lets
 into Samsung DeX/freeform mode by default. Presentation launches also clear any
 stale HUD task and request fullscreen windowing on display 0 so a previous
 forced DeX/freeform launch is less likely to bleed into the next HUD start.
+When `--apk` is omitted, the script installs the newest built
+`*-hud-debug.apk` from `app/build/outputs/apk/hud/debug`; set
+`OPENCLAW_HUD_APK` or pass `--apk` to pin a specific APK.
 
 Display modes:
 

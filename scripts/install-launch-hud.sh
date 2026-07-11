@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGE_NAME="ai.openclaw.app.hud"
 COMPONENT="$PACKAGE_NAME/ai.openclaw.app.MainActivity"
-APK_PATH="$ROOT_DIR/app/build/outputs/apk/hud/debug/openclaw-2026.4.24-hud-debug.apk"
+APK_PATH="${OPENCLAW_HUD_APK:-}"
 SERIAL="${ANDROID_SERIAL:-}"
 DISPLAY_ID="${OPENCLAW_HUD_DISPLAY_ID:-presentation}"
 SETUP_CODE="${OPENCLAW_HUD_SETUP_CODE:-}"
@@ -82,9 +82,18 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+if [[ -z "$APK_PATH" ]]; then
+    APK_PATH="$(
+        find "$ROOT_DIR/app/build/outputs/apk/hud/debug" -maxdepth 1 -name '*-hud-debug.apk' -type f -printf '%T@ %p\n' 2>/dev/null |
+            sort -nr |
+            awk 'NR == 1 { print substr($0, index($0, $2)) }'
+    )"
+fi
+
 if [[ ! -f "$APK_PATH" ]]; then
     echo "HUD APK not found: $APK_PATH" >&2
     echo "Run: ANDROID_HOME=/home/digit/android-sdk ANDROID_SDK_ROOT=/home/digit/android-sdk ./gradlew :app:assembleHudDebug" >&2
+    echo "Or pass --apk /path/to/*-hud-debug.apk." >&2
     exit 1
 fi
 
