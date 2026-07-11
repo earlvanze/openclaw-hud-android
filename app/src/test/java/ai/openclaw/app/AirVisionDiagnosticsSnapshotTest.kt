@@ -139,7 +139,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("24", root.getValue("version").jsonPrimitive.content)
+        assertEquals("25", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -481,6 +481,14 @@ class AirVisionDiagnosticsSnapshotTest {
             "Use Android/DeX screen sharing outside OpenClaw HUD; the ASUS Unity mirror window is Windows-only.",
             windowsCompatibility.getValue("androidMirrorFallback").jsonPrimitive.content,
         )
+        assertEquals(
+            listOf(
+                "Open Android Cast settings from AirVision M1 settings.",
+                "Open Android Display settings from AirVision M1 settings.",
+                "Use Samsung DeX or Android screen sharing outside OpenClaw HUD when a projected-glasses-view mirror is needed.",
+            ),
+            windowsCompatibility.getValue("androidMirrorFallbackActions").jsonArray.map { it.jsonPrimitive.content },
+        )
         assertEquals("false", windowsCompatibility.getValue("distanceHotkeyMapped").jsonPrimitive.content)
         assertEquals("true", windowsCompatibility.getValue("hardwareTouchpadPassthrough").jsonPrimitive.content)
         assertEquals(
@@ -697,6 +705,10 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("true", windowsCompatibility.getValue("distanceHotkeyMapped").jsonPrimitive.content)
+        assertEquals(
+            "Open Android Cast settings from AirVision M1 settings.",
+            windowsCompatibility.getValue("androidMirrorFallbackActions").jsonArray.first().jsonPrimitive.content,
+        )
         assertEquals(
             "Android maps virtual-distance adjustment to M1 brightness key events; Windows cursor-follow, center-cursor, Unity mirror window, and 3DoF remain unavailable on Android.",
             windowsCompatibility.getValue("summary").jsonPrimitive.content,

@@ -155,7 +155,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation, trims transcript/caption history, skips nonessential color-preview overlays, and locks IPD/3D adjustment while enabled. |
 | Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
 | Cursor Follow / Center Cursor / 3DoF | Surfaced as Windows-only capability status in Android settings and diagnostics. Android can map the AirVision distance hotkey concept to M1 brightness-key events, but it does not claim Windows virtual-cursor or 3DoF control. |
-| Unity mirror window / projected glasses view | Surfaced as Windows-only capability status in Android settings and diagnostics. Android cannot open the ASUS Unity mirror window or `Ctrl+Alt+E` shortcut, but users can fall back to Android or DeX screen sharing outside the HUD. |
+| Unity mirror window / projected glasses view | Surfaced as Windows-only capability status in Android settings and diagnostics. Android cannot open the ASUS Unity mirror window or `Ctrl+Alt+E` shortcut, but Settings provides Cast and Display shortcuts for Android/DeX screen-sharing fallback outside the HUD. |
 | Demo Mode / Tutorials | Implemented as Android Demo Mode for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway or live M1. The hidden ASUS Windows tutorial shortcut remains Windows-only and is reported separately in diagnostics. |
 | App Preferences | Implemented with startup view, AirVision companion language preference with Android locale application, speaker state, Samsung/native captions preference, OpenClaw translation caption source/target languages, demo mode, JSON profile backup/import, software version/build display, EULA note, in-app privacy policy, official FAQ/tutorial, product registration, and ASUS support links. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, device class/subclass/protocol, interface count, serial availability, USB descriptor version when Android exposes it, and firmware protocol status. Actual ASUS HID firmware version still needs vendor protocol support. |
@@ -187,8 +187,8 @@ checklist,
 all saved AirVision profile values, runtime profile metadata,
 fit/clarity/text-size guidance,
 Android demo/offline reviewer experience state, Windows-only cursor/3DoF and
-Unity mirror-window capability status, Windows-only firmware-update workflow
-status, gesture settings, and AirVision app preferences without gateway
+Unity mirror-window capability status, Android Cast/Display mirror fallback
+actions, Windows-only firmware-update workflow status, gesture settings, and AirVision app preferences without gateway
 endpoints, auth tokens, chat history, or raw USB serial values. Settings ->
 AirVision M1 -> Firmware Link also shows a compact
 write-gate summary with protocol-ready and blocked feature labels so firmware

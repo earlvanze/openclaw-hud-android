@@ -297,6 +297,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
     val threeDofAvailable: Boolean,
     val unityMirrorWindowAvailable: Boolean,
     val androidMirrorFallback: String,
+    val androidMirrorFallbackActions: List<String>,
     val distanceHotkeyMapped: Boolean,
     val hardwareTouchpadPassthrough: Boolean,
     val summary: String,
@@ -305,7 +306,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 24
+    const val VERSION = 25
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -566,6 +567,12 @@ object AirVisionDiagnosticsSnapshots {
                     threeDofAvailable = false,
                     unityMirrorWindowAvailable = false,
                     androidMirrorFallback = "Use Android/DeX screen sharing outside OpenClaw HUD; the ASUS Unity mirror window is Windows-only.",
+                    androidMirrorFallbackActions =
+                        listOf(
+                            "Open Android Cast settings from AirVision M1 settings.",
+                            "Open Android Display settings from AirVision M1 settings.",
+                            "Use Samsung DeX or Android screen sharing outside OpenClaw HUD when a projected-glasses-view mirror is needed.",
+                        ),
                     distanceHotkeyMapped = hudControls.brightnessKeyAction == AirVisionHudKeyAction.AdjustDistance,
                     hardwareTouchpadPassthrough = true,
                     summary =

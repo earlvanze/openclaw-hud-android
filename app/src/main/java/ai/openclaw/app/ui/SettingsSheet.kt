@@ -1392,6 +1392,34 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 style = mobileCallout,
                             )
                         },
+                        trailingContent = {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(
+                                    onClick = {
+                                        openSettingsAction(
+                                            context = context,
+                                            action = AIR_VISION_CAST_SETTINGS_ACTION,
+                                            fallbackAction = Settings.ACTION_DISPLAY_SETTINGS,
+                                        )
+                                        viewModel.showHudTransientMessage("Opened Android Cast settings")
+                                    },
+                                    colors = settingsPrimaryButtonColors(),
+                                    shape = RoundedCornerShape(14.dp),
+                                ) {
+                                    Text("Cast", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                                }
+                                Button(
+                                    onClick = {
+                                        openSettingsAction(context, Settings.ACTION_DISPLAY_SETTINGS)
+                                        viewModel.showHudTransientMessage("Opened Android Display settings")
+                                    },
+                                    colors = settingsPrimaryButtonColors(),
+                                    shape = RoundedCornerShape(14.dp),
+                                ) {
+                                    Text("Display", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                                }
+                            }
+                        },
                     )
                 }
             }
@@ -2645,6 +2673,19 @@ private fun openNotificationListenerSettings(context: Context) {
     }
 }
 
+private fun openSettingsAction(
+    context: Context,
+    action: String,
+    fallbackAction: String = Settings.ACTION_SETTINGS,
+) {
+    val intent = Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    runCatching {
+        context.startActivity(intent)
+    }.getOrElse {
+        context.startActivity(Intent(fallbackAction).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }
+}
+
 private fun openExternalUrl(
     context: Context,
     url: String,
@@ -2678,6 +2719,7 @@ private const val AIR_VISION_FAQ_URL = "https://www.asus.com/support/faq/1054069
 private const val AIR_VISION_PRODUCT_REGISTRATION_URL = "https://account.asus.com/product_reg.aspx"
 private const val AIR_VISION_SUPPORT_URL =
     "https://www.asus.com/displays-desktops/glasses/airvision/asus-airvision-m1/helpdesk_knowledge?model2Name=ASUS-AirVision-M1"
+private const val AIR_VISION_CAST_SETTINGS_ACTION = "android.settings.CAST_SETTINGS"
 
 private fun isAssistantRoleHeld(context: Context): Boolean =
     context.getSystemService(RoleManager::class.java).isRoleHeld(RoleManager.ROLE_ASSISTANT)
