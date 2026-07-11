@@ -158,7 +158,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Unity mirror window / projected glasses view | Surfaced as Windows-only capability status in Android settings, diagnostics, and the Windows app handoff. Android cannot open the ASUS Unity mirror window or `Ctrl+Alt+E` shortcut, but Settings and handoff guidance provide Cast and Display shortcuts for Android/DeX screen-sharing fallback outside the HUD. |
 | Demo Mode / Tutorials | Implemented as Android Demo Mode for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway or live M1. The hidden ASUS Windows tutorial shortcut remains Windows-only and is reported separately in diagnostics. |
 | App Preferences | Implemented with startup view, AirVision companion language preference with Android locale application, speaker state, Samsung/native captions preference, OpenClaw translation caption source/target languages, demo mode, JSON profile backup/import, software version/build display, EULA note, in-app privacy policy, official FAQ/tutorial, product registration, and ASUS support links. |
-| Windows app profile handoff | Implemented as an exportable Markdown handoff containing the active profile, all saved profile values, Android HUD gesture/hotkey mappings, Windows-only spatial/mirror capability status, companion app preferences, ASUS Windows app apply steps for Cyber sessions, Android USB context, and privacy reminders that omit raw USB serial values. |
+| Windows app profile handoff | Implemented as an exportable Markdown handoff containing the active profile, derived active-runtime HUD scale/transcript/caption and overlay/dimming state, runtime-metadata freshness, all saved profile values, Android HUD gesture/hotkey mappings, Windows-only spatial/mirror capability status, companion app preferences, ASUS Windows app apply steps for Cyber sessions, Android USB context, and privacy reminders that omit raw USB serial values. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, device class/subclass/protocol, interface count, serial availability, USB descriptor version when Android exposes it, and firmware protocol status. Actual ASUS HID firmware version still needs vendor protocol support. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, derived readable/writable HID report-path capability summaries with endpoint packet sizes, per-feature firmware-apply readiness for Windows-style controls, per-feature Windows protocol-capture targets for View Mode/brightness/distance/IPD/Splendid/Eye Care/Motion Sync/Light Load/3D Mode, USB interface/endpoint diagnostics for protocol capture work, and a JSON diagnostics export that omits raw USB serial values. |
 | Firmware update | Surfaced as a Windows-only workflow in Android settings and diagnostics. Android can export a firmware-update handoff with USB descriptor/version context, interface readiness, sanitized imported protocol-capture evidence, and ASUS support links, but ASUS firmware update checks and installs still require the Windows AirVision app. |
@@ -198,13 +198,15 @@ writes remain visibly blocked until the machine-checked capture results
 validate a feature.
 Settings -> AirVision M1 -> Windows App Handoff exports a Markdown bridge for
 Cyber/Windows ASUS AirVision app sessions. It lists the active Android AirVision
-profile, all saved profile slots, Windows apply steps for View Mode, brightness,
-screen distance, IPD, Splendid, Eye Care, Motion Sync, Light Load Mode, and 3D
-Mode, Android HUD gesture/hotkey mappings, companion app startup/display/language,
-Windows-only Cursor Follow, Center Cursor, 3DoF, and Unity mirror-window status
-with Android Cast/Display fallback actions, speaker, caption, translation, and
-demo preferences, and Android USB context while omitting raw USB serial values,
-gateway endpoints, auth tokens, and chat history.
+profile, derived active-runtime HUD scale/transcript/caption capacity,
+overlay/dimming state, runtime-metadata freshness, all saved profile slots,
+Windows apply steps for View Mode, brightness, screen distance, IPD, Splendid,
+Eye Care, Motion Sync, Light Load Mode, and 3D Mode, Android HUD gesture/hotkey
+mappings, companion app startup/display/language, Windows-only Cursor Follow,
+Center Cursor, 3DoF, and Unity mirror-window status with Android Cast/Display
+fallback actions, speaker, caption, translation, and demo preferences, and
+Android USB context while omitting raw USB serial values, gateway endpoints,
+auth tokens, and chat history.
 The app does not send ASUS vendor reports until the Windows app protocol is
 captured and validated.
 

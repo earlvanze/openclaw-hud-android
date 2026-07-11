@@ -34,6 +34,14 @@ object AirVisionWindowsProfileHandoffs {
                     add("- No AirVision profile values were available.")
                 }
                 add("")
+                add("## Active Android Runtime")
+                add("")
+                if (activeProfile != null) {
+                    addRuntime(activeProfile, profileBackup)
+                } else {
+                    add("- Runtime profile unavailable because no active profile values were available.")
+                }
+                add("")
                 add("## All Saved Android Profiles")
                 add("")
                 profileBackup.profiles.sortedBy { AirVisionViewMode.fromRawValue(it.viewMode).ordinal }.forEach { profile ->
@@ -139,6 +147,34 @@ object AirVisionWindowsProfileHandoffs {
         add("- Android physical main screen visible: ${yesNo(profile.physicalMainScreenVisible)}")
     }
 
+    private fun MutableList<String>.addRuntime(
+        profile: AirVisionBackupDisplayProfile,
+        profileBackup: AirVisionProfileBackup,
+    ) {
+        val runtime = runtimeProfileForProfile(profile)
+        val importedRuntime =
+            profileBackup.runtimeProfiles.firstOrNull {
+                it.viewMode.trim().lowercase() == profile.viewMode.trim().lowercase()
+            }
+        add("- Effective HUD scale: ${runtime.effectiveHudScalePercent}%")
+        add("- Transcript entries: ${runtime.hudTranscriptEntryCount}")
+        add("- Caption entries: ${runtime.hudCaptionEntryCount}")
+        add("- IPD adjustment available: ${yesNo(runtime.ipdAdjustmentEnabled)}")
+        add("- 3D Mode available: ${yesNo(runtime.threeDModeAvailable)}")
+        add("- Eye Care filter available: ${yesNo(runtime.blueLightFilterAvailable)}")
+        add("- Color preview overlays: ${onOff(runtime.colorPreviewOverlaysEnabled)}")
+        add("- Brightness dimming: ${onOff(runtime.brightnessDimmingEnabled)}")
+        add(
+            "- Embedded runtime metadata: " +
+                when {
+                    profileBackup.runtimeProfiles.isEmpty() -> "missing; recalculated from active profile values"
+                    importedRuntime == null -> "missing for active profile; recalculated from active profile values"
+                    runtimeMatches(importedRuntime, runtime) -> "current"
+                    else -> "stale; recalculated from active profile values"
+                },
+        )
+    }
+
     private fun MutableList<String>.addControls(controls: AirVisionBackupHudControls) {
         add("- Single tap: ${AirVisionHudTouchAction.fromRawValue(controls.singleTapAction).label}")
         add("- Double tap: ${AirVisionHudDoubleTapAction.fromRawValue(controls.doubleTapAction).label}")
@@ -198,6 +234,23 @@ object AirVisionWindowsProfileHandoffs {
             AirVisionViewMode.Custom2 -> labels.custom2
             else -> mode.label
         }
+
+    private fun runtimeProfileForProfile(profile: AirVisionBackupDisplayProfile): AirVisionBackupRuntimeProfile =
+        AirVisionProfileBackups.runtimeProfileFromSettings(AirVisionProfileBackups.settingsFromProfile(profile))
+
+    private fun runtimeMatches(
+        imported: AirVisionBackupRuntimeProfile,
+        derived: AirVisionBackupRuntimeProfile,
+    ): Boolean =
+        imported.viewMode == derived.viewMode &&
+            imported.ipdAdjustmentEnabled == derived.ipdAdjustmentEnabled &&
+            imported.threeDModeAvailable == derived.threeDModeAvailable &&
+            imported.blueLightFilterAvailable == derived.blueLightFilterAvailable &&
+            imported.hudTranscriptEntryCount == derived.hudTranscriptEntryCount &&
+            imported.hudCaptionEntryCount == derived.hudCaptionEntryCount &&
+            imported.effectiveHudScalePercent == derived.effectiveHudScalePercent &&
+            imported.colorPreviewOverlaysEnabled == derived.colorPreviewOverlaysEnabled &&
+            imported.brightnessDimmingEnabled == derived.brightnessDimmingEnabled
 
     private fun blueLightFilterValue(profile: AirVisionBackupDisplayProfile): String =
         if (AirVisionSplendidMode.fromRawValue(profile.splendidMode) == AirVisionSplendidMode.EyeCare) {

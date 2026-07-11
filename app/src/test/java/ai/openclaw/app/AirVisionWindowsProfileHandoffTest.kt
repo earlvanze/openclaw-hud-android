@@ -7,6 +7,27 @@ import org.junit.Test
 class AirVisionWindowsProfileHandoffTest {
     @Test
     fun renderMarkdown_exportsProfileValuesForWindowsAppWithoutRawSerial() {
+        val activeSettings =
+            AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Custom1).copy(
+                brightnessPercent = 91,
+                distanceCm = 88,
+                hudScalePercent = 123,
+                ipdMm = 67,
+                splendidMode = AirVisionSplendidMode.EyeCare,
+                blueLightFilterPercent = 42,
+                motionSyncEnabled = false,
+                threeDModeEnabled = true,
+                lightLoadModeEnabled = false,
+                hudPlacement = AirVisionHudPlacement.UpperCenter,
+                safeAreaPercent = 7,
+                physicalMainScreenVisible = false,
+            )
+        val gamingSettings =
+            AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Gaming).copy(
+                ipdMm = 69,
+                lightLoadModeEnabled = true,
+                threeDModeEnabled = false,
+            )
         val markdown =
             AirVisionWindowsProfileHandoffs.renderMarkdown(
                 profileBackup =
@@ -41,29 +62,13 @@ class AirVisionWindowsProfileHandoffTest {
                                 AirVisionProfileBackups.profileFromSettings(
                                     AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working),
                                 ),
-                                AirVisionProfileBackups.profileFromSettings(
-                                    AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Custom1).copy(
-                                        brightnessPercent = 91,
-                                        distanceCm = 88,
-                                        hudScalePercent = 123,
-                                        ipdMm = 67,
-                                        splendidMode = AirVisionSplendidMode.EyeCare,
-                                        blueLightFilterPercent = 42,
-                                        motionSyncEnabled = false,
-                                        threeDModeEnabled = true,
-                                        lightLoadModeEnabled = false,
-                                        hudPlacement = AirVisionHudPlacement.UpperCenter,
-                                        safeAreaPercent = 7,
-                                        physicalMainScreenVisible = false,
-                                    ),
-                                ),
-                                AirVisionProfileBackups.profileFromSettings(
-                                    AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Gaming).copy(
-                                        ipdMm = 69,
-                                        lightLoadModeEnabled = true,
-                                        threeDModeEnabled = false,
-                                    ),
-                                ),
+                                AirVisionProfileBackups.profileFromSettings(activeSettings),
+                                AirVisionProfileBackups.profileFromSettings(gamingSettings),
+                            ),
+                        runtimeProfiles =
+                            listOf(
+                                AirVisionProfileBackups.runtimeProfileFromSettings(activeSettings),
+                                AirVisionProfileBackups.runtimeProfileFromSettings(gamingSettings),
                             ),
                     ),
                 usbState =
@@ -99,6 +104,16 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("- Android HUD placement: Upper Center"))
         assertTrue(markdown.contains("- Android safe area: 7%"))
         assertTrue(markdown.contains("- Android physical main screen visible: no"))
+        assertTrue(markdown.contains("## Active Android Runtime"))
+        assertTrue(markdown.contains("- Effective HUD scale: 98%"))
+        assertTrue(markdown.contains("- Transcript entries: 8"))
+        assertTrue(markdown.contains("- Caption entries: 5"))
+        assertTrue(markdown.contains("- IPD adjustment available: yes"))
+        assertTrue(markdown.contains("- 3D Mode available: yes"))
+        assertTrue(markdown.contains("- Eye Care filter available: yes"))
+        assertTrue(markdown.contains("- Color preview overlays: on"))
+        assertTrue(markdown.contains("- Brightness dimming: on"))
+        assertTrue(markdown.contains("- Embedded runtime metadata: current"))
         assertTrue(markdown.contains("### Walking HUD"))
         assertTrue(markdown.contains("- IPD: 69 mm (locked by Light Load Mode)"))
         assertTrue(markdown.contains("- 3D Mode: off (locked by Light Load Mode)"))
@@ -167,6 +182,7 @@ class AirVisionWindowsProfileHandoffTest {
             )
 
         assertTrue(markdown.contains("- No AirVision profile values were available."))
+        assertTrue(markdown.contains("- Runtime profile unavailable because no active profile values were available."))
         assertTrue(markdown.contains("- Connected: no"))
         assertTrue(markdown.contains("- USB ID: not detected"))
         assertTrue(markdown.contains("- Serial status: not captured"))
@@ -211,5 +227,61 @@ class AirVisionWindowsProfileHandoffTest {
 
         assertTrue(markdown.contains("- Android distance hotkey fallback: mapped to M1 brightness keys"))
         assertFalse(markdown.contains("- Android distance hotkey fallback: off"))
+        assertTrue(markdown.contains("- Embedded runtime metadata: missing; recalculated from active profile values"))
+    }
+
+    @Test
+    fun renderMarkdown_marksStaleRuntimeMetadata() {
+        val settings =
+            AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working).copy(
+                brightnessPercent = 45,
+                hudScalePercent = 135,
+            )
+        val markdown =
+            AirVisionWindowsProfileHandoffs.renderMarkdown(
+                profileBackup =
+                    AirVisionProfileBackup(
+                        activeViewMode = AirVisionViewMode.Working.rawValue,
+                        customLabels =
+                            AirVisionBackupCustomLabels(
+                                custom1 = AirVisionViewMode.Custom1.label,
+                                custom2 = AirVisionViewMode.Custom2.label,
+                            ),
+                        hudControls =
+                            AirVisionBackupHudControls(
+                                singleTapAction = "dismiss_notification",
+                                doubleTapAction = "toggle_mic",
+                                swipeAction = "scroll_chat",
+                                brightnessKeyAction = "adjust_brightness",
+                                mediaKeyAction = "double_tap_toggle_mic",
+                            ),
+                        appPreferences =
+                            AirVisionBackupAppPreferences(
+                                language = "system",
+                                startupDestination = "hud",
+                                hudDisplayTarget = "airvision_preferred",
+                                demoModeEnabled = false,
+                            ),
+                        runtimeProfiles =
+                            listOf(
+                                AirVisionBackupRuntimeProfile(
+                                    viewMode = AirVisionViewMode.Working.rawValue,
+                                    ipdAdjustmentEnabled = true,
+                                    threeDModeAvailable = true,
+                                    blueLightFilterAvailable = false,
+                                    hudTranscriptEntryCount = 1,
+                                    hudCaptionEntryCount = 1,
+                                    effectiveHudScalePercent = 10,
+                                    colorPreviewOverlaysEnabled = false,
+                                    brightnessDimmingEnabled = false,
+                                ),
+                            ),
+                        profiles = listOf(AirVisionProfileBackups.profileFromSettings(settings)),
+                    ),
+                usbState = AirVisionUsbState(),
+            )
+
+        assertTrue(markdown.contains("- Effective HUD scale: 135%"))
+        assertTrue(markdown.contains("- Embedded runtime metadata: stale; recalculated from active profile values"))
     }
 }
