@@ -54,11 +54,25 @@ data class AirVisionFirmwareCaptureResultsSummary(
     val validatedFeatureCount: Int,
     val writeEnabledFeatureCount: Int,
     val blockedFeatureCount: Int,
+    val writeEnabledFeatureLabels: List<String>,
+    val blockedFeatureLabels: List<String>,
+    val payloadPolicy: String,
     val sourceSummary: String,
     val summary: String,
 ) {
     val displayText: String
         get() = "$summary; $sourceSummary"
+
+    val writeEnabledFeatureSummary: String
+        get() = writeEnabledFeatureLabels.joinToString().ifBlank { "none" }
+
+    val blockedFeatureSummary: String
+        get() = blockedFeatureLabels.joinToString().ifBlank { "none" }
+
+    val safetyPreviewText: String
+        get() =
+            "$payloadPolicy; raw USB captures, raw serials, payload bytes, " +
+                "and token-shaped values are rejected"
 }
 
 object AirVisionFirmwareCaptureResultFiles {
@@ -87,8 +101,14 @@ object AirVisionFirmwareCaptureResultFiles {
     fun summarize(results: AirVisionFirmwareCaptureResults): AirVisionFirmwareCaptureResultsSummary {
         validate(results)
         val validated = results.features.count { it.status == "validated" }
-        val enabled = results.features.count { it.androidEnablementDecision == "enable_android_write" }
-        val blocked = results.features.count { it.androidEnablementDecision == "blocked" }
+        val writeEnabledLabels =
+            results.features
+                .filter { it.androidEnablementDecision == "enable_android_write" }
+                .map { it.label }
+        val blockedLabels =
+            results.features
+                .filter { it.androidEnablementDecision == "blocked" }
+                .map { it.label }
         val sourceSummary =
             listOfNotNull(
                 results.source.windowsHost?.trim()?.takeIf(String::isNotEmpty)?.let { "host=$it" },
@@ -102,10 +122,19 @@ object AirVisionFirmwareCaptureResultFiles {
         return AirVisionFirmwareCaptureResultsSummary(
             featureCount = results.features.size,
             validatedFeatureCount = validated,
-            writeEnabledFeatureCount = enabled,
-            blockedFeatureCount = blocked,
+            writeEnabledFeatureCount = writeEnabledLabels.size,
+            blockedFeatureCount = blockedLabels.size,
+            writeEnabledFeatureLabels = writeEnabledLabels,
+            blockedFeatureLabels = blockedLabels,
+            payloadPolicy =
+                results.payloadPolicy
+                    ?.trim()
+                    ?.takeIf(String::isNotEmpty)
+                    ?: "Sanitized summaries only",
             sourceSummary = sourceSummary,
-            summary = "capture results: $validated validated, $enabled write-enabled, $blocked blocked",
+            summary =
+                "capture results: $validated validated, " +
+                    "${writeEnabledLabels.size} write-enabled, ${blockedLabels.size} blocked",
         )
     }
 

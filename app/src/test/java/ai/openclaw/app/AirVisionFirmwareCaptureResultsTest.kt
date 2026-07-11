@@ -13,6 +13,13 @@ class AirVisionFirmwareCaptureResultsTest {
         assertEquals(0, summary.validatedFeatureCount)
         assertEquals(0, summary.writeEnabledFeatureCount)
         assertEquals(AirVisionFirmwareFeature.entries.size, summary.blockedFeatureCount)
+        assertEquals(emptyList<String>(), summary.writeEnabledFeatureLabels)
+        assertEquals(AirVisionFirmwareFeature.entries.map { it.label }, summary.blockedFeatureLabels)
+        assertEquals("none", summary.writeEnabledFeatureSummary)
+        assertTrue(summary.blockedFeatureSummary.contains("Brightness"))
+        assertEquals("Sanitized summaries only.", summary.payloadPolicy)
+        assertTrue(summary.safetyPreviewText.contains("raw USB captures"))
+        assertTrue(summary.safetyPreviewText.contains("token-shaped values"))
         assertEquals("host=Cyber, tool=USBPcap/Wireshark", summary.sourceSummary)
         assertEquals("capture results: 0 validated, 0 write-enabled, 9 blocked", summary.summary)
     }
@@ -88,6 +95,10 @@ class AirVisionFirmwareCaptureResultsTest {
         assertEquals(1, summary.validatedFeatureCount)
         assertEquals(1, summary.writeEnabledFeatureCount)
         assertEquals(AirVisionFirmwareFeature.entries.size - 1, summary.blockedFeatureCount)
+        assertEquals(listOf("Brightness"), summary.writeEnabledFeatureLabels)
+        assertEquals("Brightness", summary.writeEnabledFeatureSummary)
+        assertTrue(summary.blockedFeatureLabels.none { it == "Brightness" })
+        assertTrue(summary.blockedFeatureSummary.contains("IPD"))
     }
 
     @Test

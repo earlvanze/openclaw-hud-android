@@ -285,7 +285,22 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         color = mobileTextSecondary,
                     )
                     Text(
-                        "- Sanitized summaries only; raw USB captures, raw serials, and token-shaped values remain rejected",
+                        "- Android write-enabled: ${captureResultsImportSummary.writeEnabledFeatureSummary}",
+                        style = mobileCallout,
+                        color =
+                            if (captureResultsImportSummary.writeEnabledFeatureCount > 0) {
+                                mobileWarning
+                            } else {
+                                mobileTextSecondary
+                            },
+                    )
+                    Text(
+                        "- Still blocked: ${captureResultsImportSummary.blockedFeatureSummary}",
+                        style = mobileCallout,
+                        color = mobileTextSecondary,
+                    )
+                    Text(
+                        "- ${captureResultsImportSummary.safetyPreviewText}",
                         style = mobileCallout,
                         color = mobileWarning,
                     )
