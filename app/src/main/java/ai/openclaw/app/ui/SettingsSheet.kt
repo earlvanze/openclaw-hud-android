@@ -749,6 +749,12 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                     firmwareFeatureReadinessSummary = airVisionUsbState.firmwareCapabilities.featureReadinessSummary,
                                     firmwareSyncSummary = airVisionFirmwareSyncPlan.summary,
                                     firmwareWriteGateSummary = airVisionFirmwareSyncPlan.writeGateSummary,
+                                    firmwareWriteGateProtocolReadyFeatureLabels =
+                                        airVisionFirmwareSyncPlan.writeGate.protocolReadyFeatureLabels,
+                                    firmwareWriteGateBlockedFeatureLabels =
+                                        airVisionFirmwareSyncPlan.writeGate.blockedFeatureLabels,
+                                    firmwareWriteGateLiveTestChecklist =
+                                        airVisionFirmwareSyncPlan.writeGate.liveTestChecklist,
                                     firmwareWriteGateNextStep = airVisionFirmwareSyncPlan.writeGate.nextStep,
                                     diagnosticsText = airVisionUsbState.diagnosticsText,
                                 ),
@@ -2403,6 +2409,9 @@ private fun airVisionUsbStatusText(
     firmwareFeatureReadinessSummary: String,
     firmwareSyncSummary: String,
     firmwareWriteGateSummary: String,
+    firmwareWriteGateProtocolReadyFeatureLabels: List<String>,
+    firmwareWriteGateBlockedFeatureLabels: List<String>,
+    firmwareWriteGateLiveTestChecklist: List<String>,
     firmwareWriteGateNextStep: String,
     diagnosticsText: String,
 ): String {
@@ -2420,9 +2429,25 @@ private fun airVisionUsbStatusText(
         firmwareFeatureReadinessSummary.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
         firmwareSyncSummary.takeIf { it.isNotBlank() },
         firmwareWriteGateSummary.takeIf { it.isNotBlank() },
+        firmwareWriteGateProtocolReadyFeatureLabels
+            .takeIf { it.isNotEmpty() }
+            ?.let { "protocol-ready: ${it.joinToString()}" },
+        firmwareWriteGateBlockedFeatureLabels
+            .takeIf { it.isNotEmpty() }
+            ?.let { "blocked: ${airVisionCompactLabelList(it)}" },
+        firmwareWriteGateLiveTestChecklist
+            .firstOrNull()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { "live-test: $it" },
         firmwareWriteGateNextStep.takeIf { it.isNotBlank() }?.let { "next: $it" },
         diagnosticsText.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
     ).joinToString("\n")
+}
+
+private fun airVisionCompactLabelList(labels: List<String>): String {
+    val visible = labels.take(4).joinToString()
+    val hiddenCount = labels.size - 4
+    return if (hiddenCount > 0) "$visible, +$hiddenCount" else visible
 }
 
 private fun airVisionFirmwareUpdateStatusText(firmwareVersion: String?): String =

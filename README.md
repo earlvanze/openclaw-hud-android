@@ -187,8 +187,9 @@ Unity mirror-window capability status, Windows-only firmware-update workflow
 status, gesture settings, and AirVision app preferences without gateway
 endpoints, auth tokens, chat history, or raw USB serial values. Settings ->
 AirVision M1 -> Firmware Link also shows a compact
-write-gate summary so firmware writes remain visibly blocked until the
-machine-checked capture results validate a feature.
+write-gate summary with protocol-ready and blocked feature labels so firmware
+writes remain visibly blocked until the machine-checked capture results
+validate a feature.
 The app does not send ASUS vendor reports until the Windows app protocol is
 captured and validated.
 
