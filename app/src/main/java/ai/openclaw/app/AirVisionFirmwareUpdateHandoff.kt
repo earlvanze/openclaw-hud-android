@@ -5,7 +5,10 @@ object AirVisionFirmwareUpdateHandoffs {
     private const val SUPPORT_URL =
         "https://www.asus.com/displays-desktops/glasses/airvision/asus-airvision-m1/helpdesk_knowledge?model2Name=ASUS-AirVision-M1"
 
-    fun renderMarkdown(usbState: AirVisionUsbState): String {
+    fun renderMarkdown(
+        usbState: AirVisionUsbState,
+        captureResults: AirVisionFirmwareCaptureResults? = null,
+    ): String {
         val info = usbState.deviceInfo
         val lines =
             buildList {
@@ -38,6 +41,10 @@ object AirVisionFirmwareUpdateHandoffs {
                 add("- Firmware report paths: ${usbState.firmwareCapabilities.summary}")
                 add("- Feature readiness: ${usbState.firmwareCapabilities.featureReadinessSummary}")
                 add("")
+                add("## Imported Protocol-Capture Evidence")
+                add("")
+                addCaptureResults(captureResults)
+                add("")
                 add("## Windows/Cyber Update Checklist")
                 add("")
                 add("- Connect the AirVision M1 directly to the Windows/Cyber machine running the ASUS AirVision app.")
@@ -58,6 +65,35 @@ object AirVisionFirmwareUpdateHandoffs {
                 add("- Do not commit raw USB captures, private payload bytes, or temporary review/demo credentials.")
             }
         return lines.joinToString("\n") + "\n"
+    }
+
+    private fun MutableList<String>.addCaptureResults(captureResults: AirVisionFirmwareCaptureResults?) {
+        if (captureResults == null) {
+            add("- Imported capture results: none")
+            add("- Android firmware writes remain blocked until sanitized capture results are imported and validated.")
+            return
+        }
+
+        val summary = AirVisionFirmwareCaptureResultFiles.summarize(captureResults)
+        val writeEnabledLabels =
+            captureResults.features
+                .filter { it.androidEnablementDecision == "enable_android_write" }
+                .joinToString { it.label }
+                .ifBlank { "none" }
+        val blockedLabels =
+            captureResults.features
+                .filter { it.androidEnablementDecision == "blocked" }
+                .joinToString { it.label }
+                .ifBlank { "none" }
+        add("- Imported capture results: ${summary.displayText}")
+        add("- Schema/version: ${captureResults.schema} v${captureResults.version}")
+        add("- Payload policy: ${displayValue(captureResults.payloadPolicy, "sanitized summaries only")}")
+        add("- Feature coverage: ${summary.featureCount} AirVision firmware features")
+        add("- Validated features: ${summary.validatedFeatureCount}")
+        add("- Android write-enabled features: $writeEnabledLabels")
+        add("- Blocked features: $blockedLabels")
+        add("- Source notes: ${displayValue(captureResults.source.notes, "not recorded")}")
+        add("- Raw USB captures, raw serial values, and payload bytes are intentionally excluded.")
     }
 
     private fun displayValue(

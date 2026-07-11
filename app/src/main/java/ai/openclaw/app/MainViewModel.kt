@@ -525,6 +525,7 @@ class MainViewModel(
     fun exportAirVisionFirmwareUpdateHandoff(): String =
         AirVisionFirmwareUpdateHandoffs.renderMarkdown(
             usbState = airVisionUsbState.value,
+            captureResults = airVisionFirmwareCaptureResults.value,
         )
 
     fun exportAirVisionWindowsProfileHandoff(): String =
