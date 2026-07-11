@@ -651,12 +651,14 @@ function verifyAppContentShape(appContent) {
       "Settings > AirVision M1 > Windows Spatial & Mirror Controls > Cast",
       "Settings > AirVision M1 > Windows Spatial & Mirror Controls > Display",
       "Settings > AirVision M1 > Firmware Updates > Export",
+      "Settings > AirVision M1 > Windows App Handoff > Export",
       "Settings > AirVision M1 > Diagnostics Export > Export",
     ],
   );
   requireIncludes("AirVision companion review notes", appContent.reviewEvidence?.airVisionCompanionReviewNotes ?? "", [
     "without a live gateway or live M1",
     "Cast and Display",
+    "Windows app handoff",
     "omit raw USB serial values",
     "Android firmware writes remain blocked",
   ]);

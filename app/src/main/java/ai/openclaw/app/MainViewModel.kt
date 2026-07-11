@@ -524,6 +524,12 @@ class MainViewModel(
             usbState = airVisionUsbState.value,
         )
 
+    fun exportAirVisionWindowsProfileHandoff(): String =
+        AirVisionWindowsProfileHandoffs.renderMarkdown(
+            profileBackup = prefs.airVisionProfileBackupSnapshot(),
+            usbState = airVisionUsbState.value,
+        )
+
     fun exportAirVisionDiagnosticsSnapshot(): String =
         AirVisionDiagnosticsSnapshots.encode(
             AirVisionDiagnosticsSnapshots.fromState(

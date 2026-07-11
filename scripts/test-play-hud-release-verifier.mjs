@@ -83,6 +83,7 @@ const validReadme = [
   "| Unity mirror window / projected glasses view | Windows-only mirror window status plus Android sharing fallback. |",
   "| Demo Mode / Tutorials | Android deterministic review mode without a live gateway or live M1 plus Windows tutorial shortcut status. |",
   "| App Preferences | Startup, language, speaker, captions, backup, policy, and support links. |",
+  "| Windows app profile handoff | ASUS Windows app apply steps and privacy reminders. |",
   "| Device Information | USB identity details. |",
   "| Firmware link | USB diagnostics and protocol capture state. |",
   "| Firmware update | Windows-only update workflow status. |",
@@ -91,6 +92,7 @@ const validReadme = [
   "",
   "Captions default to Samsung/Android native captioning. The OpenClaw fallback forces thinking off, prefers sage-router/fast, and labels alternating turns as `S1` / `S2`.",
   "Diagnostics exports include Android demo/offline reviewer experience state, profile backup/restore readiness, all saved AirVision profile values, and runtime profile metadata.",
+  "Windows App Handoff exports ASUS Windows app apply steps while omitting raw USB serial values.",
   "Profile Backup exports gesture/hotkey settings, speaker state, Samsung/native captions preference, and OpenClaw translation caption settings, and never includes gateway endpoints, auth tokens, or chat history.",
   "`play/airvision-firmware-capture-results.json` is the machine-checked sanitized capture-results file. Android firmware writes remain blocked until evidence is validated.",
 ].join("\n");

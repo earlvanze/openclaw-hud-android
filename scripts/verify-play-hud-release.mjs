@@ -482,6 +482,7 @@ async function verifyReadmeAirVisionParity() {
     "| Unity mirror window / projected glasses view |",
     "| Demo Mode / Tutorials |",
     "| App Preferences |",
+    "| Windows app profile handoff |",
     "| Device Information |",
     "| Firmware link |",
     "| Firmware update |",
@@ -496,6 +497,11 @@ async function verifyReadmeAirVisionParity() {
     "profile backup/restore readiness",
     "all saved AirVision profile values",
     "runtime profile metadata",
+  ]);
+  requireIncludes("README AirVision Windows app handoff", readme, [
+    "Windows App Handoff",
+    "ASUS Windows app apply steps",
+    "omitting raw USB serial values",
   ]);
   requireIncludes("README AirVision fit and clarity guidance", readme, [
     "53.5-74.5 mm IPD range",

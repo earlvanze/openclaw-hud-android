@@ -485,6 +485,22 @@ fun SettingsSheet(viewModel: MainViewModel) {
             }
         }
 
+    val airVisionWindowsProfileHandoffExportLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/markdown")) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            runCatching {
+                context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { writer ->
+                    writer.write(viewModel.exportAirVisionWindowsProfileHandoff())
+                } ?: error("Unable to open Windows profile handoff file.")
+            }.onSuccess {
+                Toast.makeText(context, "Exported AirVision Windows handoff", Toast.LENGTH_SHORT).show()
+                viewModel.showHudTransientMessage("Exported AirVision Windows handoff")
+            }.onFailure { error ->
+                Toast.makeText(context, "AirVision Windows handoff export failed", Toast.LENGTH_SHORT).show()
+                viewModel.showHudTransientMessage("AirVision Windows handoff export failed: ${error.message.orEmpty()}")
+            }
+        }
+
     val airVisionFirmwareCaptureResultsImportLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
@@ -877,6 +893,31 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 onClick = {
                                     airVisionFirmwareUpdateHandoffExportLauncher.launch(
                                         "openclaw-airvision-m1-firmware-update-handoff.md",
+                                    )
+                                },
+                                colors = settingsPrimaryButtonColors(),
+                                shape = RoundedCornerShape(14.dp),
+                            ) {
+                                Text("Export", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                            }
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Windows App Handoff", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Save current AirVision profile values and ASUS Windows app apply steps for Cyber sessions.",
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Button(
+                                onClick = {
+                                    airVisionWindowsProfileHandoffExportLauncher.launch(
+                                        "openclaw-airvision-m1-windows-profile-handoff.md",
                                     )
                                 },
                                 colors = settingsPrimaryButtonColors(),

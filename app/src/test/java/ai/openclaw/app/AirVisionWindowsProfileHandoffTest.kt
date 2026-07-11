@@ -1,0 +1,148 @@
+package ai.openclaw.app
+
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class AirVisionWindowsProfileHandoffTest {
+    @Test
+    fun renderMarkdown_exportsProfileValuesForWindowsAppWithoutRawSerial() {
+        val markdown =
+            AirVisionWindowsProfileHandoffs.renderMarkdown(
+                profileBackup =
+                    AirVisionProfileBackup(
+                        activeViewMode = AirVisionViewMode.Custom1.rawValue,
+                        customLabels =
+                            AirVisionBackupCustomLabels(
+                                custom1 = "Walking HUD",
+                                custom2 = "Desk HUD",
+                            ),
+                        hudControls =
+                            AirVisionBackupHudControls(
+                                singleTapAction = "clear_notification",
+                                doubleTapAction = "toggle_mic",
+                                swipeAction = "scroll_chat",
+                                brightnessKeyAction = "adjust_brightness",
+                                mediaKeyAction = "toggle_mic",
+                            ),
+                        appPreferences =
+                            AirVisionBackupAppPreferences(
+                                language = "system",
+                                startupDestination = "hud",
+                                hudDisplayTarget = "airvision_preferred",
+                                demoModeEnabled = true,
+                            ),
+                        profiles =
+                            listOf(
+                                AirVisionProfileBackups.profileFromSettings(
+                                    AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working),
+                                ),
+                                AirVisionProfileBackups.profileFromSettings(
+                                    AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Custom1).copy(
+                                        brightnessPercent = 91,
+                                        distanceCm = 88,
+                                        hudScalePercent = 123,
+                                        ipdMm = 67,
+                                        splendidMode = AirVisionSplendidMode.EyeCare,
+                                        blueLightFilterPercent = 42,
+                                        motionSyncEnabled = false,
+                                        threeDModeEnabled = true,
+                                        lightLoadModeEnabled = false,
+                                        hudPlacement = AirVisionHudPlacement.UpperCenter,
+                                        safeAreaPercent = 7,
+                                        physicalMainScreenVisible = false,
+                                    ),
+                                ),
+                                AirVisionProfileBackups.profileFromSettings(
+                                    AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Gaming).copy(
+                                        ipdMm = 69,
+                                        lightLoadModeEnabled = true,
+                                        threeDModeEnabled = false,
+                                    ),
+                                ),
+                            ),
+                    ),
+                usbState =
+                    AirVisionUsbState(
+                        connected = true,
+                        permissionGranted = true,
+                        deviceLabel = "ASUS AirVision M1",
+                        vendorProduct = "0x0b05:0x1b3c",
+                        deviceInfo =
+                            AirVisionUsbDeviceInfo(
+                                manufacturerName = "ASUS",
+                                productName = "AirVision M1",
+                                vendorProduct = "0x0b05:0x1b3c",
+                                interfaceCount = 4,
+                                serialNumber = "private-device-serial",
+                                firmwareVersion = "USB descriptor 1.02",
+                            ),
+                    ),
+            )
+
+        assertTrue(markdown.startsWith("# AirVision M1 Windows App Profile Handoff"))
+        assertTrue(markdown.contains("ASUS AirVision Windows app"))
+        assertTrue(markdown.contains("## Active Android Profile"))
+        assertTrue(markdown.contains("- View Mode: Custom 1"))
+        assertTrue(markdown.contains("- Brightness: 91%"))
+        assertTrue(markdown.contains("- Screen distance: 88 cm"))
+        assertTrue(markdown.contains("- IPD: 67 mm"))
+        assertTrue(markdown.contains("- Splendid: Eye Care"))
+        assertTrue(markdown.contains("- Blue Light Filter: 42%"))
+        assertTrue(markdown.contains("- Motion Sync: off"))
+        assertTrue(markdown.contains("- 3D Mode: on"))
+        assertTrue(markdown.contains("- Android HUD scale: 123%"))
+        assertTrue(markdown.contains("- Android HUD placement: Upper Center"))
+        assertTrue(markdown.contains("- Android safe area: 7%"))
+        assertTrue(markdown.contains("- Android physical main screen visible: no"))
+        assertTrue(markdown.contains("### Walking HUD"))
+        assertTrue(markdown.contains("- IPD: 69 mm (locked by Light Load Mode)"))
+        assertTrue(markdown.contains("- 3D Mode: off (locked by Light Load Mode)"))
+        assertTrue(markdown.contains("Open the ASUS AirVision Windows app on Cyber"))
+        assertTrue(markdown.contains("true panel preset writes"))
+        assertTrue(markdown.contains("- Connected: yes"))
+        assertTrue(markdown.contains("- USB ID: 0x0b05:0x1b3c"))
+        assertTrue(markdown.contains("- Serial status: available"))
+        assertTrue(markdown.contains("- Android-visible firmware/version context: USB descriptor 1.02"))
+        assertTrue(markdown.contains("https://www.asus.com/support/faq/1054069/"))
+        assertFalse(markdown.contains("private-device-serial"))
+    }
+
+    @Test
+    fun renderMarkdown_handlesMissingProfiles() {
+        val markdown =
+            AirVisionWindowsProfileHandoffs.renderMarkdown(
+                profileBackup =
+                    AirVisionProfileBackup(
+                        activeViewMode = AirVisionViewMode.Working.rawValue,
+                        customLabels =
+                            AirVisionBackupCustomLabels(
+                                custom1 = AirVisionViewMode.Custom1.label,
+                                custom2 = AirVisionViewMode.Custom2.label,
+                            ),
+                        hudControls =
+                            AirVisionBackupHudControls(
+                                singleTapAction = "clear_notification",
+                                doubleTapAction = "toggle_mic",
+                                swipeAction = "scroll_chat",
+                                brightnessKeyAction = "adjust_brightness",
+                                mediaKeyAction = "toggle_mic",
+                            ),
+                        appPreferences =
+                            AirVisionBackupAppPreferences(
+                                language = "system",
+                                startupDestination = "hud",
+                                hudDisplayTarget = "airvision_preferred",
+                                demoModeEnabled = false,
+                            ),
+                        profiles = emptyList(),
+                    ),
+                usbState = AirVisionUsbState(),
+            )
+
+        assertTrue(markdown.contains("- No AirVision profile values were available."))
+        assertTrue(markdown.contains("- Connected: no"))
+        assertTrue(markdown.contains("- USB ID: not detected"))
+        assertTrue(markdown.contains("- Serial status: not captured"))
+    }
+}

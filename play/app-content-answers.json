@@ -95,9 +95,10 @@
       "Settings > AirVision M1 > Windows Spatial & Mirror Controls > Cast",
       "Settings > AirVision M1 > Windows Spatial & Mirror Controls > Display",
       "Settings > AirVision M1 > Firmware Updates > Export",
+      "Settings > AirVision M1 > Windows App Handoff > Export",
       "Settings > AirVision M1 > Diagnostics Export > Export"
     ],
-    "airVisionCompanionReviewNotes": "Demo Mode lets reviewers verify the AirVision companion HUD without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists."
+    "airVisionCompanionReviewNotes": "Demo Mode lets reviewers verify the AirVision companion HUD without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists."
   },
   "finalSubmission": {
     "hostedPrivacyPolicyUrl": "https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html",
