@@ -77,11 +77,11 @@ data class AirVisionFirmwareWriteGate(
             }
 
             val validatedCaptureCount = items.count { it.captureResultStatus == "validated" }
-            val writeEnabledCaptureCount = items.count { it.androidEnablementDecision == "enable_android_write" }
+            val writeEnabledCaptureCount = items.count { it.hasValidatedWriteEnablement }
             val blockedFeatureCount = items.count { !it.firmwareWriteAllowed }
             val protocolReadyFeatureLabels =
                 items
-                    .filter { it.androidEnablementDecision == "enable_android_write" }
+                    .filter { it.hasValidatedWriteEnablement }
                     .map { it.feature.label }
             val blockedFeatureLabels =
                 items
@@ -148,6 +148,9 @@ data class AirVisionFirmwareSyncItem(
 ) {
     val summary: String
         get() = "${feature.label}=$desiredValue ($hardwareSyncStatus)"
+
+    val hasValidatedWriteEnablement: Boolean
+        get() = captureResultStatus == "validated" && androidEnablementDecision == "enable_android_write"
 }
 
 object AirVisionFirmwareSyncPlans {

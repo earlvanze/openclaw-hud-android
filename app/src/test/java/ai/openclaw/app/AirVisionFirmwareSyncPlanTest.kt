@@ -173,6 +173,56 @@ class AirVisionFirmwareSyncPlanTest {
         assertTrue(plan.writeGate.liveTestChecklist.any { it.contains("Replay only one validated feature") })
         assertTrue(plan.writeGate.nextStep.contains("live-tested with the M1 connected"))
     }
+
+    @Test
+    fun fromSettings_doesNotTreatUnvalidatedEnablementDecisionAsProtocolReady() {
+        val captureResults =
+            AirVisionFirmwareCaptureResults(
+                schema = AirVisionFirmwareCaptureResultFiles.SCHEMA,
+                version = AirVisionFirmwareCaptureResultFiles.VERSION,
+                source = AirVisionFirmwareCaptureResultsSource(windowsHost = "Cyber"),
+                features =
+                    AirVisionFirmwareFeature.entries.map { feature ->
+                        if (feature == AirVisionFirmwareFeature.Brightness) {
+                            capturedBrightnessEnablementDecision(feature)
+                        } else {
+                            pendingCaptureResult(feature)
+                        }
+                    },
+            )
+
+        val plan =
+            AirVisionFirmwareSyncPlans.fromSettings(
+                settings = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working),
+                capabilities =
+                    AirVisionFirmwareCapabilities(
+                        writableReportPaths =
+                            listOf(
+                                AirVisionFirmwareReportPath(
+                                    interfaceId = 2,
+                                    endpointAddress = 0x02,
+                                    direction = UsbConstants.USB_DIR_OUT,
+                                    type = UsbConstants.USB_ENDPOINT_XFER_INT,
+                                    maxPacketSize = 64,
+                                    interval = 1,
+                                ),
+                            ),
+                    ),
+                captureResults = captureResults,
+            )
+        val brightness = plan.items.first { it.feature == AirVisionFirmwareFeature.Brightness }
+
+        assertEquals("captured", brightness.captureResultStatus)
+        assertEquals("enable_android_write", brightness.androidEnablementDecision)
+        assertEquals(false, brightness.hasValidatedWriteEnablement)
+        assertEquals("capture pending", brightness.hardwareSyncStatus)
+        assertEquals(AirVisionFirmwareFeature.entries.size, brightness.requiredEvidence.size)
+        assertEquals("read_only_capture_pending", plan.writeGate.status)
+        assertEquals(0, plan.writeGate.validatedCaptureCount)
+        assertEquals(0, plan.writeGate.writeEnabledCaptureCount)
+        assertEquals(emptyList<String>(), plan.writeGate.protocolReadyFeatureLabels)
+        assertTrue(plan.writeGate.nextStep.contains("Capture and validate ASUS HID report payloads"))
+    }
 }
 
 private fun pendingCaptureResult(feature: AirVisionFirmwareFeature): AirVisionFirmwareCaptureResult =
@@ -198,6 +248,32 @@ private fun validatedBrightnessCaptureResult(feature: AirVisionFirmwareFeature):
         readbackEndpoint = "in if=1 interrupt addr=0x81 max=32 int=4",
         readbackPayloadSummary = "readback brightness byte matched; sanitized",
         checksumFramingNotes = "xor checksum observed; sanitized",
+        visibleStateConfirmed = true,
+        captureReferences =
+            listOf(
+                AirVisionFirmwareCaptureReference(
+                    file = "airvision-brightness-summary.txt",
+                    sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    notes = "sanitized summary only",
+                ),
+            ),
+        androidEnablementDecision = "enable_android_write",
+        blockerReason = null,
+    )
+
+private fun capturedBrightnessEnablementDecision(feature: AirVisionFirmwareFeature): AirVisionFirmwareCaptureResult =
+    AirVisionFirmwareCaptureResult(
+        rawKey = feature.rawValue,
+        label = feature.label,
+        status = "captured",
+        probeValues = feature.captureProbeValues,
+        writeReportId = "0x05",
+        writeEndpoint = "out if=2 interrupt addr=0x2 max=64 int=1",
+        writePayloadSummary = "brightness byte changes only; sanitized",
+        readbackReportId = "0x85",
+        readbackEndpoint = "in if=1 interrupt addr=0x81 max=32 int=4",
+        readbackPayloadSummary = "readback brightness byte matched; sanitized",
+        checksumFramingNotes = "checksum still under review",
         visibleStateConfirmed = true,
         captureReferences =
             listOf(
