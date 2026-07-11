@@ -279,6 +279,8 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     )
                     Text(
                         "- ${captureResultsImportSummary.validatedFeatureCount} validated, " +
+                            "${captureResultsImportSummary.capturedFeatureCount} captured-review, " +
+                            "${captureResultsImportSummary.pendingFeatureCount} pending, " +
                             "${captureResultsImportSummary.writeEnabledFeatureCount} write-enabled, " +
                             "${captureResultsImportSummary.blockedFeatureCount} blocked",
                         style = mobileCallout,
@@ -293,6 +295,21 @@ fun SettingsSheet(viewModel: MainViewModel) {
                             } else {
                                 mobileTextSecondary
                             },
+                    )
+                    Text(
+                        "- Needs validation: ${captureResultsImportSummary.reviewRequiredFeatureSummary}",
+                        style = mobileCallout,
+                        color =
+                            if (captureResultsImportSummary.capturedFeatureCount > 0) {
+                                mobileWarning
+                            } else {
+                                mobileTextSecondary
+                            },
+                    )
+                    Text(
+                        "- Pending capture: ${captureResultsImportSummary.pendingFeatureSummary}",
+                        style = mobileCallout,
+                        color = mobileTextSecondary,
                     )
                     Text(
                         "- Still blocked: ${captureResultsImportSummary.blockedFeatureSummary}",

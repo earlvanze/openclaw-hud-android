@@ -139,7 +139,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("26", root.getValue("version").jsonPrimitive.content)
+        assertEquals("27", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -310,11 +310,21 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("9", firmwareCaptureResults.getValue("expectedFeatureCount").jsonPrimitive.content)
         assertEquals("false", firmwareCaptureResults.getValue("completeFeatureSet").jsonPrimitive.content)
         assertEquals("0", firmwareCaptureResults.getValue("validatedFeatureCount").jsonPrimitive.content)
+        assertEquals("0", firmwareCaptureResults.getValue("capturedFeatureCount").jsonPrimitive.content)
+        assertEquals("0", firmwareCaptureResults.getValue("pendingFeatureCount").jsonPrimitive.content)
         assertEquals("0", firmwareCaptureResults.getValue("writeEnabledFeatureCount").jsonPrimitive.content)
         assertEquals("0", firmwareCaptureResults.getValue("blockedFeatureCount").jsonPrimitive.content)
         assertEquals(
             emptyList<String>(),
             firmwareCaptureResults.getValue("writeEnabledFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            emptyList<String>(),
+            firmwareCaptureResults.getValue("reviewRequiredFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            emptyList<String>(),
+            firmwareCaptureResults.getValue("pendingFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals(
             emptyList<String>(),
@@ -679,11 +689,24 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("9", firmwareCaptureResults.getValue("expectedFeatureCount").jsonPrimitive.content)
         assertEquals("true", firmwareCaptureResults.getValue("completeFeatureSet").jsonPrimitive.content)
         assertEquals("1", firmwareCaptureResults.getValue("validatedFeatureCount").jsonPrimitive.content)
+        assertEquals("0", firmwareCaptureResults.getValue("capturedFeatureCount").jsonPrimitive.content)
+        assertEquals("8", firmwareCaptureResults.getValue("pendingFeatureCount").jsonPrimitive.content)
         assertEquals("1", firmwareCaptureResults.getValue("writeEnabledFeatureCount").jsonPrimitive.content)
         assertEquals("8", firmwareCaptureResults.getValue("blockedFeatureCount").jsonPrimitive.content)
         assertEquals(
             listOf("Brightness"),
             firmwareCaptureResults.getValue("writeEnabledFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            emptyList<String>(),
+            firmwareCaptureResults.getValue("reviewRequiredFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertTrue(
+            firmwareCaptureResults
+                .getValue("pendingFeatureLabels")
+                .jsonArray
+                .map { it.jsonPrimitive.content }
+                .contains("IPD"),
         )
         assertTrue(
             firmwareCaptureResults
@@ -707,11 +730,11 @@ class AirVisionDiagnosticsSnapshotTest {
             source.getValue("androidDiagnosticsExportSha256").jsonPrimitive.content,
         )
         assertEquals(
-            "capture results: 1 validated, 1 write-enabled, 8 blocked",
+            "capture results: 1 validated, 0 captured-review, 8 pending, 1 write-enabled, 8 blocked",
             firmwareCaptureResults.getValue("summary").jsonPrimitive.content,
         )
         assertEquals(
-            "capture results: 1 validated, 1 write-enabled, 8 blocked; host=Cyber, tool=USBPcap/Wireshark, asusApp=1.0.12.0, diagnosticsSha256=bbbbbbbbbbbb...",
+            "capture results: 1 validated, 0 captured-review, 8 pending, 1 write-enabled, 8 blocked; host=Cyber, tool=USBPcap/Wireshark, asusApp=1.0.12.0, diagnosticsSha256=bbbbbbbbbbbb...",
             firmwareCaptureResults.getValue("displayText").jsonPrimitive.content,
         )
         assertEquals("validated", brightnessSync.getValue("captureResultStatus").jsonPrimitive.content)

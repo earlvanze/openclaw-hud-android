@@ -11,17 +11,23 @@ class AirVisionFirmwareCaptureResultsTest {
 
         assertEquals(AirVisionFirmwareFeature.entries.size, summary.featureCount)
         assertEquals(0, summary.validatedFeatureCount)
+        assertEquals(0, summary.capturedFeatureCount)
+        assertEquals(AirVisionFirmwareFeature.entries.size, summary.pendingFeatureCount)
         assertEquals(0, summary.writeEnabledFeatureCount)
         assertEquals(AirVisionFirmwareFeature.entries.size, summary.blockedFeatureCount)
         assertEquals(emptyList<String>(), summary.writeEnabledFeatureLabels)
+        assertEquals(emptyList<String>(), summary.reviewRequiredFeatureLabels)
+        assertEquals(AirVisionFirmwareFeature.entries.map { it.label }, summary.pendingFeatureLabels)
         assertEquals(AirVisionFirmwareFeature.entries.map { it.label }, summary.blockedFeatureLabels)
         assertEquals("none", summary.writeEnabledFeatureSummary)
+        assertEquals("none", summary.reviewRequiredFeatureSummary)
+        assertTrue(summary.pendingFeatureSummary.contains("Brightness"))
         assertTrue(summary.blockedFeatureSummary.contains("Brightness"))
         assertEquals("Sanitized summaries only.", summary.payloadPolicy)
         assertTrue(summary.safetyPreviewText.contains("raw USB captures"))
         assertTrue(summary.safetyPreviewText.contains("token-shaped values"))
         assertEquals("host=Cyber, tool=USBPcap/Wireshark", summary.sourceSummary)
-        assertEquals("capture results: 0 validated, 0 write-enabled, 9 blocked", summary.summary)
+        assertEquals("capture results: 0 validated, 0 captured-review, 9 pending, 0 write-enabled, 9 blocked", summary.summary)
     }
 
     @Test
@@ -61,6 +67,44 @@ class AirVisionFirmwareCaptureResultsTest {
     }
 
     @Test
+    fun summarize_reportsCapturedFeaturesThatNeedValidation() {
+        val captured =
+            pendingResultsJson(
+                overridesByRawKey =
+                    mapOf(
+                        "brightness" to
+                            """
+                            "status": "captured",
+                            "writeReportId": "0x05",
+                            "writeEndpoint": "out if=2 interrupt addr=0x2 max=64 int=1",
+                            "writePayloadSummary": "brightness byte changed; sanitized",
+                            "readbackReportId": "0x85",
+                            "readbackEndpoint": "in if=1 interrupt addr=0x81 max=32 int=4",
+                            "readbackPayloadSummary": "readback observed; sanitized",
+                            "checksumFramingNotes": "checksum still under review",
+                            "visibleStateConfirmed": true,
+                            "androidEnablementDecision": "blocked",
+                            "blockerReason": "Captured but not independently validated."
+                            """.trimIndent(),
+                    ),
+            )
+
+        val summary = AirVisionFirmwareCaptureResultFiles.summarize(captured)
+
+        assertEquals(0, summary.validatedFeatureCount)
+        assertEquals(1, summary.capturedFeatureCount)
+        assertEquals(AirVisionFirmwareFeature.entries.size - 1, summary.pendingFeatureCount)
+        assertEquals(listOf("Brightness"), summary.reviewRequiredFeatureLabels)
+        assertEquals("Brightness", summary.reviewRequiredFeatureSummary)
+        assertTrue(summary.pendingFeatureLabels.contains("IPD"))
+        assertTrue(summary.pendingFeatureSummary.contains("IPD"))
+        assertEquals(
+            "capture results: 0 validated, 1 captured-review, 8 pending, 0 write-enabled, 9 blocked",
+            summary.summary,
+        )
+    }
+
+    @Test
     fun decode_acceptsValidatedWriteEvidence() {
         val validated =
             pendingResultsJson(
@@ -93,10 +137,14 @@ class AirVisionFirmwareCaptureResultsTest {
         val summary = AirVisionFirmwareCaptureResultFiles.summarize(validated)
 
         assertEquals(1, summary.validatedFeatureCount)
+        assertEquals(0, summary.capturedFeatureCount)
+        assertEquals(AirVisionFirmwareFeature.entries.size - 1, summary.pendingFeatureCount)
         assertEquals(1, summary.writeEnabledFeatureCount)
         assertEquals(AirVisionFirmwareFeature.entries.size - 1, summary.blockedFeatureCount)
         assertEquals(listOf("Brightness"), summary.writeEnabledFeatureLabels)
         assertEquals("Brightness", summary.writeEnabledFeatureSummary)
+        assertEquals("none", summary.reviewRequiredFeatureSummary)
+        assertTrue(summary.pendingFeatureSummary.contains("IPD"))
         assertTrue(summary.blockedFeatureLabels.none { it == "Brightness" })
         assertTrue(summary.blockedFeatureSummary.contains("IPD"))
     }

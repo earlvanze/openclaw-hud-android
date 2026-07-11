@@ -52,9 +52,13 @@ data class AirVisionFirmwareCaptureReference(
 data class AirVisionFirmwareCaptureResultsSummary(
     val featureCount: Int,
     val validatedFeatureCount: Int,
+    val capturedFeatureCount: Int,
+    val pendingFeatureCount: Int,
     val writeEnabledFeatureCount: Int,
     val blockedFeatureCount: Int,
     val writeEnabledFeatureLabels: List<String>,
+    val reviewRequiredFeatureLabels: List<String>,
+    val pendingFeatureLabels: List<String>,
     val blockedFeatureLabels: List<String>,
     val payloadPolicy: String,
     val sourceSummary: String,
@@ -65,6 +69,12 @@ data class AirVisionFirmwareCaptureResultsSummary(
 
     val writeEnabledFeatureSummary: String
         get() = writeEnabledFeatureLabels.joinToString().ifBlank { "none" }
+
+    val reviewRequiredFeatureSummary: String
+        get() = reviewRequiredFeatureLabels.joinToString().ifBlank { "none" }
+
+    val pendingFeatureSummary: String
+        get() = pendingFeatureLabels.joinToString().ifBlank { "none" }
 
     val blockedFeatureSummary: String
         get() = blockedFeatureLabels.joinToString().ifBlank { "none" }
@@ -101,9 +111,19 @@ object AirVisionFirmwareCaptureResultFiles {
     fun summarize(results: AirVisionFirmwareCaptureResults): AirVisionFirmwareCaptureResultsSummary {
         validate(results)
         val validated = results.features.count { it.status == "validated" }
+        val captured = results.features.count { it.status == "captured" }
+        val pending = results.features.count { it.status == "pending" }
         val writeEnabledLabels =
             results.features
                 .filter { it.androidEnablementDecision == "enable_android_write" }
+                .map { it.label }
+        val reviewRequiredLabels =
+            results.features
+                .filter { it.status == "captured" }
+                .map { it.label }
+        val pendingLabels =
+            results.features
+                .filter { it.status == "pending" }
                 .map { it.label }
         val blockedLabels =
             results.features
@@ -122,9 +142,13 @@ object AirVisionFirmwareCaptureResultFiles {
         return AirVisionFirmwareCaptureResultsSummary(
             featureCount = results.features.size,
             validatedFeatureCount = validated,
+            capturedFeatureCount = captured,
+            pendingFeatureCount = pending,
             writeEnabledFeatureCount = writeEnabledLabels.size,
             blockedFeatureCount = blockedLabels.size,
             writeEnabledFeatureLabels = writeEnabledLabels,
+            reviewRequiredFeatureLabels = reviewRequiredLabels,
+            pendingFeatureLabels = pendingLabels,
             blockedFeatureLabels = blockedLabels,
             payloadPolicy =
                 results.payloadPolicy
@@ -134,6 +158,7 @@ object AirVisionFirmwareCaptureResultFiles {
             sourceSummary = sourceSummary,
             summary =
                 "capture results: $validated validated, " +
+                    "$captured captured-review, $pending pending, " +
                     "${writeEnabledLabels.size} write-enabled, ${blockedLabels.size} blocked",
         )
     }

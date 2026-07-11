@@ -154,9 +154,13 @@ data class AirVisionDiagnosticsFirmwareCaptureResults(
     val expectedFeatureCount: Int,
     val completeFeatureSet: Boolean,
     val validatedFeatureCount: Int,
+    val capturedFeatureCount: Int,
+    val pendingFeatureCount: Int,
     val writeEnabledFeatureCount: Int,
     val blockedFeatureCount: Int,
     val writeEnabledFeatureLabels: List<String>,
+    val reviewRequiredFeatureLabels: List<String>,
+    val pendingFeatureLabels: List<String>,
     val blockedFeatureLabels: List<String>,
     val safetyPreviewText: String,
     val sourceSummary: String,
@@ -325,7 +329,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 26
+    const val VERSION = 27
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -796,9 +800,13 @@ object AirVisionDiagnosticsSnapshots {
                 expectedFeatureCount = expectedFeatureCount,
                 completeFeatureSet = false,
                 validatedFeatureCount = 0,
+                capturedFeatureCount = 0,
+                pendingFeatureCount = 0,
                 writeEnabledFeatureCount = 0,
                 blockedFeatureCount = 0,
                 writeEnabledFeatureLabels = emptyList(),
+                reviewRequiredFeatureLabels = emptyList(),
+                pendingFeatureLabels = emptyList(),
                 blockedFeatureLabels = emptyList(),
                 safetyPreviewText =
                     "No capture results imported; Android firmware writes remain blocked.",
@@ -826,9 +834,13 @@ object AirVisionDiagnosticsSnapshots {
             expectedFeatureCount = expectedFeatureCount,
             completeFeatureSet = summary.featureCount == expectedFeatureCount,
             validatedFeatureCount = summary.validatedFeatureCount,
+            capturedFeatureCount = summary.capturedFeatureCount,
+            pendingFeatureCount = summary.pendingFeatureCount,
             writeEnabledFeatureCount = summary.writeEnabledFeatureCount,
             blockedFeatureCount = summary.blockedFeatureCount,
             writeEnabledFeatureLabels = summary.writeEnabledFeatureLabels,
+            reviewRequiredFeatureLabels = summary.reviewRequiredFeatureLabels,
+            pendingFeatureLabels = summary.pendingFeatureLabels,
             blockedFeatureLabels = summary.blockedFeatureLabels,
             safetyPreviewText = summary.safetyPreviewText,
             sourceSummary = summary.sourceSummary,
