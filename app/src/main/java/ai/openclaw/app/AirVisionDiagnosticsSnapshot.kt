@@ -13,6 +13,7 @@ data class AirVisionDiagnosticsSnapshot(
     val firmwareSync: AirVisionDiagnosticsFirmwareSyncPlan,
     val firmwareUpdate: AirVisionDiagnosticsFirmwareUpdate,
     val hudRuntime: AirVisionDiagnosticsHudRuntime,
+    val profileBackup: AirVisionDiagnosticsProfileBackup,
     val fitAndClarity: AirVisionDiagnosticsFitAndClarity,
     val demoExperience: AirVisionDiagnosticsDemoExperience,
     val windowsCompatibility: AirVisionDiagnosticsWindowsCompatibility,
@@ -194,6 +195,22 @@ data class AirVisionDiagnosticsHudRuntime(
 )
 
 @Serializable
+data class AirVisionDiagnosticsProfileBackup(
+    val schema: String,
+    val currentVersion: Int,
+    val supportedVersions: List<Int>,
+    val exportedProfileCount: Int,
+    val exportedRuntimeProfileCount: Int,
+    val expectedProfileCount: Int,
+    val completeProfileSet: Boolean,
+    val includesHudControls: Boolean,
+    val includesAppPreferences: Boolean,
+    val includesRuntimeProfiles: Boolean,
+    val restoreScope: List<String>,
+    val summary: String,
+)
+
+@Serializable
 data class AirVisionDiagnosticsFitAndClarity(
     val ipdMm: Int,
     val asusDocumentedMinIpdMm: Double,
@@ -238,9 +255,10 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 19
+    const val VERSION = 20
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
+    private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
 
     private val json =
         Json {
@@ -274,6 +292,9 @@ object AirVisionDiagnosticsSnapshots {
                     100f
             ).toInt()
         val currentIpdWithinAsusRange = displaySettings.ipdMm.toDouble() in ASUS_MIN_IPD_MM..ASUS_MAX_IPD_MM
+        val expectedProfileCount = AirVisionViewMode.entries.size
+        val exportedProfileCount = expectedProfileCount
+        val exportedRuntimeProfileCount = expectedProfileCount
 
         return AirVisionDiagnosticsSnapshot(
             usb =
@@ -378,6 +399,32 @@ object AirVisionDiagnosticsSnapshots {
                     selectedDisplayPresentationEligible = hudDisplayRoute.selectedCandidate?.isPresentation,
                     usedNonDefaultDisplayFallback = hudDisplayRoute.usedNonDefaultDisplayFallback,
                     displayRouteReason = hudDisplayRoute.reason,
+                ),
+            profileBackup =
+                AirVisionDiagnosticsProfileBackup(
+                    schema = AirVisionProfileBackups.SCHEMA,
+                    currentVersion = AirVisionProfileBackups.VERSION,
+                    supportedVersions = SUPPORTED_PROFILE_BACKUP_VERSIONS,
+                    exportedProfileCount = exportedProfileCount,
+                    exportedRuntimeProfileCount = exportedRuntimeProfileCount,
+                    expectedProfileCount = expectedProfileCount,
+                    completeProfileSet = exportedProfileCount == expectedProfileCount,
+                    includesHudControls = true,
+                    includesAppPreferences = true,
+                    includesRuntimeProfiles = exportedRuntimeProfileCount == expectedProfileCount,
+                    restoreScope =
+                        listOf(
+                            "view mode profiles",
+                            "custom profile labels",
+                            "HUD gesture and hotkey controls",
+                            "startup view and display target",
+                            "speaker and captions preferences",
+                            "translation caption languages",
+                            "demo mode preference",
+                        ),
+                    summary =
+                        "profile backup v${AirVisionProfileBackups.VERSION}: $exportedProfileCount/$expectedProfileCount profiles, " +
+                            "$exportedRuntimeProfileCount runtime profiles, HUD controls and app preferences included.",
                 ),
             fitAndClarity =
                 AirVisionDiagnosticsFitAndClarity(

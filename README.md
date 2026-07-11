@@ -176,7 +176,8 @@ AirVision profile, the Android firmware-write enablement decision, the validated
 capture evidence required before a write can be enabled, per-feature capture
 targets and probe values for future ASUS HID protocol validation, the active HUD
 profile, derived HUD runtime state, Android Presentation routing state, display
-candidate counts, selected display identity, fit/clarity/text-size guidance,
+candidate counts, selected display identity, profile backup/restore readiness,
+fit/clarity/text-size guidance,
 Android demo/offline reviewer experience state, Windows-only cursor/3DoF and
 Unity mirror-window capability status, Windows-only firmware-update workflow
 status, gesture settings, and AirVision app preferences without gateway

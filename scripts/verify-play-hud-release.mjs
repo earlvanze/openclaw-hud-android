@@ -492,6 +492,9 @@ async function verifyReadmeAirVisionParity() {
     "without a live gateway or live M1",
     "Android demo/offline reviewer experience",
   ]);
+  requireIncludes("README AirVision profile backup diagnostics", readme, [
+    "profile backup/restore readiness",
+  ]);
   requireIncludes("README AirVision fit and clarity guidance", readme, [
     "53.5-74.5 mm IPD range",
     "3D-mode blur checks",

@@ -105,6 +105,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val firmwareUpdate = root.getValue("firmwareUpdate").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
         val hudRuntime = root.getValue("hudRuntime").jsonObject
+        val profileBackup = root.getValue("profileBackup").jsonObject
         val fitAndClarity = root.getValue("fitAndClarity").jsonObject
         val demoExperience = root.getValue("demoExperience").jsonObject
         val windowsCompatibility = root.getValue("windowsCompatibility").jsonObject
@@ -134,7 +135,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("19", root.getValue("version").jsonPrimitive.content)
+        assertEquals("20", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -296,6 +297,35 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", hudRuntime.getValue("selectedDisplayPresentationEligible").jsonPrimitive.content)
         assertEquals("false", hudRuntime.getValue("usedNonDefaultDisplayFallback").jsonPrimitive.content)
         assertEquals("selected_presentation_display", hudRuntime.getValue("displayRouteReason").jsonPrimitive.content)
+        assertEquals("openclaw.airvision.m1.profile-backup", profileBackup.getValue("schema").jsonPrimitive.content)
+        assertEquals("4", profileBackup.getValue("currentVersion").jsonPrimitive.content)
+        assertEquals(
+            listOf("1", "2", "3", "4"),
+            profileBackup.getValue("supportedVersions").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals("5", profileBackup.getValue("exportedProfileCount").jsonPrimitive.content)
+        assertEquals("5", profileBackup.getValue("exportedRuntimeProfileCount").jsonPrimitive.content)
+        assertEquals("5", profileBackup.getValue("expectedProfileCount").jsonPrimitive.content)
+        assertEquals("true", profileBackup.getValue("completeProfileSet").jsonPrimitive.content)
+        assertEquals("true", profileBackup.getValue("includesHudControls").jsonPrimitive.content)
+        assertEquals("true", profileBackup.getValue("includesAppPreferences").jsonPrimitive.content)
+        assertEquals("true", profileBackup.getValue("includesRuntimeProfiles").jsonPrimitive.content)
+        assertEquals(
+            listOf(
+                "view mode profiles",
+                "custom profile labels",
+                "HUD gesture and hotkey controls",
+                "startup view and display target",
+                "speaker and captions preferences",
+                "translation caption languages",
+                "demo mode preference",
+            ),
+            profileBackup.getValue("restoreScope").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            "profile backup v4: 5/5 profiles, 5 runtime profiles, HUD controls and app preferences included.",
+            profileBackup.getValue("summary").jsonPrimitive.content,
+        )
         assertEquals("67", fitAndClarity.getValue("ipdMm").jsonPrimitive.content)
         assertEquals("53.5", fitAndClarity.getValue("asusDocumentedMinIpdMm").jsonPrimitive.content)
         assertEquals("74.5", fitAndClarity.getValue("asusDocumentedMaxIpdMm").jsonPrimitive.content)
