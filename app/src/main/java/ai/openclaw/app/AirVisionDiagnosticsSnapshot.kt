@@ -13,6 +13,7 @@ data class AirVisionDiagnosticsSnapshot(
     val firmwareSync: AirVisionDiagnosticsFirmwareSyncPlan,
     val firmwareUpdate: AirVisionDiagnosticsFirmwareUpdate,
     val hudRuntime: AirVisionDiagnosticsHudRuntime,
+    val fitAndClarity: AirVisionDiagnosticsFitAndClarity,
     val demoExperience: AirVisionDiagnosticsDemoExperience,
     val windowsCompatibility: AirVisionDiagnosticsWindowsCompatibility,
     val hudControls: AirVisionBackupHudControls,
@@ -193,6 +194,23 @@ data class AirVisionDiagnosticsHudRuntime(
 )
 
 @Serializable
+data class AirVisionDiagnosticsFitAndClarity(
+    val ipdMm: Int,
+    val asusDocumentedMinIpdMm: Double,
+    val asusDocumentedMaxIpdMm: Double,
+    val currentIpdWithinAsusRange: Boolean,
+    val androidCalibrationMinIpdMm: Int,
+    val androidCalibrationMaxIpdMm: Int,
+    val virtualDistanceCm: Int,
+    val hudScalePercent: Int,
+    val effectiveHudScalePercent: Int,
+    val threeDModeEnabled: Boolean,
+    val blurChecks: List<String>,
+    val textSizeActions: List<String>,
+    val summary: String,
+)
+
+@Serializable
 data class AirVisionDiagnosticsDemoExperience(
     val androidDemoModeAvailable: Boolean,
     val androidDemoModeEnabled: Boolean,
@@ -220,7 +238,9 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 18
+    const val VERSION = 19
+    private const val ASUS_MIN_IPD_MM = 53.5
+    private const val ASUS_MAX_IPD_MM = 74.5
 
     private val json =
         Json {
@@ -245,8 +265,17 @@ object AirVisionDiagnosticsSnapshots {
         translationCaptionSourceLanguage: String = TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
         translationCaptionTargetLanguage: String = TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
         firmwareCaptureResults: AirVisionFirmwareCaptureResults? = null,
-    ): AirVisionDiagnosticsSnapshot =
-        AirVisionDiagnosticsSnapshot(
+    ): AirVisionDiagnosticsSnapshot {
+        val effectiveHudScalePercent =
+            (
+                AirVisionDisplaySettings.hudScaleForDistanceCm(displaySettings.distanceCm) *
+                    AirVisionDisplaySettings.hudScaleMultiplierForViewMode(displaySettings.viewMode) *
+                    AirVisionDisplaySettings.hudScaleMultiplierForPercent(displaySettings.hudScalePercent) *
+                    100f
+            ).toInt()
+        val currentIpdWithinAsusRange = displaySettings.ipdMm.toDouble() in ASUS_MIN_IPD_MM..ASUS_MAX_IPD_MM
+
+        return AirVisionDiagnosticsSnapshot(
             usb =
                 AirVisionDiagnosticsUsb(
                     connected = usbState.connected,
@@ -326,13 +355,7 @@ object AirVisionDiagnosticsSnapshots {
                 AirVisionDiagnosticsHudRuntime(
                     transcriptEntryCount = AirVisionDisplaySettings.hudTranscriptEntryCount(displaySettings.lightLoadModeEnabled),
                     captionEntryCount = AirVisionDisplaySettings.hudCaptionEntryCount(displaySettings.lightLoadModeEnabled),
-                    effectiveHudScalePercent =
-                        (
-                            AirVisionDisplaySettings.hudScaleForDistanceCm(displaySettings.distanceCm) *
-                                AirVisionDisplaySettings.hudScaleMultiplierForViewMode(displaySettings.viewMode) *
-                                AirVisionDisplaySettings.hudScaleMultiplierForPercent(displaySettings.hudScalePercent) *
-                                100f
-                        ).toInt(),
+                    effectiveHudScalePercent = effectiveHudScalePercent,
                     colorPreviewOverlaysEnabled =
                         AirVisionDisplaySettings.hudColorPreviewAlpha(
                             alpha = 1f,
@@ -355,6 +378,39 @@ object AirVisionDiagnosticsSnapshots {
                     selectedDisplayPresentationEligible = hudDisplayRoute.selectedCandidate?.isPresentation,
                     usedNonDefaultDisplayFallback = hudDisplayRoute.usedNonDefaultDisplayFallback,
                     displayRouteReason = hudDisplayRoute.reason,
+                ),
+            fitAndClarity =
+                AirVisionDiagnosticsFitAndClarity(
+                    ipdMm = displaySettings.ipdMm,
+                    asusDocumentedMinIpdMm = ASUS_MIN_IPD_MM,
+                    asusDocumentedMaxIpdMm = ASUS_MAX_IPD_MM,
+                    currentIpdWithinAsusRange = currentIpdWithinAsusRange,
+                    androidCalibrationMinIpdMm = AirVisionDisplaySettings.MIN_IPD_MM,
+                    androidCalibrationMaxIpdMm = AirVisionDisplaySettings.MAX_IPD_MM,
+                    virtualDistanceCm = displaySettings.distanceCm,
+                    hudScalePercent = displaySettings.hudScalePercent,
+                    effectiveHudScalePercent = effectiveHudScalePercent,
+                    threeDModeEnabled = displaySettings.threeDModeEnabled,
+                    blurChecks =
+                        listOf(
+                            "Confirm 3D Mode is off unless viewing side-by-side 3D content.",
+                            "Confirm IPD is within the ASUS documented 53.5-74.5 mm range.",
+                            "Wear the correct prescription lenses or contacts if needed.",
+                            "Adjust glasses position before changing firmware-level alignment.",
+                        ),
+                    textSizeActions =
+                        listOf(
+                            "Increase Android HUD Scale in this AirVision profile.",
+                            "Pull Virtual Distance closer to enlarge HUD text.",
+                            "Use Android or DeX display scaling outside the HUD when mirroring other apps.",
+                            "Use browser zoom for web content outside the HUD.",
+                        ),
+                    summary =
+                        if (currentIpdWithinAsusRange) {
+                            "IPD ${displaySettings.ipdMm} mm is within ASUS documented range; effective HUD scale is $effectiveHudScalePercent%."
+                        } else {
+                            "IPD ${displaySettings.ipdMm} mm is outside ASUS documented range; verify fit, prescription, and alignment before relying on software scaling."
+                        },
                 ),
             demoExperience =
                 AirVisionDiagnosticsDemoExperience(
@@ -437,6 +493,7 @@ object AirVisionDiagnosticsSnapshots {
                         ),
                 ),
         )
+    }
 
     private fun AirVisionFirmwareCapabilities.toDiagnostics(): AirVisionDiagnosticsFirmwareCapabilities =
         AirVisionDiagnosticsFirmwareCapabilities(

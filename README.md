@@ -147,6 +147,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Screen distance | Implemented as virtual HUD distance scaling. |
 | HUD scale / zoom | Implemented as a per-profile Android Presentation scale percentage layered with view-mode and virtual-distance scaling. |
 | IPD | Stored as a calibration value, defaulting to 67 mm. Adjustment is locked while Light Load Mode is enabled, matching the ASUS app. Firmware-level apply still needs the ASUS HID protocol. |
+| Fit, clarity, and text size | Implemented as derived Settings guidance and diagnostics covering the ASUS documented 53.5-74.5 mm IPD range, 3D-mode blur checks, prescription/fit reminders, Android HUD scale, virtual-distance zoom, DeX display scaling, and browser zoom fallbacks. |
 | Splendid Standard / Theater / Office / Game / Eye Care | Stored as profile settings with subtle Android HUD color previews for Theater, Office, Game, and Eye Care. True panel presets need HID support. |
 | Blue Light Filter | Implemented as Android HUD warm filtering and available only in Eye Care mode, matching the ASUS app. |
 | Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
@@ -175,11 +176,11 @@ AirVision profile, the Android firmware-write enablement decision, the validated
 capture evidence required before a write can be enabled, per-feature capture
 targets and probe values for future ASUS HID protocol validation, the active HUD
 profile, derived HUD runtime state, Android Presentation routing state, display
-candidate counts, selected display identity, Android demo/offline reviewer experience
-state, Windows-only cursor/3DoF and Unity mirror-window capability status,
-Windows-only firmware-update workflow status, gesture settings, and AirVision app
-preferences without gateway endpoints, auth tokens, chat history, or raw USB
-serial values. Settings ->
+candidate counts, selected display identity, fit/clarity/text-size guidance,
+Android demo/offline reviewer experience state, Windows-only cursor/3DoF and
+Unity mirror-window capability status, Windows-only firmware-update workflow
+status, gesture settings, and AirVision app preferences without gateway
+endpoints, auth tokens, chat history, or raw USB serial values. Settings ->
 AirVision M1 -> Firmware Link also shows a compact
 write-gate summary so firmware writes remain visibly blocked until the
 machine-checked capture results validate a feature.

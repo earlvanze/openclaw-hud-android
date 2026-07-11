@@ -105,6 +105,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val firmwareUpdate = root.getValue("firmwareUpdate").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
         val hudRuntime = root.getValue("hudRuntime").jsonObject
+        val fitAndClarity = root.getValue("fitAndClarity").jsonObject
         val demoExperience = root.getValue("demoExperience").jsonObject
         val windowsCompatibility = root.getValue("windowsCompatibility").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
@@ -133,7 +134,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("18", root.getValue("version").jsonPrimitive.content)
+        assertEquals("19", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -295,6 +296,28 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", hudRuntime.getValue("selectedDisplayPresentationEligible").jsonPrimitive.content)
         assertEquals("false", hudRuntime.getValue("usedNonDefaultDisplayFallback").jsonPrimitive.content)
         assertEquals("selected_presentation_display", hudRuntime.getValue("displayRouteReason").jsonPrimitive.content)
+        assertEquals("67", fitAndClarity.getValue("ipdMm").jsonPrimitive.content)
+        assertEquals("53.5", fitAndClarity.getValue("asusDocumentedMinIpdMm").jsonPrimitive.content)
+        assertEquals("74.5", fitAndClarity.getValue("asusDocumentedMaxIpdMm").jsonPrimitive.content)
+        assertEquals("true", fitAndClarity.getValue("currentIpdWithinAsusRange").jsonPrimitive.content)
+        assertEquals("52", fitAndClarity.getValue("androidCalibrationMinIpdMm").jsonPrimitive.content)
+        assertEquals("78", fitAndClarity.getValue("androidCalibrationMaxIpdMm").jsonPrimitive.content)
+        assertEquals("75", fitAndClarity.getValue("virtualDistanceCm").jsonPrimitive.content)
+        assertEquals("120", fitAndClarity.getValue("hudScalePercent").jsonPrimitive.content)
+        assertEquals("120", fitAndClarity.getValue("effectiveHudScalePercent").jsonPrimitive.content)
+        assertEquals("false", fitAndClarity.getValue("threeDModeEnabled").jsonPrimitive.content)
+        assertEquals(
+            "Confirm 3D Mode is off unless viewing side-by-side 3D content.",
+            fitAndClarity.getValue("blurChecks").jsonArray.first().jsonPrimitive.content,
+        )
+        assertEquals(
+            "Use browser zoom for web content outside the HUD.",
+            fitAndClarity.getValue("textSizeActions").jsonArray.last().jsonPrimitive.content,
+        )
+        assertEquals(
+            "IPD 67 mm is within ASUS documented range; effective HUD scale is 120%.",
+            fitAndClarity.getValue("summary").jsonPrimitive.content,
+        )
         assertEquals("true", demoExperience.getValue("androidDemoModeAvailable").jsonPrimitive.content)
         assertEquals("true", demoExperience.getValue("androidDemoModeEnabled").jsonPrimitive.content)
         assertEquals("false", demoExperience.getValue("windowsDemoShortcutAvailable").jsonPrimitive.content)
@@ -406,6 +429,42 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals(
             "Android maps virtual-distance adjustment to M1 brightness key events; Windows cursor-follow, center-cursor, Unity mirror window, and 3DoF remain unavailable on Android.",
             windowsCompatibility.getValue("summary").jsonPrimitive.content,
+        )
+    }
+
+    @Test
+    fun fromState_marksFitAndClarityWhenIpdOutsideAsusRange() {
+        val encoded =
+            AirVisionDiagnosticsSnapshots.encode(
+                AirVisionDiagnosticsSnapshots.fromState(
+                    usbState = AirVisionUsbState(),
+                    displaySettings =
+                        AirVisionDisplaySettings
+                            .defaultsForViewMode(AirVisionViewMode.Working)
+                            .copy(
+                                ipdMm = AirVisionDisplaySettings.MIN_IPD_MM,
+                                threeDModeEnabled = true,
+                            ),
+                    hudControls = AirVisionHudControls(),
+                    appLanguage = AirVisionAppLanguage.System,
+                    startupDestination = AirVisionStartupDestination.Hud,
+                    hudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
+                    demoModeEnabled = false,
+                ),
+            )
+
+        val fitAndClarity =
+            Json.parseToJsonElement(encoded)
+                .jsonObject
+                .getValue("fitAndClarity")
+                .jsonObject
+
+        assertEquals("52", fitAndClarity.getValue("ipdMm").jsonPrimitive.content)
+        assertEquals("false", fitAndClarity.getValue("currentIpdWithinAsusRange").jsonPrimitive.content)
+        assertEquals("true", fitAndClarity.getValue("threeDModeEnabled").jsonPrimitive.content)
+        assertEquals(
+            "IPD 52 mm is outside ASUS documented range; verify fit, prescription, and alignment before relying on software scaling.",
+            fitAndClarity.getValue("summary").jsonPrimitive.content,
         )
     }
 

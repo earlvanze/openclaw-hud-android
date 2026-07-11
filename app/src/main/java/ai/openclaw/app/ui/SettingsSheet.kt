@@ -1114,6 +1114,18 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
+                        headlineContent = { Text("Fit & Clarity", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                airVisionFitAndClarityText(airVisionDisplaySettings),
+                                style = mobileCallout,
+                            )
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
                         headlineContent = { Text("Reset Profile", style = mobileHeadline) },
                         supportingContent = {
                             Text(
@@ -2409,6 +2421,34 @@ private fun airVisionFirmwareUpdateStatusText(firmwareVersion: String?): String 
             ?: "Android-visible firmware version is pending ASUS HID protocol.",
         "Use Windows/Cyber with the M1 connected for ASUS firmware updates; Android firmware writes stay blocked.",
     ).joinToString("\n")
+
+private fun airVisionFitAndClarityText(settings: AirVisionDisplaySettings): String {
+    val effectiveHudScalePercent =
+        (
+            AirVisionDisplaySettings.hudScaleForDistanceCm(settings.distanceCm) *
+                AirVisionDisplaySettings.hudScaleMultiplierForViewMode(settings.viewMode) *
+                AirVisionDisplaySettings.hudScaleMultiplierForPercent(settings.hudScalePercent) *
+                100f
+        ).toInt()
+    val ipdStatus =
+        if (settings.ipdMm.toDouble() in 53.5..74.5) {
+            "IPD ${settings.ipdMm} mm is within ASUS documented range."
+        } else {
+            "IPD ${settings.ipdMm} mm is outside ASUS documented range; verify fit and prescription."
+        }
+    val threeDStatus =
+        if (settings.threeDModeEnabled) {
+            "If normal text looks split or blurry, turn 3D Mode off."
+        } else {
+            "3D Mode is off for normal text clarity."
+        }
+    return listOf(
+        ipdStatus,
+        threeDStatus,
+        "Effective HUD scale: $effectiveHudScalePercent%. Increase HUD Scale or pull Virtual Distance closer to enlarge text.",
+        "Use Android/DeX display scale or browser zoom for content outside the HUD.",
+    ).joinToString("\n")
+}
 
 data class InstalledApp(
     val label: String,

@@ -471,6 +471,7 @@ async function verifyReadmeAirVisionParity() {
     "| Brightness |",
     "| Screen distance |",
     "| IPD |",
+    "| Fit, clarity, and text size |",
     "| Splendid Standard / Theater / Office / Game / Eye Care |",
     "| Blue Light Filter |",
     "| Motion Sync |",
@@ -490,6 +491,11 @@ async function verifyReadmeAirVisionParity() {
   requireIncludes("README AirVision offline reviewer mode", readme, [
     "without a live gateway or live M1",
     "Android demo/offline reviewer experience",
+  ]);
+  requireIncludes("README AirVision fit and clarity guidance", readme, [
+    "53.5-74.5 mm IPD range",
+    "3D-mode blur checks",
+    "fit/clarity/text-size guidance",
   ]);
   requireIncludes("README HUD walking defaults", readme, [
     "single-tap clears the current",

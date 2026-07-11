@@ -72,6 +72,7 @@ const validReadme = [
   "| Brightness | Software HUD dimming. |",
   "| Screen distance | Virtual HUD distance scaling. |",
   "| IPD | Calibration value. |",
+  "| Fit, clarity, and text size | 53.5-74.5 mm IPD range, 3D-mode blur checks, and fit/clarity/text-size guidance. |",
   "| Splendid Standard / Theater / Office / Game / Eye Care | Stored profile setting. |",
   "| Blue Light Filter | HUD warm filtering. |",
   "| Motion Sync | Stored in the AirVision profile. |",
