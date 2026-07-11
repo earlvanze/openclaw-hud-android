@@ -12,8 +12,8 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.11-hud-release.aab`
-- SHA-256: `85465a3fccfae01c4ca5b8674b2e8277412a0097d6803c0c4b1209033de29351`
-- Version: 2026.7.11 (2026071106)
+- SHA-256: `d8a0d97c681beba5a9aa3348a4b8e0d033e52d287ffc92a4cc30fb2fa86ce583`
+- Version: 2026.7.11 (2026071107)
 
 ## Remaining Console Blockers
 
@@ -46,7 +46,7 @@ Key features:
 - AirVision HUD per-mode profile controls for view mode, custom profile labels, copy-to-custom actions, JSON backup/import with all-profile runtime preview, external-display target, placement, physical main screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, IPD calibration, Eye Care filtering, 3D Mode, gesture/hotkey behavior, brightness-key chat/brightness/distance controls, profile reset, and low-overhead preferences
 - AirVision Windows app handoff export for applying saved Android profile values and reviewing active HUD runtime scale/caption capacity, all-profile runtime summaries, runtime metadata freshness, HUD controls, Windows-only spatial/mirror capability status, and companion preferences during ASUS AirVision sessions on Cyber or another Windows host
 - AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
-- Optional USB firmware-link detection, device identity, descriptor diagnostics, readable/writable HID report-path summaries, per-feature firmware-apply readiness, per-profile runtime summaries, desired firmware-sync state, protocol-capture targets, sanitized capture-results import preview with captured-review and pending evidence labels, and firmware-update handoff provenance for AirVision M1 hardware status
+- Optional USB firmware-link detection, device identity, descriptor diagnostics, readable/writable HID report-path summaries, per-feature firmware-apply readiness, per-profile runtime summaries, desired firmware-sync state, protocol-capture targets, sanitized capture-results import preview with captured-review, pending, and source-evidence labels, and firmware-update handoff provenance for AirVision M1 hardware status
 - Agent and provider/model controls for OpenClaw sessions
 
 OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does not use AccessibilityService, overlay windows, SMS, or Call Log permissions in the Play/HUD build. Notification access is optional and is used only after the user grants Android notification-listener access.

@@ -139,7 +139,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("27", root.getValue("version").jsonPrimitive.content)
+        assertEquals("28", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -329,6 +329,17 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals(
             emptyList<String>(),
             firmwareCaptureResults.getValue("blockedFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            listOf("capture results not imported"),
+            firmwareCaptureResults
+                .getValue("sourceCompletenessWarnings")
+                .jsonArray
+                .map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            "capture results not imported",
+            firmwareCaptureResults.getValue("sourceCompletenessSummary").jsonPrimitive.content,
         )
         assertEquals(
             "No capture results imported; Android firmware writes remain blocked.",
@@ -714,6 +725,17 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonArray
                 .map { it.jsonPrimitive.content }
                 .contains("IPD"),
+        )
+        assertEquals(
+            emptyList<String>(),
+            firmwareCaptureResults
+                .getValue("sourceCompletenessWarnings")
+                .jsonArray
+                .map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            "complete",
+            firmwareCaptureResults.getValue("sourceCompletenessSummary").jsonPrimitive.content,
         )
         assertTrue(
             firmwareCaptureResults

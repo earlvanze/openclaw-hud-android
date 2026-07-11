@@ -162,6 +162,8 @@ data class AirVisionDiagnosticsFirmwareCaptureResults(
     val reviewRequiredFeatureLabels: List<String>,
     val pendingFeatureLabels: List<String>,
     val blockedFeatureLabels: List<String>,
+    val sourceCompletenessWarnings: List<String>,
+    val sourceCompletenessSummary: String,
     val safetyPreviewText: String,
     val sourceSummary: String,
     val summary: String,
@@ -329,7 +331,7 @@ data class AirVisionDiagnosticsWindowsCompatibility(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 27
+    const val VERSION = 28
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -808,6 +810,8 @@ object AirVisionDiagnosticsSnapshots {
                 reviewRequiredFeatureLabels = emptyList(),
                 pendingFeatureLabels = emptyList(),
                 blockedFeatureLabels = emptyList(),
+                sourceCompletenessWarnings = listOf("capture results not imported"),
+                sourceCompletenessSummary = "capture results not imported",
                 safetyPreviewText =
                     "No capture results imported; Android firmware writes remain blocked.",
                 sourceSummary = "source=pending",
@@ -842,6 +846,8 @@ object AirVisionDiagnosticsSnapshots {
             reviewRequiredFeatureLabels = summary.reviewRequiredFeatureLabels,
             pendingFeatureLabels = summary.pendingFeatureLabels,
             blockedFeatureLabels = summary.blockedFeatureLabels,
+            sourceCompletenessWarnings = summary.sourceCompletenessWarnings,
+            sourceCompletenessSummary = summary.sourceCompletenessSummary,
             safetyPreviewText = summary.safetyPreviewText,
             sourceSummary = summary.sourceSummary,
             summary = summary.summary,

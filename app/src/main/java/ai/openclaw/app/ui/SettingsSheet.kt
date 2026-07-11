@@ -273,6 +273,16 @@ fun SettingsSheet(viewModel: MainViewModel) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("- ${captureResultsImportSummary.displayText}", style = mobileCallout, color = mobileTextSecondary)
                     Text(
+                        "- Source evidence: ${captureResultsImportSummary.sourceCompletenessSummary}",
+                        style = mobileCallout,
+                        color =
+                            if (captureResultsImportSummary.sourceCompletenessWarnings.isEmpty()) {
+                                mobileTextSecondary
+                            } else {
+                                mobileWarning
+                            },
+                    )
+                    Text(
                         "- ${captureResultsImportSummary.featureCount} expected AirVision firmware features covered",
                         style = mobileCallout,
                         color = mobileTextSecondary,

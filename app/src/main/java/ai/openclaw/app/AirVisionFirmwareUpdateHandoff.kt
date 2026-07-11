@@ -86,6 +86,7 @@ object AirVisionFirmwareUpdateHandoffs {
                 .joinToString { it.label }
                 .ifBlank { "none" }
         add("- Imported capture results: ${summary.displayText}")
+        add("- Source evidence: ${summary.sourceCompletenessSummary}")
         add("- Schema/version: ${captureResults.schema} v${captureResults.version}")
         add("- Payload policy: ${displayValue(captureResults.payloadPolicy, "sanitized summaries only")}")
         add("- Feature coverage: ${summary.featureCount} AirVision firmware features")

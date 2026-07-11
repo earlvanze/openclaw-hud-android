@@ -60,6 +60,7 @@ data class AirVisionFirmwareCaptureResultsSummary(
     val reviewRequiredFeatureLabels: List<String>,
     val pendingFeatureLabels: List<String>,
     val blockedFeatureLabels: List<String>,
+    val sourceCompletenessWarnings: List<String>,
     val payloadPolicy: String,
     val sourceSummary: String,
     val summary: String,
@@ -78,6 +79,14 @@ data class AirVisionFirmwareCaptureResultsSummary(
 
     val blockedFeatureSummary: String
         get() = blockedFeatureLabels.joinToString().ifBlank { "none" }
+
+    val sourceCompletenessSummary: String
+        get() =
+            if (sourceCompletenessWarnings.isEmpty()) {
+                "complete"
+            } else {
+                sourceCompletenessWarnings.joinToString()
+            }
 
     val safetyPreviewText: String
         get() =
@@ -129,6 +138,15 @@ object AirVisionFirmwareCaptureResultFiles {
             results.features
                 .filter { it.androidEnablementDecision == "blocked" }
                 .map { it.label }
+        val sourceWarnings =
+            buildList {
+                if (results.source.windowsHost.isNullOrBlank()) add("missing Windows host")
+                if (results.source.captureTool.isNullOrBlank()) add("missing capture tool")
+                if (results.source.asusAirVisionAppVersion.isNullOrBlank()) add("missing ASUS app version")
+                if (results.source.androidDiagnosticsExportSha256.isNullOrBlank()) {
+                    add("missing Android diagnostics SHA-256")
+                }
+            }
         val sourceSummary =
             listOfNotNull(
                 results.source.windowsHost?.trim()?.takeIf(String::isNotEmpty)?.let { "host=$it" },
@@ -150,6 +168,7 @@ object AirVisionFirmwareCaptureResultFiles {
             reviewRequiredFeatureLabels = reviewRequiredLabels,
             pendingFeatureLabels = pendingLabels,
             blockedFeatureLabels = blockedLabels,
+            sourceCompletenessWarnings = sourceWarnings,
             payloadPolicy =
                 results.payloadPolicy
                     ?.trim()

@@ -23,6 +23,14 @@ class AirVisionFirmwareCaptureResultsTest {
         assertEquals("none", summary.reviewRequiredFeatureSummary)
         assertTrue(summary.pendingFeatureSummary.contains("Brightness"))
         assertTrue(summary.blockedFeatureSummary.contains("Brightness"))
+        assertEquals(
+            listOf("missing ASUS app version", "missing Android diagnostics SHA-256"),
+            summary.sourceCompletenessWarnings,
+        )
+        assertEquals(
+            "missing ASUS app version, missing Android diagnostics SHA-256",
+            summary.sourceCompletenessSummary,
+        )
         assertEquals("Sanitized summaries only.", summary.payloadPolicy)
         assertTrue(summary.safetyPreviewText.contains("raw USB captures"))
         assertTrue(summary.safetyPreviewText.contains("token-shaped values"))
@@ -101,6 +109,28 @@ class AirVisionFirmwareCaptureResultsTest {
         assertEquals(
             "capture results: 0 validated, 1 captured-review, 8 pending, 0 write-enabled, 9 blocked",
             summary.summary,
+        )
+    }
+
+    @Test
+    fun summarize_reportsCompleteSourceEvidenceWhenAllSourceFieldsArePresent() {
+        val summary =
+            AirVisionFirmwareCaptureResultFiles.summarize(
+                pendingResultsJson(
+                    sourceOverride =
+                        """
+                        "asusAirVisionAppVersion": "1.0.12.0",
+                        "androidDiagnosticsExportSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                        "notes": "test"
+                        """.trimIndent(),
+                ),
+            )
+
+        assertEquals(emptyList<String>(), summary.sourceCompletenessWarnings)
+        assertEquals("complete", summary.sourceCompletenessSummary)
+        assertEquals(
+            "host=Cyber, tool=USBPcap/Wireshark, asusApp=1.0.12.0, diagnosticsSha256=bbbbbbbbbbbb...",
+            summary.sourceSummary,
         )
     }
 
@@ -291,8 +321,6 @@ class AirVisionFirmwareCaptureResultsTest {
           "source": {
             "windowsHost": "Cyber",
             "captureTool": "USBPcap/Wireshark",
-            "asusAirVisionAppVersion": null,
-            "androidDiagnosticsExportSha256": null,
             ${sourceOverride ?: "\"notes\": \"test\""}
           },
           "features": [

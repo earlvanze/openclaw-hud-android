@@ -185,7 +185,8 @@ profile, derived HUD runtime state, Android Presentation routing state, display
 candidate counts, selected display identity, profile backup/restore readiness,
 imported firmware-capture-results provenance, safety counts, protocol-ready
 feature labels, captured-review and pending evidence labels, blocked feature
-labels/reasons, payload-safety preview text, and the live M1 write-test checklist,
+labels/reasons, source-evidence completeness warnings, payload-safety preview
+text, and the live M1 write-test checklist,
 all saved AirVision profile values, runtime profile metadata, compact per-profile
 runtime summaries,
 fit/clarity/text-size guidance,
@@ -232,8 +233,9 @@ The Android app can import the same sanitized capture-results JSON from
 Settings -> AirVision M1 -> Firmware Capture Results. Import validates the
 schema and safety evidence locally, previews validated/captured-review/pending/
 write-enabled/blocked feature counts, write-enabled, needs-validation, pending,
-and blocked feature labels, sanitized source context, and the payload-safety
-policy before applying, records a compact summary in Settings, and persists the parsed result for Settings and
+and blocked feature labels, sanitized source context, source-evidence
+completeness warnings, and the payload-safety policy before applying, records a
+compact summary in Settings, and persists the parsed result for Settings and
 diagnostics. The imported evidence can mark a feature's capture result and
 Android enablement decision as validated, but firmware writes remain disabled
 until an Android HID write path is implemented and live-tested with the M1. The
