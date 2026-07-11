@@ -146,9 +146,11 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("## Android Companion Parity States"))
         assertTrue(
             markdown.contains(
-                "- AirVision companion parity: 3 offline-reviewable, 1 M1-optional, 1 firmware-gated, 2 Windows-only",
+                "- AirVision companion parity: 7 offline-reviewable, 6 M1-optional, 3 firmware-gated, 2 Windows-only",
             ),
         )
+        assertTrue(markdown.contains("- Brightness: m1_optional; Android applies software HUD dimming offline"))
+        assertTrue(markdown.contains("- Splendid, Eye Care, and blue-light filter: firmware_gated"))
         assertTrue(markdown.contains("- Captions and translation: reviewable_offline; Native captions preference is on"))
         assertTrue(markdown.contains("- Firmware apply and update: firmware_gated; Android firmware writes"))
         assertTrue(markdown.contains("## Android App Preferences"))

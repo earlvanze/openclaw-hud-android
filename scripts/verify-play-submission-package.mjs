@@ -656,6 +656,7 @@ function verifyAppContentShape(appContent) {
     ],
   );
   requireIncludes("AirVision companion review notes", appContent.reviewEvidence?.airVisionCompanionReviewNotes ?? "", [
+    "18-feature AirVision companion HUD catalog",
     "without a live gateway or live M1",
     "Cast and Display",
     "Windows app handoff",
@@ -680,9 +681,22 @@ function verifyAirVisionCompanionCapabilityStates(states) {
   requireArrayIncludes("AirVision companion capability labels", labels, [
     "HUD presentation and DeX display targeting",
     "Windows-like profile controls",
+    "Brightness",
+    "Screen distance and HUD scale",
+    "IPD, fit, clarity, and text size",
+    "Splendid, Eye Care, and blue-light filter",
+    "Motion Sync, 3D Mode, and Light Load Mode",
+    "Gesture and hotkey settings",
     "USB firmware-link diagnostics",
     "Firmware apply and update",
     "Samsung/native captions and OpenClaw translation fallback",
+    "App preferences and profile backup",
+    "Windows app profile handoff",
+    "Device information",
+    "Identify marker",
+    "Multi-screen desktop layouts",
+    "Windows-only spatial controls",
+    "Unity mirror window / projected glasses view",
   ]);
   const stateNames = states.map((entry) => entry.state);
   requireArrayIncludes("AirVision companion capability state names", stateNames, [

@@ -565,34 +565,45 @@ class AirVisionDiagnosticsSnapshotTest {
             "ASUS documents 3DoF support as Windows laptop only; phones do not support it.",
             windowsCompatibility.getValue("limitations").jsonArray[3].jsonPrimitive.content,
         )
-        assertEquals("3", companionParity.getValue("reviewableOfflineCount").jsonPrimitive.content)
-        assertEquals("1", companionParity.getValue("m1OptionalCount").jsonPrimitive.content)
-        assertEquals("1", companionParity.getValue("firmwareGatedCount").jsonPrimitive.content)
+        assertEquals("7", companionParity.getValue("reviewableOfflineCount").jsonPrimitive.content)
+        assertEquals("6", companionParity.getValue("m1OptionalCount").jsonPrimitive.content)
+        assertEquals("3", companionParity.getValue("firmwareGatedCount").jsonPrimitive.content)
         assertEquals("2", companionParity.getValue("windowsOnlyCount").jsonPrimitive.content)
-        assertEquals("2", companionParity.getValue("liveM1RequiredCount").jsonPrimitive.content)
-        assertEquals("7", companionParity.getValue("playReviewableOfflineCount").jsonPrimitive.content)
+        assertEquals("9", companionParity.getValue("liveM1RequiredCount").jsonPrimitive.content)
+        assertEquals("18", companionParity.getValue("playReviewableOfflineCount").jsonPrimitive.content)
         assertEquals(
-            "AirVision companion parity: 3 offline-reviewable, 1 M1-optional, 1 firmware-gated, 2 Windows-only",
+            "AirVision companion parity: 7 offline-reviewable, 6 M1-optional, 3 firmware-gated, 2 Windows-only",
             companionParity.getValue("summary").jsonPrimitive.content,
         )
         val companionParityEntries = companionParity.getValue("entries").jsonArray
-        assertEquals(7, companionParityEntries.size)
+        assertEquals(18, companionParityEntries.size)
         val captionsParity =
             companionParityEntries
                 .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Captions and translation" }
                 .jsonObject
+        val brightnessParity =
+            companionParityEntries
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Brightness" }
+                .jsonObject
         val firmwareParity =
             companionParityEntries
                 .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Firmware apply and update" }
+                .jsonObject
+        val spatialParity =
+            companionParityEntries
+                .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Cursor Follow, Center Cursor, and 3DoF" }
                 .jsonObject
         assertEquals("reviewable_offline", captionsParity.getValue("androidState").jsonPrimitive.content)
         assertEquals(
             "Native captions preference is on; OpenClaw translation captions are Portuguese -> Japanese.",
             captionsParity.getValue("evidence").jsonPrimitive.content,
         )
+        assertEquals("m1_optional", brightnessParity.getValue("androidState").jsonPrimitive.content)
+        assertEquals("true", brightnessParity.getValue("liveM1Required").jsonPrimitive.content)
         assertEquals("firmware_gated", firmwareParity.getValue("androidState").jsonPrimitive.content)
         assertEquals("true", firmwareParity.getValue("liveM1Required").jsonPrimitive.content)
         assertEquals("true", firmwareParity.getValue("firmwareProtocolRequired").jsonPrimitive.content)
+        assertEquals("windows_only", spatialParity.getValue("androidState").jsonPrimitive.content)
         assertEquals("es", appPreferences.getValue("language").jsonPrimitive.content)
         assertEquals("false", appPreferences.getValue("speakerEnabled").jsonPrimitive.content)
         assertEquals("true", appPreferences.getValue("nativeCaptionsEnabled").jsonPrimitive.content)

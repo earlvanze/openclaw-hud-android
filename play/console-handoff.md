@@ -12,8 +12,8 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.11-hud-release.aab`
-- SHA-256: `3b049a0f2a49f0b96698c491a48ec7a9ab44e7887a8b40afb3e9e254ad0a4c52`
-- Version: 2026.7.11 (2026071109)
+- SHA-256: `7244264610de2e2a1eee0489d377b85b7845bc32f4ad49b71d5fb53848712073`
+- Version: 2026.7.11 (2026071110)
 
 ## Remaining Console Blockers
 
@@ -44,7 +44,7 @@ Key features:
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - Speaker routing support for AirVision M1 audio devices
 - AirVision HUD per-mode profile controls for view mode, custom profile labels, copy-to-custom actions, JSON backup/import with all-profile runtime preview, external-display target, placement, physical main screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, IPD calibration, Eye Care filtering, 3D Mode, gesture/hotkey behavior, brightness-key chat/brightness/distance controls, profile reset, and low-overhead preferences
-- AirVision Windows app handoff export for applying saved Android profile values and reviewing active HUD runtime scale/caption capacity, all-profile runtime summaries, runtime metadata freshness, HUD controls, companion parity states, Windows-only spatial/mirror capability status, and companion preferences during ASUS AirVision sessions on Cyber or another Windows host
+- AirVision Windows app handoff export for applying saved Android profile values and reviewing active HUD runtime scale/caption capacity, all-profile runtime summaries, runtime metadata freshness, HUD controls, 18-feature companion parity states, Windows-only spatial/mirror capability status, and companion preferences during ASUS AirVision sessions on Cyber or another Windows host
 - AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
 - Optional USB firmware-link detection, device identity, descriptor diagnostics, readable/writable HID report-path summaries, per-feature firmware-apply readiness, per-profile runtime summaries, desired firmware-sync state, protocol-capture targets, sanitized capture-results import preview with captured-review, pending, and source-evidence labels, and firmware-update handoff provenance for AirVision M1 hardware status
 - Agent and provider/model controls for OpenClaw sessions
@@ -54,9 +54,9 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 AirVision M1 HUD release candidate:
-- Minimal green/black Samsung DeX presentation.
-- Compact chat, notifications, voice controls, and captions.
-- Per-mode M1 tuning profiles with backup/import, brightness, distance, HUD scale, IPD, Eye Care, gestures, and hotkeys.
+- Green/black Samsung DeX HUD.
+- Compact chat, notifications, voice, and captions.
+- 18-feature AirVision parity catalog for profiles, brightness, IPD, gestures, firmware gates, Windows-only handoff, and display routing.
 - USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
 - In-app privacy policy under App Preferences.
 - Play HUD build removes SMS and Call Log permissions.
@@ -98,6 +98,24 @@ Capability states:
 - Windows-like profile controls: Reviewable offline
   Review path: Settings > AirVision M1 profile controls, profile backup/import, and Windows App Handoff export.
   Evidence: Saved Android values, per-profile runtime summaries, and export text are generated without raw USB serials.
+- Brightness: M1 optional for review
+  Review path: Settings > AirVision M1 profile brightness, HUD dimming preview, and M1 touch-bar hardware brightness.
+  Evidence: Software HUD dimming is reviewable offline; live M1 testing proves panel brightness behavior and firmware touch-bar passthrough.
+- Screen distance and HUD scale: Reviewable offline
+  Review path: Settings > AirVision M1 profile distance and HUD scale controls.
+  Evidence: Virtual HUD distance scaling, per-profile HUD scale, and runtime summaries are generated without a live M1.
+- IPD, fit, clarity, and text size: M1 optional for review
+  Review path: Settings > AirVision M1 IPD, Fit & Clarity guidance, and diagnostics export.
+  Evidence: IPD calibration defaults to 67 mm and fit guidance is reviewable offline; physical focus proof needs the live M1.
+- Splendid, Eye Care, and blue-light filter: Firmware-gated
+  Review path: Settings > AirVision M1 Splendid and Eye Care profile controls.
+  Evidence: Android previews HUD color/warmth states offline; true panel preset writes need ASUS HID protocol evidence.
+- Motion Sync, 3D Mode, and Light Load Mode: Firmware-gated
+  Review path: Settings > AirVision M1 Motion Sync, 3D Mode, Light Load Mode, and runtime diagnostics.
+  Evidence: Light Load trims Android HUD work offline; Motion Sync and panel 3D writes remain firmware-protocol gated.
+- Gesture and hotkey settings: M1 optional for review
+  Review path: Settings > AirVision M1 > Gesture & Hotkey Settings.
+  Evidence: Single-tap, double-tap, swipe, brightness-key, and media-key mappings are stored offline; live M1 proof is needed for firmware-delivered events.
 - USB firmware-link diagnostics: M1 optional for review
   Review path: Settings > AirVision M1 > Firmware Link and Diagnostics Export.
   Evidence: Offline demo shows blocked/write-readiness states; connected M1 adds live descriptor and HID report-path context.
@@ -107,8 +125,29 @@ Capability states:
 - Samsung/native captions and OpenClaw translation fallback: Reviewable offline
   Review path: Voice tab caption controls and Samsung/native caption launcher.
   Evidence: Native captioning is delegated to Android/Samsung UI; OpenClaw fallback defaults to sage-router fast profile with thinking off.
+- App preferences and profile backup: Reviewable offline
+  Review path: Settings > AirVision M1 > App Preferences and Profile Backup.
+  Evidence: Startup view, display target, language, speaker, native captions, translation languages, demo mode, privacy/support links, and JSON backup/import are reviewable offline.
+- Windows app profile handoff: Reviewable offline
+  Review path: Settings > AirVision M1 > Windows App Handoff > Export.
+  Evidence: The Android app exports Cyber/Windows ASUS AirVision apply steps, runtime summaries, gesture mappings, and privacy reminders without raw USB serials.
+- Device information: M1 optional for review
+  Review path: Settings > AirVision M1 > Firmware Link and diagnostics export.
+  Evidence: USB manufacturer/product, vendor/product ID, descriptor version, and interface details populate when the M1 is connected.
+- Identify marker: Reviewable offline
+  Review path: Settings > AirVision M1 > Identify or Demo Mode HUD presentation.
+  Evidence: Android can show a temporary HUD 1 marker on the Presentation display for reviewer and external-display identification.
+- Multi-screen desktop layouts: M1 optional for review
+  Review path: Settings > AirVision M1 > Display Target, presentation routing diagnostics, and DeX launch script.
+  Evidence: External-display targeting and physical main-screen visibility are configurable offline; final DeX/M1 topology proof needs a live external display.
+- Windows-only spatial controls: Windows-only handoff
+  Review path: Settings > AirVision M1 > Windows-only spatial controls and Windows App Handoff export.
+  Evidence: Cursor Follow, Center Cursor, and 3DoF are reported as Windows-only; Android provides distance hotkey fallback state only.
+- Unity mirror window / projected glasses view: Windows-only handoff
+  Review path: Settings > AirVision M1 > Cast, Display, and Windows App Handoff mirror fallback guidance.
+  Evidence: The ASUS Unity mirror window and Ctrl+Alt+E shortcut stay Windows-only; Android provides Cast, Display, and DeX sharing fallback guidance.
 
-Demo Mode lets reviewers verify the AirVision companion HUD without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
+Demo Mode lets reviewers verify the 18-feature AirVision companion HUD catalog without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
 
 Reviewer evidence sources:
 

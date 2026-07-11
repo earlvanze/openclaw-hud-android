@@ -157,7 +157,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Cursor Follow / Center Cursor / 3DoF | Surfaced as Windows-only capability status in Android settings, diagnostics, and the Windows app handoff. Android can map the AirVision distance hotkey concept to M1 brightness-key events, but it does not claim Windows virtual-cursor or 3DoF control. |
 | Unity mirror window / projected glasses view | Surfaced as Windows-only capability status in Android settings, diagnostics, and the Windows app handoff. Android cannot open the ASUS Unity mirror window or `Ctrl+Alt+E` shortcut, but Settings and handoff guidance provide Cast and Display shortcuts for Android/DeX screen-sharing fallback outside the HUD. |
 | Demo Mode / Tutorials | Implemented as Android Demo Mode for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway or live M1. The hidden ASUS Windows tutorial shortcut remains Windows-only and is reported separately in diagnostics. |
-| Companion parity states | Implemented as a canonical app/export catalog that marks AirVision features as offline-reviewable, M1-optional, firmware-gated, or Windows-only. Settings, diagnostics, and Windows App Handoff render from this catalog so Play review evidence, Android UI claims, and Windows handoff guidance stay aligned. |
+| Companion parity states | Implemented as an 18-feature canonical app/export catalog that marks AirVision features as offline-reviewable, M1-optional, firmware-gated, or Windows-only. Settings, diagnostics, Windows App Handoff, and Play review evidence render from this catalog so Android UI claims and Windows handoff guidance stay aligned. |
 | App Preferences | Implemented with startup view, AirVision companion language preference with Android locale application, speaker state, Samsung/native captions preference, OpenClaw translation caption source/target languages, demo mode, JSON profile backup/import, software version/build display, EULA note, in-app privacy policy, official FAQ/tutorial, product registration, and ASUS support links. |
 | Windows app profile handoff | Implemented as an exportable Markdown handoff containing the active profile, derived active-runtime HUD scale/transcript/caption and overlay/dimming state, runtime-metadata freshness, all saved profile values with compact runtime summaries, Android HUD gesture/hotkey mappings, Windows-only spatial/mirror capability status, companion app preferences, ASUS Windows app apply steps for Cyber sessions, Android USB context, and privacy reminders that omit raw USB serial values. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, device class/subclass/protocol, interface count, serial availability, USB descriptor version when Android exposes it, and firmware protocol status. Actual ASUS HID firmware version still needs vendor protocol support. |
@@ -193,7 +193,7 @@ runtime summaries,
 fit/clarity/text-size guidance,
 Android demo/offline reviewer experience state, Windows-only cursor/3DoF and
 Unity mirror-window capability status, Android Cast/Display mirror fallback
-actions, companion parity-state counts for offline-reviewable, M1-optional,
+actions, 18-feature companion parity-state counts for offline-reviewable, M1-optional,
 firmware-gated, and Windows-only features, Windows-only firmware-update workflow
 status, gesture settings, and AirVision app preferences without gateway
 endpoints, auth tokens, chat history, or raw USB serial values. Settings ->
@@ -506,7 +506,7 @@ AAB exists in `build/release-bundles/`, it also verifies that the console
 checklist names the latest signed bundle and SHA-256. It also checks the
 structured AirVision Companion Review Evidence used in `play/console-handoff.md`
 so offline reviewer steps for Demo Mode, Cast/Display mirror fallback, firmware
-update handoff export, diagnostics export, and companion parity states stay
+update handoff export, diagnostics export, and 18-feature companion parity states stay
 present. It is a drift guard for Play Console form prep; the final hosted privacy-policy URL, screenshots,
 tester access, and any reviewer setup codes still belong in Play Console.
 
