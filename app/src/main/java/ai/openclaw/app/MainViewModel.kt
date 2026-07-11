@@ -554,6 +554,9 @@ class MainViewModel(
             ),
         )
 
+    fun previewAirVisionFirmwareCaptureResults(raw: String): AirVisionFirmwareCaptureResultsSummary =
+        AirVisionFirmwareCaptureResultFiles.summarize(raw)
+
     fun importAirVisionFirmwareCaptureResults(raw: String): Boolean =
         runCatching {
             prefs.importAirVisionFirmwareCaptureResults(raw)

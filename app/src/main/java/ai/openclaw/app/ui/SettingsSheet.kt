@@ -2,6 +2,7 @@ package ai.openclaw.app.ui
 
 import ai.openclaw.app.AirVisionAppLanguage
 import ai.openclaw.app.AirVisionDisplaySettings
+import ai.openclaw.app.AirVisionFirmwareCaptureResultsSummary
 import ai.openclaw.app.AirVisionFirmwareSyncPlans
 import ai.openclaw.app.AirVisionHudDisplayTarget
 import ai.openclaw.app.AirVisionHudDoubleTapAction
@@ -195,6 +196,10 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val appBuild = remember { BuildConfig.VERSION_CODE.toString() }
     var showAirVisionLegalNote by remember { mutableStateOf(false) }
     var showPrivacyPolicy by remember { mutableStateOf(false) }
+    var pendingAirVisionCaptureResultsImportRaw by remember { mutableStateOf<String?>(null) }
+    var pendingAirVisionCaptureResultsImportSummary by remember {
+        mutableStateOf<AirVisionFirmwareCaptureResultsSummary?>(null)
+    }
     var pendingAirVisionProfileImportRaw by remember { mutableStateOf<String?>(null) }
     var pendingAirVisionProfileImportPreview by remember { mutableStateOf<AirVisionProfileBackupPreview?>(null) }
     var assistantRoleAvailable by remember(context) { mutableStateOf(isAssistantRoleAvailable(context)) }
@@ -247,6 +252,72 @@ fun SettingsSheet(viewModel: MainViewModel) {
             confirmButton = {
                 TextButton(onClick = { showPrivacyPolicy = false }) {
                     Text("Close", color = mobileAccent)
+                }
+            },
+        )
+    }
+
+    val captureResultsImportSummary = pendingAirVisionCaptureResultsImportSummary
+    val captureResultsImportRaw = pendingAirVisionCaptureResultsImportRaw
+    if (captureResultsImportSummary != null && captureResultsImportRaw != null) {
+        AlertDialog(
+            onDismissRequest = {
+                pendingAirVisionCaptureResultsImportSummary = null
+                pendingAirVisionCaptureResultsImportRaw = null
+            },
+            containerColor = mobileCardSurface,
+            title = {
+                Text("Apply AirVision firmware capture results?", style = mobileTitle2, color = mobileText)
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("- ${captureResultsImportSummary.displayText}", style = mobileCallout, color = mobileTextSecondary)
+                    Text(
+                        "- ${captureResultsImportSummary.featureCount} expected AirVision firmware features covered",
+                        style = mobileCallout,
+                        color = mobileTextSecondary,
+                    )
+                    Text(
+                        "- ${captureResultsImportSummary.validatedFeatureCount} validated, " +
+                            "${captureResultsImportSummary.writeEnabledFeatureCount} write-enabled, " +
+                            "${captureResultsImportSummary.blockedFeatureCount} blocked",
+                        style = mobileCallout,
+                        color = mobileTextSecondary,
+                    )
+                    Text(
+                        "- Sanitized summaries only; raw USB captures, raw serials, and token-shaped values remain rejected",
+                        style = mobileCallout,
+                        color = mobileWarning,
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val imported = viewModel.importAirVisionFirmwareCaptureResults(captureResultsImportRaw)
+                        Toast
+                            .makeText(
+                                context,
+                                if (imported) "Validated AirVision capture results" else "AirVision capture results rejected",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        pendingAirVisionCaptureResultsImportSummary = null
+                        pendingAirVisionCaptureResultsImportRaw = null
+                    },
+                    colors = settingsPrimaryButtonColors(),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text("Apply", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        pendingAirVisionCaptureResultsImportSummary = null
+                        pendingAirVisionCaptureResultsImportRaw = null
+                    },
+                ) {
+                    Text("Cancel", color = mobileAccent)
                 }
             },
         )
@@ -561,23 +632,19 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionFirmwareCaptureResultsImportLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
-            val imported =
-                runCatching {
-                    context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { reader ->
-                        reader.readText()
-                    } ?: error("Unable to open firmware capture results file.")
-                }.map { raw ->
-                    viewModel.importAirVisionFirmwareCaptureResults(raw)
-                }.getOrElse { error ->
-                    viewModel.showHudTransientMessage("AirVision capture results import failed: ${error.message.orEmpty()}")
-                    false
-                }
-            Toast
-                .makeText(
-                    context,
-                    if (imported) "Validated AirVision capture results" else "AirVision capture results rejected",
-                    Toast.LENGTH_SHORT,
-                ).show()
+            runCatching {
+                context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { reader ->
+                    reader.readText()
+                } ?: error("Unable to open firmware capture results file.")
+            }.map { raw ->
+                val summary = viewModel.previewAirVisionFirmwareCaptureResults(raw)
+                pendingAirVisionCaptureResultsImportRaw = raw
+                pendingAirVisionCaptureResultsImportSummary = summary
+                viewModel.showHudTransientMessage("Validated AirVision capture results")
+            }.getOrElse { error ->
+                viewModel.showHudTransientMessage("AirVision capture results import failed: ${error.message.orEmpty()}")
+                Toast.makeText(context, "AirVision capture results rejected", Toast.LENGTH_SHORT).show()
+            }
         }
 
     val airVisionProfileImportLauncher =
