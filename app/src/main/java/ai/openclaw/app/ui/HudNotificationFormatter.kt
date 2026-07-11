@@ -1,5 +1,6 @@
 package ai.openclaw.app.ui
 
+import ai.openclaw.app.isOpenClawAppPackage
 import ai.openclaw.app.node.DeviceNotificationEntry
 
 internal enum class HudNotificationKind {
@@ -35,7 +36,7 @@ internal fun selectHudNotification(notifications: List<DeviceNotificationEntry>)
         notifications
             .asSequence()
             .filterNot { it.packageName.isBlank() }
-            .filterNot { it.packageName.startsWith("ai.openclaw.app") }
+            .filterNot { isOpenClawAppPackage(it.packageName) }
             .sortedWith(
                 compareByDescending<DeviceNotificationEntry> { hudNotificationPriority(it) }
                     .thenByDescending { it.postTimeMs },

@@ -69,6 +69,13 @@ class HudNotificationFormatterTest {
                 listOf(
                     entry(
                         packageName = "ai.openclaw.app.hud",
+                        title = "OpenClaw HUD · Connected",
+                        text = "Connected",
+                        postTimeMs = 40,
+                        isOngoing = true,
+                    ),
+                    entry(
+                        packageName = "ai.openclaw.app",
                         title = "OpenClaw Node · Connected",
                         text = "Connected",
                         postTimeMs = 30,

@@ -4,6 +4,7 @@ import ai.openclaw.app.NotificationBurstLimiter
 import ai.openclaw.app.SecurePrefs
 import ai.openclaw.app.allowsPackage
 import ai.openclaw.app.isWithinQuietHours
+import ai.openclaw.app.isOpenClawAppPackage
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.RemoteInput
@@ -367,7 +368,7 @@ class DeviceNotificationListenerService : NotificationListenerService() {
         private fun rememberRecentPackage(packageName: String?) {
             val service = activeService ?: return
             val normalized = packageName?.trim().orEmpty()
-            if (normalized.isEmpty() || normalized == service.packageName) return
+            if (normalized.isEmpty() || isOpenClawAppPackage(normalized) || normalized == service.packageName) return
             migrateLegacyRecentPackagesIfNeeded(service.applicationContext)
             val prefs = recentPackagesPrefs(service.applicationContext)
             val existing =

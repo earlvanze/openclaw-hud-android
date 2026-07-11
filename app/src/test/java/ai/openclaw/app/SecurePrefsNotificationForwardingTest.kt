@@ -128,4 +128,24 @@ class SecurePrefsNotificationForwardingTest {
         assertFalse(policy.enabled)
         assertEquals(NotificationPackageFilterMode.Blocklist, policy.mode)
     }
+
+    @Test
+    fun notificationForwarding_neverAllowsOpenClawSiblingPackages() {
+        val policy =
+            NotificationForwardingPolicy(
+                enabled = true,
+                mode = NotificationPackageFilterMode.Allowlist,
+                packages = setOf("ai.openclaw.app", "ai.openclaw.app.hud", "com.google.android.apps.maps"),
+                quietHoursEnabled = false,
+                quietStart = "22:00",
+                quietEnd = "06:00",
+                maxEventsPerMinute = 30,
+                sessionKey = null,
+            )
+
+        assertFalse(policy.allowsPackage("ai.openclaw.app"))
+        assertFalse(policy.allowsPackage("ai.openclaw.app.hud"))
+        assertFalse(policy.allowsPackage(" ai.openclaw.app.debug "))
+        assertTrue(policy.allowsPackage("com.google.android.apps.maps"))
+    }
 }

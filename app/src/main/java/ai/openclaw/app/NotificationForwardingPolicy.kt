@@ -32,10 +32,18 @@ internal fun NotificationForwardingPolicy.allowsPackage(packageName: String): Bo
     if (normalized.isEmpty()) {
         return false
     }
+    if (isOpenClawAppPackage(normalized)) {
+        return false
+    }
     return when (mode) {
         NotificationPackageFilterMode.Allowlist -> packages.contains(normalized)
         NotificationPackageFilterMode.Blocklist -> !packages.contains(normalized)
     }
+}
+
+internal fun isOpenClawAppPackage(packageName: String): Boolean {
+    val normalized = packageName.trim()
+    return normalized == "ai.openclaw.app" || normalized.startsWith("ai.openclaw.app.")
 }
 
 internal fun NotificationForwardingPolicy.isWithinQuietHours(
