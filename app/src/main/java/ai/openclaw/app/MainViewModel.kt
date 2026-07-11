@@ -516,6 +516,7 @@ class MainViewModel(
         AirVisionFirmwareCapturePlans.renderMarkdown(
             usbState = airVisionUsbState.value,
             displaySettings = airVisionDisplaySettings.value,
+            captureResults = airVisionFirmwareCaptureResults.value,
         )
 
     fun exportAirVisionDiagnosticsSnapshot(): String =

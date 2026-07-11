@@ -4,10 +4,11 @@ object AirVisionFirmwareCapturePlans {
     fun renderMarkdown(
         usbState: AirVisionUsbState,
         displaySettings: AirVisionDisplaySettings = AirVisionDisplaySettings(),
+        captureResults: AirVisionFirmwareCaptureResults? = null,
     ): String {
         val capabilities = usbState.firmwareCapabilities
         val targets = capabilities.captureTargets.associateBy { it.feature }
-        val syncPlan = AirVisionFirmwareSyncPlans.fromSettings(displaySettings, capabilities)
+        val syncPlan = AirVisionFirmwareSyncPlans.fromSettings(displaySettings, capabilities, captureResults)
         val syncItems = syncPlan.items.associateBy { it.feature }
         val lines =
             buildList {
@@ -39,6 +40,18 @@ object AirVisionFirmwareCapturePlans {
                 add("## Desired Firmware Sync")
                 add("")
                 add(syncPlan.summary)
+                add("")
+                add("## Firmware Write Gate")
+                add("")
+                add("- Status: `${syncPlan.writeGate.status}`")
+                add("- Summary: ${syncPlan.writeGate.summary}")
+                add("- Firmware writes enabled: ${yesNo(syncPlan.writeGate.firmwareWritesEnabled)}")
+                add("- Validated captures: ${syncPlan.writeGate.validatedCaptureCount}/${syncPlan.items.size}")
+                add("- Protocol-ready captures: ${syncPlan.writeGate.writeEnabledCaptureCount}/${syncPlan.items.size}")
+                add("- Blocked features: ${syncPlan.writeGate.blockedFeatureCount}")
+                add("- Live M1 required before writes: ${yesNo(syncPlan.writeGate.liveM1Required)}")
+                add("- Explicit user confirmation required: ${yesNo(syncPlan.writeGate.explicitUserConfirmationRequired)}")
+                add("- Next step: ${syncPlan.writeGate.nextStep}")
                 add("")
                 add("| Feature | Desired value | Android effect | Hardware sync | Blocked reason |")
                 add("| --- | --- | --- | --- | --- |")

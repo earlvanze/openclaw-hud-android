@@ -46,6 +46,13 @@ const captureResults = await readFile(captureResultsPath, "utf8");
 const labels = parseCaptureFeatureLabels(source);
 
 requireIncludes("Capture plan safety criteria", capturePlan, [
+  "## Firmware Write Gate",
+  "- Status: `read_only_capture_pending`",
+  "firmware writes: read-only",
+  "- Firmware writes enabled: no",
+  "- Live M1 required before writes: yes",
+  "- Explicit user confirmation required: yes",
+  "Capture and validate ASUS HID report payloads on Windows/Cyber",
   "## Capture Acceptance Criteria",
   "exact Windows write report ID",
   "sanitized payload summary",

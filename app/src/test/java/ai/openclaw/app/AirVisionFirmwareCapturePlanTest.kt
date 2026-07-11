@@ -62,6 +62,16 @@ class AirVisionFirmwareCapturePlanTest {
         assertTrue(markdown.contains("- Capture readiness: writable HID report path detected"))
         assertTrue(markdown.contains("## Desired Firmware Sync"))
         assertTrue(markdown.contains("firmware sync: 9 Android-applied, 9 pending ASUS HID sync"))
+        assertTrue(markdown.contains("## Firmware Write Gate"))
+        assertTrue(markdown.contains("- Status: `read_only_capture_pending`"))
+        assertTrue(markdown.contains("- Summary: firmware writes: read-only; 0/9 validated captures, 0 protocol-ready, 9 blocked"))
+        assertTrue(markdown.contains("- Firmware writes enabled: no"))
+        assertTrue(markdown.contains("- Validated captures: 0/9"))
+        assertTrue(markdown.contains("- Protocol-ready captures: 0/9"))
+        assertTrue(markdown.contains("- Blocked features: 9"))
+        assertTrue(markdown.contains("- Live M1 required before writes: yes"))
+        assertTrue(markdown.contains("- Explicit user confirmation required: yes"))
+        assertTrue(markdown.contains("- Next step: Capture and validate ASUS HID report payloads"))
         assertTrue(
             markdown.contains(
                 "| Brightness | 64% | software HUD dimming | capture pending | " +
@@ -91,6 +101,44 @@ class AirVisionFirmwareCapturePlanTest {
         assertFalse(markdown.contains("payload bytes"))
         assertTrue(markdown.contains("| Brightness | pending | pending | pending | pending | pending | pending | blocked |"))
         assertTrue(markdown.contains("| IPD | pending | pending | pending | pending | pending | pending | blocked |"))
+    }
+
+    @Test
+    fun renderMarkdown_reflectsImportedValidatedCaptureResultsInWriteGate() {
+        val markdown =
+            AirVisionFirmwareCapturePlans.renderMarkdown(
+                usbState = AirVisionUsbState(),
+                displaySettings =
+                    AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working).copy(
+                        brightnessPercent = 72,
+                    ),
+                captureResults =
+                    AirVisionFirmwareCaptureResults(
+                        schema = AirVisionFirmwareCaptureResultFiles.SCHEMA,
+                        version = AirVisionFirmwareCaptureResultFiles.VERSION,
+                        source = AirVisionFirmwareCaptureResultsSource(windowsHost = "Cyber"),
+                        features =
+                            AirVisionFirmwareFeature.entries.map { feature ->
+                                if (feature == AirVisionFirmwareFeature.Brightness) {
+                                    validatedBrightnessCaptureResult(feature)
+                                } else {
+                                    pendingCaptureResult(feature)
+                                }
+                            },
+                    ),
+            )
+
+        assertTrue(markdown.contains("- Status: `read_only_live_test_required`"))
+        assertTrue(markdown.contains("- Summary: firmware writes: read-only; 1/9 validated captures, 1 protocol-ready, 9 blocked"))
+        assertTrue(markdown.contains("- Validated captures: 1/9"))
+        assertTrue(markdown.contains("- Protocol-ready captures: 1/9"))
+        assertTrue(markdown.contains("- Next step: Keep Android firmware writes disabled until the validated report sequence"))
+        assertTrue(
+            markdown.contains(
+                "| Brightness | 72% | software HUD dimming | validated capture imported | " +
+                    "Validated capture result imported; Android HID firmware-write implementation remains disabled until live M1 testing. |",
+            ),
+        )
     }
 
     @Test
@@ -143,3 +191,39 @@ class AirVisionFirmwareCapturePlanTest {
         )
     }
 }
+
+private fun pendingCaptureResult(feature: AirVisionFirmwareFeature): AirVisionFirmwareCaptureResult =
+    AirVisionFirmwareCaptureResult(
+        rawKey = feature.rawValue,
+        label = feature.label,
+        status = "pending",
+        probeValues = feature.captureProbeValues,
+        androidEnablementDecision = "blocked",
+        blockerReason = "Windows ASUS HID protocol capture has not been validated.",
+    )
+
+private fun validatedBrightnessCaptureResult(feature: AirVisionFirmwareFeature): AirVisionFirmwareCaptureResult =
+    AirVisionFirmwareCaptureResult(
+        rawKey = feature.rawValue,
+        label = feature.label,
+        status = "validated",
+        probeValues = feature.captureProbeValues,
+        writeReportId = "0x05",
+        writeEndpoint = "out if=2 interrupt addr=0x2 max=64 int=1",
+        writePayloadSummary = "brightness byte changes only; sanitized",
+        readbackReportId = "0x85",
+        readbackEndpoint = "in if=2 interrupt addr=0x81 max=32 int=4",
+        readbackPayloadSummary = "readback brightness byte matched; sanitized",
+        checksumFramingNotes = "xor checksum observed; sanitized",
+        visibleStateConfirmed = true,
+        captureReferences =
+            listOf(
+                AirVisionFirmwareCaptureReference(
+                    file = "airvision-brightness-summary.txt",
+                    sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    notes = "sanitized summary only",
+                ),
+            ),
+        androidEnablementDecision = "enable_android_write",
+        blockerReason = null,
+    )

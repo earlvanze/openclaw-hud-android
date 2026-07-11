@@ -193,11 +193,14 @@ captured and validated.
 the next Windows/Cyber capture session. It is derived from the app's canonical
 AirVision firmware feature list and records probe sequences for View Mode,
 brightness, screen distance, IPD, Splendid, blue-light filter, Motion Sync,
-Light Load Mode, and 3D Mode, plus acceptance criteria and a per-feature
-capture-result template for report IDs, payload lengths, endpoints, sanitized
-payload summaries, checksum/framing notes, visible-state confirmation, and the
-Android firmware-write enablement decision. Raw payload bytes stay in private
-capture files and are intentionally rejected by the checked-in results verifier.
+Light Load Mode, and 3D Mode, plus the read-only firmware write gate,
+acceptance criteria, and a per-feature capture-result template for report IDs,
+payload lengths, endpoints, sanitized payload summaries, checksum/framing
+notes, visible-state confirmation, and the Android firmware-write enablement
+decision. The in-app export also reflects imported Windows/Cyber capture
+results so protocol-ready evidence stays distinct from actual Android
+hardware-write enablement. Raw payload bytes stay in private capture files and
+are intentionally rejected by the checked-in results verifier.
 `play/airvision-firmware-capture-results.json` is the machine-checked sanitized
 capture-results file. It starts with every feature blocked and must stay free of
 raw USBPcap dumps, raw USB serial numbers, tokens, and temporary review
