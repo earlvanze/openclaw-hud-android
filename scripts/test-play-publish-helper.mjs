@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const androidDir = join(scriptDir, "..");
 const publishScript = join("scripts", "publish-play-internal.mjs");
+const readinessScript = join("scripts", "report-play-readiness.mjs");
 const allowedAccount = "earlvanze@gmail.com";
 const secondaryAllowedAccount = "earl@earlbnb.com";
 const serviceAccount = "rclone@sacred-result-442018-v2.iam.gserviceaccount.com";
@@ -155,6 +156,29 @@ exit 64
     const disallowedActiveText = outputText(disallowedActive);
     if (!disallowedActiveText.includes("Play publishing is restricted to")) {
       throw new Error(`Disallowed active-account failure did not explain the account restriction:\n${disallowedActiveText}`);
+    }
+
+    const readiness = spawnSync(process.execPath, [readinessScript, "--json", "--skip-signature"], {
+      cwd: androidDir,
+      encoding: "utf8",
+      env: { ...env, OPENCLAW_FAKE_GCLOUD_SCENARIO: "missing-allowed" },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    if (readiness.status !== 0) {
+      throw new Error(`Readiness report exited ${readiness.status}:\n${outputText(readiness)}`);
+    }
+    const readinessReport = JSON.parse(readiness.stdout);
+    if (readinessReport.publishReady !== false) {
+      throw new Error(`Readiness report should not claim publish readiness without OAuth/final Play evidence:\n${readiness.stdout}`);
+    }
+    if (readinessReport.localReleaseReady !== true) {
+      throw new Error(`Readiness report should accept the local release gates in fake-gcloud mode:\n${readiness.stdout}`);
+    }
+    if (readinessReport.oauthReady !== false) {
+      throw new Error(`Readiness report should reject missing allowed OAuth accounts:\n${readiness.stdout}`);
+    }
+    if (!readinessReport.blockers.some((blocker) => blocker.includes("Authenticate one allowed publisher account"))) {
+      throw new Error(`Readiness report did not include the OAuth blocker:\n${readiness.stdout}`);
     }
 
     console.log("Play publish helper regression tests passed.");

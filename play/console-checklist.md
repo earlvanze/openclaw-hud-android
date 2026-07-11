@@ -30,6 +30,9 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
   AirVision companion language menu.
 - Run `node scripts/verify-play-submission-package.mjs` before filling or
   updating Play Console App content answers.
+- Run `node scripts/report-play-readiness.mjs` before attempting preflight or
+  commit publishing. It summarizes the local release gates, final Play Console
+  fields, and allowed OAuth account status in one report.
 - Upload the fresh HUD AAB selected by the publish helper to the internal track
   first. Rebuild with `./gradlew :app:bundleHudRelease` for local dry-runs, or
   `node scripts/build-release-aab.mjs --flavor hud` for a locally signed release
@@ -74,7 +77,8 @@ Current local status:
 - Current Cyber gcloud auth state still needs OAuth login for both allowed
   publisher accounts. `--auth-check` currently fails early for
   `earlvanze@gmail.com` and `earl@earlbnb.com` because only the existing service
-  account is authenticated locally.
+  account is authenticated locally. `node scripts/report-play-readiness.mjs`
+  summarizes this OAuth state alongside the local release gates.
 - `node scripts/publish-play-internal.mjs --commit` is guarded by
   `node scripts/verify-play-submission-package.mjs --final` before any Play API
   upload.

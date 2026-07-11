@@ -268,6 +268,7 @@ async function render() {
     "- `node scripts/verify-play-submission-package.mjs`",
     "- `node scripts/test-play-submission-verifier.mjs`",
     "- `node scripts/render-play-console-evidence-template.mjs --verified-at YYYY-MM-DD --json-only` after external Console blockers are complete",
+    "- `node scripts/report-play-readiness.mjs`",
     "- `node scripts/publish-play-internal.mjs --dry-run`",
     "- `node scripts/verify-play-submission-package.mjs --final` after Console blockers are complete",
     "- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@gmail.com --auth-check` after OAuth login",

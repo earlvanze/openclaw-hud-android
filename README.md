@@ -365,6 +365,8 @@ Google Play internal-track publishing helper:
 
 ```bash
 node scripts/verify-play-hud-release.mjs
+node scripts/report-play-readiness.mjs
+node scripts/report-play-readiness.mjs --json
 node scripts/test-play-publish-helper.mjs
 node scripts/verify-play-submission-package.mjs
 node scripts/render-play-console-evidence-template.mjs --verified-at 2026-07-10 --json-only
@@ -379,6 +381,12 @@ GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=/path/to/service-account.json \
 node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@gmail.com --commit
 node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earl@earlbnb.com --commit
 ```
+
+`node scripts/report-play-readiness.mjs` summarizes the HUD release verifier,
+draft/final Play submission verifiers, publish dry-run, and both allowed OAuth
+`--auth-check` paths in one report. Use `--strict` when a release step should
+fail unless the package is actually publish-ready, and `--skip-signature` for CI
+checks against unsigned Gradle release bundles.
 
 The publish helper defaults to package `ai.openclaw.app.hud`, track `internal`,
 release status `draft`, and the newest HUD AAB from either
