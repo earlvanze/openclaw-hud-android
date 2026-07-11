@@ -519,6 +519,11 @@ class MainViewModel(
             captureResults = airVisionFirmwareCaptureResults.value,
         )
 
+    fun exportAirVisionFirmwareUpdateHandoff(): String =
+        AirVisionFirmwareUpdateHandoffs.renderMarkdown(
+            usbState = airVisionUsbState.value,
+        )
+
     fun exportAirVisionDiagnosticsSnapshot(): String =
         AirVisionDiagnosticsSnapshots.encode(
             AirVisionDiagnosticsSnapshots.fromState(

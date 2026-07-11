@@ -469,6 +469,22 @@ fun SettingsSheet(viewModel: MainViewModel) {
             }
         }
 
+    val airVisionFirmwareUpdateHandoffExportLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/markdown")) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            runCatching {
+                context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { writer ->
+                    writer.write(viewModel.exportAirVisionFirmwareUpdateHandoff())
+                } ?: error("Unable to open firmware update handoff file.")
+            }.onSuccess {
+                Toast.makeText(context, "Exported AirVision update handoff", Toast.LENGTH_SHORT).show()
+                viewModel.showHudTransientMessage("Exported AirVision update handoff")
+            }.onFailure { error ->
+                Toast.makeText(context, "AirVision update handoff export failed", Toast.LENGTH_SHORT).show()
+                viewModel.showHudTransientMessage("AirVision update handoff export failed: ${error.message.orEmpty()}")
+            }
+        }
+
     val airVisionFirmwareCaptureResultsImportLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
@@ -855,6 +871,19 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 airVisionFirmwareUpdateStatusText(airVisionUsbState.deviceInfo.firmwareVersion),
                                 style = mobileCallout,
                             )
+                        },
+                        trailingContent = {
+                            Button(
+                                onClick = {
+                                    airVisionFirmwareUpdateHandoffExportLauncher.launch(
+                                        "openclaw-airvision-m1-firmware-update-handoff.md",
+                                    )
+                                },
+                                colors = settingsPrimaryButtonColors(),
+                                shape = RoundedCornerShape(14.dp),
+                            ) {
+                                Text("Export", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                            }
                         },
                     )
                     HorizontalDivider(color = mobileBorder)
