@@ -147,7 +147,70 @@ Capability states:
   Review path: Settings > AirVision M1 > Cast, Display, and Windows App Handoff mirror fallback guidance.
   Evidence: The ASUS Unity mirror window and Ctrl+Alt+E shortcut stay Windows-only; Android provides Cast, Display, and DeX sharing fallback guidance.
 
-Demo Mode lets reviewers verify the 18-feature AirVision companion HUD catalog without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
+Windows app apply matrix:
+
+- View Mode
+  Windows target: Working, Gaming, Infinity, Custom 1, or Custom 2
+  Android effect: Per-mode Android profile slot and custom label state
+  Proof: Reviewable offline in Settings, profile backup, Windows App Handoff, and diagnostics export.
+  Firmware gate: none
+- Brightness
+  Windows target: Panel brightness percentage
+  Android effect: Software HUD dimming plus M1 hardware touch-bar passthrough
+  Proof: Software dimming is reviewable offline; panel brightness proof needs live M1 hardware.
+  Firmware gate: HID capture pending
+- Screen distance
+  Windows target: Virtual screen distance in centimeters
+  Android effect: HUD scale derived from virtual distance and per-profile HUD scale
+  Proof: HUD scaling is reviewable offline; firmware-level distance write proof needs live M1 hardware.
+  Firmware gate: HID capture pending
+- IPD
+  Windows target: Inter-pupillary distance in millimeters
+  Android effect: Stored calibration, ASUS range check, and fit/clarity guidance
+  Proof: Calibration and guidance are reviewable offline; physical focus proof needs live M1 hardware.
+  Firmware gate: HID capture pending
+- Splendid / Eye Care
+  Windows target: Standard, Theater, Office, Game, Eye Care, and blue-light percentage
+  Android effect: HUD color and warmth preview overlays
+  Proof: Preview overlays are reviewable offline; true panel preset proof needs live M1 hardware.
+  Firmware gate: HID capture pending
+- Motion Sync
+  Windows target: Motion Sync on or off
+  Android effect: Stored desired state only
+  Proof: Stored setting is reviewable offline; hardware behavior proof needs live M1 hardware.
+  Firmware gate: HID capture pending
+- Light Load Mode
+  Windows target: Light Load on or off
+  Android effect: Low-overhead HUD mode with trimmed transcript/caption history and locked IPD/3D controls
+  Proof: Android runtime behavior is reviewable offline; panel state proof needs live M1 hardware.
+  Firmware gate: HID capture pending
+- 3D Mode
+  Windows target: 3D Mode on or off
+  Android effect: Stored desired state, locked off when Light Load Mode is enabled
+  Proof: Android guard state is reviewable offline; panel 3D proof needs live M1 hardware.
+  Firmware gate: HID capture pending
+- Android HUD layout
+  Windows target: none
+  Android effect: HUD scale, placement, safe area, and physical main-screen visibility
+  Proof: Reviewable offline with Demo Mode and screenshots; live display proof is optional for M1 framing.
+  Firmware gate: none
+- Display routing
+  Windows target: none
+  Android effect: Android Presentation display targeting for AirVision-preferred or other external displays
+  Proof: Routing settings are reviewable offline; DeX/M1 topology proof needs live external display hardware.
+  Firmware gate: none
+- Gesture and hotkey settings
+  Windows target: none
+  Android effect: Single tap, double tap, swipe, brightness-key, and media-key mappings
+  Proof: Stored mappings are reviewable offline; firmware-delivered event proof needs live M1 hardware.
+  Firmware gate: none
+- Windows spatial/mirror features
+  Windows target: Cursor Follow, Center Cursor, 3DoF, or Unity mirror when needed
+  Android effect: Windows-only status plus Android Cast, Display, and DeX fallback guidance
+  Proof: Android fallback and Windows-only status are reviewable offline; ASUS spatial/mirror features remain Windows workflows.
+  Firmware gate: Windows-only
+
+Demo Mode lets reviewers verify the 18-feature AirVision companion HUD catalog and 12-row Windows app apply matrix without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
 
 Reviewer evidence sources:
 

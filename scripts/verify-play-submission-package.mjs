@@ -657,6 +657,7 @@ function verifyAppContentShape(appContent) {
   );
   requireIncludes("AirVision companion review notes", appContent.reviewEvidence?.airVisionCompanionReviewNotes ?? "", [
     "18-feature AirVision companion HUD catalog",
+    "12-row Windows app apply matrix",
     "without a live gateway or live M1",
     "Cast and Display",
     "Windows app handoff",
@@ -664,6 +665,7 @@ function verifyAppContentShape(appContent) {
     "Android firmware writes remain blocked",
   ]);
   verifyAirVisionCompanionCapabilityStates(appContent.reviewEvidence?.airVisionCompanionCapabilityStates ?? []);
+  verifyAirVisionWindowsApplyMatrix(appContent.reviewEvidence?.airVisionWindowsApplyMatrixReview ?? []);
   requireArrayIncludes(
     "Data safety not-collected list",
     appContent.dataSafety?.notCollected ?? [],
@@ -717,6 +719,51 @@ function verifyAirVisionCompanionCapabilityStates(states) {
     }
     if (typeof entry.evidence !== "string" || entry.evidence.trim() === "") {
       throw new Error(`${prefix} must include non-empty evidence.`);
+    }
+  }
+}
+
+function verifyAirVisionWindowsApplyMatrix(matrix) {
+  if (!Array.isArray(matrix) || matrix.length !== 12) {
+    throw new Error("AirVision Windows apply matrix review must list exactly 12 feature rows.");
+  }
+  const labels = matrix.map((entry) => entry.feature);
+  requireArrayIncludes("AirVision Windows apply matrix feature labels", labels, [
+    "View Mode",
+    "Brightness",
+    "Screen distance",
+    "IPD",
+    "Splendid / Eye Care",
+    "Motion Sync",
+    "Light Load Mode",
+    "3D Mode",
+    "Android HUD layout",
+    "Display routing",
+    "Gesture and hotkey settings",
+    "Windows spatial/mirror features",
+  ]);
+  const firmwareGates = matrix.map((entry) => entry.firmwareGate);
+  requireArrayIncludes("AirVision Windows apply matrix firmware gates", firmwareGates, [
+    "none",
+    "HID capture pending",
+    "Windows-only",
+  ]);
+  for (const entry of matrix) {
+    const prefix = `AirVision Windows apply matrix ${entry.feature ?? "(missing feature)"}`;
+    if (typeof entry.feature !== "string" || entry.feature.trim() === "") {
+      throw new Error(`${prefix} must include a non-empty feature.`);
+    }
+    if (typeof entry.windowsAppTarget !== "string" || entry.windowsAppTarget.trim() === "") {
+      throw new Error(`${prefix} must include a non-empty windowsAppTarget.`);
+    }
+    if (typeof entry.androidEffect !== "string" || entry.androidEffect.trim() === "") {
+      throw new Error(`${prefix} must include a non-empty androidEffect.`);
+    }
+    if (typeof entry.proof !== "string" || entry.proof.trim() === "") {
+      throw new Error(`${prefix} must include a non-empty proof.`);
+    }
+    if (typeof entry.firmwareGate !== "string" || entry.firmwareGate.trim() === "") {
+      throw new Error(`${prefix} must include a non-empty firmwareGate.`);
     }
   }
 }

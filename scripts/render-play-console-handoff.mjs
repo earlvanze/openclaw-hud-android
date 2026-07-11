@@ -66,6 +66,17 @@ function capabilityStateLines(values) {
   ]);
 }
 
+function windowsApplyMatrixLines(values) {
+  if (!Array.isArray(values)) return [];
+  return values.flatMap((value) => [
+    `- ${value.feature}`,
+    `  Windows target: ${value.windowsAppTarget}`,
+    `  Android effect: ${value.androidEffect}`,
+    `  Proof: ${value.proof}`,
+    `  Firmware gate: ${value.firmwareGate}`,
+  ]);
+}
+
 async function latestSignedHudReleaseBundle() {
   const files = await readdir(releaseOutputDir).catch(() => []);
   const candidates = [];
@@ -217,6 +228,10 @@ async function render() {
     "Capability states:",
     "",
     ...capabilityStateLines(reviewEvidence.airVisionCompanionCapabilityStates),
+    "",
+    "Windows app apply matrix:",
+    "",
+    ...windowsApplyMatrixLines(reviewEvidence.airVisionWindowsApplyMatrixReview),
     "",
     reviewEvidence.airVisionCompanionReviewNotes ?? "",
     "",

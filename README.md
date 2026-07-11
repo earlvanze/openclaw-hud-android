@@ -509,8 +509,8 @@ AAB exists in `build/release-bundles/`, it also verifies that the console
 checklist names the latest signed bundle and SHA-256. It also checks the
 structured AirVision Companion Review Evidence used in `play/console-handoff.md`
 so offline reviewer steps for Demo Mode, Cast/Display mirror fallback, firmware
-update handoff export, diagnostics export, and 18-feature companion parity states stay
-present. It is a drift guard for Play Console form prep; the final hosted privacy-policy URL, screenshots,
+update handoff export, diagnostics export, 18-feature companion parity states,
+and the 12-row Windows app apply matrix stay present. It is a drift guard for Play Console form prep; the final hosted privacy-policy URL, screenshots,
 tester access, and any reviewer setup codes still belong in Play Console.
 
 Use `node scripts/verify-play-submission-package.mjs --final` only when the

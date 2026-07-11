@@ -199,6 +199,27 @@ try {
     );
   }
 
+  const missingApplyMatrixAppContent = JSON.parse(originalAppContent);
+  missingApplyMatrixAppContent.reviewEvidence = {
+    ...missingApplyMatrixAppContent.reviewEvidence,
+    airVisionWindowsApplyMatrixReview: [],
+  };
+  const missingApplyMatrixPath = join(tempDir, "missing-airvision-apply-matrix-app-content.json");
+  await writeFile(missingApplyMatrixPath, `${JSON.stringify(missingApplyMatrixAppContent, null, 2)}\n`);
+  const missingApplyMatrix = runVerifier(["--app-content", missingApplyMatrixPath]);
+  if (
+    missingApplyMatrix.status === 0 ||
+    !outputText(missingApplyMatrix).includes("AirVision Windows apply matrix review must list exactly 12 feature rows")
+  ) {
+    throw new Error(
+      [
+        "Expected submission verifier to reject missing AirVision Windows apply matrix.",
+        `status=${missingApplyMatrix.status}`,
+        outputText(missingApplyMatrix),
+      ].join("\n"),
+    );
+  }
+
   const missingEvidenceAppContent = JSON.parse(originalAppContent);
   missingEvidenceAppContent.finalSubmission = {
     ...missingEvidenceAppContent.finalSubmission,
