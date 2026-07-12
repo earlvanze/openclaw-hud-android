@@ -218,10 +218,11 @@ evidence for `VirtualSpaceDistance`, `SoftwareIPD`, `DisplaySplendidMode`,
 firmware-gated, and Windows-only features, Windows-only firmware-update workflow
 status, gesture settings, and AirVision app preferences without gateway
 endpoints, auth tokens, chat history, or raw USB serial values. Settings ->
-AirVision M1 -> Firmware Link also shows a compact
-write-gate summary with protocol-ready and blocked feature labels so firmware
-writes remain visibly blocked until the machine-checked capture results
-validate a feature.
+AirVision M1 -> Firmware Link also shows a compact write-gate summary with
+protocol-ready and blocked feature labels plus per-control WAIT/CAPTURE/READY
+rows for target value, Android effect, firmware status, missing evidence, and
+blocker text so firmware writes remain visibly blocked until the
+machine-checked capture results validate a feature.
 Settings -> AirVision M1 -> Windows App Handoff exports a Markdown bridge for
 Cyber/Windows ASUS AirVision app sessions. It lists the active Android AirVision
 profile, derived active-runtime HUD scale/transcript/caption capacity,

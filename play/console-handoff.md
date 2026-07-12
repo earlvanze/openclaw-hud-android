@@ -86,6 +86,7 @@ These steps exercise the Windows-like AirVision companion controls that can be r
 - Settings > AirVision M1 > App Preferences > Demo Mode
 - Settings > AirVision M1 > Windows Spatial & Mirror Controls > Cast
 - Settings > AirVision M1 > Windows Spatial & Mirror Controls > Display
+- Settings > AirVision M1 > Firmware Link per-control WAIT/CAPTURE/READY rows
 - Settings > AirVision M1 > Firmware Updates > Export
 - Settings > AirVision M1 > Windows App Handoff > Export
 - Settings > AirVision M1 > Diagnostics Export > Export
@@ -118,7 +119,7 @@ Capability states:
   Evidence: Single-tap, double-tap, swipe, brightness-key, and media-key mappings are stored offline. Diagnostics export the active M1 brightness-key/media-key mode, Android consumption state, step sizes, and firmware passthrough expectation; live M1 proof is needed for firmware-delivered events.
 - USB firmware-link diagnostics: M1 optional for review
   Review path: Settings > AirVision M1 > Firmware Link and Diagnostics Export.
-  Evidence: Offline demo shows blocked/write-readiness states; connected M1 adds live descriptor and HID report-path context.
+  Evidence: Firmware Link shows per-control WAIT/CAPTURE/READY rows with target value, Android effect, firmware status, missing evidence, and blocker text. Offline demo shows blocked/write-readiness states; connected M1 adds live descriptor and HID report-path context.
 - Firmware apply and update: Firmware-gated
   Review path: Settings > AirVision M1 > Firmware Updates > Export.
   Evidence: Android write actions remain blocked until sanitized ASUS HID capture evidence and live M1 write tests are both present.

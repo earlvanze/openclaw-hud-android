@@ -523,6 +523,14 @@ async function verifyReadmeAirVisionParity() {
     "offline-reviewable, M1-optional",
     "firmware-gated, and Windows-only",
   ]);
+  requireIncludes("README AirVision Firmware Link per-control rows", readme, [
+    "per-control WAIT/CAPTURE/READY",
+    "target value",
+    "Android effect",
+    "firmware status",
+    "missing evidence",
+    "blocker text",
+  ]);
   requireIncludes("README AirVision fit and clarity guidance", readme, [
     "53.5-74.5 mm IPD range",
     "54-74 mm slider stops",

@@ -650,6 +650,7 @@ function verifyAppContentShape(appContent) {
       "Settings > AirVision M1 > App Preferences > Demo Mode",
       "Settings > AirVision M1 > Windows Spatial & Mirror Controls > Cast",
       "Settings > AirVision M1 > Windows Spatial & Mirror Controls > Display",
+      "Settings > AirVision M1 > Firmware Link per-control WAIT/CAPTURE/READY rows",
       "Settings > AirVision M1 > Firmware Updates > Export",
       "Settings > AirVision M1 > Windows App Handoff > Export",
       "Settings > AirVision M1 > Diagnostics Export > Export",
@@ -931,6 +932,11 @@ async function main() {
     "Android consumption state",
     "step sizes",
     "firmware passthrough expectation",
+    "WAIT/CAPTURE/READY",
+    "target value",
+    "Android effect",
+    "firmware status",
+    "missing evidence",
   ]);
 
   console.log(`App-content package: ${appContent.packageName}`);
