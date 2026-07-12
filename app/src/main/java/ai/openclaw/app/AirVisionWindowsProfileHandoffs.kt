@@ -84,6 +84,10 @@ object AirVisionWindowsProfileHandoffs {
                 add("")
                 addPreferences(profileBackup.appPreferences)
                 add("")
+                add("## Caption and Translation Mode")
+                add("")
+                addCaptionMode(profileBackup.appPreferences)
+                add("")
                 add("## Support, Legal, and Registration")
                 add("")
                 addSupportMetadata()
@@ -425,6 +429,19 @@ object AirVisionWindowsProfileHandoffs {
         add("- Samsung/native captions: ${onOff(preferences.nativeCaptionsEnabled)}")
         add("- Translation captions: ${sourceLanguage.label} -> ${targetLanguage.label}")
         add("- Demo Mode: ${onOff(preferences.demoModeEnabled)}")
+    }
+
+    private fun MutableList<String>.addCaptionMode(preferences: AirVisionBackupAppPreferences) {
+        val status = AirVisionCaptionModeStatus.from(preferences)
+        add("- ${status.summary}")
+        add("- Native provider: ${status.nativeProvider}")
+        add("- Native captions enabled: ${onOff(status.nativeCaptionsEnabled)}")
+        add("- OpenClaw fallback available: ${yesNo(status.openClawFallbackAvailable)}")
+        add("- OpenClaw fallback model: ${status.openClawFallbackModel}")
+        add("- OpenClaw fallback thinking: ${status.openClawFallbackThinking}")
+        add("- Source language: ${status.sourceLanguageLabel} (${status.sourceLanguage})")
+        add("- Target language: ${status.targetLanguageLabel} (${status.targetLanguage})")
+        add("- Speaker labels: ${status.speakerLabels.joinToString()}")
     }
 
     private fun MutableList<String>.addSupportMetadata() {

@@ -27,6 +27,7 @@ data class AirVisionDiagnosticsSnapshot(
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
     val supportMetadata: AirVisionSupportMetadata,
+    val captionMode: AirVisionCaptionModeStatus,
 )
 
 @Serializable
@@ -433,7 +434,7 @@ data class AirVisionDiagnosticsShortcutMenu(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 34
+    const val VERSION = 35
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -757,6 +758,12 @@ object AirVisionDiagnosticsSnapshots {
                         ),
                 ),
             supportMetadata = AirVisionSupportMetadata.default,
+            captionMode =
+                AirVisionCaptionModeStatus.from(
+                    nativeCaptionsEnabled = nativeCaptionsEnabled,
+                    sourceLanguageCode = translationCaptionSourceLanguage,
+                    targetLanguageCode = translationCaptionTargetLanguage,
+                ),
         )
     }
 

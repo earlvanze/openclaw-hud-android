@@ -125,13 +125,13 @@ Capability states:
   Evidence: Android write actions remain blocked until sanitized ASUS HID capture evidence and live M1 write tests are both present.
 - Samsung/native captions and OpenClaw translation fallback: Reviewable offline
   Review path: Voice tab caption controls and Samsung/native caption launcher.
-  Evidence: Native captioning is delegated to Android/Samsung UI; OpenClaw fallback defaults to sage-router fast profile with thinking off.
+  Evidence: Native captioning is delegated to Android/Samsung UI; OpenClaw fallback exports structured caption-mode status with sage-router fast profile, thinking off, selected source/target languages, and S1/S2 speaker labels.
 - App preferences and profile backup: Reviewable offline
   Review path: Settings > AirVision M1 > App Preferences and Profile Backup.
-  Evidence: Startup view, display target, language, speaker, native captions, translation languages, demo mode, structured support/legal/registration metadata, privacy/support links, and JSON backup/import are reviewable offline.
+  Evidence: Startup view, display target, language, speaker, structured native captions plus OpenClaw translation fallback status, translation languages, demo mode, structured support/legal/registration metadata, privacy/support links, and JSON backup/import are reviewable offline.
 - Windows app profile handoff: Reviewable offline
   Review path: Settings > AirVision M1 > Windows App Handoff > Export.
-  Evidence: The Android app exports Cyber/Windows ASUS AirVision apply steps, runtime summaries, gesture mappings, structured support/legal/registration metadata, and privacy reminders without raw USB serials.
+  Evidence: The Android app exports Cyber/Windows ASUS AirVision apply steps, runtime summaries, gesture mappings, structured caption/translation mode status, structured support/legal/registration metadata, and privacy reminders without raw USB serials.
 - Device information: M1 optional for review
   Review path: Settings > AirVision M1 > Firmware Link and diagnostics export.
   Evidence: USB manufacturer/product, vendor/product ID, descriptor version, and interface details populate when the M1 is connected.

@@ -122,6 +122,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val shortcutMenu = root.getValue("shortcutMenu").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
         val supportMetadata = root.getValue("supportMetadata").jsonObject
+        val captionMode = root.getValue("captionMode").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
         val writableReportPath = firmwareCapabilities.getValue("writableReportPaths").jsonArray.first().jsonObject
@@ -147,7 +148,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("34", root.getValue("version").jsonPrimitive.content)
+        assertEquals("35", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -781,6 +782,15 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", appPreferences.getValue("nativeCaptionsEnabled").jsonPrimitive.content)
         assertEquals("pt", appPreferences.getValue("translationCaptionSourceLanguage").jsonPrimitive.content)
         assertEquals("ja", appPreferences.getValue("translationCaptionTargetLanguage").jsonPrimitive.content)
+        assertEquals("true", captionMode.getValue("nativeCaptionsEnabled").jsonPrimitive.content)
+        assertEquals("sage-router/fast", captionMode.getValue("openClawFallbackModel").jsonPrimitive.content)
+        assertEquals("off", captionMode.getValue("openClawFallbackThinking").jsonPrimitive.content)
+        assertEquals("pt", captionMode.getValue("sourceLanguage").jsonPrimitive.content)
+        assertEquals("ja", captionMode.getValue("targetLanguage").jsonPrimitive.content)
+        assertEquals(
+            listOf("S1", "S2"),
+            captionMode.getValue("speakerLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
         assertEquals(AirVisionSupportMetadata.FAQ_URL, supportMetadata.getValue("faqUrl").jsonPrimitive.content)
         assertEquals(
             AirVisionSupportMetadata.PRODUCT_REGISTRATION_URL,
