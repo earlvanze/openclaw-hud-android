@@ -20,6 +20,7 @@ import ai.openclaw.app.AirVisionShortcutMenuStatus
 import ai.openclaw.app.AirVisionSpatialMirrorFallback
 import ai.openclaw.app.AirVisionSplendidMode
 import ai.openclaw.app.AirVisionStartupDestination
+import ai.openclaw.app.AirVisionSupportMetadata
 import ai.openclaw.app.AirVisionViewMode
 import ai.openclaw.app.BuildConfig
 import ai.openclaw.app.LocationMode
@@ -246,7 +247,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
             },
             text = {
                 Text(
-                    "ASUS displays the AirVision EULA inside the Windows AirVision app. This Android HUD is an OpenClaw companion and does not replace ASUS firmware, warranty, registration, or license terms.",
+                    AirVisionSupportMetadata.default.legalNote,
                     style = mobileCallout,
                     color = mobileTextSecondary,
                 )
@@ -1808,21 +1809,21 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         title = "FAQ & Tutorials",
                         supportingText = "Open the official ASUS AirVision M1 setup, app, and troubleshooting FAQ.",
                         buttonText = "Open",
-                        onClick = { openExternalUrl(context, AIR_VISION_FAQ_URL) },
+                        onClick = { openExternalUrl(context, AirVisionSupportMetadata.default.faqUrl) },
                     )
                     HorizontalDivider(color = mobileBorder)
                     AirVisionLinkRow(
                         title = "Product Registration",
                         supportingText = "Open the official ASUS product registration page.",
                         buttonText = "Open",
-                        onClick = { openExternalUrl(context, AIR_VISION_PRODUCT_REGISTRATION_URL) },
+                        onClick = { openExternalUrl(context, AirVisionSupportMetadata.default.productRegistrationUrl) },
                     )
                     HorizontalDivider(color = mobileBorder)
                     AirVisionLinkRow(
                         title = "ASUS Support",
                         supportingText = "Open the AirVision M1 support page for warranty, service, and manuals.",
                         buttonText = "Open",
-                        onClick = { openExternalUrl(context, AIR_VISION_SUPPORT_URL) },
+                        onClick = { openExternalUrl(context, AirVisionSupportMetadata.default.supportUrl) },
                     )
                 }
             }
@@ -3051,10 +3052,6 @@ private fun hasMotionCapabilities(context: Context): Boolean {
 private fun isAssistantRoleAvailable(context: Context): Boolean =
     context.getSystemService(RoleManager::class.java).isRoleAvailable(RoleManager.ROLE_ASSISTANT)
 
-private const val AIR_VISION_FAQ_URL = "https://www.asus.com/support/faq/1054069/"
-private const val AIR_VISION_PRODUCT_REGISTRATION_URL = "https://account.asus.com/product_reg.aspx"
-private const val AIR_VISION_SUPPORT_URL =
-    "https://www.asus.com/displays-desktops/glasses/airvision/asus-airvision-m1/helpdesk_knowledge?model2Name=ASUS-AirVision-M1"
 private const val AIR_VISION_CAST_SETTINGS_ACTION = "android.settings.CAST_SETTINGS"
 
 private fun isAssistantRoleHeld(context: Context): Boolean =

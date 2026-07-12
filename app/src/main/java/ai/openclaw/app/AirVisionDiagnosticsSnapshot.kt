@@ -26,6 +26,7 @@ data class AirVisionDiagnosticsSnapshot(
     val shortcutMenu: AirVisionDiagnosticsShortcutMenu,
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
+    val supportMetadata: AirVisionSupportMetadata,
 )
 
 @Serializable
@@ -755,6 +756,7 @@ object AirVisionDiagnosticsSnapshots {
                             TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
                         ),
                 ),
+            supportMetadata = AirVisionSupportMetadata.default,
         )
     }
 

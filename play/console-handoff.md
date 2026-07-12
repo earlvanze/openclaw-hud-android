@@ -128,10 +128,10 @@ Capability states:
   Evidence: Native captioning is delegated to Android/Samsung UI; OpenClaw fallback defaults to sage-router fast profile with thinking off.
 - App preferences and profile backup: Reviewable offline
   Review path: Settings > AirVision M1 > App Preferences and Profile Backup.
-  Evidence: Startup view, display target, language, speaker, native captions, translation languages, demo mode, privacy/support links, and JSON backup/import are reviewable offline.
+  Evidence: Startup view, display target, language, speaker, native captions, translation languages, demo mode, structured support/legal/registration metadata, privacy/support links, and JSON backup/import are reviewable offline.
 - Windows app profile handoff: Reviewable offline
   Review path: Settings > AirVision M1 > Windows App Handoff > Export.
-  Evidence: The Android app exports Cyber/Windows ASUS AirVision apply steps, runtime summaries, gesture mappings, and privacy reminders without raw USB serials.
+  Evidence: The Android app exports Cyber/Windows ASUS AirVision apply steps, runtime summaries, gesture mappings, structured support/legal/registration metadata, and privacy reminders without raw USB serials.
 - Device information: M1 optional for review
   Review path: Settings > AirVision M1 > Firmware Link and diagnostics export.
   Evidence: USB manufacturer/product, vendor/product ID, descriptor version, and interface details populate when the M1 is connected.

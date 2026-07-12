@@ -1,10 +1,6 @@
 package ai.openclaw.app
 
 object AirVisionWindowsProfileHandoffs {
-    private const val FAQ_URL = "https://www.asus.com/support/faq/1054069/"
-    private const val SUPPORT_URL =
-        "https://www.asus.com/displays-desktops/glasses/airvision/asus-airvision-m1/helpdesk_knowledge?model2Name=ASUS-AirVision-M1"
-
     fun renderMarkdown(
         profileBackup: AirVisionProfileBackup,
         usbState: AirVisionUsbState,
@@ -88,6 +84,10 @@ object AirVisionWindowsProfileHandoffs {
                 add("")
                 addPreferences(profileBackup.appPreferences)
                 add("")
+                add("## Support, Legal, and Registration")
+                add("")
+                addSupportMetadata()
+                add("")
                 add("## Windows/Cyber Apply Checklist")
                 add("")
                 add("- Open the ASUS AirVision Windows app on Cyber or another Windows host.")
@@ -147,8 +147,8 @@ object AirVisionWindowsProfileHandoffs {
                 add("")
                 add("## ASUS Links")
                 add("")
-                add("- FAQ and tutorials: $FAQ_URL")
-                add("- AirVision M1 support: $SUPPORT_URL")
+                add("- FAQ and tutorials: ${AirVisionSupportMetadata.default.faqUrl}")
+                add("- AirVision M1 support: ${AirVisionSupportMetadata.default.supportUrl}")
             }
         return lines.joinToString("\n") + "\n"
     }
@@ -425,6 +425,17 @@ object AirVisionWindowsProfileHandoffs {
         add("- Samsung/native captions: ${onOff(preferences.nativeCaptionsEnabled)}")
         add("- Translation captions: ${sourceLanguage.label} -> ${targetLanguage.label}")
         add("- Demo Mode: ${onOff(preferences.demoModeEnabled)}")
+    }
+
+    private fun MutableList<String>.addSupportMetadata() {
+        val metadata = AirVisionSupportMetadata.default
+        add("- ${metadata.summary}")
+        add("- EULA status: ${metadata.eulaStatus}")
+        add("- Legal note: ${metadata.legalNote}")
+        add("- Privacy boundary: ${metadata.privacyBoundary}")
+        add("- FAQ and tutorials: ${metadata.faqUrl}")
+        add("- Product registration: ${metadata.productRegistrationUrl}")
+        add("- AirVision M1 support: ${metadata.supportUrl}")
     }
 
     private fun profileDisplayLabel(

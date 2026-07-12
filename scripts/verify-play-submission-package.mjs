@@ -940,11 +940,13 @@ async function main() {
     "structured fallback state",
     "hardware touchpad passthrough",
     "Samsung DeX sharing fallback actions",
+    "structured support/legal/registration metadata",
     "WAIT/CAPTURE/READY",
     "target value",
     "Android effect",
     "firmware status",
     "missing evidence",
+    "without raw USB serials",
   ]);
 
   console.log(`App-content package: ${appContent.packageName}`);

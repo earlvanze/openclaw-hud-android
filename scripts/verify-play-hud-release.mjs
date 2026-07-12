@@ -508,6 +508,7 @@ async function verifyReadmeAirVisionParity() {
     "ASUS brightness/volume/distance",
     "structured Android Cast/Display/Samsung DeX",
     "mirror fallback actions and limitations",
+    "structured support/legal/registration metadata",
     "Windows gesture catalog",
     "instant transparent",
     "shortcut-menu hold/slide",
@@ -524,6 +525,7 @@ async function verifyReadmeAirVisionParity() {
     "structured M1 hardware-key mapping",
     "brightness/media key consumption state",
     "shortcut-menu parity",
+    "structured support/legal/registration metadata",
     "Windows gesture catalog entries",
     "omitting raw USB serial values",
   ]);

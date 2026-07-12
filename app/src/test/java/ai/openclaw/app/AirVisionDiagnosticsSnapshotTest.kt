@@ -121,6 +121,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val windowsGestureCatalog = root.getValue("windowsGestureCatalog").jsonObject
         val shortcutMenu = root.getValue("shortcutMenu").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
+        val supportMetadata = root.getValue("supportMetadata").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
         val writableReportPath = firmwareCapabilities.getValue("writableReportPaths").jsonArray.first().jsonObject
@@ -780,6 +781,14 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", appPreferences.getValue("nativeCaptionsEnabled").jsonPrimitive.content)
         assertEquals("pt", appPreferences.getValue("translationCaptionSourceLanguage").jsonPrimitive.content)
         assertEquals("ja", appPreferences.getValue("translationCaptionTargetLanguage").jsonPrimitive.content)
+        assertEquals(AirVisionSupportMetadata.FAQ_URL, supportMetadata.getValue("faqUrl").jsonPrimitive.content)
+        assertEquals(
+            AirVisionSupportMetadata.PRODUCT_REGISTRATION_URL,
+            supportMetadata.getValue("productRegistrationUrl").jsonPrimitive.content,
+        )
+        assertEquals(AirVisionSupportMetadata.SUPPORT_URL, supportMetadata.getValue("supportUrl").jsonPrimitive.content)
+        assertTrue(supportMetadata.getValue("legalNote").jsonPrimitive.content.contains("OpenClaw companion"))
+        assertTrue(supportMetadata.getValue("privacyBoundary").jsonPrimitive.content.contains("excludes gateway endpoints"))
         assertTrue(encoded.contains("ASUS AirVision M1"))
     }
 

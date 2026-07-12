@@ -1,10 +1,6 @@
 package ai.openclaw.app
 
 object AirVisionFirmwareUpdateHandoffs {
-    private const val FAQ_URL = "https://www.asus.com/support/faq/1054069/"
-    private const val SUPPORT_URL =
-        "https://www.asus.com/displays-desktops/glasses/airvision/asus-airvision-m1/helpdesk_knowledge?model2Name=ASUS-AirVision-M1"
-
     fun renderMarkdown(
         usbState: AirVisionUsbState,
         captureResults: AirVisionFirmwareCaptureResults? = null,
@@ -70,8 +66,8 @@ object AirVisionFirmwareUpdateHandoffs {
                 add("")
                 add("## ASUS Support Links")
                 add("")
-                add("- FAQ and tutorials: $FAQ_URL")
-                add("- AirVision M1 support: $SUPPORT_URL")
+                add("- FAQ and tutorials: ${AirVisionSupportMetadata.default.faqUrl}")
+                add("- AirVision M1 support: ${AirVisionSupportMetadata.default.supportUrl}")
                 add("")
                 add("## Privacy Notes")
                 add("")
