@@ -924,6 +924,14 @@ async function main() {
     "earl@earlbnb.com",
     "stale local artifacts",
   ]);
+  const reviewEvidenceText = JSON.stringify(appContent.reviewEvidence ?? {});
+  requireIncludes("AirVision companion review evidence", reviewEvidenceText, [
+    "structured M1 hardware-key diagnostics",
+    "brightness-key/media-key mode",
+    "Android consumption state",
+    "step sizes",
+    "firmware passthrough expectation",
+  ]);
 
   console.log(`App-content package: ${appContent.packageName}`);
   console.log(`Manifest permissions checked: ${permissionCount}`);

@@ -114,8 +114,8 @@ Capability states:
   Review path: Settings > AirVision M1 Motion Sync, 3D Mode, Light Load Mode, and runtime diagnostics.
   Evidence: Light Load trims Android HUD work offline; Motion Sync and panel 3D writes remain firmware-protocol gated.
 - Gesture and hotkey settings: M1 optional for review
-  Review path: Settings > AirVision M1 > Gesture & Hotkey Settings.
-  Evidence: Single-tap, double-tap, swipe, brightness-key, and media-key mappings are stored offline; live M1 proof is needed for firmware-delivered events.
+  Review path: Settings > AirVision M1 > Gesture & Hotkey Settings and Diagnostics Export.
+  Evidence: Single-tap, double-tap, swipe, brightness-key, and media-key mappings are stored offline. Diagnostics export the active M1 brightness-key/media-key mode, Android consumption state, step sizes, and firmware passthrough expectation; live M1 proof is needed for firmware-delivered events.
 - USB firmware-link diagnostics: M1 optional for review
   Review path: Settings > AirVision M1 > Firmware Link and Diagnostics Export.
   Evidence: Offline demo shows blocked/write-readiness states; connected M1 adds live descriptor and HID report-path context.
@@ -220,7 +220,7 @@ Windows app settings-key evidence:
 - Proof: Windows App Handoff and diagnostics export include Cyber-observed ASUS AirVision version/build/settings-key evidence for reviewer inspection without a live M1.
 - Boundary: The exported evidence omits raw HID bytes, raw USB serial values, user-specific paths, gateway endpoints, auth tokens, and chat history.
 
-Demo Mode lets reviewers verify the 18-feature AirVision companion HUD catalog, 12-row Windows app apply matrix, and Cyber-observed ASUS AirVision 1.0.7.1 settings-key evidence without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
+Demo Mode lets reviewers verify the 18-feature AirVision companion HUD catalog, 12-row Windows app apply matrix, structured M1 hardware-key diagnostics, and Cyber-observed ASUS AirVision 1.0.7.1 settings-key evidence without a live gateway or live M1. Cast and Display open Android or DeX mirror fallback settings outside the HUD. Firmware-update handoff, Windows app handoff, and diagnostics exports are user-initiated files that omit raw USB serial values; Android firmware writes remain blocked until validated ASUS HID protocol evidence exists.
 
 Reviewer evidence sources:
 
