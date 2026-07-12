@@ -205,6 +205,8 @@ text, the live M1 write-test checklist,
 all saved AirVision profile values, runtime profile metadata, compact per-profile
 runtime summaries,
 fit/clarity/text-size guidance,
+structured M1 brightness-key/media-key mapping evidence with Android consumption
+state and step sizes,
 Android demo/offline reviewer experience state, Windows-only cursor/3DoF and
 Unity mirror-window capability status, Android Cast/Display mirror fallback
 actions, a structured Windows app apply matrix that lists each ASUS Windows

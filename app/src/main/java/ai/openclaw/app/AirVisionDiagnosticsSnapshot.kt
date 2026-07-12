@@ -21,6 +21,7 @@ data class AirVisionDiagnosticsSnapshot(
     val windowsAppEvidence: AirVisionDiagnosticsWindowsAppEvidence,
     val windowsApplyMatrix: AirVisionDiagnosticsWindowsApplyMatrix,
     val companionParity: AirVisionDiagnosticsCompanionParity,
+    val hardwareKeyMapping: AirVisionDiagnosticsHardwareKeyMapping,
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
 )
@@ -381,9 +382,24 @@ data class AirVisionDiagnosticsWindowsApplyMatrixItem(
     val summary: String,
 )
 
+@Serializable
+data class AirVisionDiagnosticsHardwareKeyMapping(
+    val brightnessKeyAction: String,
+    val brightnessKeyLabel: String,
+    val brightnessKeyConsumedByAndroid: Boolean,
+    val brightnessStepPercent: Int?,
+    val distanceStepCm: Int?,
+    val scrollStepPx: Float?,
+    val mediaKeyAction: String,
+    val mediaKeyLabel: String,
+    val mediaKeyDoubleTapTimeoutMs: Long,
+    val firmwareBrightnessPassthroughPossible: Boolean,
+    val summary: String,
+)
+
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 31
+    const val VERSION = 32
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -692,6 +708,7 @@ object AirVisionDiagnosticsSnapshots {
                     translationCaptionSourceLanguage = translationCaptionSourceLanguage,
                     translationCaptionTargetLanguage = translationCaptionTargetLanguage,
                 ),
+            hardwareKeyMapping = hardwareKeyMapping(hudControls),
             hudControls =
                 AirVisionBackupHudControls(
                     singleTapAction = hudControls.singleTapAction.rawValue,
@@ -719,6 +736,48 @@ object AirVisionDiagnosticsSnapshots {
                             TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
                         ),
                 ),
+        )
+    }
+
+    private fun hardwareKeyMapping(controls: AirVisionHudControls): AirVisionDiagnosticsHardwareKeyMapping {
+        val brightnessConsumed = controls.brightnessKeyAction != AirVisionHudKeyAction.None
+        val firmwarePassthrough = controls.brightnessKeyAction == AirVisionHudKeyAction.None
+        val effect =
+            when (controls.brightnessKeyAction) {
+                AirVisionHudKeyAction.None -> "M1 firmware or Android system handles brightness keys"
+                AirVisionHudKeyAction.ScrollChat -> "brightness keys scroll the HUD chat transcript"
+                AirVisionHudKeyAction.AdjustBrightness -> "brightness keys step Android HUD dimming by 5%"
+                AirVisionHudKeyAction.AdjustDistance -> "brightness keys step virtual projection distance by 5 cm"
+            }
+        return AirVisionDiagnosticsHardwareKeyMapping(
+            brightnessKeyAction = controls.brightnessKeyAction.rawValue,
+            brightnessKeyLabel = controls.brightnessKeyAction.label,
+            brightnessKeyConsumedByAndroid = brightnessConsumed,
+            brightnessStepPercent =
+                if (controls.brightnessKeyAction == AirVisionHudKeyAction.AdjustBrightness) {
+                    5
+                } else {
+                    null
+                },
+            distanceStepCm =
+                if (controls.brightnessKeyAction == AirVisionHudKeyAction.AdjustDistance) {
+                    5
+                } else {
+                    null
+                },
+            scrollStepPx =
+                if (controls.brightnessKeyAction == AirVisionHudKeyAction.ScrollChat) {
+                    96f
+                } else {
+                    null
+                },
+            mediaKeyAction = controls.mediaKeyAction.rawValue,
+            mediaKeyLabel = controls.mediaKeyAction.label,
+            mediaKeyDoubleTapTimeoutMs = 450L,
+            firmwareBrightnessPassthroughPossible = firmwarePassthrough,
+            summary =
+                "M1 brightness keys: ${controls.brightnessKeyAction.label}; $effect; " +
+                    "media key ${controls.mediaKeyAction.label}.",
         )
     }
 

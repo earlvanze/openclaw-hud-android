@@ -117,6 +117,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val windowsAppEvidence = root.getValue("windowsAppEvidence").jsonObject
         val windowsApplyMatrix = root.getValue("windowsApplyMatrix").jsonObject
         val companionParity = root.getValue("companionParity").jsonObject
+        val hardwareKeyMapping = root.getValue("hardwareKeyMapping").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
@@ -143,7 +144,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("31", root.getValue("version").jsonPrimitive.content)
+        assertEquals("32", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -667,6 +668,18 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("Cursor Follow, Center Cursor, 3DoF, or Unity mirror when needed", spatialApply.getValue("windowsAppTarget").jsonPrimitive.content)
         assertEquals("Windows-only", spatialApply.getValue("firmwareGate").jsonPrimitive.content)
         assertEquals("true", spatialApply.getValue("windowsOnly").jsonPrimitive.content)
+        assertEquals("scroll_chat", hardwareKeyMapping.getValue("brightnessKeyAction").jsonPrimitive.content)
+        assertEquals("Scroll chat", hardwareKeyMapping.getValue("brightnessKeyLabel").jsonPrimitive.content)
+        assertEquals("true", hardwareKeyMapping.getValue("brightnessKeyConsumedByAndroid").jsonPrimitive.content)
+        assertEquals("96.0", hardwareKeyMapping.getValue("scrollStepPx").jsonPrimitive.content)
+        assertEquals("double_tap_toggle_mic", hardwareKeyMapping.getValue("mediaKeyAction").jsonPrimitive.content)
+        assertEquals("Double-tap mic", hardwareKeyMapping.getValue("mediaKeyLabel").jsonPrimitive.content)
+        assertEquals("450", hardwareKeyMapping.getValue("mediaKeyDoubleTapTimeoutMs").jsonPrimitive.content)
+        assertEquals("false", hardwareKeyMapping.getValue("firmwareBrightnessPassthroughPossible").jsonPrimitive.content)
+        assertEquals(
+            "M1 brightness keys: Scroll chat; brightness keys scroll the HUD chat transcript; media key Double-tap mic.",
+            hardwareKeyMapping.getValue("summary").jsonPrimitive.content,
+        )
         assertEquals("7", companionParity.getValue("reviewableOfflineCount").jsonPrimitive.content)
         assertEquals("6", companionParity.getValue("m1OptionalCount").jsonPrimitive.content)
         assertEquals("3", companionParity.getValue("firmwareGatedCount").jsonPrimitive.content)
@@ -1127,6 +1140,37 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("low-overhead HUD profile", lightLoadSync.getValue("androidEffect").jsonPrimitive.content)
         assertEquals("off (locked by Light Load Mode)", threeDSync.getValue("desiredValue").jsonPrimitive.content)
         assertEquals("waiting for writable HID", ipdSync.getValue("hardwareSyncStatus").jsonPrimitive.content)
+    }
+
+    @Test
+    fun fromState_exportsBrightnessKeyAdjustmentMapping() {
+        val encoded =
+            AirVisionDiagnosticsSnapshots.encode(
+                AirVisionDiagnosticsSnapshots.fromState(
+                    usbState = AirVisionUsbState(),
+                    displaySettings = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working),
+                    hudControls = AirVisionHudControls(brightnessKeyAction = AirVisionHudKeyAction.AdjustBrightness),
+                    appLanguage = AirVisionAppLanguage.System,
+                    startupDestination = AirVisionStartupDestination.Hud,
+                    hudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
+                    demoModeEnabled = false,
+                ),
+            )
+        val hardwareKeyMapping =
+            Json.parseToJsonElement(encoded)
+                .jsonObject
+                .getValue("hardwareKeyMapping")
+                .jsonObject
+
+        assertEquals("adjust_brightness", hardwareKeyMapping.getValue("brightnessKeyAction").jsonPrimitive.content)
+        assertEquals("Adjust brightness", hardwareKeyMapping.getValue("brightnessKeyLabel").jsonPrimitive.content)
+        assertEquals("true", hardwareKeyMapping.getValue("brightnessKeyConsumedByAndroid").jsonPrimitive.content)
+        assertEquals("5", hardwareKeyMapping.getValue("brightnessStepPercent").jsonPrimitive.content)
+        assertEquals("false", hardwareKeyMapping.getValue("firmwareBrightnessPassthroughPossible").jsonPrimitive.content)
+        assertEquals(
+            "M1 brightness keys: Adjust brightness; brightness keys step Android HUD dimming by 5%; media key Double-tap mic.",
+            hardwareKeyMapping.getValue("summary").jsonPrimitive.content,
+        )
     }
 
     private fun diagnosticsProfileBackup(activeSettings: AirVisionDisplaySettings): AirVisionProfileBackup {

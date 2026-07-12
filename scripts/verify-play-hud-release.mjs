@@ -501,6 +501,9 @@ async function verifyReadmeAirVisionParity() {
     "profile backup/restore readiness",
     "all saved AirVision profile values",
     "runtime profile metadata",
+    "structured M1 brightness-key/media-key mapping evidence",
+    "Android consumption",
+    "step sizes",
   ]);
   requireIncludes("README AirVision Windows app handoff", readme, [
     "Windows App Handoff",
