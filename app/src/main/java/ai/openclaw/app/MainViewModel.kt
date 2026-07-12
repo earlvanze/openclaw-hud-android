@@ -403,7 +403,8 @@ class MainViewModel(
     }
 
     fun setSpeakerEnabled(enabled: Boolean) {
-        ensureRuntime().setSpeakerEnabled(enabled)
+        prefs.setSpeakerEnabled(enabled)
+        runtimeRef.value?.setSpeakerEnabled(enabled)
     }
 
     fun setNativeCaptionsEnabled(enabled: Boolean) {
