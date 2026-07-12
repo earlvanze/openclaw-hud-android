@@ -18,9 +18,27 @@ Generated from `AirVisionFirmwareFeature` in `AirVisionUsbController.kt`. Run `n
 - Validated captures: 0/9
 - Protocol-ready captures: 0/9
 - Blocked features: 9
+- Protocol-ready feature labels: none
+- Blocked feature labels: View Mode, Brightness, Screen distance, IPD, Splendid, Blue Light Filter, Motion Sync, Light Load Mode, 3D Mode
 - Live M1 required before writes: yes
 - Explicit user confirmation required: yes
 - Next step: Capture and validate ASUS HID report payloads on Windows/Cyber for each Windows-style control.
+
+### Live M1 Write-Test Checklist
+
+- Reconnect the AirVision M1 to the Android device.
+- Grant USB permission and confirm readable plus writable HID report paths.
+- Replay only one validated feature report sequence at a time.
+- Read back the matching report and verify checksum/framing.
+- Confirm the visible M1 state changed as expected before enabling the next feature.
+
+## Firmware Apply Preview
+
+- Status: `no_protocol_ready_commands`
+- Summary: firmware apply preview: 0 protocol-ready, 9 blocked, writes disabled
+- Protocol-ready command count: 0/9
+- Blocked feature labels: View Mode, Brightness, Screen distance, IPD, Splendid, Blue Light Filter, Motion Sync, Light Load Mode, 3D Mode
+- Commands: none
 
 ## Capture Acceptance Criteria
 

@@ -241,13 +241,14 @@ the next Windows/Cyber capture session. It is derived from the app's canonical
 AirVision firmware feature list and records probe sequences for View Mode,
 brightness, screen distance, IPD, Splendid, blue-light filter, Motion Sync,
 Light Load Mode, and 3D Mode, plus the read-only firmware write gate,
+live M1 write-test checklist, blocked-by-default firmware apply preview,
 acceptance criteria, and a per-feature capture-result template for report IDs,
 payload lengths, endpoints, sanitized payload summaries, checksum/framing
 notes, visible-state confirmation, and the Android firmware-write enablement
 decision. The in-app export also reflects imported Windows/Cyber capture
-results so protocol-ready evidence stays distinct from actual Android
-hardware-write enablement. Raw payload bytes stay in private capture files and
-are intentionally rejected by the checked-in results verifier.
+results as protocol-ready command previews so evidence stays distinct from
+actual Android hardware-write enablement. Raw payload bytes stay in private
+capture files and are intentionally rejected by the checked-in results verifier.
 `play/airvision-firmware-capture-results.json` is the machine-checked sanitized
 capture-results file. It starts with every feature blocked and must stay free of
 raw USBPcap dumps, raw USB serial numbers, tokens, and temporary review
@@ -510,9 +511,10 @@ confirms App Bundle language splits stay disabled while the app uses runtime
 AirVision language switching. It also verifies that the generated AirVision
 firmware capture worksheet is current and still contains the safety criteria
 and per-feature blocked result rows needed before Android firmware writes can
-be enabled. In-app capture-plan exports also include protocol-ready feature
-labels, blocked feature labels, and the live M1 write-test checklist so
-sanitized Windows evidence stays distinct from Android write enablement. The language split setting is
+be enabled. Capture-plan exports also include protocol-ready feature labels,
+blocked feature labels, the live M1 write-test checklist, and a firmware apply
+preview that lists protocol-ready command summaries while writes remain
+disabled. The language split setting is
 intentional: Play
 can otherwise deliver only the install-time language resources, which breaks the
 in-app AirVision companion language menu. Run

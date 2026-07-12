@@ -81,6 +81,16 @@ class AirVisionFirmwareCapturePlanTest {
         assertTrue(markdown.contains("### Live M1 Write-Test Checklist"))
         assertTrue(markdown.contains("- Reconnect the AirVision M1 to the Android device."))
         assertTrue(markdown.contains("- Read back the matching report and verify checksum/framing."))
+        assertTrue(markdown.contains("## Firmware Apply Preview"))
+        assertTrue(markdown.contains("- Status: `no_protocol_ready_commands`"))
+        assertTrue(markdown.contains("- Summary: firmware apply preview: 0 protocol-ready, 9 blocked, writes disabled"))
+        assertTrue(markdown.contains("- Protocol-ready command count: 0/9"))
+        assertTrue(
+            markdown.contains(
+                "- Blocked feature labels: View Mode, Brightness, Screen distance, IPD, Splendid, Blue Light Filter, Motion Sync, Light Load Mode, 3D Mode",
+            ),
+        )
+        assertTrue(markdown.contains("- Commands: none"))
         assertTrue(
             markdown.contains(
                 "| Brightness | 64% | software HUD dimming | capture pending | " +
@@ -143,6 +153,14 @@ class AirVisionFirmwareCapturePlanTest {
         assertTrue(markdown.contains("- Protocol-ready captures: 1/9"))
         assertTrue(markdown.contains("- Protocol-ready feature labels: Brightness"))
         assertTrue(markdown.contains("- Next step: Keep Android firmware writes disabled until the validated report sequence"))
+        assertTrue(markdown.contains("- Status: `blocked_until_live_m1_test`"))
+        assertTrue(markdown.contains("- Summary: firmware apply preview: 1 protocol-ready, 8 blocked, writes disabled"))
+        assertTrue(markdown.contains("- Protocol-ready command count: 1/9"))
+        assertTrue(
+            markdown.contains(
+                "| Brightness | 72% | 0x05 | out if=2 interrupt addr=0x2 max=64 int=1 | 0x85 | in if=2 interrupt addr=0x81 max=32 int=4 | blocked until live M1 test |",
+            ),
+        )
         assertTrue(
             markdown.contains(
                 "| Brightness | 72% | software HUD dimming | validated capture imported | " +

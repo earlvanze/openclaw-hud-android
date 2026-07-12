@@ -61,6 +61,28 @@ object AirVisionFirmwareCapturePlans {
                     add("- $item")
                 }
                 add("")
+                add("## Firmware Apply Preview")
+                add("")
+                add("- Status: `${syncPlan.applyPreview.status}`")
+                add("- Summary: ${syncPlan.applyPreview.summary}")
+                add("- Protocol-ready command count: ${syncPlan.applyPreview.readyCommandCount}/${syncPlan.items.size}")
+                add("- Blocked feature labels: ${syncPlan.applyPreview.blockedFeatureLabels.joinToString().ifBlank { "none" }}")
+                if (syncPlan.applyPreview.commands.isEmpty()) {
+                    add("- Commands: none")
+                } else {
+                    add("")
+                    add("| Feature | Desired value | Write report | Write endpoint | Readback report | Readback endpoint | Status |")
+                    add("| --- | --- | --- | --- | --- | --- | --- |")
+                    syncPlan.applyPreview.commands.forEach { command ->
+                        add(
+                            "| ${command.feature.label.escapeTableCell()} | ${command.desiredValue.escapeTableCell()} | " +
+                                "${command.writeReportId.escapeTableCell()} | ${command.writeEndpoint.escapeTableCell()} | " +
+                                "${command.readbackReportId.escapeTableCell()} | ${command.readbackEndpoint.escapeTableCell()} | " +
+                                "blocked until live M1 test |",
+                        )
+                    }
+                }
+                add("")
                 add("| Feature | Desired value | Android effect | Hardware sync | Blocked reason |")
                 add("| --- | --- | --- | --- | --- |")
                 AirVisionFirmwareFeature.entries.forEach { feature ->
