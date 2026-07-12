@@ -326,6 +326,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                             "${captureResultsImportSummary.capturedFeatureCount} captured-review, " +
                             "${captureResultsImportSummary.pendingFeatureCount} pending, " +
                             "${captureResultsImportSummary.writeEnabledFeatureCount} protocol-ready, " +
+                            "${captureResultsImportSummary.validatedBlockedFeatureCount} validated-blocked, " +
                             "${captureResultsImportSummary.blockedFeatureCount} blocked",
                         style = mobileCallout,
                         color = mobileTextSecondary,
@@ -335,6 +336,16 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         style = mobileCallout,
                         color =
                             if (captureResultsImportSummary.writeEnabledFeatureCount > 0) {
+                                mobileWarning
+                            } else {
+                                mobileTextSecondary
+                            },
+                    )
+                    Text(
+                        "- Validated but blocked: ${captureResultsImportSummary.validatedBlockedFeatureSummary}",
+                        style = mobileCallout,
+                        color =
+                            if (captureResultsImportSummary.validatedBlockedFeatureCount > 0) {
                                 mobileWarning
                             } else {
                                 mobileTextSecondary

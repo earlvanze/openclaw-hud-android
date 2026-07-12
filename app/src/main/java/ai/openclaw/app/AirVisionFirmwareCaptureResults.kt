@@ -55,8 +55,10 @@ data class AirVisionFirmwareCaptureResultsSummary(
     val capturedFeatureCount: Int,
     val pendingFeatureCount: Int,
     val protocolReadyFeatureCount: Int,
+    val validatedBlockedFeatureCount: Int,
     val blockedFeatureCount: Int,
     val protocolReadyFeatureLabels: List<String>,
+    val validatedBlockedFeatureLabels: List<String>,
     val reviewRequiredFeatureLabels: List<String>,
     val pendingFeatureLabels: List<String>,
     val blockedFeatureLabels: List<String>,
@@ -79,6 +81,9 @@ data class AirVisionFirmwareCaptureResultsSummary(
 
     val writeEnabledFeatureSummary: String
         get() = protocolReadyFeatureSummary
+
+    val validatedBlockedFeatureSummary: String
+        get() = validatedBlockedFeatureLabels.joinToString().ifBlank { "none" }
 
     val reviewRequiredFeatureSummary: String
         get() = reviewRequiredFeatureLabels.joinToString().ifBlank { "none" }
@@ -135,6 +140,10 @@ object AirVisionFirmwareCaptureResultFiles {
             results.features
                 .filter { it.androidEnablementDecision == "enable_android_write" }
                 .map { it.label }
+        val validatedBlockedLabels =
+            results.features
+                .filter { it.status == "validated" && it.androidEnablementDecision == "blocked" }
+                .map { it.label }
         val reviewRequiredLabels =
             results.features
                 .filter { it.status == "captured" }
@@ -172,8 +181,10 @@ object AirVisionFirmwareCaptureResultFiles {
             capturedFeatureCount = captured,
             pendingFeatureCount = pending,
             protocolReadyFeatureCount = protocolReadyLabels.size,
+            validatedBlockedFeatureCount = validatedBlockedLabels.size,
             blockedFeatureCount = blockedLabels.size,
             protocolReadyFeatureLabels = protocolReadyLabels,
+            validatedBlockedFeatureLabels = validatedBlockedLabels,
             reviewRequiredFeatureLabels = reviewRequiredLabels,
             pendingFeatureLabels = pendingLabels,
             blockedFeatureLabels = blockedLabels,
@@ -187,7 +198,9 @@ object AirVisionFirmwareCaptureResultFiles {
             summary =
                 "capture results: $validated validated, " +
                     "$captured captured-review, $pending pending, " +
-                    "${protocolReadyLabels.size} protocol-ready, ${blockedLabels.size} blocked",
+                    "${protocolReadyLabels.size} protocol-ready, " +
+                    "${validatedBlockedLabels.size} validated-blocked, " +
+                    "${blockedLabels.size} blocked",
         )
     }
 
