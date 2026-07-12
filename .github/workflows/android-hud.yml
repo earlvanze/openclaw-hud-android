@@ -48,6 +48,7 @@ jobs:
           node scripts/verify-play-hud-release.mjs \
             --bundle app/build/outputs/bundle/hudRelease/app-hud-release.aab \
             --skip-signature
+          node scripts/verify-android-flavor-manifests.mjs
           node scripts/verify-airvision-firmware-capture-results.mjs
           node scripts/test-airvision-firmware-capture-results.mjs
           node scripts/test-airvision-firmware-capture-plan-renderer.mjs

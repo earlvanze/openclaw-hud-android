@@ -385,7 +385,10 @@ Flavor-specific direct Gradle tasks:
 GitHub Actions gates all three release bundle variants with the same unsigned
 release flag used for local CI verification, so HUD, Play-safe Node, and full
 third-party Node release minification/package regressions are caught before
-pushes are treated as good.
+pushes are treated as good. The CI verifier also checks packaged release
+manifests and generated BuildConfig values so the HUD, Play-safe Node, and
+third-party Node flavors keep the intended package IDs, permissions, services,
+file-provider authorities, and SMS/call-log runtime gates.
 
 Google Play internal-track publishing helper:
 
