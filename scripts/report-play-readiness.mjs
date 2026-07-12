@@ -138,15 +138,22 @@ function renderMarkdown(report) {
     "## Summary",
     "",
     `- Publish ready: ${report.publishReady ? "yes" : "no"}`,
-    `- Local release gates ready: ${report.localReleaseReady ? "yes" : "no"}`,
+    `- Local artifact gates ready: ${report.localArtifactReady ? "yes" : "no"}`,
+    `- Local dry-run ready: ${report.localDryRunReady ? "yes" : "no"}`,
     `- Final Play Console fields ready: ${report.finalSubmissionReady ? "yes" : "no"}`,
     `- Allowed OAuth ready: ${report.oauthReady ? "yes" : "no"}`,
     "",
-    "## Local Gates",
+    "## Local Artifact Gates",
     "",
     markdownCheckLine("HUD release verifier", report.checks.hudRelease),
     markdownCheckLine("Play submission draft verifier", report.checks.submissionDraft),
+    "",
+    "## Local Publish Dry Run",
+    "",
     markdownCheckLine("Publish dry run", report.checks.publishDryRun),
+    "",
+    "## External Publish Gates",
+    "",
     markdownCheckLine("Play submission final verifier", report.checks.submissionFinal),
     "",
     "## OAuth",
@@ -179,20 +186,37 @@ async function main() {
     ...authCheck(account),
   }));
 
-  const localReleaseReady = checks.hudRelease.ok && checks.submissionDraft.ok && checks.publishDryRun.ok;
+  const localArtifactReady = checks.hudRelease.ok && checks.submissionDraft.ok;
+  const localDryRunReady = checks.publishDryRun.ok;
+  const localReleaseReady = localArtifactReady && localDryRunReady;
   const finalSubmissionReady = checks.submissionFinal.ok;
   const oauthReady = oauth.some((entry) => entry.ok);
   const publishReady = localReleaseReady && finalSubmissionReady && oauthReady;
 
   const blockers = [];
-  if (!checks.hudRelease.ok) blockers.push("HUD release verifier is failing.");
-  if (!checks.submissionDraft.ok) blockers.push("Draft Play submission verifier is failing.");
-  if (!checks.publishDryRun.ok) blockers.push("Publish dry run is failing.");
+  const localBlockers = [];
+  const externalBlockers = [];
+  if (!checks.hudRelease.ok) {
+    blockers.push("HUD release verifier is failing.");
+    localBlockers.push("HUD release verifier is failing.");
+  }
+  if (!checks.submissionDraft.ok) {
+    blockers.push("Draft Play submission verifier is failing.");
+    localBlockers.push("Draft Play submission verifier is failing.");
+  }
+  if (!checks.publishDryRun.ok) {
+    blockers.push("Publish dry run is failing before Play API upload.");
+    localBlockers.push("Publish dry run is failing before Play API upload.");
+  }
   if (!checks.submissionFinal.ok) {
-    blockers.push("Final Play submission verifier is failing; complete Play Console external fields and evidence.");
+    const blocker = "Final Play submission verifier is failing; complete Play Console external fields and evidence.";
+    blockers.push(blocker);
+    externalBlockers.push(blocker);
   }
   if (!oauthReady) {
-    blockers.push(`Authenticate one allowed publisher account with gcloud: ${allowedAccounts.join(" or ")}.`);
+    const blocker = `Authenticate one allowed publisher account with gcloud: ${allowedAccounts.join(" or ")}.`;
+    blockers.push(blocker);
+    externalBlockers.push(blocker);
   }
 
   const report = {
@@ -200,6 +224,8 @@ async function main() {
     packageName: "ai.openclaw.app.hud",
     allowedAccounts,
     publishReady,
+    localArtifactReady,
+    localDryRunReady,
     localReleaseReady,
     finalSubmissionReady,
     oauthReady,
@@ -221,6 +247,8 @@ async function main() {
       summary: resultSummary(entry),
     })),
     blockers,
+    localBlockers,
+    externalBlockers,
   };
 
   if (args.format === "json") {

@@ -31,8 +31,9 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 - Run `node scripts/verify-play-submission-package.mjs` before filling or
   updating Play Console App content answers.
 - Run `node scripts/report-play-readiness.mjs` before attempting preflight or
-  commit publishing. It summarizes the local release gates, final Play Console
-  fields, and allowed OAuth account status in one report.
+  commit publishing. It separates local artifact gates, the local publish
+  dry-run, final Play Console fields, and allowed OAuth account status in one
+  report.
 - Upload the fresh HUD AAB selected by the publish helper to the internal track
   first. Rebuild with `./gradlew :app:bundleHudRelease` for local dry-runs, or
   `node scripts/build-release-aab.mjs --flavor hud` for a locally signed release
@@ -62,7 +63,7 @@ Current local status:
 - Latest signed HUD AAB builds successfully from the current release commit:
   `build/release-bundles/openclaw-2026.7.12-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `f9f5b12f25386b1ccde7ec41b1f10b1d1a28cb69e247a172f850a43900c0ce52`
+  `f86e7d47183e666094114d09cfc3fbcf7b75c171db7aa5c570d25e3345488c3f`
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -78,7 +79,7 @@ Current local status:
   publisher accounts. `--auth-check` currently fails early for
   `earlvanze@gmail.com` and `earl@earlbnb.com` because only the existing service
   account is authenticated locally. `node scripts/report-play-readiness.mjs`
-  summarizes this OAuth state alongside the local release gates.
+  summarizes this OAuth state alongside the local artifact and dry-run gates.
 - `node scripts/publish-play-internal.mjs --commit` is guarded by
   `node scripts/verify-play-submission-package.mjs --final` before any Play API
   upload.

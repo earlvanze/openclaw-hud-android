@@ -174,8 +174,14 @@ exit 64
     if (readinessReport.localReleaseReady !== true) {
       throw new Error(`Readiness report should accept the local release gates in fake-gcloud mode:\n${readiness.stdout}`);
     }
+    if (readinessReport.localArtifactReady !== true || readinessReport.localDryRunReady !== true) {
+      throw new Error(`Readiness report should split ready local artifact and dry-run gates:\n${readiness.stdout}`);
+    }
     if (readinessReport.oauthReady !== false) {
       throw new Error(`Readiness report should reject missing allowed OAuth accounts:\n${readiness.stdout}`);
+    }
+    if (readinessReport.externalBlockers.length < 2 || readinessReport.localBlockers.length !== 0) {
+      throw new Error(`Readiness report should keep external blockers separate from local blockers:\n${readiness.stdout}`);
     }
     if (!readinessReport.blockers.some((blocker) => blocker.includes("Authenticate one allowed publisher account"))) {
       throw new Error(`Readiness report did not include the OAuth blocker:\n${readiness.stdout}`);

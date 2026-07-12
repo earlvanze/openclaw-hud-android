@@ -419,11 +419,13 @@ node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earlvanze@
 node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earl@earlbnb.com --commit
 ```
 
-`node scripts/report-play-readiness.mjs` summarizes the HUD release verifier,
-draft/final Play submission verifiers, publish dry-run, and both allowed OAuth
-`--auth-check` paths in one report. Use `--strict` when a release step should
-fail unless the package is actually publish-ready, and `--skip-signature` for CI
-checks against unsigned Gradle release bundles.
+`node scripts/report-play-readiness.mjs` summarizes local artifact gates, the
+local publish dry-run, final Play Console fields, and both allowed OAuth
+`--auth-check` paths in one report. Its JSON output separates `localBlockers`
+from `externalBlockers` so a clean local package is not confused with missing
+Play Console/OAuth setup. Use `--strict` when a release step should fail unless
+the package is actually publish-ready, and `--skip-signature` for CI checks
+against unsigned Gradle release bundles.
 
 The publish helper defaults to package `ai.openclaw.app.hud`, track `internal`,
 release status `draft`, and the newest HUD AAB from either
