@@ -261,36 +261,43 @@ fun HudScreen(viewModel: MainViewModel) {
             Modifier
                 .fillMaxSize()
                 .background(hudBackground)
-                .pointerInput(notificationLine?.key, airVisionHudControls.singleTapAction, airVisionHudControls.doubleTapAction) {
-                    detectTapGestures(
-                        onTap = {
-                            performHudSingleTapAction(
-                                action = airVisionHudControls.singleTapAction,
-                                notificationLine = notificationLine,
-                                viewModel = viewModel,
-                            )
-                        },
-                        onDoubleTap = {
-                            performHudDoubleTapAction(
-                                action = airVisionHudControls.doubleTapAction,
-                                notificationLine = notificationLine,
-                                viewModel = viewModel,
-                            )
-                        },
-                    )
-                }.pointerInput(chatScrollState, airVisionHudControls.swipeAction) {
-                    detectDragGestures { change, dragAmount ->
-                        if (airVisionHudControls.swipeAction != AirVisionHudSwipeAction.ScrollChat) {
-                            return@detectDragGestures
-                        }
-                        change.consume()
-                        gestureScope.launch {
-                            chatScrollState.scrollBy(-dragAmount.y)
-                        }
-                    }
-                }.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
                 .padding(safePadding),
     ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .pointerInput(notificationLine?.key, airVisionHudControls.singleTapAction, airVisionHudControls.doubleTapAction) {
+                        detectTapGestures(
+                            onTap = {
+                                performHudSingleTapAction(
+                                    action = airVisionHudControls.singleTapAction,
+                                    notificationLine = notificationLine,
+                                    viewModel = viewModel,
+                                )
+                            },
+                            onDoubleTap = {
+                                performHudDoubleTapAction(
+                                    action = airVisionHudControls.doubleTapAction,
+                                    notificationLine = notificationLine,
+                                    viewModel = viewModel,
+                                )
+                            },
+                        )
+                    }.pointerInput(chatScrollState, airVisionHudControls.swipeAction) {
+                        detectDragGestures { change, dragAmount ->
+                            if (airVisionHudControls.swipeAction != AirVisionHudSwipeAction.ScrollChat) {
+                                return@detectDragGestures
+                            }
+                            change.consume()
+                            gestureScope.launch {
+                                chatScrollState.scrollBy(-dragAmount.y)
+                            }
+                        }
+                    },
+        )
+
         HudSignalLights(
             modifier = Modifier.align(Alignment.TopEnd),
             isConnected = if (airVisionDemoModeEnabled) true else isConnected,
