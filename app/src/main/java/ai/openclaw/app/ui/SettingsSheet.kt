@@ -1,6 +1,7 @@
 package ai.openclaw.app.ui
 
 import ai.openclaw.app.AirVisionAppLanguage
+import ai.openclaw.app.AirVisionCaptionModeStatus
 import ai.openclaw.app.AirVisionCompanionParity
 import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionDiagnosticsCompanionParity
@@ -154,6 +155,14 @@ fun SettingsSheet(viewModel: MainViewModel) {
                 nativeCaptionsEnabled = nativeCaptionsEnabled,
                 translationCaptionSourceLanguage = translationCaptionSourceLanguage,
                 translationCaptionTargetLanguage = translationCaptionTargetLanguage,
+            )
+        }
+    val airVisionCaptionModeStatus =
+        remember(nativeCaptionsEnabled, translationCaptionSourceLanguage, translationCaptionTargetLanguage) {
+            AirVisionCaptionModeStatus.from(
+                nativeCaptionsEnabled = nativeCaptionsEnabled,
+                sourceLanguageCode = translationCaptionSourceLanguage,
+                targetLanguageCode = translationCaptionTargetLanguage,
             )
         }
 
@@ -1727,6 +1736,18 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
+                        headlineContent = { Text("Caption & Translation Mode", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                airVisionCaptionModeSettingsText(airVisionCaptionModeStatus),
+                                style = mobileCallout,
+                            )
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
                         headlineContent = { Text("Demo Mode", style = mobileHeadline) },
                         supportingContent = {
                             Text(
@@ -2853,6 +2874,16 @@ private fun airVisionSpatialMirrorSettingsText(controls: AirVisionHudControls): 
         status.androidMirrorFallbackActions.forEach { add(it) }
     }.joinToString("\n")
 }
+
+internal fun airVisionCaptionModeSettingsText(status: AirVisionCaptionModeStatus): String =
+    buildList {
+        add(status.summary)
+        add("Native provider: ${status.nativeProvider}")
+        add("OpenClaw fallback: ${if (status.openClawFallbackAvailable) "available" else "unavailable"}")
+        add("Fallback model: ${status.openClawFallbackModel}; thinking ${status.openClawFallbackThinking}")
+        add("Languages: ${status.sourceLanguageLabel} -> ${status.targetLanguageLabel}")
+        add("Speaker labels: ${status.speakerLabels.joinToString()}")
+    }.joinToString("\n")
 
 private fun airVisionFitAndClarityText(settings: AirVisionDisplaySettings): String {
     val effectiveHudScalePercent =
