@@ -39,8 +39,8 @@ class MainViewModel(
     val requestedHomeDestination: StateFlow<HomeDestination?> = _requestedHomeDestination
     private val _chatDraft = MutableStateFlow<String?>(null)
     val chatDraft: StateFlow<String?> = _chatDraft
-    private val _hudPromptDraft = MutableStateFlow("")
-    val hudPromptDraft: StateFlow<String> = _hudPromptDraft
+    private val hudPromptMirrorState = HudPromptMirrorState()
+    val hudPromptDraft: StateFlow<String> = hudPromptMirrorState.draft
     private val _pendingAssistantAutoSend = MutableStateFlow<String?>(null)
     val pendingAssistantAutoSend: StateFlow<String?> = _pendingAssistantAutoSend
     private val _hudScrollRequests = MutableSharedFlow<Float>(extraBufferCapacity = 16)
@@ -317,11 +317,11 @@ class MainViewModel(
     }
 
     fun setHudPromptDraft(value: String) {
-        _hudPromptDraft.value = value
+        hudPromptMirrorState.setDraft(value)
     }
 
     fun clearHudPromptDraft() {
-        _hudPromptDraft.value = ""
+        hudPromptMirrorState.clearDraft()
     }
 
     fun showHudTransientMessage(message: String) {
