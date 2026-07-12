@@ -514,6 +514,8 @@ async function verifyReadmeAirVisionParity() {
     "SoftwareIPD",
     "DisplaySplendidMode",
     "DistanceHotkey",
+    "structured M1 hardware-key mapping",
+    "brightness/media key consumption state",
     "omitting raw USB serial values",
   ]);
   requireIncludes("README AirVision companion parity states", readme, [

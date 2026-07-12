@@ -172,6 +172,13 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("- Swipe: Scroll chat"))
         assertTrue(markdown.contains("- Brightness key: Adjust brightness"))
         assertTrue(markdown.contains("- Media key: Double-tap mic"))
+        assertTrue(markdown.contains("## M1 Hardware Key Mapping"))
+        assertTrue(markdown.contains("- Brightness key action: Adjust brightness"))
+        assertTrue(markdown.contains("- Brightness key consumed by Android: yes"))
+        assertTrue(markdown.contains("- Brightness key effect: steps Android HUD dimming by 5% per press"))
+        assertTrue(markdown.contains("- Media key action: Double-tap mic"))
+        assertTrue(markdown.contains("- Media key double-tap window: 450 ms"))
+        assertTrue(markdown.contains("- Firmware brightness passthrough expected: no"))
         assertTrue(markdown.contains("## Windows-Only Spatial & Mirror Controls"))
         assertTrue(markdown.contains("- Cursor Follow: Windows AirVision app only"))
         assertTrue(markdown.contains("- Center Cursor: Windows AirVision app only"))
@@ -288,6 +295,9 @@ class AirVisionWindowsProfileHandoffTest {
 
         assertTrue(markdown.contains("- Android distance hotkey fallback: mapped to M1 brightness keys"))
         assertFalse(markdown.contains("- Android distance hotkey fallback: off"))
+        assertTrue(markdown.contains("- Brightness key action: Adjust distance"))
+        assertTrue(markdown.contains("- Brightness key effect: steps virtual projection distance by 5 cm per press"))
+        assertTrue(markdown.contains("- Firmware brightness passthrough expected: no"))
         assertTrue(markdown.contains("Android maps the distance hotkey concept to M1 brightness-key virtual-distance changes"))
         assertTrue(markdown.contains("- Embedded runtime metadata: missing; recalculated from active profile values"))
     }

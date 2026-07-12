@@ -64,6 +64,10 @@ object AirVisionWindowsProfileHandoffs {
                 add("")
                 addControls(profileBackup.hudControls)
                 add("")
+                add("## M1 Hardware Key Mapping")
+                add("")
+                addHardwareKeyMapping(profileBackup.hudControls)
+                add("")
                 add("## Windows-Only Spatial & Mirror Controls")
                 add("")
                 addWindowsOnlyControls(profileBackup.hudControls)
@@ -303,6 +307,35 @@ object AirVisionWindowsProfileHandoffs {
         add("- Swipe: ${AirVisionHudSwipeAction.fromRawValue(controls.swipeAction).label}")
         add("- Brightness key: ${AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction).label}")
         add("- Media key: ${AirVisionHudMediaKeyAction.fromRawValue(controls.mediaKeyAction).label}")
+    }
+
+    private fun MutableList<String>.addHardwareKeyMapping(controls: AirVisionBackupHudControls) {
+        val brightnessKeyAction = AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction)
+        val mediaKeyAction = AirVisionHudMediaKeyAction.fromRawValue(controls.mediaKeyAction)
+        add("- Brightness key action: ${brightnessKeyAction.label}")
+        add("- Brightness key consumed by Android: ${yesNo(brightnessKeyAction != AirVisionHudKeyAction.None)}")
+        add(
+            "- Brightness key effect: " +
+                when (brightnessKeyAction) {
+                    AirVisionHudKeyAction.None -> "firmware or Android system handles brightness keys"
+                    AirVisionHudKeyAction.ScrollChat -> "scrolls the HUD chat transcript by 96 px per press"
+                    AirVisionHudKeyAction.AdjustBrightness -> "steps Android HUD dimming by 5% per press"
+                    AirVisionHudKeyAction.AdjustDistance -> "steps virtual projection distance by 5 cm per press"
+                },
+        )
+        add("- Media key action: ${mediaKeyAction.label}")
+        add(
+            "- Media key double-tap window: " +
+                if (mediaKeyAction == AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
+                    "450 ms"
+                } else {
+                    "off"
+                },
+        )
+        add(
+            "- Firmware brightness passthrough expected: " +
+                yesNo(brightnessKeyAction == AirVisionHudKeyAction.None),
+        )
     }
 
     private fun MutableList<String>.addWindowsOnlyControls(controls: AirVisionBackupHudControls) {
