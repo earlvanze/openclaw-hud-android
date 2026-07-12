@@ -143,10 +143,10 @@ Capability states:
   Evidence: External-display targeting and physical main-screen visibility are configurable offline; final DeX/M1 topology proof needs a live external display.
 - Windows-only spatial controls: Windows-only handoff
   Review path: Settings > AirVision M1 > Windows-only spatial controls and Windows App Handoff export.
-  Evidence: Cursor Follow, Center Cursor, and 3DoF are reported as Windows-only; Android provides distance hotkey fallback state only.
+  Evidence: Cursor Follow, Center Cursor, and 3DoF are reported as Windows-only with structured fallback state. Android provides distance-hotkey mapping status, hardware touchpad passthrough status, and limitation text explaining the required ASUS Windows app surfaces.
 - Unity mirror window / projected glasses view: Windows-only handoff
   Review path: Settings > AirVision M1 > Cast, Display, and Windows App Handoff mirror fallback guidance.
-  Evidence: The ASUS Unity mirror window and Ctrl+Alt+E shortcut stay Windows-only; Android provides Cast, Display, and DeX sharing fallback guidance.
+  Evidence: The ASUS Unity mirror window and Ctrl+Alt+E shortcut stay Windows-only; Settings, diagnostics, and Windows App Handoff provide structured Cast, Display, and Samsung DeX sharing fallback actions plus limitations.
 
 Windows app apply matrix:
 

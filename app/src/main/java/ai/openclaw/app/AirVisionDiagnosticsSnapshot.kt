@@ -482,6 +482,7 @@ object AirVisionDiagnosticsSnapshots {
                     custom1 = AirVisionViewMode.Custom1.label,
                     custom2 = AirVisionViewMode.Custom2.label,
                 )
+        val spatialMirrorFallback = AirVisionSpatialMirrorFallback.from(hudControls)
         val backupRuntimeSummaries =
             backupProfiles.map { profile ->
                 profileRuntimeSummary(
@@ -698,33 +699,16 @@ object AirVisionDiagnosticsSnapshots {
                 ),
             windowsCompatibility =
                 AirVisionDiagnosticsWindowsCompatibility(
-                    cursorFollowAvailable = false,
-                    centerCursorAvailable = false,
-                    threeDofAvailable = false,
-                    unityMirrorWindowAvailable = false,
-                    androidMirrorFallback = "Use Android/DeX screen sharing outside OpenClaw HUD; the ASUS Unity mirror window is Windows-only.",
-                    androidMirrorFallbackActions =
-                        listOf(
-                            "Open Android Cast settings from AirVision M1 settings.",
-                            "Open Android Display settings from AirVision M1 settings.",
-                            "Use Samsung DeX or Android screen sharing outside OpenClaw HUD when a projected-glasses-view mirror is needed.",
-                        ),
-                    distanceHotkeyMapped = hudControls.brightnessKeyAction == AirVisionHudKeyAction.AdjustDistance,
-                    hardwareTouchpadPassthrough = true,
-                    summary =
-                        if (hudControls.brightnessKeyAction == AirVisionHudKeyAction.AdjustDistance) {
-                            "Android maps virtual-distance adjustment to M1 brightness key events; Windows cursor-follow, center-cursor, Unity mirror window, and 3DoF remain unavailable on Android."
-                        } else {
-                            "Windows cursor-follow, center-cursor, Unity mirror window, and 3DoF remain unavailable on Android; M1 touchpad brightness/media behavior can still pass through firmware."
-                        },
-                    limitations =
-                        listOf(
-                            "Cursor Follow requires Windows AirVision line-of-sight cursor control.",
-                            "Center Cursor requires Windows virtual-screen cursor ownership.",
-                            "The ASUS Unity mirror window requires the Windows AirVision app shortcut.",
-                            "ASUS documents 3DoF support as Windows laptop only; phones do not support it.",
-                            "M1 firmware can keep touchpad brightness swipe before Android receives a gesture event.",
-                        ),
+                    cursorFollowAvailable = spatialMirrorFallback.cursorFollowAvailable,
+                    centerCursorAvailable = spatialMirrorFallback.centerCursorAvailable,
+                    threeDofAvailable = spatialMirrorFallback.threeDofAvailable,
+                    unityMirrorWindowAvailable = spatialMirrorFallback.unityMirrorWindowAvailable,
+                    androidMirrorFallback = spatialMirrorFallback.androidMirrorFallback,
+                    androidMirrorFallbackActions = spatialMirrorFallback.androidMirrorFallbackActions,
+                    distanceHotkeyMapped = spatialMirrorFallback.distanceHotkeyMapped,
+                    hardwareTouchpadPassthrough = spatialMirrorFallback.hardwareTouchpadPassthrough,
+                    summary = spatialMirrorFallback.summary,
+                    limitations = spatialMirrorFallback.limitations,
                 ),
             windowsAppEvidence = AirVisionWindowsAppEvidence.diagnostics,
             windowsApplyMatrix =

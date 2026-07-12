@@ -373,21 +373,23 @@ object AirVisionWindowsProfileHandoffs {
     }
 
     private fun MutableList<String>.addWindowsOnlyControls(controls: AirVisionBackupHudControls) {
-        val brightnessKeyAction = AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction)
+        val fallback = AirVisionSpatialMirrorFallback.from(controls)
         add("- Cursor Follow: Windows AirVision app only")
         add("- Center Cursor: Windows AirVision app only")
         add("- 3DoF: Windows laptop/AirVision app only")
         add("- Unity mirror window / Ctrl+Alt+E: Windows AirVision app only")
         add(
             "- Android distance hotkey fallback: " +
-                if (brightnessKeyAction == AirVisionHudKeyAction.AdjustDistance) "mapped to M1 brightness keys" else "off",
+                if (fallback.distanceHotkeyMapped) "mapped to M1 brightness keys" else "off",
         )
-        add(
-            "- Android mirror fallback: use Android Cast, Android Display settings, or Samsung DeX screen sharing outside the HUD",
-        )
-        add(
-            "- M1 touch hardware passthrough: firmware may keep brightness/media behavior before Android receives gesture events",
-        )
+        add("- Android mirror fallback: ${fallback.androidMirrorFallback}")
+        fallback.androidMirrorFallbackActions.forEach { action ->
+            add("- Fallback action: $action")
+        }
+        add("- M1 touch hardware passthrough: ${yesNo(fallback.hardwareTouchpadPassthrough)}")
+        fallback.limitations.forEach { limitation ->
+            add("- Limitation: $limitation")
+        }
     }
 
     private fun MutableList<String>.addCompanionParity(

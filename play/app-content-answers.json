@@ -200,13 +200,13 @@
         "capability": "Windows-only spatial controls",
         "state": "Windows-only handoff",
         "reviewPath": "Settings > AirVision M1 > Windows-only spatial controls and Windows App Handoff export.",
-        "evidence": "Cursor Follow, Center Cursor, and 3DoF are reported as Windows-only; Android provides distance hotkey fallback state only."
+        "evidence": "Cursor Follow, Center Cursor, and 3DoF are reported as Windows-only with structured fallback state. Android provides distance-hotkey mapping status, hardware touchpad passthrough status, and limitation text explaining the required ASUS Windows app surfaces."
       },
       {
         "capability": "Unity mirror window / projected glasses view",
         "state": "Windows-only handoff",
         "reviewPath": "Settings > AirVision M1 > Cast, Display, and Windows App Handoff mirror fallback guidance.",
-        "evidence": "The ASUS Unity mirror window and Ctrl+Alt+E shortcut stay Windows-only; Android provides Cast, Display, and DeX sharing fallback guidance."
+        "evidence": "The ASUS Unity mirror window and Ctrl+Alt+E shortcut stay Windows-only; Settings, diagnostics, and Windows App Handoff provide structured Cast, Display, and Samsung DeX sharing fallback actions plus limitations."
       }
     ],
     "airVisionWindowsApplyMatrixReview": [

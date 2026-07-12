@@ -196,8 +196,13 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("- 3DoF: Windows laptop/AirVision app only"))
         assertTrue(markdown.contains("- Unity mirror window / Ctrl+Alt+E: Windows AirVision app only"))
         assertTrue(markdown.contains("- Android distance hotkey fallback: off"))
-        assertTrue(markdown.contains("Android Cast, Android Display settings, or Samsung DeX screen sharing outside the HUD"))
-        assertTrue(markdown.contains("firmware may keep brightness/media behavior before Android receives gesture events"))
+        assertTrue(markdown.contains("- Android mirror fallback: Use Android/DeX screen sharing outside OpenClaw HUD; the ASUS Unity mirror window is Windows-only."))
+        assertTrue(markdown.contains("- Fallback action: Open Android Cast settings from AirVision M1 settings."))
+        assertTrue(markdown.contains("- Fallback action: Open Android Display settings from AirVision M1 settings."))
+        assertTrue(markdown.contains("- Fallback action: Use Samsung DeX or Android screen sharing outside OpenClaw HUD when a projected-glasses-view mirror is needed."))
+        assertTrue(markdown.contains("- M1 touch hardware passthrough: yes"))
+        assertTrue(markdown.contains("- Limitation: Cursor Follow requires Windows AirVision line-of-sight cursor control."))
+        assertTrue(markdown.contains("- Limitation: ASUS documents 3DoF support as Windows laptop only; phones do not support it."))
         assertTrue(markdown.contains("## Android Companion Parity States"))
         assertTrue(
             markdown.contains(

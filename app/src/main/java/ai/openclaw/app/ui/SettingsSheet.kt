@@ -17,6 +17,7 @@ import ai.openclaw.app.AirVisionHudSwipeAction
 import ai.openclaw.app.AirVisionHudTouchAction
 import ai.openclaw.app.AirVisionProfileBackupPreview
 import ai.openclaw.app.AirVisionShortcutMenuStatus
+import ai.openclaw.app.AirVisionSpatialMirrorFallback
 import ai.openclaw.app.AirVisionSplendidMode
 import ai.openclaw.app.AirVisionStartupDestination
 import ai.openclaw.app.AirVisionViewMode
@@ -1632,11 +1633,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Windows Spatial & Mirror Controls", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                if (airVisionHudControls.brightnessKeyAction == AirVisionHudKeyAction.AdjustDistance) {
-                                    "Distance hotkey parity is mapped to M1 brightness keys. Cursor Follow, Center Cursor, Unity mirror window, and 3DoF remain Windows-only."
-                                } else {
-                                    "Cursor Follow, Center Cursor, Unity mirror window, and 3DoF remain Windows-only. Use Android or DeX screen sharing outside the HUD when you need a mirror fallback."
-                                },
+                                airVisionSpatialMirrorSettingsText(airVisionHudControls),
                                 style = mobileCallout,
                             )
                         },
@@ -2845,6 +2842,15 @@ private fun airVisionShortcutMenuSettingsText(
         "Volume: ${status.volume}",
         "Distance: ${status.distance}",
     ).joinToString("\n")
+}
+
+private fun airVisionSpatialMirrorSettingsText(controls: AirVisionHudControls): String {
+    val status = AirVisionSpatialMirrorFallback.from(controls)
+    return buildList {
+        add(status.summary)
+        add(status.androidMirrorFallback)
+        status.androidMirrorFallbackActions.forEach { add(it) }
+    }.joinToString("\n")
 }
 
 private fun airVisionFitAndClarityText(settings: AirVisionDisplaySettings): String {

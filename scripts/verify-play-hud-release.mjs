@@ -506,6 +506,8 @@ async function verifyReadmeAirVisionParity() {
     "step sizes",
     "shortcut-menu parity",
     "ASUS brightness/volume/distance",
+    "structured Android Cast/Display/Samsung DeX",
+    "mirror fallback actions and limitations",
     "Windows gesture catalog",
     "instant transparent",
     "shortcut-menu hold/slide",
