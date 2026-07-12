@@ -105,6 +105,7 @@ data class AirVisionDiagnosticsFirmwareSyncPlan(
     val firmwareWriteAllowedCount: Int,
     val blockedFirmwareWriteCount: Int,
     val writeGate: AirVisionDiagnosticsFirmwareWriteGate,
+    val applyPreview: AirVisionDiagnosticsFirmwareApplyPreview,
     val summary: String,
     val writeGateSummary: String,
     val detailSummary: String,
@@ -126,6 +127,33 @@ data class AirVisionDiagnosticsFirmwareWriteGate(
     val explicitUserConfirmationRequired: Boolean,
     val summary: String,
     val nextStep: String,
+)
+
+@Serializable
+data class AirVisionDiagnosticsFirmwareApplyPreview(
+    val status: String,
+    val commandCount: Int,
+    val readyCommandCount: Int,
+    val blockedFeatureLabels: List<String>,
+    val summary: String,
+    val commands: List<AirVisionDiagnosticsFirmwareApplyCommand>,
+)
+
+@Serializable
+data class AirVisionDiagnosticsFirmwareApplyCommand(
+    val feature: String,
+    val label: String,
+    val desiredValue: String,
+    val writeReportId: String,
+    val writeEndpoint: String,
+    val writePayloadSummary: String,
+    val readbackReportId: String,
+    val readbackEndpoint: String,
+    val readbackPayloadSummary: String,
+    val checksumFramingNotes: String,
+    val protocolReady: Boolean,
+    val blockedReason: String,
+    val summary: String,
 )
 
 @Serializable
@@ -984,6 +1012,7 @@ object AirVisionDiagnosticsSnapshots {
             firmwareWriteAllowedCount = firmwareWriteAllowedCount,
             blockedFirmwareWriteCount = blockedFirmwareWriteCount,
             writeGate = writeGate.toDiagnostics(),
+            applyPreview = applyPreview.toDiagnostics(),
             summary = summary,
             writeGateSummary = writeGateSummary,
             detailSummary = detailSummary,
@@ -1005,6 +1034,33 @@ object AirVisionDiagnosticsSnapshots {
             explicitUserConfirmationRequired = explicitUserConfirmationRequired,
             summary = summary,
             nextStep = nextStep,
+        )
+
+    private fun AirVisionFirmwareApplyPreview.toDiagnostics(): AirVisionDiagnosticsFirmwareApplyPreview =
+        AirVisionDiagnosticsFirmwareApplyPreview(
+            status = status,
+            commandCount = commandCount,
+            readyCommandCount = readyCommandCount,
+            blockedFeatureLabels = blockedFeatureLabels,
+            summary = summary,
+            commands = commands.map { it.toDiagnostics() },
+        )
+
+    private fun AirVisionFirmwareApplyCommand.toDiagnostics(): AirVisionDiagnosticsFirmwareApplyCommand =
+        AirVisionDiagnosticsFirmwareApplyCommand(
+            feature = feature.rawValue,
+            label = feature.label,
+            desiredValue = desiredValue,
+            writeReportId = writeReportId,
+            writeEndpoint = writeEndpoint,
+            writePayloadSummary = writePayloadSummary,
+            readbackReportId = readbackReportId,
+            readbackEndpoint = readbackEndpoint,
+            readbackPayloadSummary = readbackPayloadSummary,
+            checksumFramingNotes = checksumFramingNotes,
+            protocolReady = protocolReady,
+            blockedReason = blockedReason,
+            summary = summary,
         )
 
     private fun AirVisionFirmwareSyncItem.toDiagnostics(): AirVisionDiagnosticsFirmwareSyncItem =

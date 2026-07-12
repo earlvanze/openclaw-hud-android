@@ -969,6 +969,9 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                     firmwareWriteGateLiveTestChecklist =
                                         airVisionFirmwareSyncPlan.writeGate.liveTestChecklist,
                                     firmwareWriteGateNextStep = airVisionFirmwareSyncPlan.writeGate.nextStep,
+                                    firmwareApplyPreviewSummary = airVisionFirmwareSyncPlan.applyPreview.summary,
+                                    firmwareApplyCommandSummaries =
+                                        airVisionFirmwareSyncPlan.applyPreview.commands.map { it.summary },
                                     diagnosticsText = airVisionUsbState.diagnosticsText,
                                 ),
                                 style = mobileCallout,
@@ -2704,6 +2707,8 @@ private fun airVisionUsbStatusText(
     firmwareWriteGateBlockedFeatureLabels: List<String>,
     firmwareWriteGateLiveTestChecklist: List<String>,
     firmwareWriteGateNextStep: String,
+    firmwareApplyPreviewSummary: String,
+    firmwareApplyCommandSummaries: List<String>,
     diagnosticsText: String,
 ): String {
     val interfaces =
@@ -2731,6 +2736,10 @@ private fun airVisionUsbStatusText(
             ?.takeIf { it.isNotBlank() }
             ?.let { "live-test: $it" },
         firmwareWriteGateNextStep.takeIf { it.isNotBlank() }?.let { "next: $it" },
+        firmwareApplyPreviewSummary.takeIf { it.isNotBlank() }?.let { "apply: $it" },
+        firmwareApplyCommandSummaries
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(prefix = "apply commands: ") { it },
         diagnosticsText.takeIf { it.isNotBlank() && (!deviceLabel.isNullOrBlank() || !vendorProduct.isNullOrBlank()) },
     ).joinToString("\n")
 }

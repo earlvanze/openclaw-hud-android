@@ -49,6 +49,14 @@ class AirVisionFirmwareSyncPlanTest {
         assertEquals("firmware writes: read-only; 0/9 validated captures, 0 protocol-ready, 9 blocked", plan.writeGateSummary)
         assertEquals("read_only_capture_pending", plan.writeGate.status)
         assertEquals(false, plan.writeGate.firmwareWritesEnabled)
+        assertEquals("no_protocol_ready_commands", plan.applyPreview.status)
+        assertEquals(0, plan.applyPreview.commandCount)
+        assertEquals(0, plan.applyPreview.readyCommandCount)
+        assertEquals(AirVisionFirmwareFeature.entries.map { it.label }, plan.applyPreview.blockedFeatureLabels)
+        assertEquals(
+            "firmware apply preview: 0 protocol-ready, 9 blocked, writes disabled",
+            plan.applyPreview.summary,
+        )
         assertEquals(0, plan.writeGate.validatedCaptureCount)
         assertEquals(0, plan.writeGate.writeEnabledCaptureCount)
         assertEquals(AirVisionFirmwareFeature.entries.size, plan.writeGate.blockedFeatureCount)
@@ -165,6 +173,35 @@ class AirVisionFirmwareSyncPlanTest {
         assertEquals(AirVisionFirmwareFeature.entries.size, plan.writeGate.blockedFeatureCount)
         assertEquals(listOf("Brightness"), plan.writeGate.protocolReadyFeatureLabels)
         assertEquals(AirVisionFirmwareFeature.entries.map { it.label }, plan.writeGate.blockedFeatureLabels)
+        assertEquals("blocked_until_live_m1_test", plan.applyPreview.status)
+        assertEquals(1, plan.applyPreview.commandCount)
+        assertEquals(1, plan.applyPreview.readyCommandCount)
+        assertEquals(
+            AirVisionFirmwareFeature.entries
+                .filterNot { it == AirVisionFirmwareFeature.Brightness }
+                .map { it.label },
+            plan.applyPreview.blockedFeatureLabels,
+        )
+        assertEquals(
+            "firmware apply preview: 1 protocol-ready, 8 blocked, writes disabled",
+            plan.applyPreview.summary,
+        )
+        val command = plan.applyPreview.commands.single()
+        assertEquals(AirVisionFirmwareFeature.Brightness, command.feature)
+        assertEquals("72%", command.desiredValue)
+        assertEquals("0x05", command.writeReportId)
+        assertEquals("out if=2 interrupt addr=0x2 max=64 int=1", command.writeEndpoint)
+        assertEquals("brightness byte changes only; sanitized", command.writePayloadSummary)
+        assertEquals("0x85", command.readbackReportId)
+        assertEquals("in if=1 interrupt addr=0x81 max=32 int=4", command.readbackEndpoint)
+        assertEquals("readback brightness byte matched; sanitized", command.readbackPayloadSummary)
+        assertEquals("xor checksum observed; sanitized", command.checksumFramingNotes)
+        assertEquals(true, command.protocolReady)
+        assertTrue(command.blockedReason.contains("live M1 testing"))
+        assertEquals(
+            "Brightness=72% via 0x05 on out if=2 interrupt addr=0x2 max=64 int=1",
+            command.summary,
+        )
         assertTrue(
             plan.writeGate.blockedFeatureSummaries
                 .first { it.startsWith("Brightness:") }

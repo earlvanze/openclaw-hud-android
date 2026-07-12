@@ -105,6 +105,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val firmwareCapabilities = usb.getValue("firmwareCapabilities").jsonObject
         val firmwareSync = root.getValue("firmwareSync").jsonObject
         val firmwareWriteGate = firmwareSync.getValue("writeGate").jsonObject
+        val firmwareApplyPreview = firmwareSync.getValue("applyPreview").jsonObject
         val firmwareCaptureResults = root.getValue("firmwareCaptureResults").jsonObject
         val firmwareUpdate = root.getValue("firmwareUpdate").jsonObject
         val activeProfile = root.getValue("activeProfile").jsonObject
@@ -246,6 +247,18 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("0", firmwareWriteGate.getValue("writeEnabledCaptureCount").jsonPrimitive.content)
         assertEquals("9", firmwareWriteGate.getValue("blockedFeatureCount").jsonPrimitive.content)
         assertEquals(emptyList<String>(), firmwareWriteGate.getValue("protocolReadyFeatureLabels").jsonArray.map { it.jsonPrimitive.content })
+        assertEquals("no_protocol_ready_commands", firmwareApplyPreview.getValue("status").jsonPrimitive.content)
+        assertEquals("0", firmwareApplyPreview.getValue("commandCount").jsonPrimitive.content)
+        assertEquals("0", firmwareApplyPreview.getValue("readyCommandCount").jsonPrimitive.content)
+        assertEquals(
+            AirVisionFirmwareFeature.entries.map { it.label },
+            firmwareApplyPreview.getValue("blockedFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(emptyList<String>(), firmwareApplyPreview.getValue("commands").jsonArray.map { it.jsonObject.getValue("label").jsonPrimitive.content })
+        assertEquals(
+            "firmware apply preview: 0 protocol-ready, 9 blocked, writes disabled",
+            firmwareApplyPreview.getValue("summary").jsonPrimitive.content,
+        )
         assertEquals(
             AirVisionFirmwareFeature.entries.map { it.label },
             firmwareWriteGate.getValue("blockedFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
@@ -810,6 +823,12 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
                 .getValue("writeGate")
                 .jsonObject
+        val firmwareApplyPreview =
+            root
+                .getValue("firmwareSync")
+                .jsonObject
+                .getValue("applyPreview")
+                .jsonObject
         val source = firmwareCaptureResults.getValue("source").jsonObject
         val firmwareSyncItems =
             root
@@ -899,6 +918,33 @@ class AirVisionDiagnosticsSnapshotTest {
             AirVisionFirmwareFeature.entries.map { it.label },
             firmwareWriteGate.getValue("blockedFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
         )
+        assertEquals("blocked_until_live_m1_test", firmwareApplyPreview.getValue("status").jsonPrimitive.content)
+        assertEquals("1", firmwareApplyPreview.getValue("commandCount").jsonPrimitive.content)
+        assertEquals("1", firmwareApplyPreview.getValue("readyCommandCount").jsonPrimitive.content)
+        assertEquals(
+            AirVisionFirmwareFeature.entries
+                .filterNot { it == AirVisionFirmwareFeature.Brightness }
+                .map { it.label },
+            firmwareApplyPreview.getValue("blockedFeatureLabels").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            "firmware apply preview: 1 protocol-ready, 8 blocked, writes disabled",
+            firmwareApplyPreview.getValue("summary").jsonPrimitive.content,
+        )
+        val firmwareApplyCommand = firmwareApplyPreview.getValue("commands").jsonArray.single().jsonObject
+        assertEquals("brightness", firmwareApplyCommand.getValue("feature").jsonPrimitive.content)
+        assertEquals("Brightness", firmwareApplyCommand.getValue("label").jsonPrimitive.content)
+        assertEquals("80%", firmwareApplyCommand.getValue("desiredValue").jsonPrimitive.content)
+        assertEquals("0x05", firmwareApplyCommand.getValue("writeReportId").jsonPrimitive.content)
+        assertEquals(
+            "out if=2 interrupt addr=0x2 max=64 int=1",
+            firmwareApplyCommand.getValue("writeEndpoint").jsonPrimitive.content,
+        )
+        assertEquals(
+            "brightness byte changes only; sanitized",
+            firmwareApplyCommand.getValue("writePayloadSummary").jsonPrimitive.content,
+        )
+        assertEquals("true", firmwareApplyCommand.getValue("protocolReady").jsonPrimitive.content)
         assertTrue(
             firmwareWriteGate
                 .getValue("blockedFeatureSummaries")

@@ -4,6 +4,9 @@ data class AirVisionFirmwareSyncPlan(
     val items: List<AirVisionFirmwareSyncItem>,
     val writeGate: AirVisionFirmwareWriteGate = AirVisionFirmwareWriteGate.fromItems(items),
 ) {
+    val applyPreview: AirVisionFirmwareApplyPreview
+        get() = AirVisionFirmwareApplyPreview.fromItems(items, writeGate)
+
     val pendingHardwareSyncCount: Int
         get() = items.count { it.hardwareSyncPending }
 
@@ -30,6 +33,86 @@ data class AirVisionFirmwareSyncPlan(
 
     val detailSummary: String
         get() = "firmware desired state: ${items.joinToString("; ") { it.summary }}"
+}
+
+data class AirVisionFirmwareApplyPreview(
+    val status: String,
+    val commands: List<AirVisionFirmwareApplyCommand>,
+    val blockedFeatureLabels: List<String>,
+    val summary: String,
+) {
+    val commandCount: Int
+        get() = commands.size
+
+    val readyCommandCount: Int
+        get() = commands.count { it.protocolReady }
+
+    companion object {
+        fun fromItems(
+            items: List<AirVisionFirmwareSyncItem>,
+            writeGate: AirVisionFirmwareWriteGate,
+        ): AirVisionFirmwareApplyPreview {
+            val commands =
+                items.mapNotNull { item ->
+                    AirVisionFirmwareApplyCommand.fromItem(item)
+                }
+            val blockedLabels =
+                items
+                    .filterNot { it.hasValidatedWriteEnablement }
+                    .map { it.feature.label }
+            val status =
+                when {
+                    commands.isEmpty() -> "no_protocol_ready_commands"
+                    writeGate.firmwareWritesEnabled -> "ready_to_apply"
+                    else -> "blocked_until_live_m1_test"
+                }
+            return AirVisionFirmwareApplyPreview(
+                status = status,
+                commands = commands,
+                blockedFeatureLabels = blockedLabels,
+                summary =
+                    "firmware apply preview: ${commands.size} protocol-ready, " +
+                        "${blockedLabels.size} blocked, writes ${if (writeGate.firmwareWritesEnabled) "enabled" else "disabled"}",
+            )
+        }
+    }
+}
+
+data class AirVisionFirmwareApplyCommand(
+    val feature: AirVisionFirmwareFeature,
+    val desiredValue: String,
+    val writeReportId: String,
+    val writeEndpoint: String,
+    val writePayloadSummary: String,
+    val readbackReportId: String,
+    val readbackEndpoint: String,
+    val readbackPayloadSummary: String,
+    val checksumFramingNotes: String,
+    val protocolReady: Boolean,
+    val blockedReason: String,
+) {
+    val summary: String
+        get() = "${feature.label}=$desiredValue via $writeReportId on $writeEndpoint"
+
+    companion object {
+        fun fromItem(item: AirVisionFirmwareSyncItem): AirVisionFirmwareApplyCommand? {
+            val capture = item.captureResult ?: return null
+            if (!item.hasValidatedWriteEnablement) return null
+            return AirVisionFirmwareApplyCommand(
+                feature = item.feature,
+                desiredValue = item.desiredValue,
+                writeReportId = capture.writeReportId.orEmpty(),
+                writeEndpoint = capture.writeEndpoint.orEmpty(),
+                writePayloadSummary = capture.writePayloadSummary.orEmpty(),
+                readbackReportId = capture.readbackReportId.orEmpty(),
+                readbackEndpoint = capture.readbackEndpoint.orEmpty(),
+                readbackPayloadSummary = capture.readbackPayloadSummary.orEmpty(),
+                checksumFramingNotes = capture.checksumFramingNotes.orEmpty(),
+                protocolReady = true,
+                blockedReason = item.blockedReason,
+            )
+        }
+    }
 }
 
 data class AirVisionFirmwareWriteGate(
@@ -145,6 +228,7 @@ data class AirVisionFirmwareSyncItem(
     val firmwareWriteAllowed: Boolean,
     val requiredEvidence: List<String>,
     val blockedReason: String,
+    val captureResult: AirVisionFirmwareCaptureResult? = null,
 ) {
     val summary: String
         get() = "${feature.label}=$desiredValue ($hardwareSyncStatus)"
@@ -230,6 +314,7 @@ object AirVisionFirmwareSyncPlans {
             firmwareWriteAllowed = false,
             requiredEvidence = if (hasValidatedAndroidWriteEvidence) emptyList() else validatedWriteEvidence,
             blockedReason = blockedReason,
+            captureResult = captureResult,
         )
     }
 
