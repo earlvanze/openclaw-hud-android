@@ -409,6 +409,7 @@ Google Play internal-track publishing helper:
 node scripts/verify-play-hud-release.mjs
 node scripts/report-play-readiness.mjs
 node scripts/report-play-readiness.mjs --json
+node scripts/report-play-readiness.mjs --generated-at 2026-07-12T05:20:29Z --output play/readiness-report.md --check
 node scripts/test-play-publish-helper.mjs
 node scripts/verify-play-submission-package.mjs
 node scripts/render-play-console-evidence-template.mjs --verified-at 2026-07-10 --json-only

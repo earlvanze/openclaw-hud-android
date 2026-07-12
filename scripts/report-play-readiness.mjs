@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,6 +14,9 @@ function parseArgs(argv) {
     format: "markdown",
     strict: false,
     skipSignature: false,
+    output: null,
+    check: false,
+    generatedAt: null,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -21,10 +25,13 @@ function parseArgs(argv) {
     else if (arg === "--markdown") args.format = "markdown";
     else if (arg === "--strict") args.strict = true;
     else if (arg === "--skip-signature") args.skipSignature = true;
+    else if (arg === "--output") args.output = join(androidDir, argv[++index]);
+    else if (arg === "--check") args.check = true;
+    else if (arg === "--generated-at") args.generatedAt = argv[++index];
     else if (arg === "--help" || arg === "-h") {
       console.log(
         [
-          "Usage: node scripts/report-play-readiness.mjs [--json] [--strict] [--skip-signature]",
+          "Usage: node scripts/report-play-readiness.mjs [--json] [--strict] [--skip-signature] [--output path] [--check] [--generated-at value]",
           "",
           "Runs the local HUD release, Play submission, publish dry-run, final-readiness,",
           "and allowed OAuth account checks, then prints a publish-readiness report.",
@@ -32,6 +39,8 @@ function parseArgs(argv) {
           "Default output is Markdown. Use --json for automation.",
           "Use --strict to exit nonzero unless all publish requirements are ready.",
           "Use --skip-signature for CI checks against unsigned Gradle release bundles.",
+          "Use --output to write a tracked readiness snapshot; --check fails when it is stale.",
+          "Use --generated-at to pin generated metadata for stable checked-in snapshots.",
         ].join("\n"),
       );
       process.exit(0);
@@ -120,6 +129,14 @@ function authCheck(account) {
   ]);
 }
 
+function serviceAccountAuthCheck() {
+  return runNodeScript("publish-play-internal.mjs", ["--auth", "service-account", "--auth-check"]);
+}
+
+function serviceAccountPreflight() {
+  return runNodeScript("publish-play-internal.mjs", ["--auth", "service-account", "--preflight"]);
+}
+
 function statusLabel(ok) {
   return ok ? "ready" : "blocked";
 }
@@ -142,6 +159,7 @@ function renderMarkdown(report) {
     `- Local dry-run ready: ${report.localDryRunReady ? "yes" : "no"}`,
     `- Final Play Console fields ready: ${report.finalSubmissionReady ? "yes" : "no"}`,
     `- Allowed OAuth ready: ${report.oauthReady ? "yes" : "no"}`,
+    `- Service-account preflight ready: ${report.serviceAccountReady ? "yes" : "no"}`,
     "",
     "## Local Artifact Gates",
     "",
@@ -161,6 +179,11 @@ function renderMarkdown(report) {
     `Authenticated gcloud accounts: ${report.gcloud.accounts.length ? report.gcloud.accounts.join(", ") : "(none)"}`,
     "",
     ...report.oauth.map((entry) => markdownCheckLine(entry.account, entry)),
+    "",
+    "## Service Account",
+    "",
+    markdownCheckLine("Service-account auth", report.serviceAccount.authCheck),
+    markdownCheckLine("Service-account Play preflight", report.serviceAccount.preflight),
   ];
 
   if (report.blockers.length > 0) {
@@ -185,13 +208,34 @@ async function main() {
     account,
     ...authCheck(account),
   }));
+  const hasServiceAccount =
+    Boolean(process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_APPLICATION_CREDENTIALS);
+  const serviceAccount = {
+    configured: hasServiceAccount,
+    authCheck: hasServiceAccount
+      ? serviceAccountAuthCheck()
+      : {
+          ok: false,
+          status: 1,
+          detail: "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON or GOOGLE_APPLICATION_CREDENTIALS is not set.",
+        },
+    preflight: hasServiceAccount
+      ? serviceAccountPreflight()
+      : {
+          ok: false,
+          status: 1,
+          detail: "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON or GOOGLE_APPLICATION_CREDENTIALS is not set.",
+        },
+  };
 
   const localArtifactReady = checks.hudRelease.ok && checks.submissionDraft.ok;
   const localDryRunReady = checks.publishDryRun.ok;
   const localReleaseReady = localArtifactReady && localDryRunReady;
   const finalSubmissionReady = checks.submissionFinal.ok;
   const oauthReady = oauth.some((entry) => entry.ok);
-  const publishReady = localReleaseReady && finalSubmissionReady && oauthReady;
+  const serviceAccountReady = serviceAccount.preflight.ok;
+  const publisherAuthReady = oauthReady || serviceAccountReady;
+  const publishReady = localReleaseReady && finalSubmissionReady && publisherAuthReady;
 
   const blockers = [];
   const localBlockers = [];
@@ -213,14 +257,17 @@ async function main() {
     blockers.push(blocker);
     externalBlockers.push(blocker);
   }
-  if (!oauthReady) {
-    const blocker = `Authenticate one allowed publisher account with gcloud: ${allowedAccounts.join(" or ")}.`;
+  if (!publisherAuthReady) {
+    const serviceAccountHint = hasServiceAccount
+      ? " or grant the configured service account Play Console access to ai.openclaw.app.hud"
+      : "";
+    const blocker = `Authenticate one allowed publisher account with gcloud: ${allowedAccounts.join(" or ")}${serviceAccountHint}.`;
     blockers.push(blocker);
     externalBlockers.push(blocker);
   }
 
   const report = {
-    generatedAt: new Date().toISOString(),
+    generatedAt: args.generatedAt ?? new Date().toISOString(),
     packageName: "ai.openclaw.app.hud",
     allowedAccounts,
     publishReady,
@@ -229,7 +276,21 @@ async function main() {
     localReleaseReady,
     finalSubmissionReady,
     oauthReady,
+    serviceAccountReady,
     gcloud,
+    serviceAccount: {
+      configured: serviceAccount.configured,
+      authCheck: {
+        ok: serviceAccount.authCheck.ok,
+        status: serviceAccount.authCheck.status,
+        summary: resultSummary(serviceAccount.authCheck),
+      },
+      preflight: {
+        ok: serviceAccount.preflight.ok,
+        status: serviceAccount.preflight.status,
+        summary: resultSummary(serviceAccount.preflight),
+      },
+    },
     checks: Object.fromEntries(
       Object.entries(checks).map(([key, value]) => [
         key,
@@ -251,10 +312,21 @@ async function main() {
     externalBlockers,
   };
 
-  if (args.format === "json") {
-    console.log(JSON.stringify(report, null, 2));
+  const rendered = args.format === "json" ? `${JSON.stringify(report, null, 2)}\n` : renderMarkdown(report);
+
+  if (args.output) {
+    if (args.check) {
+      const existing = readFileSync(args.output, "utf8");
+      if (existing !== rendered) {
+        throw new Error(`Play readiness report is stale: ${args.output}`);
+      }
+      console.log(`Play readiness report verified at ${args.output}`);
+    } else {
+      writeFileSync(args.output, rendered);
+      console.log(`Play readiness report written to ${args.output}`);
+    }
   } else {
-    process.stdout.write(renderMarkdown(report));
+    process.stdout.write(rendered);
   }
 
   if (args.strict && !publishReady) process.exit(1);
