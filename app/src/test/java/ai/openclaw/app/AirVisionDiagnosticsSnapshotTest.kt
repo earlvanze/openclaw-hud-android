@@ -148,7 +148,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("35", root.getValue("version").jsonPrimitive.content)
+        assertEquals("36", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -659,10 +659,25 @@ class AirVisionDiagnosticsSnapshotTest {
                 .first { it.jsonObject.getValue("feature").jsonPrimitive.content == "Windows spatial/mirror features" }
                 .jsonObject
         assertEquals("72%", brightnessApply.getValue("windowsAppTarget").jsonPrimitive.content)
+        assertEquals("ASUS_AirVision_SDK HID brightness API", brightnessApply.getValue("windowsSurface").jsonPrimitive.content)
+        assertEquals(
+            listOf("SET_BRIGHTNESS", "GlassesBrightness", "BrightnessChanged"),
+            brightnessApply.getValue("observedSettingKeys").jsonArray.map { it.jsonPrimitive.content },
+        )
+        assertEquals(
+            "not persisted in observed Settings.json; SDK reads panel state",
+            brightnessApply.getValue("observedDefault").jsonPrimitive.content,
+        )
         assertEquals("software HUD dimming", brightnessApply.getValue("androidEffect").jsonPrimitive.content)
+        assertEquals(
+            "Capture SDK SetBrightness writes and matching brightness-change readback.",
+            brightnessApply.getValue("captureImplication").jsonPrimitive.content,
+        )
         assertEquals("true", brightnessApply.getValue("liveM1ProofRequired").jsonPrimitive.content)
         assertEquals("HID capture pending", brightnessApply.getValue("firmwareGate").jsonPrimitive.content)
         assertEquals("none", layoutApply.getValue("windowsAppTarget").jsonPrimitive.content)
+        assertEquals("OpenClaw Android Presentation-only layout", layoutApply.getValue("windowsSurface").jsonPrimitive.content)
+        assertEquals(emptyList<String>(), layoutApply.getValue("observedSettingKeys").jsonArray.map { it.jsonPrimitive.content })
         assertEquals(
             "HUD scale 120%, Upper Left, safe area 5%, physical main screen yes",
             layoutApply.getValue("androidEffect").jsonPrimitive.content,

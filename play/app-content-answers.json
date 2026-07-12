@@ -176,7 +176,7 @@
         "capability": "Windows app profile handoff",
         "state": "Reviewable offline",
         "reviewPath": "Settings > AirVision M1 > Windows App Handoff > Export.",
-        "evidence": "The Android app exports Cyber/Windows ASUS AirVision apply steps, runtime summaries, gesture mappings, structured caption/translation mode status, structured support/legal/registration metadata, and privacy reminders without raw USB serials."
+        "evidence": "The Android app exports Cyber/Windows ASUS AirVision apply steps, runtime summaries, gesture mappings, row-level observed Windows surfaces/keys/defaults/capture implications, structured caption/translation mode status, structured support/legal/registration metadata, and privacy reminders without raw USB serials."
       },
       {
         "capability": "Device information",

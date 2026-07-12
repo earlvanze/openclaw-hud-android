@@ -940,6 +940,7 @@ async function main() {
     "structured fallback state",
     "hardware touchpad passthrough",
     "Samsung DeX sharing fallback actions",
+    "row-level observed Windows surfaces/keys/defaults/capture implications",
     "structured caption-mode status",
     "S1/S2 speaker labels",
     "structured support/legal/registration metadata",

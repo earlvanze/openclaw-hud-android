@@ -131,7 +131,7 @@ Capability states:
   Evidence: Startup view, display target, language, speaker, structured native captions plus OpenClaw translation fallback status, translation languages, demo mode, structured support/legal/registration metadata, privacy/support links, and JSON backup/import are reviewable offline.
 - Windows app profile handoff: Reviewable offline
   Review path: Settings > AirVision M1 > Windows App Handoff > Export.
-  Evidence: The Android app exports Cyber/Windows ASUS AirVision apply steps, runtime summaries, gesture mappings, structured caption/translation mode status, structured support/legal/registration metadata, and privacy reminders without raw USB serials.
+  Evidence: The Android app exports Cyber/Windows ASUS AirVision apply steps, runtime summaries, gesture mappings, row-level observed Windows surfaces/keys/defaults/capture implications, structured caption/translation mode status, structured support/legal/registration metadata, and privacy reminders without raw USB serials.
 - Device information: M1 optional for review
   Review path: Settings > AirVision M1 > Firmware Link and diagnostics export.
   Evidence: USB manufacturer/product, vendor/product ID, descriptor version, and interface details populate when the M1 is connected.

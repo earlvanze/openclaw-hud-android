@@ -379,7 +379,11 @@ data class AirVisionDiagnosticsWindowsApplyMatrix(
 data class AirVisionDiagnosticsWindowsApplyMatrixItem(
     val feature: String,
     val windowsAppTarget: String,
+    val windowsSurface: String,
+    val observedSettingKeys: List<String>,
+    val observedDefault: String,
     val androidEffect: String,
+    val captureImplication: String,
     val liveM1ProofRequired: Boolean,
     val firmwareGate: String,
     val windowsOnly: Boolean,
@@ -434,7 +438,7 @@ data class AirVisionDiagnosticsShortcutMenu(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 35
+    const val VERSION = 36
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -917,7 +921,7 @@ object AirVisionDiagnosticsSnapshots {
         )
     }
 
-    private fun windowsApplyMatrix(
+    fun windowsApplyMatrix(
         profile: AirVisionBackupDisplayProfile,
         labels: AirVisionBackupCustomLabels,
         controls: AirVisionHudControls,
@@ -1052,11 +1056,16 @@ object AirVisionDiagnosticsSnapshots {
         liveM1ProofRequired: Boolean,
         firmwareGate: String,
         windowsOnly: Boolean,
-    ): AirVisionDiagnosticsWindowsApplyMatrixItem =
-        AirVisionDiagnosticsWindowsApplyMatrixItem(
+    ): AirVisionDiagnosticsWindowsApplyMatrixItem {
+        val evidence = AirVisionWindowsAppEvidence.mappingFor(feature)
+        return AirVisionDiagnosticsWindowsApplyMatrixItem(
             feature = feature,
             windowsAppTarget = windowsAppTarget,
+            windowsSurface = evidence?.windowsSurface ?: "not mapped in observed ASUS AirVision evidence",
+            observedSettingKeys = evidence?.observedSettingKeys.orEmpty(),
+            observedDefault = evidence?.observedDefault ?: "not observed",
             androidEffect = androidEffect,
+            captureImplication = evidence?.captureImplication ?: "No ASUS AirVision capture implication documented.",
             liveM1ProofRequired = liveM1ProofRequired,
             firmwareGate = firmwareGate,
             windowsOnly = windowsOnly,
@@ -1064,6 +1073,7 @@ object AirVisionDiagnosticsSnapshots {
                 "$feature: Windows target $windowsAppTarget; Android effect $androidEffect; " +
                     "live M1 proof ${yesNo(liveM1ProofRequired)}; firmware gate $firmwareGate",
         )
+    }
 
     private fun profileDisplayLabel(
         mode: AirVisionViewMode,
