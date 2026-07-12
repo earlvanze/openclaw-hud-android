@@ -27,6 +27,16 @@ class AirVisionSpatialMirrorFallbackTest {
             ),
             fallback.androidMirrorFallbackActions,
         )
+        assertEquals(2, fallback.androidMirrorFallbackLaunchActions.size)
+        assertEquals("android_cast_settings", fallback.androidMirrorFallbackLaunchActions[0].id)
+        assertEquals("Cast", fallback.androidMirrorFallbackLaunchActions[0].label)
+        assertEquals("android.settings.CAST_SETTINGS", fallback.androidMirrorFallbackLaunchActions[0].androidIntentAction)
+        assertEquals("android.settings.DISPLAY_SETTINGS", fallback.androidMirrorFallbackLaunchActions[0].fallbackIntentAction)
+        assertTrue(fallback.androidMirrorFallbackLaunchActions[0].summary.contains("falling back to Display settings"))
+        assertEquals("android_display_settings", fallback.androidMirrorFallbackLaunchActions[1].id)
+        assertEquals("Display", fallback.androidMirrorFallbackLaunchActions[1].label)
+        assertEquals("android.settings.DISPLAY_SETTINGS", fallback.androidMirrorFallbackLaunchActions[1].androidIntentAction)
+        assertEquals(null, fallback.androidMirrorFallbackLaunchActions[1].fallbackIntentAction)
         assertEquals(
             "Android maps virtual-distance adjustment to M1 brightness key events; Windows cursor-follow, center-cursor, Unity mirror window, and 3DoF remain unavailable on Android.",
             fallback.summary,

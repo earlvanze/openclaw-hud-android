@@ -7,6 +7,7 @@ data class AirVisionSpatialMirrorFallback(
     val unityMirrorWindowAvailable: Boolean,
     val androidMirrorFallback: String,
     val androidMirrorFallbackActions: List<String>,
+    val androidMirrorFallbackLaunchActions: List<AirVisionSpatialMirrorLaunchAction>,
     val distanceHotkeyMapped: Boolean,
     val hardwareTouchpadPassthrough: Boolean,
     val summary: String,
@@ -26,6 +27,23 @@ data class AirVisionSpatialMirrorFallback(
                         "Open Android Cast settings from AirVision M1 settings.",
                         "Open Android Display settings from AirVision M1 settings.",
                         "Use Samsung DeX or Android screen sharing outside OpenClaw HUD when a projected-glasses-view mirror is needed.",
+                    ),
+                androidMirrorFallbackLaunchActions =
+                    listOf(
+                        AirVisionSpatialMirrorLaunchAction(
+                            id = "android_cast_settings",
+                            label = "Cast",
+                            androidIntentAction = "android.settings.CAST_SETTINGS",
+                            fallbackIntentAction = "android.settings.DISPLAY_SETTINGS",
+                            summary = "Opens Android Cast settings, falling back to Display settings when Cast settings are unavailable.",
+                        ),
+                        AirVisionSpatialMirrorLaunchAction(
+                            id = "android_display_settings",
+                            label = "Display",
+                            androidIntentAction = "android.settings.DISPLAY_SETTINGS",
+                            fallbackIntentAction = null,
+                            summary = "Opens Android Display settings for DeX/external-display and screen-sharing fallback setup.",
+                        ),
                     ),
                 distanceHotkeyMapped = distanceHotkeyMapped,
                 hardwareTouchpadPassthrough = true,
@@ -58,3 +76,11 @@ data class AirVisionSpatialMirrorFallback(
             )
     }
 }
+
+data class AirVisionSpatialMirrorLaunchAction(
+    val id: String,
+    val label: String,
+    val androidIntentAction: String,
+    val fallbackIntentAction: String?,
+    val summary: String,
+)

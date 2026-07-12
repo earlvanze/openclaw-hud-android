@@ -157,6 +157,10 @@ fun SettingsSheet(viewModel: MainViewModel) {
                 translationCaptionTargetLanguage = translationCaptionTargetLanguage,
             )
         }
+    val airVisionSpatialMirrorFallback =
+        remember(airVisionHudControls) {
+            AirVisionSpatialMirrorFallback.from(airVisionHudControls)
+        }
     val airVisionCaptionModeStatus =
         remember(nativeCaptionsEnabled, translationCaptionSourceLanguage, translationCaptionTargetLanguage) {
             AirVisionCaptionModeStatus.from(
@@ -1654,35 +1658,27 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Windows Spatial & Mirror Controls", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                airVisionSpatialMirrorSettingsText(airVisionHudControls),
+                                airVisionSpatialMirrorSettingsText(airVisionSpatialMirrorFallback),
                                 style = mobileCallout,
                             )
                         },
                         trailingContent = {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(
-                                    onClick = {
-                                        openSettingsAction(
-                                            context = context,
-                                            action = AIR_VISION_CAST_SETTINGS_ACTION,
-                                            fallbackAction = Settings.ACTION_DISPLAY_SETTINGS,
-                                        )
-                                        viewModel.showHudTransientMessage("Opened Android Cast settings")
-                                    },
-                                    colors = settingsPrimaryButtonColors(),
-                                    shape = RoundedCornerShape(14.dp),
-                                ) {
-                                    Text("Cast", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
-                                }
-                                Button(
-                                    onClick = {
-                                        openSettingsAction(context, Settings.ACTION_DISPLAY_SETTINGS)
-                                        viewModel.showHudTransientMessage("Opened Android Display settings")
-                                    },
-                                    colors = settingsPrimaryButtonColors(),
-                                    shape = RoundedCornerShape(14.dp),
-                                ) {
-                                    Text("Display", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                                airVisionSpatialMirrorFallback.androidMirrorFallbackLaunchActions.forEach { action ->
+                                    Button(
+                                        onClick = {
+                                            openSettingsAction(
+                                                context = context,
+                                                action = action.androidIntentAction,
+                                                fallbackAction = action.fallbackIntentAction ?: Settings.ACTION_SETTINGS,
+                                            )
+                                            viewModel.showHudTransientMessage("Opened Android ${action.label} settings")
+                                        },
+                                        colors = settingsPrimaryButtonColors(),
+                                        shape = RoundedCornerShape(14.dp),
+                                    ) {
+                                        Text(action.label, style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                                    }
                                 }
                             }
                         },
@@ -2877,14 +2873,17 @@ private fun airVisionShortcutMenuSettingsText(
     ).joinToString("\n")
 }
 
-private fun airVisionSpatialMirrorSettingsText(controls: AirVisionHudControls): String {
-    val status = AirVisionSpatialMirrorFallback.from(controls)
-    return buildList {
+private fun airVisionSpatialMirrorSettingsText(status: AirVisionSpatialMirrorFallback): String =
+    buildList {
         add(status.summary)
         add(status.androidMirrorFallback)
         status.androidMirrorFallbackActions.forEach { add(it) }
+        status.androidMirrorFallbackLaunchActions.forEach { action ->
+            add("${action.label}: ${action.androidIntentAction}${action.fallbackIntentAction?.let { " fallback $it" } ?: ""}")
+        }
+        add("M1 touch hardware passthrough: ${if (status.hardwareTouchpadPassthrough) "on" else "off"}")
+        status.limitations.forEach { add(it) }
     }.joinToString("\n")
-}
 
 internal fun airVisionCaptionModeSettingsText(status: AirVisionCaptionModeStatus): String =
     buildList {
@@ -3093,8 +3092,6 @@ private fun hasMotionCapabilities(context: Context): Boolean {
 
 private fun isAssistantRoleAvailable(context: Context): Boolean =
     context.getSystemService(RoleManager::class.java).isRoleAvailable(RoleManager.ROLE_ASSISTANT)
-
-private const val AIR_VISION_CAST_SETTINGS_ACTION = "android.settings.CAST_SETTINGS"
 
 private fun isAssistantRoleHeld(context: Context): Boolean =
     context.getSystemService(RoleManager::class.java).isRoleHeld(RoleManager.ROLE_ASSISTANT)

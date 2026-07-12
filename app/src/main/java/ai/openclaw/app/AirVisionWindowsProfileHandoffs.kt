@@ -347,6 +347,10 @@ object AirVisionWindowsProfileHandoffs {
         fallback.androidMirrorFallbackActions.forEach { action ->
             add("- Fallback action: $action")
         }
+        fallback.androidMirrorFallbackLaunchActions.forEach { action ->
+            add("- Launch action ${action.label}: ${action.androidIntentAction}${action.fallbackIntentAction?.let { " (fallback $it)" } ?: ""}")
+            add("  - ${action.summary}")
+        }
         add("- M1 touch hardware passthrough: ${yesNo(fallback.hardwareTouchpadPassthrough)}")
         fallback.limitations.forEach { limitation ->
             add("- Limitation: $limitation")

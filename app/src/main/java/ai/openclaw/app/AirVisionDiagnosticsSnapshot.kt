@@ -361,10 +361,20 @@ data class AirVisionDiagnosticsWindowsCompatibility(
     val unityMirrorWindowAvailable: Boolean,
     val androidMirrorFallback: String,
     val androidMirrorFallbackActions: List<String>,
+    val androidMirrorFallbackLaunchActions: List<AirVisionDiagnosticsMirrorLaunchAction>,
     val distanceHotkeyMapped: Boolean,
     val hardwareTouchpadPassthrough: Boolean,
     val summary: String,
     val limitations: List<String>,
+)
+
+@Serializable
+data class AirVisionDiagnosticsMirrorLaunchAction(
+    val id: String,
+    val label: String,
+    val androidIntentAction: String,
+    val fallbackIntentAction: String?,
+    val summary: String,
 )
 
 @Serializable
@@ -713,6 +723,16 @@ object AirVisionDiagnosticsSnapshots {
                     unityMirrorWindowAvailable = spatialMirrorFallback.unityMirrorWindowAvailable,
                     androidMirrorFallback = spatialMirrorFallback.androidMirrorFallback,
                     androidMirrorFallbackActions = spatialMirrorFallback.androidMirrorFallbackActions,
+                    androidMirrorFallbackLaunchActions =
+                        spatialMirrorFallback.androidMirrorFallbackLaunchActions.map {
+                            AirVisionDiagnosticsMirrorLaunchAction(
+                                id = it.id,
+                                label = it.label,
+                                androidIntentAction = it.androidIntentAction,
+                                fallbackIntentAction = it.fallbackIntentAction,
+                                summary = it.summary,
+                            )
+                        },
                     distanceHotkeyMapped = spatialMirrorFallback.distanceHotkeyMapped,
                     hardwareTouchpadPassthrough = spatialMirrorFallback.hardwareTouchpadPassthrough,
                     summary = spatialMirrorFallback.summary,

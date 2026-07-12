@@ -576,6 +576,17 @@ class AirVisionDiagnosticsSnapshotTest {
             ),
             windowsCompatibility.getValue("androidMirrorFallbackActions").jsonArray.map { it.jsonPrimitive.content },
         )
+        val mirrorLaunchActions = windowsCompatibility.getValue("androidMirrorFallbackLaunchActions").jsonArray
+        assertEquals("2", mirrorLaunchActions.size.toString())
+        val castLaunchAction = mirrorLaunchActions[0].jsonObject
+        assertEquals("android_cast_settings", castLaunchAction.getValue("id").jsonPrimitive.content)
+        assertEquals("Cast", castLaunchAction.getValue("label").jsonPrimitive.content)
+        assertEquals("android.settings.CAST_SETTINGS", castLaunchAction.getValue("androidIntentAction").jsonPrimitive.content)
+        assertEquals(
+            "android.settings.DISPLAY_SETTINGS",
+            castLaunchAction.getValue("fallbackIntentAction").jsonPrimitive.content,
+        )
+        assertTrue(castLaunchAction.getValue("summary").jsonPrimitive.content.contains("falling back to Display settings"))
         assertEquals("false", windowsCompatibility.getValue("distanceHotkeyMapped").jsonPrimitive.content)
         assertEquals("true", windowsCompatibility.getValue("hardwareTouchpadPassthrough").jsonPrimitive.content)
         assertEquals(
