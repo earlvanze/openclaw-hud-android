@@ -60,6 +60,14 @@ class AirVisionFirmwareUpdateHandoffTest {
         assertTrue(markdown.contains("- Interface count: 4"))
         assertTrue(markdown.contains("- Serial status: available"))
         assertTrue(markdown.contains("- Android-visible firmware/version context: USB descriptor 1.02"))
+        assertTrue(markdown.contains("## Companion Firmware Readiness"))
+        assertTrue(markdown.contains("- Status: limited Android firmware protocol ready"))
+        assertTrue(markdown.contains("- Android action: only run firmware writes for validated protocol-ready features"))
+        assertTrue(markdown.contains("- Windows action: use Cyber/Windows ASUS app for firmware updates and any unvalidated controls"))
+        assertTrue(markdown.contains("- Firmware report path visible: yes"))
+        assertTrue(markdown.contains("- Imported protocol evidence: 1 validated, 1 protocol-ready, 8 blocked"))
+        assertTrue(markdown.contains("- Android firmware writes allowed: yes"))
+        assertTrue(markdown.contains("- Reason: sanitized capture evidence enabled 1 feature write path(s)"))
         assertTrue(markdown.contains("- HID control interface: yes"))
         assertTrue(markdown.contains("- Audio interface: yes"))
         assertTrue(markdown.contains("- Input interface: yes"))
@@ -94,9 +102,54 @@ class AirVisionFirmwareUpdateHandoffTest {
         assertTrue(markdown.contains("- USB ID: not detected"))
         assertTrue(markdown.contains("- Serial status: not captured"))
         assertTrue(markdown.contains("- Android-visible firmware/version context: pending ASUS HID protocol"))
+        assertTrue(markdown.contains("- Status: waiting for AirVision M1"))
+        assertTrue(markdown.contains("- Android action: connect the AirVision M1 to inspect USB descriptors"))
+        assertTrue(markdown.contains("- Windows action: use Cyber/Windows ASUS app for firmware updates and protocol capture"))
+        assertTrue(markdown.contains("- Firmware report path visible: no"))
+        assertTrue(markdown.contains("- Imported protocol evidence: none"))
+        assertTrue(markdown.contains("- Android firmware writes allowed: no"))
+        assertTrue(markdown.contains("- Reason: no Android-visible M1 device is present"))
         assertTrue(markdown.contains("- Status: M1 USB device not detected."))
         assertTrue(markdown.contains("- Imported capture results: none"))
         assertTrue(markdown.contains("Android firmware writes remain blocked"))
+    }
+
+    @Test
+    fun readiness_marksConnectedDeviceAsReadOnlyUntilCaptureEvidenceIsImported() {
+        val readiness =
+            AirVisionFirmwareUpdateReadiness.from(
+                usbState =
+                    AirVisionUsbState(
+                        connected = true,
+                        permissionGranted = true,
+                        hidControlInterface = true,
+                        interfaces =
+                            listOf(
+                                AirVisionUsbInterfaceInfo(
+                                    id = 2,
+                                    interfaceClass = UsbConstants.USB_CLASS_HID,
+                                    interfaceSubclass = 0,
+                                    interfaceProtocol = 0,
+                                    endpoints =
+                                        listOf(
+                                            AirVisionUsbEndpointInfo(
+                                                address = 0x02,
+                                                direction = UsbConstants.USB_DIR_OUT,
+                                                type = UsbConstants.USB_ENDPOINT_XFER_INT,
+                                                maxPacketSize = 64,
+                                                interval = 1,
+                                            ),
+                                        ),
+                                ),
+                            ),
+                    ),
+                captureResults = null,
+            )
+
+        assertTrue(readiness.firmwareReportPathVisible)
+        assertFalse(readiness.androidFirmwareWritesAllowed)
+        assertTrue(readiness.status.contains("read-only Android inspection ready"))
+        assertTrue(readiness.androidAction.contains("keep writes blocked"))
     }
 
     private fun firmwareCaptureResults(): AirVisionFirmwareCaptureResults =

@@ -10,6 +10,7 @@ object AirVisionFirmwareUpdateHandoffs {
         captureResults: AirVisionFirmwareCaptureResults? = null,
     ): String {
         val info = usbState.deviceInfo
+        val readiness = AirVisionFirmwareUpdateReadiness.from(usbState, captureResults)
         val lines =
             buildList {
                 add("# AirVision M1 Firmware Update Handoff")
@@ -32,6 +33,19 @@ object AirVisionFirmwareUpdateHandoffs {
                 add("- Serial status: ${serialStatus(info)}")
                 add("- Android-visible firmware/version context: ${firmwareVersion(info)}")
                 add("- Status: ${usbState.statusText}")
+                add("")
+                add("## Companion Firmware Readiness")
+                add("")
+                add("- Status: ${readiness.status}")
+                add("- Android action: ${readiness.androidAction}")
+                add("- Windows action: ${readiness.windowsAction}")
+                add("- Connected: ${yesNo(readiness.connected)}")
+                add("- USB permission granted: ${yesNo(readiness.permissionGranted)}")
+                add("- HID control interface: ${yesNo(readiness.hidControlInterface)}")
+                add("- Firmware report path visible: ${yesNo(readiness.firmwareReportPathVisible)}")
+                add("- Imported protocol evidence: ${readiness.importedProtocolEvidence}")
+                add("- Android firmware writes allowed: ${yesNo(readiness.androidFirmwareWritesAllowed)}")
+                add("- Reason: ${readiness.reason}")
                 add("")
                 add("## Android Interface Readiness")
                 add("")
@@ -111,4 +125,83 @@ object AirVisionFirmwareUpdateHandoffs {
             ?: "not captured"
 
     private fun yesNo(value: Boolean): String = if (value) "yes" else "no"
+}
+
+data class AirVisionFirmwareUpdateReadiness(
+    val connected: Boolean,
+    val permissionGranted: Boolean,
+    val hidControlInterface: Boolean,
+    val firmwareReportPathVisible: Boolean,
+    val androidFirmwareWritesAllowed: Boolean,
+    val importedProtocolEvidence: String,
+    val status: String,
+    val androidAction: String,
+    val windowsAction: String,
+    val reason: String,
+) {
+    companion object {
+        fun from(
+            usbState: AirVisionUsbState,
+            captureResults: AirVisionFirmwareCaptureResults?,
+        ): AirVisionFirmwareUpdateReadiness {
+            val evidenceSummary =
+                captureResults
+                    ?.let(AirVisionFirmwareCaptureResultFiles::summarize)
+            val writeEnabledCount = evidenceSummary?.writeEnabledFeatureCount ?: 0
+            val androidFirmwareWritesAllowed = writeEnabledCount > 0
+            val firmwareReportPathVisible =
+                usbState.firmwareCapabilities.protocolCaptureReady ||
+                    usbState.hidControlInterface
+            val importedEvidence =
+                evidenceSummary?.let {
+                    "${it.validatedFeatureCount} validated, ${it.writeEnabledFeatureCount} protocol-ready, ${it.blockedFeatureCount} blocked"
+                } ?: "none"
+            val status =
+                when {
+                    !usbState.connected -> "waiting for AirVision M1"
+                    !usbState.permissionGranted -> "waiting for Android USB permission"
+                    androidFirmwareWritesAllowed -> "limited Android firmware protocol ready"
+                    firmwareReportPathVisible -> "read-only Android inspection ready"
+                    else -> "connected without firmware report path"
+                }
+            val androidAction =
+                when {
+                    !usbState.connected -> "connect the AirVision M1 to inspect USB descriptors"
+                    !usbState.permissionGranted -> "grant USB permission before export or capture planning"
+                    androidFirmwareWritesAllowed ->
+                        "only run firmware writes for validated protocol-ready features"
+                    firmwareReportPathVisible ->
+                        "export diagnostics, capture plan, or Windows handoff; keep writes blocked"
+                    else -> "export device identity and continue through Windows ASUS app"
+                }
+            val windowsAction =
+                if (androidFirmwareWritesAllowed) {
+                    "use Cyber/Windows ASUS app for firmware updates and any unvalidated controls"
+                } else {
+                    "use Cyber/Windows ASUS app for firmware updates and protocol capture"
+                }
+            val reason =
+                when {
+                    !usbState.connected -> "no Android-visible M1 device is present"
+                    !usbState.permissionGranted -> "Android cannot inspect interfaces until USB permission is granted"
+                    androidFirmwareWritesAllowed ->
+                        "sanitized capture evidence enabled $writeEnabledCount feature write path(s)"
+                    firmwareReportPathVisible ->
+                        "Android can see M1 control/report context, but no imported evidence enables writes"
+                    else -> "the connected descriptor does not expose a usable HID report path"
+                }
+            return AirVisionFirmwareUpdateReadiness(
+                connected = usbState.connected,
+                permissionGranted = usbState.permissionGranted,
+                hidControlInterface = usbState.hidControlInterface,
+                firmwareReportPathVisible = firmwareReportPathVisible,
+                androidFirmwareWritesAllowed = androidFirmwareWritesAllowed,
+                importedProtocolEvidence = importedEvidence,
+                status = status,
+                androidAction = androidAction,
+                windowsAction = windowsAction,
+                reason = reason,
+            )
+        }
+    }
 }

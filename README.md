@@ -187,7 +187,10 @@ future ASUS protocol capture work. Firmware Updates can export an AirVision M1
 firmware-update handoff for Windows/Cyber ASUS AirVision app sessions with
 Android-visible USB descriptor/version context, interface readiness, sanitized
 imported protocol-capture evidence, ASUS support links, and privacy reminders
-that omit raw USB serial values. Firmware Link can
+that omit raw USB serial values. The export now includes a companion firmware
+readiness block that separates connected/permission/HID report-path state,
+imported protocol evidence, Android write allow/deny state, and the required
+Cyber/Windows ASUS app action for updates or protocol capture. Firmware Link can
 also export an AirVision diagnostics JSON snapshot containing current USB
 readiness, descriptor summaries, derived readable/writable HID report paths with
 endpoint addresses and packet sizes, USB class/subclass/protocol, interface
