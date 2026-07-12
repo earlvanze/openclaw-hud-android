@@ -713,7 +713,7 @@ class SecurePrefs(
 
     fun setAirVisionIpdMm(value: Int) {
         if (!_airVisionDisplaySettings.value.ipdAdjustmentEnabled) return
-        val normalized = AirVisionDisplaySettings.normalizeIpdMm(value)
+        val normalized = AirVisionDisplaySettings.normalizeAsusIpdMm(value)
         val viewMode = _airVisionDisplaySettings.value.viewMode
         plainPrefs.edit {
             putInt(AIR_VISION_IPD_MM_KEY, normalized)

@@ -1375,9 +1375,9 @@ fun SettingsSheet(viewModel: MainViewModel) {
                             },
                         value = airVisionDisplaySettings.ipdMm.toFloat(),
                         valueRange =
-                            AirVisionDisplaySettings.MIN_IPD_MM
+                            AirVisionDisplaySettings.MIN_ASUS_IPD_MM
                                 .toFloat()
-                                .rangeTo(AirVisionDisplaySettings.MAX_IPD_MM.toFloat()),
+                                .rangeTo(AirVisionDisplaySettings.MAX_ASUS_IPD_MM.toFloat()),
                         enabled = airVisionDisplaySettings.ipdAdjustmentEnabled,
                         onValueChange = { viewModel.setAirVisionIpdMm(it.roundToInt()) },
                     )

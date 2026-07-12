@@ -26,6 +26,17 @@ class AirVisionDisplaySettingsTest {
     }
 
     @Test
+    fun normalizeAsusIpdMm_usesDocumentedCompanionRange() {
+        assertEquals(AirVisionDisplaySettings.MIN_ASUS_IPD_MM, AirVisionDisplaySettings.normalizeAsusIpdMm(40))
+        assertEquals(67, AirVisionDisplaySettings.normalizeAsusIpdMm(67))
+        assertEquals(AirVisionDisplaySettings.MAX_ASUS_IPD_MM, AirVisionDisplaySettings.normalizeAsusIpdMm(90))
+        assertTrue(AirVisionDisplaySettings.isWithinAsusIpdRange(54))
+        assertTrue(AirVisionDisplaySettings.isWithinAsusIpdRange(74))
+        assertEquals(false, AirVisionDisplaySettings.isWithinAsusIpdRange(53))
+        assertEquals(false, AirVisionDisplaySettings.isWithinAsusIpdRange(75))
+    }
+
+    @Test
     fun hudScaleForDistanceCm_getsSmallerAsDistanceIncreases() {
         val close = AirVisionDisplaySettings.hudScaleForDistanceCm(50)
         val far = AirVisionDisplaySettings.hudScaleForDistanceCm(120)

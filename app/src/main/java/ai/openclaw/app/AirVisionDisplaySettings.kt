@@ -126,6 +126,8 @@ data class AirVisionDisplaySettings(
         const val DEFAULT_HUD_SCALE_PERCENT = 100
         const val MIN_IPD_MM = 52
         const val MAX_IPD_MM = 78
+        const val MIN_ASUS_IPD_MM = 54
+        const val MAX_ASUS_IPD_MM = 74
         const val DEFAULT_IPD_MM = 67
         const val MIN_SAFE_AREA_PERCENT = 0
         const val MAX_SAFE_AREA_PERCENT = 20
@@ -228,6 +230,10 @@ data class AirVisionDisplaySettings(
         fun normalizeHudScalePercent(value: Int): Int = value.coerceIn(MIN_HUD_SCALE_PERCENT, MAX_HUD_SCALE_PERCENT)
 
         fun normalizeIpdMm(value: Int): Int = value.coerceIn(MIN_IPD_MM, MAX_IPD_MM)
+
+        fun normalizeAsusIpdMm(value: Int): Int = value.coerceIn(MIN_ASUS_IPD_MM, MAX_ASUS_IPD_MM)
+
+        fun isWithinAsusIpdRange(value: Int): Boolean = value in MIN_ASUS_IPD_MM..MAX_ASUS_IPD_MM
 
         fun normalizeSafeAreaPercent(value: Int): Int = value.coerceIn(MIN_SAFE_AREA_PERCENT, MAX_SAFE_AREA_PERCENT)
 

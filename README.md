@@ -160,7 +160,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Brightness | Implemented as software HUD dimming. Hardware brightness remains available from the M1 touch bar. |
 | Screen distance | Implemented as virtual HUD distance scaling. |
 | HUD scale / zoom | Implemented as a per-profile Android Presentation scale percentage layered with view-mode and virtual-distance scaling. |
-| IPD | Stored as a calibration value, defaulting to 67 mm. Adjustment is locked while Light Load Mode is enabled, matching the ASUS app. Firmware-level apply still needs the ASUS HID protocol. |
+| IPD | Stored as a calibration value, defaulting to 67 mm. Normal Android adjustment is clamped to the ASUS documented 53.5-74.5 mm range, represented as 54-74 mm slider stops. Adjustment is locked while Light Load Mode is enabled, matching the ASUS app. Firmware-level apply still needs the ASUS HID protocol. |
 | Fit, clarity, and text size | Implemented as derived Settings guidance and diagnostics covering the ASUS documented 53.5-74.5 mm IPD range, 3D-mode blur checks, prescription/fit reminders, Android HUD scale, virtual-distance zoom, DeX display scaling, and browser zoom fallbacks. |
 | Splendid Standard / Theater / Office / Game / Eye Care | Stored as profile settings with subtle Android HUD color previews for Theater, Office, Game, and Eye Care. True panel presets need HID support. |
 | Blue Light Filter | Implemented as Android HUD warm filtering and available only in Eye Care mode, matching the ASUS app. |

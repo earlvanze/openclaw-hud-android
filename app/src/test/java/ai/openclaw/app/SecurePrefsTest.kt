@@ -519,6 +519,23 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun airVisionIpdChange_clampsToAsusCompanionRange() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        prefs.setAirVisionViewMode(AirVisionViewMode.Working)
+        prefs.setAirVisionIpdMm(40)
+
+        assertEquals(AirVisionDisplaySettings.MIN_ASUS_IPD_MM, prefs.airVisionDisplaySettings.value.ipdMm)
+
+        prefs.setAirVisionIpdMm(90)
+
+        assertEquals(AirVisionDisplaySettings.MAX_ASUS_IPD_MM, SecurePrefs(context).airVisionDisplaySettings.value.ipdMm)
+    }
+
+    @Test
     fun airVisionBlueLightFilterChange_isLockedOutsideEyeCareMode() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
