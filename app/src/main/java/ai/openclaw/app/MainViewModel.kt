@@ -633,11 +633,13 @@ class MainViewModel(
     }
 
     fun setTranslationCaptionSourceLanguage(value: String) {
-        ensureRuntime().setTranslationCaptionSourceLanguage(value)
+        prefs.setTranslationCaptionSourceLanguage(value)
+        runtimeRef.value?.setTranslationCaptionSourceLanguage(value)
     }
 
     fun setTranslationCaptionTargetLanguage(value: String) {
-        ensureRuntime().setTranslationCaptionTargetLanguage(value)
+        prefs.setTranslationCaptionTargetLanguage(value)
+        runtimeRef.value?.setTranslationCaptionTargetLanguage(value)
     }
 
     fun refreshGatewayConnection() {
