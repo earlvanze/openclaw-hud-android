@@ -23,6 +23,7 @@ data class AirVisionDiagnosticsSnapshot(
     val companionParity: AirVisionDiagnosticsCompanionParity,
     val hardwareKeyMapping: AirVisionDiagnosticsHardwareKeyMapping,
     val windowsGestureCatalog: AirVisionDiagnosticsWindowsGestureCatalog,
+    val shortcutMenu: AirVisionDiagnosticsShortcutMenu,
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
 )
@@ -419,9 +420,19 @@ data class AirVisionDiagnosticsWindowsGestureCatalogItem(
     val notes: String,
 )
 
+@Serializable
+data class AirVisionDiagnosticsShortcutMenu(
+    val brightness: String,
+    val volume: String,
+    val distance: String,
+    val androidMappedCount: Int,
+    val firmwareOrSystemOwnedCount: Int,
+    val summary: String,
+)
+
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 33
+    const val VERSION = 34
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -732,6 +743,7 @@ object AirVisionDiagnosticsSnapshots {
                 ),
             hardwareKeyMapping = hardwareKeyMapping(hudControls),
             windowsGestureCatalog = windowsGestureCatalog(hudControls),
+            shortcutMenu = shortcutMenu(hudControls, speakerEnabled),
             hudControls =
                 AirVisionBackupHudControls(
                     singleTapAction = hudControls.singleTapAction.rawValue,
@@ -883,17 +895,32 @@ object AirVisionDiagnosticsSnapshots {
                 },
             scrollStepPx =
                 if (controls.brightnessKeyAction == AirVisionHudKeyAction.ScrollChat) {
-                    96f
+                    160f
                 } else {
                     null
                 },
             mediaKeyAction = controls.mediaKeyAction.rawValue,
             mediaKeyLabel = controls.mediaKeyAction.label,
-            mediaKeyDoubleTapTimeoutMs = 450L,
+            mediaKeyDoubleTapTimeoutMs = 500L,
             firmwareBrightnessPassthroughPossible = firmwarePassthrough,
             summary =
                 "M1 brightness keys: ${controls.brightnessKeyAction.label}; $effect; " +
                     "media key ${controls.mediaKeyAction.label}.",
+        )
+    }
+
+    private fun shortcutMenu(
+        controls: AirVisionHudControls,
+        speakerEnabled: Boolean,
+    ): AirVisionDiagnosticsShortcutMenu {
+        val status = AirVisionShortcutMenuStatus.from(controls, speakerEnabled)
+        return AirVisionDiagnosticsShortcutMenu(
+            brightness = status.brightness,
+            volume = status.volume,
+            distance = status.distance,
+            androidMappedCount = status.androidMappedCount,
+            firmwareOrSystemOwnedCount = status.firmwareOrSystemOwnedCount,
+            summary = status.summary,
         )
     }
 

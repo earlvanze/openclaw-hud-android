@@ -119,6 +119,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val companionParity = root.getValue("companionParity").jsonObject
         val hardwareKeyMapping = root.getValue("hardwareKeyMapping").jsonObject
         val windowsGestureCatalog = root.getValue("windowsGestureCatalog").jsonObject
+        val shortcutMenu = root.getValue("shortcutMenu").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
@@ -145,7 +146,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("33", root.getValue("version").jsonPrimitive.content)
+        assertEquals("34", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -676,10 +677,10 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("scroll_chat", hardwareKeyMapping.getValue("brightnessKeyAction").jsonPrimitive.content)
         assertEquals("Scroll chat", hardwareKeyMapping.getValue("brightnessKeyLabel").jsonPrimitive.content)
         assertEquals("true", hardwareKeyMapping.getValue("brightnessKeyConsumedByAndroid").jsonPrimitive.content)
-        assertEquals("96.0", hardwareKeyMapping.getValue("scrollStepPx").jsonPrimitive.content)
+        assertEquals("160.0", hardwareKeyMapping.getValue("scrollStepPx").jsonPrimitive.content)
         assertEquals("double_tap_toggle_mic", hardwareKeyMapping.getValue("mediaKeyAction").jsonPrimitive.content)
         assertEquals("Double-tap mic", hardwareKeyMapping.getValue("mediaKeyLabel").jsonPrimitive.content)
-        assertEquals("450", hardwareKeyMapping.getValue("mediaKeyDoubleTapTimeoutMs").jsonPrimitive.content)
+        assertEquals("500", hardwareKeyMapping.getValue("mediaKeyDoubleTapTimeoutMs").jsonPrimitive.content)
         assertEquals("false", hardwareKeyMapping.getValue("firmwareBrightnessPassthroughPossible").jsonPrimitive.content)
         assertEquals(
             "M1 brightness keys: Scroll chat; brightness keys scroll the HUD chat transcript; media key Double-tap mic.",
@@ -692,6 +693,24 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals(
             "Windows gesture catalog: 7 gestures, 4 Android-mapped, 3 firmware-passthrough, 1 Windows-only.",
             windowsGestureCatalog.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals(
+            "brightness keys scroll chat; panel brightness remains firmware/system owned",
+            shortcutMenu.getValue("brightness").jsonPrimitive.content,
+        )
+        assertEquals(
+            "OpenClaw speaker/TTS output muted; hardware volume route remains Android system or M1 firmware owned",
+            shortcutMenu.getValue("volume").jsonPrimitive.content,
+        )
+        assertEquals(
+            "Settings slider stores virtual projection distance; ASUS shortcut-menu distance remains firmware/Windows owned",
+            shortcutMenu.getValue("distance").jsonPrimitive.content,
+        )
+        assertEquals("0", shortcutMenu.getValue("androidMappedCount").jsonPrimitive.content)
+        assertEquals("3", shortcutMenu.getValue("firmwareOrSystemOwnedCount").jsonPrimitive.content)
+        assertEquals(
+            "Shortcut menu parity: brightness Scroll chat, volume speaker muted, distance settings-only; 0 Android-mapped, 3 firmware/system-owned.",
+            shortcutMenu.getValue("summary").jsonPrimitive.content,
         )
         val windowsGestureItems = windowsGestureCatalog.getValue("items").jsonArray
         assertTrue(

@@ -8,6 +8,7 @@ import ai.openclaw.app.AirVisionFirmwareCaptureResultsSummary
 import ai.openclaw.app.AirVisionFirmwareSyncItem
 import ai.openclaw.app.AirVisionFirmwareSyncPlans
 import ai.openclaw.app.AirVisionHudDisplayTarget
+import ai.openclaw.app.AirVisionHudControls
 import ai.openclaw.app.AirVisionHudDoubleTapAction
 import ai.openclaw.app.AirVisionHudKeyAction
 import ai.openclaw.app.AirVisionHudMediaKeyAction
@@ -15,6 +16,7 @@ import ai.openclaw.app.AirVisionHudPlacement
 import ai.openclaw.app.AirVisionHudSwipeAction
 import ai.openclaw.app.AirVisionHudTouchAction
 import ai.openclaw.app.AirVisionProfileBackupPreview
+import ai.openclaw.app.AirVisionShortcutMenuStatus
 import ai.openclaw.app.AirVisionSplendidMode
 import ai.openclaw.app.AirVisionStartupDestination
 import ai.openclaw.app.AirVisionViewMode
@@ -128,6 +130,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionUsbState by viewModel.airVisionUsbState.collectAsState()
     val airVisionFirmwareCaptureResults by viewModel.airVisionFirmwareCaptureResults.collectAsState()
     val airVisionFirmwareCaptureResultsSummary by viewModel.airVisionFirmwareCaptureResultsSummary.collectAsState()
+    val speakerEnabled by viewModel.speakerEnabled.collectAsState()
     val nativeCaptionsEnabled by viewModel.nativeCaptionsEnabled.collectAsState()
     val translationCaptionSourceLanguage by viewModel.translationCaptionSourceLanguage.collectAsState()
     val translationCaptionTargetLanguage by viewModel.translationCaptionTargetLanguage.collectAsState()
@@ -1611,6 +1614,21 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
+                        headlineContent = { Text("Shortcut Menu Parity", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                airVisionShortcutMenuSettingsText(
+                                    controls = airVisionHudControls,
+                                    speakerEnabled = speakerEnabled,
+                                ),
+                                style = mobileCallout,
+                            )
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
                         headlineContent = { Text("Windows Spatial & Mirror Controls", style = mobileHeadline) },
                         supportingContent = {
                             Text(
@@ -2815,6 +2833,19 @@ private fun airVisionCompanionParityStateLabel(state: String): String =
         "windows_only" -> "Windows-only"
         else -> state
     }
+
+private fun airVisionShortcutMenuSettingsText(
+    controls: AirVisionHudControls,
+    speakerEnabled: Boolean,
+): String {
+    val status = AirVisionShortcutMenuStatus.from(controls, speakerEnabled)
+    return listOf(
+        status.summary,
+        "Brightness: ${status.brightness}",
+        "Volume: ${status.volume}",
+        "Distance: ${status.distance}",
+    ).joinToString("\n")
+}
 
 private fun airVisionFitAndClarityText(settings: AirVisionDisplaySettings): String {
     val effectiveHudScalePercent =

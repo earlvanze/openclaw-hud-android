@@ -504,6 +504,8 @@ async function verifyReadmeAirVisionParity() {
     "structured M1 brightness-key/media-key mapping evidence",
     "Android consumption",
     "step sizes",
+    "shortcut-menu parity",
+    "ASUS brightness/volume/distance",
     "Windows gesture catalog",
     "instant transparent",
     "shortcut-menu hold/slide",
@@ -519,6 +521,7 @@ async function verifyReadmeAirVisionParity() {
     "DistanceHotkey",
     "structured M1 hardware-key mapping",
     "brightness/media key consumption state",
+    "shortcut-menu parity",
     "Windows gesture catalog entries",
     "omitting raw USB serial values",
   ]);

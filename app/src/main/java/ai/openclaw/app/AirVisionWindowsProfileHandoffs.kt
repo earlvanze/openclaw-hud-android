@@ -72,6 +72,10 @@ object AirVisionWindowsProfileHandoffs {
                 add("")
                 addWindowsGestureCatalog(profileBackup.hudControls)
                 add("")
+                add("## Shortcut Menu Parity")
+                add("")
+                addShortcutMenu(profileBackup.hudControls, profileBackup.appPreferences)
+                add("")
                 add("## Windows-Only Spatial & Mirror Controls")
                 add("")
                 addWindowsOnlyControls(profileBackup.hudControls)
@@ -322,7 +326,7 @@ object AirVisionWindowsProfileHandoffs {
             "- Brightness key effect: " +
                 when (brightnessKeyAction) {
                     AirVisionHudKeyAction.None -> "firmware or Android system handles brightness keys"
-                    AirVisionHudKeyAction.ScrollChat -> "scrolls the HUD chat transcript by 96 px per press"
+                    AirVisionHudKeyAction.ScrollChat -> "scrolls the HUD chat transcript by 160 px per press"
                     AirVisionHudKeyAction.AdjustBrightness -> "steps Android HUD dimming by 5% per press"
                     AirVisionHudKeyAction.AdjustDistance -> "steps virtual projection distance by 5 cm per press"
                 },
@@ -331,7 +335,7 @@ object AirVisionWindowsProfileHandoffs {
         add(
             "- Media key double-tap window: " +
                 if (mediaKeyAction == AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
-                    "450 ms"
+                    "500 ms"
                 } else {
                     "off"
                 },
@@ -353,6 +357,19 @@ object AirVisionWindowsProfileHandoffs {
         add("- One-finger double tap: ASUS positioning/floating switch; Android HUD double tap ${doubleTapAction.label}.")
         add("- Two-finger press and hold 1.5 seconds: ASUS 3D toggle; Android stores 3D preference and keeps panel write firmware-gated.")
         add("- One-finger press and hold 1.5 seconds, then slide: ASUS shortcut menu for brightness, volume, and distance; Android maps brightness/distance through HUD controls and speaker routing through AirVision preferences.")
+    }
+
+    private fun MutableList<String>.addShortcutMenu(
+        controls: AirVisionBackupHudControls,
+        preferences: AirVisionBackupAppPreferences,
+    ) {
+        val status = AirVisionShortcutMenuStatus.from(controls, preferences)
+        add("- ${status.summary}")
+        add("- Brightness: ${status.brightness}")
+        add("- Volume: ${status.volume}")
+        add("- Distance: ${status.distance}")
+        add("- Android-mapped controls: ${status.androidMappedCount}")
+        add("- Firmware/system-owned controls: ${status.firmwareOrSystemOwnedCount}")
     }
 
     private fun MutableList<String>.addWindowsOnlyControls(controls: AirVisionBackupHudControls) {

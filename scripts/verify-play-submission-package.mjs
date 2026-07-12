@@ -931,6 +931,8 @@ async function main() {
     "brightness-key/media-key mode",
     "Android consumption state",
     "step sizes",
+    "shortcut-menu parity",
+    "brightness/volume/distance",
     "firmware passthrough expectation",
     "Windows gesture catalog",
     "instant transparent",
