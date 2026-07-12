@@ -520,6 +520,8 @@ async function verifyReadmeAirVisionParity() {
   ]);
   requireIncludes("README AirVision fit and clarity guidance", readme, [
     "53.5-74.5 mm IPD range",
+    "54-74 mm slider stops",
+    "Adjustment is locked while Light Load Mode is enabled",
     "3D-mode blur checks",
     "fit/clarity/text-size guidance",
   ]);
@@ -562,6 +564,11 @@ async function verifyGeneratedAirVisionFirmwareCapturePlan() {
   const capturePlan = await readFile(airVisionFirmwareCapturePlanPath, "utf8");
   requireIncludes("AirVision firmware capture worksheet", capturePlan, [
     "## Capture Acceptance Criteria",
+    "## Firmware Apply Preview",
+    "firmware apply preview: 0 protocol-ready",
+    "Protocol-ready command count: 0/9",
+    "Blocked feature labels: View Mode, Brightness, Screen distance, IPD, Splendid, Blue Light Filter, Motion Sync, Light Load Mode, 3D Mode",
+    "- Commands: none",
     "exact Windows write report ID",
     "sanitized payload summary",
     "Keep raw bytes only in private capture files.",

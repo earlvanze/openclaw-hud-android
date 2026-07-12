@@ -71,7 +71,7 @@ const validReadme = [
   "| Working / Gaming / Infinity / Custom modes | Profiles, custom labels, backup/import, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |",
   "| Brightness | Software HUD dimming. |",
   "| Screen distance | Virtual HUD distance scaling. |",
-  "| IPD | Calibration value. |",
+  "| IPD | Calibration value clamped to the ASUS documented 53.5-74.5 mm range as 54-74 mm slider stops. Adjustment is locked while Light Load Mode is enabled. |",
   "| Fit, clarity, and text size | 53.5-74.5 mm IPD range, 3D-mode blur checks, and fit/clarity/text-size guidance. |",
   "| Splendid Standard / Theater / Office / Game / Eye Care | Stored profile setting. |",
   "| Blue Light Filter | HUD warm filtering. |",
@@ -236,7 +236,13 @@ async function main() {
     }
 
     await writeListing(listingPath);
-    await writeFile(readmePath, validReadme.replace("| IPD | Calibration value. |", ""));
+    await writeFile(
+      readmePath,
+      validReadme.replace(
+        "| IPD | Calibration value clamped to the ASUS documented 53.5-74.5 mm range as 54-74 mm slider stops. Adjustment is locked while Light Load Mode is enabled. |",
+        "",
+      ),
+    );
     const readmeFailing = runListingVerifier(gradlePath, localePath, listingPath, readmePath, settingsSheetPath);
     if (readmeFailing.status === 0 || !readmeFailing.stderr.includes("README Windows AirVision feature matrix")) {
       throw new Error(
@@ -245,6 +251,22 @@ async function main() {
           `status=${readmeFailing.status}`,
           `stderr=${readmeFailing.stderr.trim()}`,
           `stdout=${readmeFailing.stdout.trim()}`,
+        ].join("\n"),
+      );
+    }
+
+    await writeFile(readmePath, validReadme.replace("54-74 mm slider stops", "generic slider stops"));
+    const readmeIpdFailing = runListingVerifier(gradlePath, localePath, listingPath, readmePath, settingsSheetPath);
+    if (
+      readmeIpdFailing.status === 0 ||
+      !readmeIpdFailing.stderr.includes("README AirVision fit and clarity guidance")
+    ) {
+      throw new Error(
+        [
+          "Expected verifier to reject README text that omits the ASUS IPD clamp.",
+          `status=${readmeIpdFailing.status}`,
+          `stderr=${readmeIpdFailing.stderr.trim()}`,
+          `stdout=${readmeIpdFailing.stdout.trim()}`,
         ].join("\n"),
       );
     }
