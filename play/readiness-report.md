@@ -6,7 +6,7 @@ Generated: 2026-07-12T05:20:29Z
 
 - Publish ready: no
 - Local artifact gates ready: yes
-- Local dry-run ready: no
+- Local dry-run ready: yes
 - Final Play Console fields ready: no
 - Allowed OAuth ready: no
 - Service-account preflight ready: no
@@ -18,7 +18,7 @@ Generated: 2026-07-12T05:20:29Z
 
 ## Local Publish Dry Run
 
-- [ ] Publish dry run: blocked
+- [x] Publish dry run: ready
 
 ## External Publish Gates
 
@@ -40,6 +40,5 @@ Authenticated gcloud accounts: rclone@sacred-result-442018-v2.iam.gserviceaccoun
 
 ## Blockers
 
-- Publish dry run is failing before Play API upload.
 - Final Play submission verifier is failing; complete Play Console external fields and evidence.
 - Authenticate one allowed publisher account with gcloud: earlvanze@gmail.com or earl@earlbnb.com or resolve service-account preflight blocker play_package_missing_or_ungranted.
