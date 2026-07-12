@@ -35,7 +35,7 @@ class AirVisionFirmwareCaptureResultsTest {
         assertTrue(summary.safetyPreviewText.contains("raw USB captures"))
         assertTrue(summary.safetyPreviewText.contains("token-shaped values"))
         assertEquals("host=Cyber, tool=USBPcap/Wireshark", summary.sourceSummary)
-        assertEquals("capture results: 0 validated, 0 captured-review, 9 pending, 0 write-enabled, 9 blocked", summary.summary)
+        assertEquals("capture results: 0 validated, 0 captured-review, 9 pending, 0 protocol-ready, 9 blocked", summary.summary)
     }
 
     @Test
@@ -107,7 +107,7 @@ class AirVisionFirmwareCaptureResultsTest {
         assertTrue(summary.pendingFeatureLabels.contains("IPD"))
         assertTrue(summary.pendingFeatureSummary.contains("IPD"))
         assertEquals(
-            "capture results: 0 validated, 1 captured-review, 8 pending, 0 write-enabled, 9 blocked",
+            "capture results: 0 validated, 1 captured-review, 8 pending, 0 protocol-ready, 9 blocked",
             summary.summary,
         )
     }

@@ -39,6 +39,8 @@ class MainViewModel(
     val requestedHomeDestination: StateFlow<HomeDestination?> = _requestedHomeDestination
     private val _chatDraft = MutableStateFlow<String?>(null)
     val chatDraft: StateFlow<String?> = _chatDraft
+    private val _hudPromptDraft = MutableStateFlow("")
+    val hudPromptDraft: StateFlow<String> = _hudPromptDraft
     private val _pendingAssistantAutoSend = MutableStateFlow<String?>(null)
     val pendingAssistantAutoSend: StateFlow<String?> = _pendingAssistantAutoSend
     private val _hudScrollRequests = MutableSharedFlow<Float>(extraBufferCapacity = 16)
@@ -312,6 +314,14 @@ class MainViewModel(
 
     fun requestHudScroll(deltaPx: Float) {
         _hudScrollRequests.tryEmit(deltaPx)
+    }
+
+    fun setHudPromptDraft(value: String) {
+        _hudPromptDraft.value = value
+    }
+
+    fun clearHudPromptDraft() {
+        _hudPromptDraft.value = ""
     }
 
     fun showHudTransientMessage(message: String) {
@@ -729,6 +739,7 @@ class MainViewModel(
         thinking: String,
         attachments: List<OutgoingAttachment>,
     ) {
+        clearHudPromptDraft()
         ensureRuntime().sendChat(message = message, thinking = thinking, attachments = attachments)
     }
 

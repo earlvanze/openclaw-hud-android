@@ -56,7 +56,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,6 +76,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -123,7 +123,7 @@ fun HudScreen(viewModel: MainViewModel) {
     val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
     val airVisionDemoModeEnabled by viewModel.airVisionDemoModeEnabled.collectAsState()
     val airVisionIdentifyToken by viewModel.airVisionIdentifyToken.collectAsState()
-    var prompt by rememberSaveable { mutableStateOf("") }
+    val prompt by viewModel.hudPromptDraft.collectAsState()
     var identifyVisible by remember { mutableStateOf(false) }
     var transientHudText by remember { mutableStateOf<String?>(null) }
 
@@ -268,6 +268,7 @@ fun HudScreen(viewModel: MainViewModel) {
             modifier =
                 Modifier
                     .fillMaxSize()
+                    .zIndex(-1f)
                     .pointerInput(notificationLine?.key, airVisionHudControls.singleTapAction, airVisionHudControls.doubleTapAction) {
                         detectTapGestures(
                             onTap = {
@@ -298,8 +299,33 @@ fun HudScreen(viewModel: MainViewModel) {
                     },
         )
 
+        if (splendidOverlayAlpha > 0f) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .zIndex(0f)
+                        .background(
+                            hudSplendidOverlayColor(airVisionSettings.splendidMode)
+                                .copy(alpha = splendidOverlayAlpha),
+                        ),
+            )
+        }
+        if (dimAlpha > 0f) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .zIndex(0f)
+                        .background(Color.Black.copy(alpha = dimAlpha)),
+            )
+        }
+
         HudSignalLights(
-            modifier = Modifier.align(Alignment.TopEnd),
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .zIndex(1f),
             isConnected = if (airVisionDemoModeEnabled) true else isConnected,
             micEnabled = if (airVisionDemoModeEnabled) true else micEnabled,
             micInputLevel = if (airVisionDemoModeEnabled) 0.25f else micInputLevel,
@@ -337,6 +363,7 @@ fun HudScreen(viewModel: MainViewModel) {
             modifier =
                 Modifier
                     .align(layoutSpec.alignment)
+                    .zIndex(1f)
                     .fillMaxWidth(layoutSpec.widthFraction)
                     .fillMaxHeight(),
         ) {
@@ -359,6 +386,10 @@ fun HudScreen(viewModel: MainViewModel) {
                         line = line,
                         onDismiss = { viewModel.dismissNotification(line.key) },
                     )
+                }
+
+                prompt.trim().takeIf { it.isNotEmpty() && !airVisionDemoModeEnabled }?.let { draft ->
+                    HudPromptMirror(draft = draft)
                 }
 
                 if (airVisionDemoModeEnabled) {
@@ -426,11 +457,11 @@ fun HudScreen(viewModel: MainViewModel) {
             HudChatInputBar(
                 prompt = prompt,
                 enabled = !airVisionDemoModeEnabled && healthOk && pendingRunCount == 0,
-                onPromptChange = { prompt = it },
+                onPromptChange = viewModel::setHudPromptDraft,
                 onSend = {
                     val text = prompt.trim()
                     if (text.isNotEmpty()) {
-                        prompt = ""
+                        viewModel.clearHudPromptDraft()
                         viewModel.sendChat(
                             message = text,
                             thinking = if (translationCaptionsEnabled) "off" else thinkingLevel,
@@ -446,34 +477,21 @@ fun HudScreen(viewModel: MainViewModel) {
             )
         }
 
-        if (splendidOverlayAlpha > 0f) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(
-                            hudSplendidOverlayColor(airVisionSettings.splendidMode)
-                                .copy(alpha = splendidOverlayAlpha),
-                        ),
-            )
-        }
-        if (dimAlpha > 0f) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = dimAlpha)),
-            )
-        }
         if (identifyVisible) {
             HudDisplayIdentifyOverlay(
-                modifier = Modifier.align(Alignment.Center),
+                modifier =
+                    Modifier
+                        .align(Alignment.Center)
+                        .zIndex(2f),
             )
         }
         transientHudText?.let { message ->
             HudTransientTextOverlay(
                 message = message,
-                modifier = Modifier.align(Alignment.TopCenter),
+                modifier =
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .zIndex(2f),
             )
         }
     }
@@ -759,6 +777,25 @@ private fun HudTranslationCaptions(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun HudPromptMirror(draft: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            "ask",
+            style = hudReadableTextStyle,
+            color = hudMuted,
+            maxLines = 1,
+        )
+        Text(
+            draft,
+            style = hudPrimaryTextStyle.copy(fontWeight = FontWeight.SemiBold),
+            color = hudText,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

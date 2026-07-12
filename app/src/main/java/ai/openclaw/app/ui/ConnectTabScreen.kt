@@ -298,6 +298,7 @@ fun ConnectTabScreen(
                     if (inputMode == ConnectInputMode.SetupCode) {
                         viewModel.resetGatewaySetupAuth()
                     }
+                    viewModel.setAirVisionDemoModeEnabled(false)
                     viewModel.setManualEnabled(true)
                     viewModel.setManualHost(config.host)
                     viewModel.setManualPort(config.port)

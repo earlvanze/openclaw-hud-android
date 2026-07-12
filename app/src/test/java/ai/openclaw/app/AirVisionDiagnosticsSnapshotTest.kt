@@ -881,11 +881,11 @@ class AirVisionDiagnosticsSnapshotTest {
             source.getValue("androidDiagnosticsExportSha256").jsonPrimitive.content,
         )
         assertEquals(
-            "capture results: 1 validated, 0 captured-review, 8 pending, 1 write-enabled, 8 blocked",
+            "capture results: 1 validated, 0 captured-review, 8 pending, 1 protocol-ready, 8 blocked",
             firmwareCaptureResults.getValue("summary").jsonPrimitive.content,
         )
         assertEquals(
-            "capture results: 1 validated, 0 captured-review, 8 pending, 1 write-enabled, 8 blocked; host=Cyber, tool=USBPcap/Wireshark, asusApp=1.0.12.0, diagnosticsSha256=bbbbbbbbbbbb...",
+            "capture results: 1 validated, 0 captured-review, 8 pending, 1 protocol-ready, 8 blocked; host=Cyber, tool=USBPcap/Wireshark, asusApp=1.0.12.0, diagnosticsSha256=bbbbbbbbbbbb...",
             firmwareCaptureResults.getValue("displayText").jsonPrimitive.content,
         )
         assertEquals("validated", brightnessSync.getValue("captureResultStatus").jsonPrimitive.content)

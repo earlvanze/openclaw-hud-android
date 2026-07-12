@@ -91,7 +91,7 @@ object AirVisionFirmwareUpdateHandoffs {
         add("- Payload policy: ${displayValue(captureResults.payloadPolicy, "sanitized summaries only")}")
         add("- Feature coverage: ${summary.featureCount} AirVision firmware features")
         add("- Validated features: ${summary.validatedFeatureCount}")
-        add("- Android write-enabled features: $writeEnabledLabels")
+        add("- Android protocol-ready features: $writeEnabledLabels")
         add("- Blocked features: $blockedLabels")
         add("- Source notes: ${displayValue(captureResults.source.notes, "not recorded")}")
         add("- Raw USB captures, raw serial values, and payload bytes are intentionally excluded.")

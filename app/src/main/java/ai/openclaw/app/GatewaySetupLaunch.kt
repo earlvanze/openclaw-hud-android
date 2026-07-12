@@ -71,6 +71,7 @@ fun applyGatewaySetupLaunchConfig(
     prefs.setGatewayBootstrapToken(config.bootstrapToken)
     prefs.setGatewayToken(config.token)
     prefs.setGatewayPassword(config.password)
+    prefs.setAirVisionDemoModeEnabled(false)
     prefs.setOnboardingCompleted(true)
     return config
 }

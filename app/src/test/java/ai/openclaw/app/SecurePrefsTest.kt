@@ -763,15 +763,15 @@ class SecurePrefsTest {
         val prefs = SecurePrefs(context)
         val summary = prefs.importAirVisionFirmwareCaptureResults(airVisionCaptureResultsJson())
 
-        assertEquals("capture results: 0 validated, 0 captured-review, 9 pending, 0 write-enabled, 9 blocked", summary.summary)
+        assertEquals("capture results: 0 validated, 0 captured-review, 9 pending, 0 protocol-ready, 9 blocked", summary.summary)
         assertEquals(
-            "capture results: 0 validated, 0 captured-review, 9 pending, 0 write-enabled, 9 blocked; host=Cyber, tool=USBPcap/Wireshark",
+            "capture results: 0 validated, 0 captured-review, 9 pending, 0 protocol-ready, 9 blocked; host=Cyber, tool=USBPcap/Wireshark",
             prefs.airVisionFirmwareCaptureResultsSummary.value,
         )
 
         val reloaded = SecurePrefs(context)
         assertEquals(
-            "capture results: 0 validated, 0 captured-review, 9 pending, 0 write-enabled, 9 blocked; host=Cyber, tool=USBPcap/Wireshark",
+            "capture results: 0 validated, 0 captured-review, 9 pending, 0 protocol-ready, 9 blocked; host=Cyber, tool=USBPcap/Wireshark",
             reloaded.airVisionFirmwareCaptureResultsSummary.value,
         )
         assertEquals(AirVisionFirmwareFeature.entries.size, reloaded.airVisionFirmwareCaptureResults.value?.features?.size)
@@ -805,7 +805,7 @@ class SecurePrefsTest {
 
         assertEquals(true, error.message.orEmpty().contains("secret or raw-serial-shaped"))
         assertEquals(
-            "capture results: 0 validated, 0 captured-review, 9 pending, 0 write-enabled, 9 blocked; host=Cyber, tool=USBPcap/Wireshark",
+            "capture results: 0 validated, 0 captured-review, 9 pending, 0 protocol-ready, 9 blocked; host=Cyber, tool=USBPcap/Wireshark",
             prefs.airVisionFirmwareCaptureResultsSummary.value,
         )
     }

@@ -256,7 +256,7 @@ validated write/readback/checksum/visible-state evidence for a feature.
 The Android app can import the same sanitized capture-results JSON from
 Settings -> AirVision M1 -> Firmware Capture Results. Import validates the
 schema and safety evidence locally, previews validated/captured-review/pending/
-write-enabled/blocked feature counts, write-enabled, needs-validation, pending,
+protocol-ready/blocked feature counts, protocol-ready, needs-validation, pending,
 and blocked feature labels, sanitized source context, source-evidence
 completeness warnings, and the payload-safety policy before applying, records a
 compact summary in Settings, and persists the parsed result for Settings and

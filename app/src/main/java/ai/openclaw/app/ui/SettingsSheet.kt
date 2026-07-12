@@ -310,13 +310,13 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         "- ${captureResultsImportSummary.validatedFeatureCount} validated, " +
                             "${captureResultsImportSummary.capturedFeatureCount} captured-review, " +
                             "${captureResultsImportSummary.pendingFeatureCount} pending, " +
-                            "${captureResultsImportSummary.writeEnabledFeatureCount} write-enabled, " +
+                            "${captureResultsImportSummary.writeEnabledFeatureCount} protocol-ready, " +
                             "${captureResultsImportSummary.blockedFeatureCount} blocked",
                         style = mobileCallout,
                         color = mobileTextSecondary,
                     )
                     Text(
-                        "- Android write-enabled: ${captureResultsImportSummary.writeEnabledFeatureSummary}",
+                        "- Android protocol-ready: ${captureResultsImportSummary.writeEnabledFeatureSummary}",
                         style = mobileCallout,
                         color =
                             if (captureResultsImportSummary.writeEnabledFeatureCount > 0) {
