@@ -96,6 +96,13 @@ class AirVisionFirmwareSyncPlanTest {
         assertTrue(plan.items.none { it.firmwareWriteAllowed })
         assertTrue(plan.items.all { it.requiredEvidence.size == 9 })
         assertTrue(plan.items.all { it.blockedReason.contains("vendor report payloads are not validated") })
+        assertEquals("CAPTURE", plan.items.first { it.feature == AirVisionFirmwareFeature.Brightness }.companionStatusBadge)
+        assertTrue(
+            plan.items
+                .first { it.feature == AirVisionFirmwareFeature.Brightness }
+                .companionStatusText
+                .contains("Firmware: capture pending."),
+        )
     }
 
     @Test
@@ -127,6 +134,13 @@ class AirVisionFirmwareSyncPlanTest {
             plan.items.first { it.feature == AirVisionFirmwareFeature.LightLoadMode }.desiredValue,
         )
         assertTrue(plan.items.all { it.hardwareSyncStatus == "waiting for writable HID" })
+        assertEquals("WAIT", plan.items.first { it.feature == AirVisionFirmwareFeature.Ipd }.companionStatusBadge)
+        assertTrue(
+            plan.items
+                .first { it.feature == AirVisionFirmwareFeature.Ipd }
+                .companionStatusText
+                .contains("Target: 67 mm (locked by Light Load Mode)."),
+        )
     }
 
     @Test
@@ -198,6 +212,9 @@ class AirVisionFirmwareSyncPlanTest {
         assertEquals("xor checksum observed; sanitized", command.checksumFramingNotes)
         assertEquals(true, command.protocolReady)
         assertTrue(command.blockedReason.contains("live M1 testing"))
+        assertEquals("READY", brightness.companionStatusBadge)
+        assertTrue(brightness.companionStatusText.contains("Capture: validated; enable_android_write."))
+        assertTrue(brightness.companionStatusText.contains("Blocked: Validated capture result imported"))
         assertEquals(
             "Brightness=72% via 0x05 on out if=2 interrupt addr=0x2 max=64 int=1",
             command.summary,

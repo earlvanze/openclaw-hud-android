@@ -5,6 +5,7 @@ import ai.openclaw.app.AirVisionCompanionParity
 import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionDiagnosticsCompanionParity
 import ai.openclaw.app.AirVisionFirmwareCaptureResultsSummary
+import ai.openclaw.app.AirVisionFirmwareSyncItem
 import ai.openclaw.app.AirVisionFirmwareSyncPlans
 import ai.openclaw.app.AirVisionHudDisplayTarget
 import ai.openclaw.app.AirVisionHudDoubleTapAction
@@ -1000,6 +1001,10 @@ fun SettingsSheet(viewModel: MainViewModel) {
                             }
                         },
                     )
+                    airVisionFirmwareSyncPlan.items.forEach { item ->
+                        HorizontalDivider(color = mobileBorder)
+                        AirVisionFirmwareSyncItemRow(item)
+                    }
                     HorizontalDivider(color = mobileBorder)
                     ListItem(
                         modifier = Modifier.fillMaxWidth(),
@@ -2486,6 +2491,39 @@ fun SettingsSheet(viewModel: MainViewModel) {
             item { Spacer(modifier = Modifier.height(24.dp)) }
         }
     }
+}
+
+@Composable
+private fun AirVisionFirmwareSyncItemRow(item: AirVisionFirmwareSyncItem) {
+    ListItem(
+        modifier = Modifier.fillMaxWidth(),
+        colors =
+            ListItemDefaults.colors(
+                containerColor = Color.Transparent,
+                headlineColor = mobileText,
+                supportingColor = mobileTextSecondary,
+                trailingIconColor = mobileTextSecondary,
+                leadingIconColor = mobileTextSecondary,
+            ),
+        headlineContent = {
+            Text(item.feature.label, style = mobileHeadline)
+        },
+        supportingContent = {
+            Text(item.companionStatusText, style = mobileCallout)
+        },
+        trailingContent = {
+            Text(
+                item.companionStatusBadge,
+                style = mobileCaption1.copy(fontWeight = FontWeight.Bold),
+                color =
+                    if (item.hasValidatedWriteEnablement) {
+                        mobileAccent
+                    } else {
+                        mobileTextSecondary
+                    },
+            )
+        },
+    )
 }
 
 @Composable

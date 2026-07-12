@@ -235,6 +235,38 @@ data class AirVisionFirmwareSyncItem(
 
     val hasValidatedWriteEnablement: Boolean
         get() = captureResultStatus == "validated" && androidEnablementDecision == "enable_android_write"
+
+    val companionStatusBadge: String
+        get() =
+            when {
+                hasValidatedWriteEnablement -> "READY"
+                captureResultStatus == "validated" -> "REVIEW"
+                hardwareSyncStatus == "capture pending" -> "CAPTURE"
+                else -> "WAIT"
+            }
+
+    val companionStatusText: String
+        get() =
+            buildList {
+                add("Target: $desiredValue.")
+                add("Android: $androidEffect.")
+                add("Firmware: $hardwareSyncStatus.")
+                if (captureResultStatus != "pending_validated_capture_result") {
+                    add("Capture: $captureResultStatus; $androidEnablementDecision.")
+                }
+                if (requiredEvidence.isNotEmpty()) {
+                    add("Needs: ${requiredEvidence.companionCompactLabelList()}.")
+                }
+                if (blockedReason.isNotBlank()) {
+                    add("Blocked: $blockedReason")
+                }
+            }.joinToString("\n")
+}
+
+private fun List<String>.companionCompactLabelList(): String {
+    val visible = take(4).joinToString()
+    val hiddenCount = size - 4
+    return if (hiddenCount > 0) "$visible, +$hiddenCount" else visible
 }
 
 object AirVisionFirmwareSyncPlans {
