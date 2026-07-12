@@ -641,6 +641,15 @@ async function verifySettingsAirVisionParity() {
     "firmware-gated",
     "Windows-only",
   ]);
+  requireIncludes("Settings AirVision caption mode", settingsSheet, [
+    "AirVisionCaptionModeStatus.from",
+    'headlineContent = { Text("Caption & Translation Mode"',
+    "airVisionCaptionModeSettingsText",
+    "Fallback model:",
+    "thinking",
+    "Languages:",
+    "Speaker labels:",
+  ]);
   return { path: settingsSheetPath };
 }
 

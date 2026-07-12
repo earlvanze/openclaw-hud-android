@@ -102,13 +102,21 @@ const validReadme = [
 const validSettingsSheet = [
   "package ai.openclaw.app.ui",
   "import ai.openclaw.app.AirVisionCompanionParity",
+  "import ai.openclaw.app.AirVisionCaptionModeStatus",
   "val airVisionCompanionParity = AirVisionCompanionParity.fromState(...)",
+  "val airVisionCaptionModeStatus = AirVisionCaptionModeStatus.from(...)",
   'headlineContent = { Text("Companion Parity", style = mobileHeadline) }',
+  'headlineContent = { Text("Caption & Translation Mode", style = mobileHeadline) }',
   "airVisionCompanionParitySettingsText(airVisionCompanionParity)",
+  "airVisionCaptionModeSettingsText(airVisionCaptionModeStatus)",
   '\"reviewable_offline\" -> \"offline-reviewable\"',
   '\"m1_optional\" -> \"M1-optional\"',
   '\"firmware_gated\" -> \"firmware-gated\"',
   '\"windows_only\" -> \"Windows-only\"',
+  "Fallback model:",
+  "thinking",
+  "Languages:",
+  "Speaker labels:",
 ].join("\n");
 
 function runVerifier(
