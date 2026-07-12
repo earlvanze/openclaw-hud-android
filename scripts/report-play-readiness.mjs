@@ -87,6 +87,51 @@ function resultSummary(result) {
   return summarizeDetail(detail);
 }
 
+function classifyPlayApiPreflight(result) {
+  const detail = result.detail ?? "";
+  if (result.ok) {
+    return {
+      code: "ready",
+      label: "Play API preflight ready",
+      action: "No Play Console API blocker detected.",
+    };
+  }
+  if (detail.includes("Package not found: ai.openclaw.app.hud")) {
+    return {
+      code: "play_package_missing_or_ungranted",
+      label: "Play package missing or service account ungranted",
+      action:
+        "Create package ai.openclaw.app.hud in Play Console and grant the configured service account access, then rerun service-account preflight.",
+    };
+  }
+  if (detail.includes("403") || detail.includes("permission") || detail.includes("Permission")) {
+    return {
+      code: "play_api_permission_denied",
+      label: "Play API permission denied",
+      action: "Grant Android Publisher access for this package to the selected publisher identity, then rerun preflight.",
+    };
+  }
+  if (detail.includes("OAuth token exchange failed")) {
+    return {
+      code: "service_account_token_failed",
+      label: "Service-account token exchange failed",
+      action: "Verify the service-account JSON is valid and allowed to request the Android Publisher scope.",
+    };
+  }
+  if (detail.includes("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON or GOOGLE_APPLICATION_CREDENTIALS is not set")) {
+    return {
+      code: "service_account_not_configured",
+      label: "Service account not configured",
+      action: "Set GOOGLE_PLAY_SERVICE_ACCOUNT_JSON or GOOGLE_APPLICATION_CREDENTIALS for service-account preflight.",
+    };
+  }
+  return {
+    code: "play_api_preflight_failed",
+    label: "Play API preflight failed",
+    action: "Inspect the service-account preflight summary and rerun after correcting the Play Console/API setup.",
+  };
+}
+
 function gcloudAccounts() {
   const result = run("gcloud", ["auth", "list", "--format=json"]);
   if (!result.ok) {
@@ -184,6 +229,8 @@ function renderMarkdown(report) {
     "",
     markdownCheckLine("Service-account auth", report.serviceAccount.authCheck),
     markdownCheckLine("Service-account Play preflight", report.serviceAccount.preflight),
+    `- Service-account preflight blocker: ${report.serviceAccount.preflightBlocker.code}`,
+    `- Service-account next action: ${report.serviceAccount.preflightBlocker.action}`,
   ];
 
   if (report.blockers.length > 0) {
@@ -234,6 +281,7 @@ async function main() {
   const finalSubmissionReady = checks.submissionFinal.ok;
   const oauthReady = oauth.some((entry) => entry.ok);
   const serviceAccountReady = serviceAccount.preflight.ok;
+  const serviceAccountPreflightBlocker = classifyPlayApiPreflight(serviceAccount.preflight);
   const publisherAuthReady = oauthReady || serviceAccountReady;
   const publishReady = localReleaseReady && finalSubmissionReady && publisherAuthReady;
 
@@ -259,11 +307,14 @@ async function main() {
   }
   if (!publisherAuthReady) {
     const serviceAccountHint = hasServiceAccount
-      ? " or grant the configured service account Play Console access to ai.openclaw.app.hud"
+      ? ` or resolve service-account preflight blocker ${serviceAccountPreflightBlocker.code}`
       : "";
     const blocker = `Authenticate one allowed publisher account with gcloud: ${allowedAccounts.join(" or ")}${serviceAccountHint}.`;
     blockers.push(blocker);
     externalBlockers.push(blocker);
+  }
+  if (hasServiceAccount && !serviceAccount.preflight.ok) {
+    externalBlockers.push(`${serviceAccountPreflightBlocker.code}: ${serviceAccountPreflightBlocker.action}`);
   }
 
   const report = {
@@ -290,6 +341,7 @@ async function main() {
         status: serviceAccount.preflight.status,
         summary: resultSummary(serviceAccount.preflight),
       },
+      preflightBlocker: serviceAccountPreflightBlocker,
     },
     checks: Object.fromEntries(
       Object.entries(checks).map(([key, value]) => [

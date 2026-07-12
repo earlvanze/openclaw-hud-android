@@ -35,8 +35,10 @@ Authenticated gcloud accounts: rclone@sacred-result-442018-v2.iam.gserviceaccoun
 
 - [x] Service-account auth: ready
 - [ ] Service-account Play preflight: blocked
+- Service-account preflight blocker: play_package_missing_or_ungranted
+- Service-account next action: Create package ai.openclaw.app.hud in Play Console and grant the configured service account access, then rerun service-account preflight.
 
 ## Blockers
 
 - Final Play submission verifier is failing; complete Play Console external fields and evidence.
-- Authenticate one allowed publisher account with gcloud: earlvanze@gmail.com or earl@earlbnb.com or grant the configured service account Play Console access to ai.openclaw.app.hud.
+- Authenticate one allowed publisher account with gcloud: earlvanze@gmail.com or earl@earlbnb.com or resolve service-account preflight blocker play_package_missing_or_ungranted.

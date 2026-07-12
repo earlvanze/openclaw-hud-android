@@ -180,6 +180,9 @@ exit 64
     if (readinessReport.oauthReady !== false) {
       throw new Error(`Readiness report should reject missing allowed OAuth accounts:\n${readiness.stdout}`);
     }
+    if (readinessReport.serviceAccount.preflightBlocker.code !== "service_account_not_configured") {
+      throw new Error(`Readiness report should classify missing fake service-account config:\n${readiness.stdout}`);
+    }
     if (readinessReport.externalBlockers.length < 2 || readinessReport.localBlockers.length !== 0) {
       throw new Error(`Readiness report should keep external blockers separate from local blockers:\n${readiness.stdout}`);
     }

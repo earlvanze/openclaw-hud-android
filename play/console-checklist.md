@@ -79,10 +79,11 @@ Current local status:
   publisher accounts. `--auth-check` currently fails early for
   `earlvanze@gmail.com` and `earl@earlbnb.com` because only the existing service
   account is authenticated locally. A configured Google Play service-account JSON
-  passes local `--auth service-account --auth-check`, but Play API preflight
-  currently returns `Package not found: ai.openclaw.app.hud`, so the app still
-  needs to be created in Play Console and the service account needs package
-  access. `node scripts/report-play-readiness.mjs` summarizes OAuth,
+  passes local `--auth service-account --auth-check`, but Play API preflight is
+  classified as `play_package_missing_or_ungranted` because it currently returns
+  `Package not found: ai.openclaw.app.hud`, so the app still needs to be created
+  in Play Console and the service account needs package access.
+  `node scripts/report-play-readiness.mjs` summarizes OAuth,
   service-account, local artifact, and dry-run gates together.
 - `node scripts/publish-play-internal.mjs --commit` is guarded by
   `node scripts/verify-play-submission-package.mjs --final` before any Play API
