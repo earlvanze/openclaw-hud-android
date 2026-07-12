@@ -116,7 +116,7 @@ Capability states:
   Evidence: Light Load trims Android HUD work offline; Motion Sync and panel 3D writes remain firmware-protocol gated.
 - Gesture and hotkey settings: M1 optional for review
   Review path: Settings > AirVision M1 > Gesture & Hotkey Settings and Diagnostics Export.
-  Evidence: Single-tap, double-tap, swipe, brightness-key, and media-key mappings are stored offline. Diagnostics export the active M1 brightness-key/media-key mode, Android consumption state, step sizes, and firmware passthrough expectation; live M1 proof is needed for firmware-delivered events.
+  Evidence: Single-tap, double-tap, swipe, brightness-key, and media-key mappings are stored offline. Diagnostics export the active M1 brightness-key/media-key mode, Android consumption state, step sizes, firmware passthrough expectation, and Windows gesture catalog entries for ASUS brightness swipe, play/pause tap, instant transparent, center virtual screens, 3D hold, and shortcut-menu hold/slide behavior; live M1 proof is needed for firmware-delivered events.
 - USB firmware-link diagnostics: M1 optional for review
   Review path: Settings > AirVision M1 > Firmware Link and Diagnostics Export.
   Evidence: Firmware Link shows per-control WAIT/CAPTURE/READY rows with target value, Android effect, firmware status, missing evidence, and blocker text. Offline demo shows blocked/write-readiness states; connected M1 adds live descriptor and HID report-path context.

@@ -68,6 +68,10 @@ object AirVisionWindowsProfileHandoffs {
                 add("")
                 addHardwareKeyMapping(profileBackup.hudControls)
                 add("")
+                add("## Windows Gesture Catalog")
+                add("")
+                addWindowsGestureCatalog(profileBackup.hudControls)
+                add("")
                 add("## Windows-Only Spatial & Mirror Controls")
                 add("")
                 addWindowsOnlyControls(profileBackup.hudControls)
@@ -336,6 +340,19 @@ object AirVisionWindowsProfileHandoffs {
             "- Firmware brightness passthrough expected: " +
                 yesNo(brightnessKeyAction == AirVisionHudKeyAction.None),
         )
+    }
+
+    private fun MutableList<String>.addWindowsGestureCatalog(controls: AirVisionBackupHudControls) {
+        val brightnessKeyAction = AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction)
+        val mediaKeyAction = AirVisionHudMediaKeyAction.fromRawValue(controls.mediaKeyAction)
+        val doubleTapAction = AirVisionHudDoubleTapAction.fromRawValue(controls.doubleTapAction)
+        add("- One-finger swipe forward/backward: ASUS quick brightness; Android mapping ${brightnessKeyAction.label}.")
+        add("- One-finger tap: ASUS play/pause in floating mode; Android media/tap mapping ${mediaKeyAction.label}.")
+        add("- Two-finger tap: ASUS instant transparent / lowest brightness; Android status firmware passthrough.")
+        add("- One-finger tap in positioning mode: ASUS center virtual screens; Android status Windows-only virtual-screen action.")
+        add("- One-finger double tap: ASUS positioning/floating switch; Android HUD double tap ${doubleTapAction.label}.")
+        add("- Two-finger press and hold 1.5 seconds: ASUS 3D toggle; Android stores 3D preference and keeps panel write firmware-gated.")
+        add("- One-finger press and hold 1.5 seconds, then slide: ASUS shortcut menu for brightness, volume, and distance; Android maps brightness/distance through HUD controls and speaker routing through AirVision preferences.")
     }
 
     private fun MutableList<String>.addWindowsOnlyControls(controls: AirVisionBackupHudControls) {

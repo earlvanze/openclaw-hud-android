@@ -118,6 +118,7 @@ class AirVisionDiagnosticsSnapshotTest {
         val windowsApplyMatrix = root.getValue("windowsApplyMatrix").jsonObject
         val companionParity = root.getValue("companionParity").jsonObject
         val hardwareKeyMapping = root.getValue("hardwareKeyMapping").jsonObject
+        val windowsGestureCatalog = root.getValue("windowsGestureCatalog").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
         val firstInterface = usb.getValue("interfaces").jsonArray.first().jsonObject
         val firstEndpoint = firstInterface.getValue("endpoints").jsonArray.first().jsonObject
@@ -144,7 +145,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("32", root.getValue("version").jsonPrimitive.content)
+        assertEquals("33", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -618,8 +619,12 @@ class AirVisionDiagnosticsSnapshotTest {
             brightnessMapping.getValue("observedSettingKeys").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals(
-            "Android key delivery depends on firmware passthrough; brightness swipes may remain panel-owned.",
+            "Android key delivery depends on firmware passthrough; brightness swipes, transparent mode, 3D hold, and shortcut-menu gestures may remain panel- or Windows-app-owned.",
             gestureMapping.getValue("captureImplication").jsonPrimitive.content,
+        )
+        assertEquals(
+            "Cursor/distance hotkeys and ASUS-documented touchpad gestures",
+            gestureMapping.getValue("windowsSurface").jsonPrimitive.content,
         )
         assertEquals(
             "ASUS AirVision 1.0.7.1 build 20250414_112726; 12 Windows setting mappings documented for Android handoff and capture planning.",
@@ -679,6 +684,38 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals(
             "M1 brightness keys: Scroll chat; brightness keys scroll the HUD chat transcript; media key Double-tap mic.",
             hardwareKeyMapping.getValue("summary").jsonPrimitive.content,
+        )
+        assertEquals("7", windowsGestureCatalog.getValue("itemCount").jsonPrimitive.content)
+        assertEquals("4", windowsGestureCatalog.getValue("androidImplementedCount").jsonPrimitive.content)
+        assertEquals("3", windowsGestureCatalog.getValue("firmwarePassthroughCount").jsonPrimitive.content)
+        assertEquals("1", windowsGestureCatalog.getValue("windowsOnlyCount").jsonPrimitive.content)
+        assertEquals(
+            "Windows gesture catalog: 7 gestures, 4 Android-mapped, 3 firmware-passthrough, 1 Windows-only.",
+            windowsGestureCatalog.getValue("summary").jsonPrimitive.content,
+        )
+        val windowsGestureItems = windowsGestureCatalog.getValue("items").jsonArray
+        assertTrue(
+            windowsGestureItems.any {
+                val item = it.jsonObject
+                item.getValue("gesture").jsonPrimitive.content == "Two-finger tap" &&
+                    item.getValue("windowsAction").jsonPrimitive.content == "Instant transparent / lowest brightness toggle" &&
+                    item.getValue("androidStatus").jsonPrimitive.content == "firmware passthrough"
+            },
+        )
+        assertTrue(
+            windowsGestureItems.any {
+                val item = it.jsonObject
+                item.getValue("gesture").jsonPrimitive.content == "One-finger press and hold 1.5 seconds, then slide" &&
+                    item.getValue("windowsAction").jsonPrimitive.content == "Shortcut menu for brightness, volume, and distance" &&
+                    item.getValue("androidStatus").jsonPrimitive.content == "partially mapped through HUD controls"
+            },
+        )
+        assertTrue(
+            windowsGestureItems.any {
+                val item = it.jsonObject
+                item.getValue("gesture").jsonPrimitive.content == "One-finger tap in positioning mode" &&
+                    item.getValue("windowsOnly").jsonPrimitive.content == "true"
+            },
         )
         assertEquals("7", companionParity.getValue("reviewableOfflineCount").jsonPrimitive.content)
         assertEquals("6", companionParity.getValue("m1OptionalCount").jsonPrimitive.content)

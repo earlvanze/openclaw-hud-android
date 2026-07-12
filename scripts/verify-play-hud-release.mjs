@@ -504,6 +504,9 @@ async function verifyReadmeAirVisionParity() {
     "structured M1 brightness-key/media-key mapping evidence",
     "Android consumption",
     "step sizes",
+    "Windows gesture catalog",
+    "instant transparent",
+    "shortcut-menu hold/slide",
   ]);
   requireIncludes("README AirVision Windows app handoff", readme, [
     "Windows App Handoff",
@@ -516,6 +519,7 @@ async function verifyReadmeAirVisionParity() {
     "DistanceHotkey",
     "structured M1 hardware-key mapping",
     "brightness/media key consumption state",
+    "Windows gesture catalog entries",
     "omitting raw USB serial values",
   ]);
   requireIncludes("README AirVision companion parity states", readme, [

@@ -22,6 +22,7 @@ data class AirVisionDiagnosticsSnapshot(
     val windowsApplyMatrix: AirVisionDiagnosticsWindowsApplyMatrix,
     val companionParity: AirVisionDiagnosticsCompanionParity,
     val hardwareKeyMapping: AirVisionDiagnosticsHardwareKeyMapping,
+    val windowsGestureCatalog: AirVisionDiagnosticsWindowsGestureCatalog,
     val hudControls: AirVisionBackupHudControls,
     val appPreferences: AirVisionBackupAppPreferences,
 )
@@ -397,9 +398,30 @@ data class AirVisionDiagnosticsHardwareKeyMapping(
     val summary: String,
 )
 
+@Serializable
+data class AirVisionDiagnosticsWindowsGestureCatalog(
+    val itemCount: Int,
+    val androidImplementedCount: Int,
+    val firmwarePassthroughCount: Int,
+    val windowsOnlyCount: Int,
+    val items: List<AirVisionDiagnosticsWindowsGestureCatalogItem>,
+    val summary: String,
+)
+
+@Serializable
+data class AirVisionDiagnosticsWindowsGestureCatalogItem(
+    val gesture: String,
+    val windowsAction: String,
+    val androidStatus: String,
+    val androidMapping: String,
+    val firmwarePassthroughRequired: Boolean,
+    val windowsOnly: Boolean,
+    val notes: String,
+)
+
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 32
+    const val VERSION = 33
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
@@ -709,6 +731,7 @@ object AirVisionDiagnosticsSnapshots {
                     translationCaptionTargetLanguage = translationCaptionTargetLanguage,
                 ),
             hardwareKeyMapping = hardwareKeyMapping(hudControls),
+            windowsGestureCatalog = windowsGestureCatalog(hudControls),
             hudControls =
                 AirVisionBackupHudControls(
                     singleTapAction = hudControls.singleTapAction.rawValue,
@@ -736,6 +759,99 @@ object AirVisionDiagnosticsSnapshots {
                             TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
                         ),
                 ),
+        )
+    }
+
+    private fun windowsGestureCatalog(controls: AirVisionHudControls): AirVisionDiagnosticsWindowsGestureCatalog {
+        val items =
+            listOf(
+                AirVisionDiagnosticsWindowsGestureCatalogItem(
+                    gesture = "One-finger swipe forward/backward",
+                    windowsAction = "Quick brightness adjustment",
+                    androidStatus =
+                        if (controls.brightnessKeyAction == AirVisionHudKeyAction.AdjustBrightness) {
+                            "implemented when Android receives brightness key events"
+                        } else {
+                            "firmware passthrough or alternate Android mapping"
+                        },
+                    androidMapping = controls.brightnessKeyAction.label,
+                    firmwarePassthroughRequired = controls.brightnessKeyAction == AirVisionHudKeyAction.None,
+                    windowsOnly = false,
+                    notes = "ASUS documents hardware touchpad brightness; Android can also map delivered brightness keys to chat scroll, HUD dimming, or virtual distance.",
+                ),
+                AirVisionDiagnosticsWindowsGestureCatalogItem(
+                    gesture = "One-finger tap",
+                    windowsAction = "Audio/video play/pause in floating mode",
+                    androidStatus =
+                        if (controls.mediaKeyAction == AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
+                            "mapped to HUD media-key double-tap mic behavior"
+                        } else {
+                            "left to Android or firmware media handling"
+                        },
+                    androidMapping = controls.mediaKeyAction.label,
+                    firmwarePassthroughRequired = controls.mediaKeyAction == AirVisionHudMediaKeyAction.None,
+                    windowsOnly = false,
+                    notes = "Android HUD tap actions are configured separately for on-screen touch input.",
+                ),
+                AirVisionDiagnosticsWindowsGestureCatalogItem(
+                    gesture = "Two-finger tap",
+                    windowsAction = "Instant transparent / lowest brightness toggle",
+                    androidStatus = "firmware passthrough",
+                    androidMapping = "M1 firmware handles transparent/lowest-brightness behavior before Android receives a gesture event.",
+                    firmwarePassthroughRequired = true,
+                    windowsOnly = false,
+                    notes = "Android does not synthesize panel transparent mode; use brightness passthrough or HUD dimming for software-only review.",
+                ),
+                AirVisionDiagnosticsWindowsGestureCatalogItem(
+                    gesture = "One-finger tap in positioning mode",
+                    windowsAction = "Center virtual screens",
+                    androidStatus = "Windows-only virtual-screen action",
+                    androidMapping = "Android reports Center Cursor/virtual-screen centering as Windows-only and offers Cast/Display fallback guidance.",
+                    firmwarePassthroughRequired = false,
+                    windowsOnly = true,
+                    notes = "Centering Windows virtual screens requires the ASUS AirVision Windows compositor.",
+                ),
+                AirVisionDiagnosticsWindowsGestureCatalogItem(
+                    gesture = "One-finger double tap",
+                    windowsAction = "Switch viewing mode between positioning and floating",
+                    androidStatus = "Android HUD double tap configurable",
+                    androidMapping = controls.doubleTapAction.label,
+                    firmwarePassthroughRequired = false,
+                    windowsOnly = false,
+                    notes = "Android does not switch ASUS positioning/floating compositor modes; the HUD maps double tap to microphone or notification actions.",
+                ),
+                AirVisionDiagnosticsWindowsGestureCatalogItem(
+                    gesture = "Two-finger press and hold for 1.5 seconds",
+                    windowsAction = "Toggle 3D mode",
+                    androidStatus = "profile preference stored; panel write firmware-gated",
+                    androidMapping = "3D Mode profile toggle is available in Settings and locked while Light Load Mode is enabled.",
+                    firmwarePassthroughRequired = true,
+                    windowsOnly = false,
+                    notes = "ASUS documents 3D for side-by-side full-screen content and not while Light Load Mode is active.",
+                ),
+                AirVisionDiagnosticsWindowsGestureCatalogItem(
+                    gesture = "One-finger press and hold 1.5 seconds, then slide",
+                    windowsAction = "Shortcut menu for brightness, volume, and distance",
+                    androidStatus = "partially mapped through HUD controls",
+                    androidMapping = "Brightness keys can adjust HUD brightness or virtual distance; audio routing is controlled by the AirVision speaker preference.",
+                    firmwarePassthroughRequired = true,
+                    windowsOnly = false,
+                    notes = "Android does not display the ASUS shortcut menu; equivalent companion controls live in AirVision M1 settings.",
+                ),
+            )
+        val androidImplementedCount =
+            items.count { !it.windowsOnly && !it.androidStatus.contains("firmware passthrough", ignoreCase = true) }
+        val firmwarePassthroughCount = items.count { it.firmwarePassthroughRequired }
+        val windowsOnlyCount = items.count { it.windowsOnly }
+        return AirVisionDiagnosticsWindowsGestureCatalog(
+            itemCount = items.size,
+            androidImplementedCount = androidImplementedCount,
+            firmwarePassthroughCount = firmwarePassthroughCount,
+            windowsOnlyCount = windowsOnlyCount,
+            items = items,
+            summary =
+                "Windows gesture catalog: ${items.size} gestures, $androidImplementedCount Android-mapped, " +
+                    "$firmwarePassthroughCount firmware-passthrough, $windowsOnlyCount Windows-only.",
         )
     }
 

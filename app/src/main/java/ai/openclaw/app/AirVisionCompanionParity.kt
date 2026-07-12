@@ -134,7 +134,7 @@ object AirVisionCompanionParity {
                     feature = "Gesture and hotkey settings",
                     androidState = M1_OPTIONAL,
                     reviewPath = "Settings > AirVision M1 > Gesture & Hotkey Settings.",
-                    evidence = "Android stores single-tap, double-tap, swipe, brightness-key, and media-key actions; live M1 proof is needed for firmware-delivered key events.",
+                    evidence = "Android stores single-tap, double-tap, swipe, brightness-key, and media-key actions and diagnostics export the ASUS gesture catalog including instant transparent, center virtual screens, 3D toggle, and shortcut-menu behavior; live M1 proof is needed for firmware-delivered key events.",
                     liveM1Required = true,
                     firmwareProtocolRequired = false,
                     playReviewableOffline = true,

@@ -118,7 +118,7 @@ object AirVisionWindowsAppEvidence {
             ),
             mapping(
                 feature = "Gesture and hotkey settings",
-                windowsSurface = "Cursor and distance hotkeys",
+                windowsSurface = "Cursor/distance hotkeys and ASUS-documented touchpad gestures",
                 observedSettingKeys =
                     listOf(
                         "CenterCursorHotkey",
@@ -127,9 +127,9 @@ object AirVisionWindowsAppEvidence {
                         "IsMenuIconAutoFollow",
                         "IsClipCursor",
                     ),
-                observedDefault = "CenterCursorHotkey=46,4, DistanceHotkey=69,4, IsCursorAutoFollow=true",
-                androidMapping = "HUD tap, double-tap, swipe, brightness-key, and media-key actions",
-                captureImplication = "Android key delivery depends on firmware passthrough; brightness swipes may remain panel-owned.",
+                observedDefault = "CenterCursorHotkey=46,4, DistanceHotkey=69,4, IsCursorAutoFollow=true; ASUS support documents brightness swipe, play/pause tap, instant transparent two-finger tap, 3D hold, and shortcut-menu hold/slide gestures",
+                androidMapping = "HUD tap, double-tap, swipe, brightness-key, media-key, and exported Windows gesture catalog",
+                captureImplication = "Android key delivery depends on firmware passthrough; brightness swipes, transparent mode, 3D hold, and shortcut-menu gestures may remain panel- or Windows-app-owned.",
             ),
             mapping(
                 feature = "Windows spatial/mirror features",

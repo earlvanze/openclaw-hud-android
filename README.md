@@ -167,7 +167,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
 | 3D Mode | Stored in the AirVision profile and disabled while Light Load Mode is enabled. Hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation, trims transcript/caption history, skips nonessential color-preview overlays, and locks IPD/3D adjustment while enabled. |
-| Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. |
+| Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. Diagnostics and Windows App Handoff also include a Windows gesture catalog for ASUS-documented brightness swipe, play/pause tap, instant transparent two-finger tap, center virtual screens, positioning/floating double tap, 3D hold, and shortcut-menu hold/slide behavior. |
 | Cursor Follow / Center Cursor / 3DoF | Surfaced as Windows-only capability status in Android settings, diagnostics, and the Windows app handoff. Android can map the AirVision distance hotkey concept to M1 brightness-key events, but it does not claim Windows virtual-cursor or 3DoF control. |
 | Unity mirror window / projected glasses view | Surfaced as Windows-only capability status in Android settings, diagnostics, and the Windows app handoff. Android cannot open the ASUS Unity mirror window or `Ctrl+Alt+E` shortcut, but Settings and handoff guidance provide Cast and Display shortcuts for Android/DeX screen-sharing fallback outside the HUD. |
 | Demo Mode / Tutorials | Implemented as Android Demo Mode for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway or live M1. The hidden ASUS Windows tutorial shortcut remains Windows-only and is reported separately in diagnostics. |
@@ -206,7 +206,9 @@ all saved AirVision profile values, runtime profile metadata, compact per-profil
 runtime summaries,
 fit/clarity/text-size guidance,
 structured M1 brightness-key/media-key mapping evidence with Android consumption
-state and step sizes,
+state and step sizes, a Windows gesture catalog covering ASUS-documented
+brightness swipe, play/pause tap, instant transparent, center virtual screens,
+positioning/floating mode switch, 3D hold, and shortcut-menu hold/slide gestures,
 Android demo/offline reviewer experience state, Windows-only cursor/3DoF and
 Unity mirror-window capability status, Android Cast/Display mirror fallback
 actions, a structured Windows app apply matrix that lists each ASUS Windows
@@ -233,6 +235,7 @@ runtime summaries, Cyber-observed ASUS AirVision 1.0.7.1 build/settings-key
 evidence from ReleaseInfo, SDK strings, and Data/Settings.json, Windows apply steps for View Mode, brightness, screen distance,
 IPD, Splendid, Eye Care, Motion Sync, Light Load Mode, and 3D Mode, Android HUD gesture/hotkey mappings,
 structured M1 hardware-key mapping with brightness/media key consumption state and step sizes, companion app startup/display/language,
+Windows gesture catalog entries for brightness swipe, play/pause tap, instant transparent, center virtual screens, 3D hold, and shortcut-menu hold/slide behavior,
 Windows-only Cursor Follow, Center Cursor, 3DoF, and Unity mirror-window status with Android Cast/Display
 fallback actions, Android companion parity states, speaker, caption,
 translation, and demo preferences, and Android USB context while omitting raw USB serial values,
