@@ -3,6 +3,7 @@ package ai.openclaw.app
 import ai.openclaw.app.ui.HudScreen
 import ai.openclaw.app.ui.OpenClawTheme
 import android.app.Presentation
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -48,7 +49,7 @@ internal class HudPresentation(
         applyHudWindowFlags()
 
         val composeView =
-            ComposeView(activity).apply {
+            ComposeView(composeDisplayContext()).apply {
                 setViewTreeLifecycleOwner(activity)
                 setViewTreeViewModelStoreOwner(activity)
                 setViewTreeSavedStateRegistryOwner(activity)
@@ -91,6 +92,8 @@ internal class HudPresentation(
         }
         return super.dispatchKeyEvent(event)
     }
+
+    internal fun composeDisplayContext(): Context = context
 
     @Suppress("DEPRECATION")
     private fun applyHudWindowFlags() {

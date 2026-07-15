@@ -56,6 +56,7 @@ const validListingFiles = {
   ].join("\n"),
   "release-notes.txt": [
     "Automatic Android Presentation routing for external and wearable displays with Runtime display names.",
+    "- Display-scoped density and resources for USB-C and HDMI targets.",
     "- USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.",
   ].join("\n"),
 };

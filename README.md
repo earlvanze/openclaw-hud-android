@@ -89,6 +89,9 @@ does not request SMS or Call Log permissions, and opens directly to the HUD tab.
 Fresh installs automatically select the largest presentation-capable external
 display. Users can explicitly prefer AirVision hardware or choose the first,
 last, or largest external display.
+The HUD Compose tree uses the selected Presentation display's context, so
+density, dimensions, and resource configuration follow the USB-C, HDMI,
+wireless, or wearable target instead of the phone display.
 
 `scripts/install-launch-hud.sh` now defaults to `--display presentation`.
 Presentation mode starts the Android Activity on display 0 and lets

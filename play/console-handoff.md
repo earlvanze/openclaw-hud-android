@@ -12,8 +12,8 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.15-hud-release.aab`
-- SHA-256: `28ce6ef47b251a547f98dcfcc2771f93fa440e946166251632f622902a89fbda`
-- Version: 2026.7.15 (2026071501)
+- SHA-256: `9ea6e5d6ead6d49e49b79d3c1def7bd11cc834b8d764a6188843c6d25142cb42`
+- Version: 2026.7.15 (2026071502)
 
 ## Remaining Console Blockers
 
@@ -60,11 +60,11 @@ Release notes:
 
 OpenClaw HUD external-display update:
 - Automatic Android Presentation routing for external and wearable displays.
+- Display-scoped density, dimensions, and resources for USB-C, HDMI, wireless, and wearable targets.
 - Runtime display names and generic accessory-key controls.
-- Compact chat, notifications, voice, and captions.
-- In-app assistant-response reporting with confirmation and receipts.
-- Optional AirVision USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
-- In-app privacy policy under App Preferences.
+- Compact chat, notifications, voice, captions, and reporting.
+- USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
+- In-app privacy policy.
 
 ## Privacy Policy
 

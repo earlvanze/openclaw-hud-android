@@ -353,6 +353,9 @@ async function verifyListing(listingDir, language) {
   requireIncludes("Release notes", releaseNotes, [
     "Automatic Android Presentation routing",
     "external and wearable displays",
+    "Display-scoped density",
+    "USB-C",
+    "HDMI",
     "Runtime display names",
     "USB firmware-link diagnostics",
     "HID report paths",
