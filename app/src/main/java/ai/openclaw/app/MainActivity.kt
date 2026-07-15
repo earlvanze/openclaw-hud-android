@@ -45,6 +45,7 @@ class MainActivity : ComponentActivity() {
     private var hudMediaSession: MediaSession? = null
     private val hudPresentationSession = HudPresentationSessionController<HudPresentation>()
     private var hudPresentationRecoveryRunnable: Runnable? = null
+    private var hudPresentationStabilityRunnable: Runnable? = null
     private var hudDisplayListenerRegistered = false
     private var appliedAirVisionAppLanguage: AirVisionAppLanguage? = null
     private val hudKeyInputController = AirVisionHudKeyInputController()
@@ -195,6 +196,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         unregisterHudDisplayListener()
         cancelHudPresentationRecovery(resetAttempts = true)
+        cancelHudPresentationStability()
         hudPresentationSession.current?.let { releaseHudPresentation(it, dismiss = true) }
         viewModel.setAirVisionHudPresentationActive(false)
         hudMediaSession?.release()
@@ -244,6 +246,7 @@ class MainActivity : ComponentActivity() {
         if (!BuildConfig.OPENCLAW_DEFAULT_HUD || isFinishing || isDestroyed) return
         if (isOnExternalDisplay()) {
             cancelHudPresentationRecovery(resetAttempts = true)
+            cancelHudPresentationStability()
             hudPresentationSession.current?.let { releaseHudPresentation(it, dismiss = true) }
             viewModel.setAirVisionHudPresentationActive(false)
             viewModel.setAirVisionHudDisplayRoute(
@@ -289,6 +292,7 @@ class MainActivity : ComponentActivity() {
             externalDisplays.firstOrNull { it.displayId == displayRoute.selectedCandidate?.displayId }
                 ?: run {
                     cancelHudPresentationRecovery(resetAttempts = true)
+                    cancelHudPresentationStability()
                     hudPresentationSession.current?.let { releaseHudPresentation(it, dismiss = true) }
                     viewModel.setAirVisionHudPresentationActive(false)
                     return
@@ -296,8 +300,9 @@ class MainActivity : ComponentActivity() {
 
         hudPresentationSession.current?.let { current ->
             if (current.display.displayId == targetDisplay.displayId && current.isShowing) {
-                cancelHudPresentationRecovery(resetAttempts = true)
+                cancelHudPresentationRecovery(resetAttempts = false)
                 hudPresentationSession.markShown(current)
+                scheduleHudPresentationStability(current)
                 viewModel.setAirVisionHudPresentationActive(true)
                 return
             }
@@ -308,6 +313,7 @@ class MainActivity : ComponentActivity() {
         hudPresentationSession.attach(presentation)
         presentation.setOnDismissListener {
             if (hudPresentationSession.release(presentation)) {
+                cancelHudPresentationStability()
                 viewModel.setAirVisionHudPresentationActive(false)
                 scheduleHudPresentationRecovery("presentation_dismissed")
             }
@@ -315,7 +321,8 @@ class MainActivity : ComponentActivity() {
         runCatching { presentation.show() }
             .onSuccess {
                 if (hudPresentationSession.markShown(presentation)) {
-                    cancelHudPresentationRecovery(resetAttempts = true)
+                    cancelHudPresentationRecovery(resetAttempts = false)
+                    scheduleHudPresentationStability(presentation)
                     Log.d(TAG, "HUD presentation shown on display ${targetDisplay.displayId} ${targetDisplay.name}")
                     viewModel.setAirVisionHudPresentationActive(true)
                     applyPhoneSystemBars()
@@ -333,6 +340,7 @@ class MainActivity : ComponentActivity() {
         dismiss: Boolean,
     ): Boolean {
         if (!hudPresentationSession.release(presentation)) return false
+        cancelHudPresentationStability()
         if (dismiss) {
             runCatching { presentation.dismiss() }
                 .onFailure { error -> Log.w(TAG, "Failed to dismiss HUD presentation", error) }
@@ -369,6 +377,26 @@ class MainActivity : ComponentActivity() {
         if (resetAttempts) {
             hudPresentationSession.resetRecovery()
         }
+    }
+
+    private fun scheduleHudPresentationStability(presentation: HudPresentation) {
+        cancelHudPresentationStability()
+        lateinit var stability: Runnable
+        stability =
+            Runnable {
+                if (hudPresentationStabilityRunnable !== stability) return@Runnable
+                hudPresentationStabilityRunnable = null
+                if (presentation.isShowing && hudPresentationSession.markStable(presentation)) {
+                    Log.d(TAG, "HUD presentation stable on display ${presentation.display.displayId}")
+                }
+            }
+        hudPresentationStabilityRunnable = stability
+        hudSystemBarsHandler.postDelayed(stability, PRESENTATION_STABILITY_INTERVAL_MS)
+    }
+
+    private fun cancelHudPresentationStability() {
+        hudPresentationStabilityRunnable?.let(hudSystemBarsHandler::removeCallbacks)
+        hudPresentationStabilityRunnable = null
     }
 
     private fun Display.toHudDisplayCandidate(presentationDisplayIds: Set<Int>): AirVisionHudDisplayCandidate =
@@ -565,5 +593,6 @@ class MainActivity : ComponentActivity() {
         private const val TAG = "MainActivity"
         private const val ASUS_VENDOR_ID = 0x0b05
         private const val AIRVISION_M1_PRODUCT_ID = 0x1b3c
+        private const val PRESENTATION_STABILITY_INTERVAL_MS = 10_000L
     }
 }

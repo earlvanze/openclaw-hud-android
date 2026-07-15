@@ -25,7 +25,9 @@ internal class HudPresentationSessionController<T : Any>(
         return true
     }
 
-    fun markShown(session: T): Boolean {
+    fun markShown(session: T): Boolean = current === session
+
+    fun markStable(session: T): Boolean {
         if (current !== session) return false
         resetRecovery()
         return true

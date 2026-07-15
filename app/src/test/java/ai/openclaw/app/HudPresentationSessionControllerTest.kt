@@ -31,7 +31,7 @@ class HudPresentationSessionControllerTest {
     }
 
     @Test
-    fun confirmedSessionResetsRecoveryDelay() {
+    fun shownSessionKeepsRecoveryBackoffUntilStable() {
         val controller = HudPresentationSessionController<Any>(listOf(5L, 10L, 20L))
         val session = Any()
 
@@ -40,6 +40,8 @@ class HudPresentationSessionControllerTest {
         assertEquals(10L, controller.nextRecoveryDelayMs())
         assertTrue(controller.markShown(session))
 
+        assertEquals(20L, controller.nextRecoveryDelayMs())
+        assertTrue(controller.markStable(session))
         assertEquals(5L, controller.nextRecoveryDelayMs())
     }
 
@@ -53,7 +55,7 @@ class HudPresentationSessionControllerTest {
         controller.nextRecoveryDelayMs()
         controller.attach(replacement)
 
-        assertFalse(controller.markShown(first))
+        assertFalse(controller.markStable(first))
         assertEquals(10L, controller.nextRecoveryDelayMs())
         assertSame(replacement, controller.current)
     }
