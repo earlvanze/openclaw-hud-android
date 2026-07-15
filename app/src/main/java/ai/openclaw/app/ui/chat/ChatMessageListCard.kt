@@ -34,6 +34,7 @@ fun ChatMessageListCard(
     streamingAssistantText: String?,
     healthOk: Boolean,
     modifier: Modifier = Modifier,
+    onReportAssistantMessage: (ChatMessage) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     val displayMessages = remember(messages) { messages.asReversed() }
@@ -81,7 +82,15 @@ fun ChatMessageListCard(
             }
 
             items(items = displayMessages, key = { it.id }) { message ->
-                ChatMessageBubble(message = message)
+                ChatMessageBubble(
+                    message = message,
+                    onReport =
+                        if (message.role.equals("assistant", ignoreCase = true)) {
+                            { onReportAssistantMessage(message) }
+                        } else {
+                            null
+                        },
+                )
             }
         }
 

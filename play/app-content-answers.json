@@ -14,7 +14,7 @@
   },
   "appAccess": {
     "restrictedFeatures": true,
-    "reviewAccessInstructions": "Open the app and go to Settings > External Display HUD > App Preferences, then enable Demo Mode. Demo Mode exposes the HUD surface without a gateway account, credentials, pairing code, purchase, or external hardware. Gateway pairing is optional. Reviewers can inspect chat, notifications, voice/caption controls, display placement, and external-display settings in Demo Mode."
+    "reviewAccessInstructions": "Open the app and go to Settings > External Display HUD > App Preferences, then enable Demo Mode. Demo Mode exposes the HUD surface without a gateway account, credentials, pairing code, purchase, or external hardware. Gateway pairing is optional. Reviewers can inspect chat, notifications, voice/caption controls, display placement, and external-display settings in Demo Mode. Each assistant response has a flag button that opens the in-app offensive-content report form and shows the exact data disclosure before submission."
   },
   "targetAudience": {
     "designedForChildren": false,
@@ -28,8 +28,10 @@
   "aiGeneratedContent": {
     "present": true,
     "policyUrl": "https://support.google.com/googleplay/android-developer/answer/13985936",
-    "inAppReportingImplemented": false,
-    "notes": "The HUD displays conversational AI output from the configured OpenClaw gateway. Do not send the Play release for review until assistant responses have an in-app offensive-content report action that submits the report to ECO Systems LLC without leaving the app."
+    "inAppReportingImplemented": true,
+    "reportingEndpoint": "https://aops.studio/openclaw-hud-api/report.php",
+    "retentionDays": 90,
+    "notes": "Assistant response bubbles expose an in-app flag action. The confirmation dialog discloses the bounded payload and submits it directly to the ECO Systems LLC receiver without leaving the app. Live endpoint health and receipt-backed POST storage were verified on 2026-07-15."
   },
   "dataDeletion": {
     "accountCreationInApp": false,
@@ -56,9 +58,9 @@
         "playType": "Messages",
         "playSubtype": "Other in-app messages",
         "optional": true,
-        "purpose": ["App functionality"],
-        "whereUsed": "HUD chat prompts, assistant responses, and notification summaries when the user connects to a gateway.",
-        "destination": "Configured OpenClaw gateway."
+        "purpose": ["App functionality", "Developer communications"],
+        "whereUsed": "HUD chat prompts, assistant responses, and notification summaries when the user connects to a gateway. A user-confirmed offensive-content report sends only the selected assistant excerpt, category, optional note, app version, and one-way message hash.",
+        "destination": "Configured OpenClaw gateway; for an explicit offensive-content report only, the ECO Systems LLC receiver at aops.studio."
       },
       {
         "playType": "App activity",
@@ -358,6 +360,6 @@
       "play/screenshots/phone/hud-demo.png",
       "play/screenshots/phone/settings-demo.png"
     ],
-    "notes": "Play app creation, internal tester selection, privacy policy, reviewer Demo Mode access, store listing, category/contact details, and signed version 2026071500 upload were verified on 2026-07-15. The internal release remains a draft and has not been sent for review or rolled out. Google Play AI-content reporting remains a hard gate before review."
+    "notes": "Play app creation, internal tester selection, privacy policy, reviewer Demo Mode access, store listing, category/contact details, and signed version 2026071500 upload were verified on 2026-07-15. The internal release remains a draft and has not been sent for review or rolled out. A replacement signed bundle containing in-app AI-content reporting must be uploaded before review."
   }
 }

@@ -1,8 +1,11 @@
 package ai.openclaw.app.ui.chat
 
+import ai.openclaw.app.BuildConfig
 import ai.openclaw.app.MainViewModel
+import ai.openclaw.app.chat.ChatMessage
 import ai.openclaw.app.chat.ChatSessionEntry
 import ai.openclaw.app.chat.OutgoingAttachment
+import ai.openclaw.app.reporting.ContentReportClient
 import ai.openclaw.app.ui.mobileAccent
 import ai.openclaw.app.ui.mobileAccentBorderStrong
 import ai.openclaw.app.ui.mobileBorderStrong
@@ -33,8 +36,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -110,6 +115,23 @@ fun ChatSheetContent(viewModel: MainViewModel) {
     val context = LocalContext.current
     val resolver = context.contentResolver
     val scope = rememberCoroutineScope()
+    val contentReportClient =
+        remember {
+            ContentReportClient(
+                endpointUrl = BuildConfig.OPENCLAW_CONTENT_REPORT_URL,
+                packageName = BuildConfig.APPLICATION_ID,
+                appVersion = BuildConfig.VERSION_NAME,
+            )
+        }
+    var reportTarget by remember { mutableStateOf<ChatMessage?>(null) }
+
+    reportTarget?.let { target ->
+        ContentReportDialog(
+            message = target,
+            client = contentReportClient,
+            onDismiss = { reportTarget = null },
+        )
+    }
 
     val attachments = remember { mutableStateListOf<PendingImageAttachment>() }
 
@@ -155,6 +177,7 @@ fun ChatSheetContent(viewModel: MainViewModel) {
             pendingToolCalls = pendingToolCalls,
             streamingAssistantText = streamingAssistantText,
             healthOk = healthOk,
+            onReportAssistantMessage = { message -> reportTarget = message },
             modifier = Modifier.weight(1f, fill = true),
         )
 

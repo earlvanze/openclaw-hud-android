@@ -24,6 +24,10 @@ const defaultPrivacyPolicyPath = join(androidDir, "play", "privacy-policy.md");
 const defaultHostedPrivacyPolicyPagePath = join(androidDir, "docs", "privacy-policy.html");
 const defaultInAppPrivacyPolicyPath = join(androidDir, "app", "src", "main", "java", "ai", "openclaw", "app", "PrivacyPolicyText.kt");
 const defaultSettingsSheetPath = join(androidDir, "app", "src", "main", "java", "ai", "openclaw", "app", "ui", "SettingsSheet.kt");
+const defaultContentReportClientPath = join(androidDir, "app", "src", "main", "java", "ai", "openclaw", "app", "reporting", "ContentReportClient.kt");
+const defaultContentReportDialogPath = join(androidDir, "app", "src", "main", "java", "ai", "openclaw", "app", "ui", "chat", "ContentReportDialog.kt");
+const defaultChatMessageViewsPath = join(androidDir, "app", "src", "main", "java", "ai", "openclaw", "app", "ui", "chat", "ChatMessageViews.kt");
+const defaultChatSheetContentPath = join(androidDir, "app", "src", "main", "java", "ai", "openclaw", "app", "ui", "chat", "ChatSheetContent.kt");
 const defaultDataSafetyNotesPath = join(androidDir, "play", "data-safety-notes.md");
 const defaultConsoleChecklistPath = join(androidDir, "play", "console-checklist.md");
 const defaultListingDir = join(androidDir, "play", "listings", "en-US");
@@ -49,6 +53,9 @@ const corePrivacyDisclosures = [
   "The Google Play HUD build may request microphone, notification, nearby-device, network, foreground-service, and audio-routing permissions",
   "Notification access is optional",
   "Voice and caption features may send microphone transcripts, caption text, chat text, assistant status, and selected AirVision HUD settings",
+  "You can report an offensive assistant response from its flag button",
+  "Reports do not include images, gateway URLs or credentials, chat-session identifiers, device identifiers, or unrelated chat history",
+  "retained for up to 90 days",
   "OpenClaw HUD does not sell personal data and does not include advertising",
 ];
 
@@ -333,6 +340,18 @@ async function verifyHostedPrivacyPolicyUrl(hostedUrl, localHostedPage, problems
   }
 }
 
+async function verifyContentReportEndpoint(endpointUrl, problems) {
+  try {
+    const responseText = await fetchText(endpointUrl, hostedPolicyFetchTimeoutMs);
+    const response = JSON.parse(responseText);
+    if (response?.ok !== true || response?.service !== "openclaw-hud-content-reports" || response?.retentionDays !== 90) {
+      throw new Error("health response does not match the reporting contract");
+    }
+  } catch (error) {
+    problems.push(`aiGeneratedContent.reportingEndpoint must be reachable and healthy: ${error.message}`);
+  }
+}
+
 function resolveScreenshotPath(value) {
   const trimmed = value.trim();
   if (isHttpsUrl(trimmed)) return null;
@@ -572,6 +591,11 @@ async function verifyFinalSubmissionReadiness(
       "aiGeneratedContent.inAppReportingImplemented must be true after an in-app offensive-content report reaches the developer without leaving the app.",
     );
   }
+  if (!isHttpsUrl(appContent.aiGeneratedContent?.reportingEndpoint)) {
+    problems.push("aiGeneratedContent.reportingEndpoint must be a public https:// URL.");
+  } else if (!skipHostedPrivacyUrlFetch) {
+    await verifyContentReportEndpoint(appContent.aiGeneratedContent.reportingEndpoint, problems);
+  }
   verifyFinalConsoleEvidence(finalSubmission, problems);
   const phoneScreenshots = Array.isArray(finalSubmission.phoneScreenshots) ? finalSubmission.phoneScreenshots : [];
   if (phoneScreenshots.length < 2) {
@@ -630,6 +654,12 @@ function verifyAppContentShape(appContent) {
   requireBoolean(appContent.aiGeneratedContent?.present, true, "AI-generated content declaration");
   if (!isHttpsUrl(appContent.aiGeneratedContent?.policyUrl)) {
     throw new Error("AI-generated content policyUrl must be a public https:// URL.");
+  }
+  if (!isHttpsUrl(appContent.aiGeneratedContent?.reportingEndpoint)) {
+    throw new Error("AI-generated content reportingEndpoint must be a public https:// URL.");
+  }
+  if (appContent.aiGeneratedContent?.retentionDays !== 90) {
+    throw new Error("AI-generated content report retention must be 90 days.");
   }
   if (appContent.dataSafety?.dataEncryptedInTransitAnswer !== "no_not_all_paths") {
     throw new Error("Data safety transport-security answer must reflect that not all self-hosted gateway paths are encrypted.");
@@ -880,6 +910,10 @@ async function main() {
   const hostedPrivacyPolicyPage = await readText(args.hostedPrivacyPolicyPage);
   const inAppPrivacyPolicy = await readText(args.inAppPrivacyPolicy);
   const settingsSheet = await readText(args.settingsSheet);
+  const contentReportClient = await readText(defaultContentReportClientPath);
+  const contentReportDialog = await readText(defaultContentReportDialogPath);
+  const chatMessageViews = await readText(defaultChatMessageViewsPath);
+  const chatSheetContent = await readText(defaultChatSheetContentPath);
   const dataSafetyNotes = await readText(args.dataSafetyNotes);
   const consoleChecklist = await readText(args.consoleChecklist);
   const consoleHandoff =
@@ -918,6 +952,30 @@ async function main() {
   ]);
   verifyInAppPolicyMirrorsHostedPolicy(privacyPolicy, inAppPrivacyPolicy);
   verifyHostedPrivacyPolicyPage(privacyPolicy, hostedPrivacyPolicyPage);
+  requireIncludes("Content report client", contentReportClient, [
+    "assistantExcerpt",
+    "messageHash",
+    "MAX_EXCERPT_CHARS = 4000",
+    "MAX_COMMENT_CHARS = 500",
+  ]);
+  requireIncludes("Content report wiring", chatSheetContent, [
+    "BuildConfig.OPENCLAW_CONTENT_REPORT_URL",
+    "ContentReportClient",
+    "ContentReportDialog",
+    "onReportAssistantMessage",
+  ]);
+  requireIncludes("Content report dialog", contentReportDialog, [
+    "Report offensive response",
+    "ECO Systems LLC",
+    "No image, gateway, device ID, or session data is included",
+    "Send report",
+    "Report received",
+  ]);
+  requireIncludes("Assistant report action", chatMessageViews, [
+    "Report offensive response",
+    "Icons.Outlined.Flag",
+    "role == \"assistant\"",
+  ]);
   requireIncludes("Settings privacy policy surface", settingsSheet, [
     "PrivacyPolicyText",
     "Privacy Policy",
@@ -929,6 +987,8 @@ async function main() {
     "Optional microphone",
     "Optional notification-listener",
     "Data is sent only to the OpenClaw gateway endpoint configured by the user",
+    "Developer communications",
+    "ECO Systems LLC receiver",
   ]);
   requireIncludes("Console checklist", consoleChecklist, [
     "Data safety",

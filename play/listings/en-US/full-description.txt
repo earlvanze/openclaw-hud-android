@@ -8,6 +8,7 @@ Key features:
 - Minimal always-on HUD for external displays
 - OpenClaw gateway pairing and secure local setup storage
 - Compact chat with hardware keyboard send support
+- In-app offensive-response reporting with explicit payload review, direct developer delivery, and receipt confirmation
 - Notification summaries for navigation and assistant context
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback

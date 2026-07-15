@@ -290,7 +290,19 @@ try {
     );
   }
 
-  const missingAiReport = runVerifier(["--final", "--skip-hosted-privacy-url-fetch"]);
+  const missingAiReportAppContent = JSON.parse(originalAppContent);
+  missingAiReportAppContent.aiGeneratedContent = {
+    ...missingAiReportAppContent.aiGeneratedContent,
+    inAppReportingImplemented: false,
+  };
+  const missingAiReportPath = join(tempDir, "missing-ai-report-app-content.json");
+  await writeFile(missingAiReportPath, `${JSON.stringify(missingAiReportAppContent, null, 2)}\n`);
+  const missingAiReport = runVerifier([
+    "--app-content",
+    missingAiReportPath,
+    "--final",
+    "--skip-hosted-privacy-url-fetch",
+  ]);
   if (
     missingAiReport.status === 0 ||
     !outputText(missingAiReport).includes("aiGeneratedContent.inAppReportingImplemented")

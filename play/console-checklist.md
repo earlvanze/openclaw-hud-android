@@ -13,9 +13,8 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
   `GOOGLE_PLAY_GCLOUD_ACCOUNT` and `gcloud config set account <email>` are also
   supported. The publish helper rejects other gcloud accounts by default.
 - Complete App content forms, including Data safety, Ads, App access, Content rating, Target audience, and Data deletion.
-- Implement and verify an in-app offensive-content report action for assistant
-  responses that reaches ECO Systems LLC without leaving the app. Google Play's
-  AI-generated content policy makes this a release gate.
+- Verify the in-app offensive-content report action against the live ECO Systems
+  LLC receiver before every release that changes chat/reporting behavior.
 - Use the copy in `play/listings/en-US/` for the initial English listing.
 - Use `play/privacy-policy.md` as the hosted privacy-policy source; the same
   disclosure is available in-app at Settings -> External Display HUD -> App Preferences
@@ -66,7 +65,7 @@ Current local status:
 - Latest signed HUD AAB builds successfully from the current release commit:
   `build/release-bundles/openclaw-2026.7.15-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `f621b7f96c7aad6f537dde7d4943b11c46d95cc95811f39f12d07e1bd5ee9272`
+  `781092a0e99471e89c5eb02b2452155a9be61f6b71a3a0cf6484943dc9b8af4f`
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.

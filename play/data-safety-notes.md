@@ -17,14 +17,18 @@ Expected Google Play declarations for the HUD build:
   messages; Audio files > Voice or sound recordings; App activity > Other
   actions; App info and performance > Diagnostics. Each is optional, used for
   app functionality, not sold, and not used for advertising.
+- Messages > Other in-app messages also uses Developer communications when the
+  user explicitly reports an offensive assistant response. The bounded report
+  goes to the ECO Systems LLC receiver at `aops.studio` and is retained for no
+  more than 90 days.
 - App account creation: No. Data deletion path: Android app storage clear-data
   or uninstall for local app state; gateway/provider data is controlled by the
   configured gateway/provider.
 - App access for review: Use HUD Demo Mode without a live gateway, or
   provide temporary setup code/demo gateway credentials only inside Play Console
   App access instructions.
-- AI-generated assistant responses require an in-app offensive-content reporting
-  path to ECO Systems LLC before the release is sent for Play review. This is a
-  release gate, not a completed declaration for version 2026071500.
+- AI-generated assistant responses include an in-app flag action and confirmation
+  dialog that submits to ECO Systems LLC without leaving the app. The Play draft
+  must receive the replacement bundle and updated declaration before review.
 
 Before production release, verify declarations against the exact final manifest and any screenshots/video submitted in Play Console.

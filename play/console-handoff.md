@@ -12,15 +12,15 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.15-hud-release.aab`
-- SHA-256: `f621b7f96c7aad6f537dde7d4943b11c46d95cc95811f39f12d07e1bd5ee9272`
-- Version: 2026.7.15 (2026071500)
+- SHA-256: `781092a0e99471e89c5eb02b2452155a9be61f6b71a3a0cf6484943dc9b8af4f`
+- Version: 2026.7.15 (2026071501)
 
 ## Remaining Console Blockers
 
 - [x] Create app in Play Console (verifiedAt=2026-07-15; source=Google Play Console > All apps > OpenClaw HUD (ai.openclaw.app.hud); notes=Verified that the separate OpenClaw HUD app exists as Play app 4973554177385209084.)
 - [x] Configure internal testers (verifiedAt=2026-07-15; source=Google Play Console > Test and release > Testing > Internal testing > Testers; notes=Verified that the dedicated OpenClaw HUD Internal Testers list is attached with one intended tester.)
 - [x] Configure reviewer app access (verifiedAt=2026-07-15; source=Google Play Console > Policy and programs > App content > Sign in details; notes=Verified that Play contains account-free Demo Mode instructions covering the HUD without a gateway or external hardware.)
-- [ ] Implement in-app AI-content reporting to the developer
+- [x] Implement in-app AI-content reporting to the developer
 
 Console flags and evidence entries live in `play/app-content-answers.json` under `finalSubmission`. The AI-content gate lives under `aiGeneratedContent`. Flip a flag only after the matching setup or implementation is complete.
 
@@ -42,6 +42,7 @@ Key features:
 - Minimal always-on HUD for external displays
 - OpenClaw gateway pairing and secure local setup storage
 - Compact chat with hardware keyboard send support
+- In-app offensive-response reporting with explicit payload review, direct developer delivery, and receipt confirmation
 - Notification summaries for navigation and assistant context
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
@@ -61,6 +62,7 @@ OpenClaw HUD external-display update:
 - Automatic Android Presentation routing for external and wearable displays.
 - Runtime display names and generic accessory-key controls.
 - Compact chat, notifications, voice, and captions.
+- In-app assistant-response reporting with confirmation and receipts.
 - Optional AirVision USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
 - In-app privacy policy under App Preferences.
 
@@ -80,7 +82,7 @@ Use the tracked fallback screenshots when live Fold/M1 capture is unavailable. T
 
 ## App Access
 
-Open the app and go to Settings > External Display HUD > App Preferences, then enable Demo Mode. Demo Mode exposes the HUD surface without a gateway account, credentials, pairing code, purchase, or external hardware. Gateway pairing is optional. Reviewers can inspect chat, notifications, voice/caption controls, display placement, and external-display settings in Demo Mode.
+Open the app and go to Settings > External Display HUD > App Preferences, then enable Demo Mode. Demo Mode exposes the HUD surface without a gateway account, credentials, pairing code, purchase, or external hardware. Gateway pairing is optional. Reviewers can inspect chat, notifications, voice/caption controls, display placement, and external-display settings in Demo Mode. Each assistant response has a flag button that opens the in-app offensive-content report form and shows the exact data disclosure before submission.
 
 ## AirVision Companion Review Evidence
 
@@ -248,7 +250,7 @@ Reviewer evidence sources:
 Collected data:
 
 - Audio files: optional; purpose App functionality; Wake word, push-to-talk, and realtime caption/translation workflows when enabled by the user.
-- Messages: optional; purpose App functionality; HUD chat prompts, assistant responses, and notification summaries when the user connects to a gateway.
+- Messages: optional; purpose App functionality, Developer communications; HUD chat prompts, assistant responses, and notification summaries when the user connects to a gateway. A user-confirmed offensive-content report sends only the selected assistant excerpt, category, optional note, app version, and one-way message hash.
 - App activity: optional; purpose App functionality; Assistant run controls plus active session, agent, provider, and model selections when enabled.
 - App info and performance: optional; purpose App functionality; Gateway connection state, external-display capability status, optional AirVision profile state, and diagnostics exports created explicitly by the user.
 

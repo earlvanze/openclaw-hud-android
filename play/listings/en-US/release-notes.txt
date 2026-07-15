@@ -2,5 +2,6 @@ OpenClaw HUD external-display update:
 - Automatic Android Presentation routing for external and wearable displays.
 - Runtime display names and generic accessory-key controls.
 - Compact chat, notifications, voice, and captions.
+- In-app assistant-response reporting with confirmation and receipts.
 - Optional AirVision USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
 - In-app privacy policy under App Preferences.

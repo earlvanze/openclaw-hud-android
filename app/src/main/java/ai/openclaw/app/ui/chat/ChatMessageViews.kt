@@ -31,6 +31,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -53,7 +57,10 @@ private data class ChatBubbleStyle(
 )
 
 @Composable
-fun ChatMessageBubble(message: ChatMessage) {
+fun ChatMessageBubble(
+    message: ChatMessage,
+    onReport: (() -> Unit)? = null,
+) {
     val role = message.role.trim().lowercase(Locale.US)
     val style = bubbleStyle(role)
 
@@ -68,7 +75,11 @@ fun ChatMessageBubble(message: ChatMessage) {
 
     if (displayableContent.isEmpty()) return
 
-    ChatBubbleContainer(style = style, roleLabel = roleLabel(role)) {
+    ChatBubbleContainer(
+        style = style,
+        roleLabel = roleLabel(role),
+        onReport = onReport?.takeIf { role == "assistant" },
+    ) {
         ChatMessageBody(content = displayableContent, textColor = mobileText)
     }
 }
@@ -78,6 +89,7 @@ private fun ChatBubbleContainer(
     style: ChatBubbleStyle,
     roleLabel: String,
     modifier: Modifier = Modifier,
+    onReport: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     Row(
@@ -96,11 +108,27 @@ private fun ChatBubbleContainer(
                 modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
-                Text(
-                    text = roleLabel,
-                    style = mobileCaption2.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 0.6.sp),
-                    color = style.roleColor,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = roleLabel,
+                        style = mobileCaption2.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 0.6.sp),
+                        color = style.roleColor,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (onReport != null) {
+                        IconButton(
+                            onClick = onReport,
+                            modifier = Modifier.size(30.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Flag,
+                                contentDescription = "Report offensive response",
+                                tint = mobileTextSecondary,
+                                modifier = Modifier.size(17.dp),
+                            )
+                        }
+                    }
+                }
                 content()
             }
         }

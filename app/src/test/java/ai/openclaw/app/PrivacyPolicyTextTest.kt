@@ -15,5 +15,9 @@ class PrivacyPolicyTextTest {
         assertTrue(policy.contains("does not sell personal data"))
         assertTrue(policy.contains("clear data"))
         assertTrue(policy.contains("does not include advertising"))
+        assertTrue(policy.contains("report an offensive assistant response"))
+        assertTrue(policy.contains("eco systems llc"))
+        assertTrue(policy.contains("retained for up to 90 days"))
+        assertTrue(policy.contains("do not include images"))
     }
 }
