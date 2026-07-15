@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.12-hud-release.aab`
-- SHA-256: `217d6c5926cc3e0f4c94454b08854a6ae00af5846745236abff7e4d58b96cc4b`
-- Version: 2026.7.12 (2026071206)
+- AAB: `build/release-bundles/openclaw-2026.7.15-hud-release.aab`
+- SHA-256: `cc6ed4dd4b0ca8a989aebe7ec670cdfebc1d40cb909f75b079139083287b847e`
+- Version: 2026.7.15 (2026071500)
 
 ## Remaining Console Blockers
 
@@ -27,23 +27,26 @@ These flags and evidence entries live in `play/app-content-answers.json` under `
 
 Title: OpenClaw HUD
 
-Short description: Minimal assistant HUD for Samsung DeX and Asus AirVision M1 displays.
+Short description: Minimal assistant HUD for Android external and wearable displays.
 
 Full description:
 
-OpenClaw HUD is a low-distraction assistant companion for Android phones connected to wearable displays such as the Asus AirVision M1.
+OpenClaw HUD is a low-distraction assistant companion for Android devices connected to external or wearable displays.
 
-The app is optimized for Samsung DeX and has been tested with Galaxy Fold 7 and AirVision M1. It renders glanceable green text on black in Android Presentation mode, keeping status, chat, notifications, captions, microphone state, and speaker state readable without filling the display with a full desktop interface.
+The app uses Android Presentation mode and automatically targets a compatible USB-C, HDMI, wireless, or wearable display. It has been tested with Samsung DeX, Galaxy Fold 7, and AirVision M1. Glanceable green text on black keeps status, chat, notifications, captions, microphone state, and speaker state readable without filling the display with a full desktop interface.
 
 Key features:
+- Automatic Android Presentation routing with first, last, largest, and optional AirVision-preferred display targets
+- Runtime display names in identification and host restore screens
 - Minimal always-on HUD for external displays
 - OpenClaw gateway pairing and secure local setup storage
 - Compact chat with hardware keyboard send support
 - Notification summaries for navigation and assistant context
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
-- Speaker routing support for AirVision M1 audio devices
-- AirVision HUD per-mode profile controls for view mode, custom profile labels, copy-to-custom actions, JSON backup/import with all-profile runtime preview, external-display target, placement, physical main screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, IPD calibration, Eye Care filtering, 3D Mode, gesture/hotkey behavior, brightness-key chat/brightness/distance controls, profile reset, and low-overhead preferences
+- External-display profiles for view mode, custom labels, JSON backup/import, placement, main-screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, gesture/hotkey behavior, profile reset, and low-overhead preferences
+- Generic external accessory keys plus media-button mic control while the HUD is focused
+- Optional speaker routing, IPD calibration, Eye Care, 3D Mode, USB diagnostics, and Windows handoff tools for AirVision M1
 - AirVision Windows app handoff export for applying saved Android profile values and reviewing active HUD runtime scale/caption capacity, all-profile runtime summaries, runtime metadata freshness, HUD controls, 18-feature companion parity states, Cyber-observed ASUS AirVision 1.0.7.1 settings-key evidence, Windows-only spatial/mirror capability status, and companion preferences during ASUS AirVision sessions on Cyber or another Windows host
 - AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
 - Optional USB firmware-link detection, device identity, descriptor diagnostics, readable/writable HID report-path summaries, per-feature firmware-apply readiness, per-profile runtime summaries, desired firmware-sync state, protocol-capture targets, sanitized capture-results import preview with captured-review, pending, and source-evidence labels, and firmware-update handoff provenance for AirVision M1 hardware status
@@ -53,20 +56,19 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 
 Release notes:
 
-AirVision M1 HUD release candidate:
-- Green/black Samsung DeX HUD.
+OpenClaw HUD external-display update:
+- Automatic Android Presentation routing for external and wearable displays.
+- Runtime display names and generic accessory-key controls.
 - Compact chat, notifications, voice, and captions.
-- 18-feature AirVision parity catalog with Cyber-observed ASUS settings-key evidence.
-- USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
+- Optional AirVision USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
 - In-app privacy policy under App Preferences.
-- Play HUD build removes SMS and Call Log permissions.
 
 ## Privacy Policy
 
 - Hosted URL: https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html
 - Source file: `play/privacy-policy.md`
 - Hosted page source: `docs/privacy-policy.html`
-- In-app location: Settings > AirVision M1 > App Preferences > Privacy Policy
+- In-app location: Settings > External Display HUD > App Preferences > Privacy Policy
 
 ## Screenshots
 
@@ -77,7 +79,7 @@ Use the tracked fallback screenshots when live Fold/M1 capture is unavailable. T
 
 ## App Access
 
-OpenClaw HUD can be reviewed without a live gateway by opening Settings > AirVision M1 > App Preferences and enabling Demo Mode. Gateway pairing is optional for the HUD surface. If Google Play review needs live gateway features, provide a temporary setup code or demo gateway credentials in the Play Console App access form only; do not store those credentials in this repository.
+OpenClaw HUD can be reviewed without a live gateway by opening Settings > External Display HUD > App Preferences and enabling Demo Mode. Gateway pairing is optional for the HUD surface. If Google Play review needs live gateway features, provide a temporary setup code or demo gateway credentials in the Play Console App access form only; do not store those credentials in this repository.
 
 ## AirVision Companion Review Evidence
 

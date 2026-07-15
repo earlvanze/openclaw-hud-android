@@ -19,7 +19,7 @@ internal sealed interface AirVisionHudKeyCommand {
 
     data object ArmMicDoubleTap : AirVisionHudKeyCommand
 
-    data object LogUnhandledM1Key : AirVisionHudKeyCommand
+    data object LogUnhandledHudAccessoryKey : AirVisionHudKeyCommand
 }
 
 internal data class AirVisionHudKeyDecision(
@@ -36,7 +36,7 @@ internal class AirVisionHudKeyInputController(
         keyCode: Int,
         action: Int,
         eventTimeMs: Long,
-        isAirVisionM1Event: Boolean,
+        isHudAccessoryEvent: Boolean,
         controls: AirVisionHudControls,
     ): AirVisionHudKeyDecision {
         val scrollDelta = hudScrollKeyDeltas[keyCode]
@@ -74,10 +74,15 @@ internal class AirVisionHudKeyInputController(
         }
 
         val isHudMediaKey = hudMicToggleKeys.contains(keyCode)
-        if (!isHudMediaKey || (!isAirVisionM1Event && keyCode !in hudGlobalMicToggleKeys)) {
+        if (!isHudMediaKey || (!isHudAccessoryEvent && keyCode !in hudGlobalMicToggleKeys)) {
             return AirVisionHudKeyDecision(
                 consume = false,
-                command = if (action == KeyEvent.ACTION_UP && isAirVisionM1Event) AirVisionHudKeyCommand.LogUnhandledM1Key else null,
+                command =
+                    if (action == KeyEvent.ACTION_UP && isHudAccessoryEvent) {
+                        AirVisionHudKeyCommand.LogUnhandledHudAccessoryKey
+                    } else {
+                        null
+                    },
             )
         }
 

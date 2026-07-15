@@ -19,7 +19,7 @@ class AirVisionHudKeyInputControllerTest {
                 keyCode = KeyEvent.KEYCODE_BRIGHTNESS_DOWN,
                 action = KeyEvent.ACTION_DOWN,
                 eventTimeMs = 1_000L,
-                isAirVisionM1Event = true,
+                isHudAccessoryEvent = true,
                 controls = AirVisionHudControls(),
             ),
         )
@@ -29,7 +29,7 @@ class AirVisionHudKeyInputControllerTest {
                 keyCode = KeyEvent.KEYCODE_BRIGHTNESS_DOWN,
                 action = KeyEvent.ACTION_UP,
                 eventTimeMs = 1_010L,
-                isAirVisionM1Event = true,
+                isHudAccessoryEvent = true,
                 controls = AirVisionHudControls(),
             ),
         )
@@ -45,7 +45,7 @@ class AirVisionHudKeyInputControllerTest {
                 keyCode = KeyEvent.KEYCODE_BRIGHTNESS_UP,
                 action = KeyEvent.ACTION_DOWN,
                 eventTimeMs = 1_000L,
-                isAirVisionM1Event = true,
+                isHudAccessoryEvent = true,
                 controls = AirVisionHudControls(brightnessKeyAction = AirVisionHudKeyAction.None),
             ),
         )
@@ -58,7 +58,7 @@ class AirVisionHudKeyInputControllerTest {
                 keyCode = KeyEvent.KEYCODE_BRIGHTNESS_UP,
                 action = KeyEvent.ACTION_DOWN,
                 eventTimeMs = 1_100L,
-                isAirVisionM1Event = true,
+                isHudAccessoryEvent = true,
                 controls = AirVisionHudControls(brightnessKeyAction = AirVisionHudKeyAction.AdjustBrightness),
             ),
         )
@@ -71,7 +71,7 @@ class AirVisionHudKeyInputControllerTest {
                 keyCode = KeyEvent.KEYCODE_BRIGHTNESS_DOWN,
                 action = KeyEvent.ACTION_DOWN,
                 eventTimeMs = 1_200L,
-                isAirVisionM1Event = true,
+                isHudAccessoryEvent = true,
                 controls = AirVisionHudControls(brightnessKeyAction = AirVisionHudKeyAction.AdjustDistance),
             ),
         )
@@ -95,7 +95,7 @@ class AirVisionHudKeyInputControllerTest {
     }
 
     @Test
-    fun m1CenterKeyRequiresDoubleTapButNonM1CenterKeyPassesThrough() {
+    fun accessoryCenterKeyRequiresDoubleTapButBuiltInCenterKeyPassesThrough() {
         val controller = AirVisionHudKeyInputController()
 
         assertEquals(
@@ -104,7 +104,7 @@ class AirVisionHudKeyInputControllerTest {
                 keyCode = KeyEvent.KEYCODE_DPAD_CENTER,
                 action = KeyEvent.ACTION_UP,
                 eventTimeMs = 1_000L,
-                isAirVisionM1Event = false,
+                isHudAccessoryEvent = false,
                 controls = AirVisionHudControls(),
             ),
         )
@@ -117,14 +117,14 @@ class AirVisionHudKeyInputControllerTest {
                 keyCode = KeyEvent.KEYCODE_DPAD_CENTER,
                 action = KeyEvent.ACTION_UP,
                 eventTimeMs = 1_000L,
-                isAirVisionM1Event = true,
+                isHudAccessoryEvent = true,
                 controls = AirVisionHudControls(),
             ),
         )
     }
 
     @Test
-    fun globalMediaKeyDoubleTapWorksWithoutM1DeviceIdentity() {
+    fun globalMediaKeyDoubleTapWorksWithoutAccessoryIdentity() {
         val controller = AirVisionHudKeyInputController()
 
         assertEquals(
@@ -133,7 +133,7 @@ class AirVisionHudKeyInputControllerTest {
                 keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
                 action = KeyEvent.ACTION_DOWN,
                 eventTimeMs = 1_000L,
-                isAirVisionM1Event = false,
+                isHudAccessoryEvent = false,
                 controls = AirVisionHudControls(),
             ),
         )
@@ -146,7 +146,7 @@ class AirVisionHudKeyInputControllerTest {
                 keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
                 action = KeyEvent.ACTION_UP,
                 eventTimeMs = 1_010L,
-                isAirVisionM1Event = false,
+                isHudAccessoryEvent = false,
                 controls = AirVisionHudControls(),
             ),
         )
@@ -159,26 +159,26 @@ class AirVisionHudKeyInputControllerTest {
                 keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
                 action = KeyEvent.ACTION_UP,
                 eventTimeMs = 1_300L,
-                isAirVisionM1Event = false,
+                isHudAccessoryEvent = false,
                 controls = AirVisionHudControls(),
             ),
         )
     }
 
     @Test
-    fun unhandledM1KeyIsLoggedButNotConsumed() {
+    fun unhandledAccessoryKeyIsLoggedButNotConsumed() {
         val controller = AirVisionHudKeyInputController()
         val decision =
             controller.handleKeyEvent(
                 keyCode = KeyEvent.KEYCODE_A,
                 action = KeyEvent.ACTION_UP,
                 eventTimeMs = 1_000L,
-                isAirVisionM1Event = true,
+                isHudAccessoryEvent = true,
                 controls = AirVisionHudControls(),
             )
 
         assertEquals(false, decision.consume)
-        assertEquals(AirVisionHudKeyCommand.LogUnhandledM1Key, decision.command)
+        assertEquals(AirVisionHudKeyCommand.LogUnhandledHudAccessoryKey, decision.command)
     }
 
     @Test
@@ -189,7 +189,7 @@ class AirVisionHudKeyInputControllerTest {
                 keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
                 action = KeyEvent.ACTION_UP,
                 eventTimeMs = 1_000L,
-                isAirVisionM1Event = false,
+                isHudAccessoryEvent = false,
                 controls = AirVisionHudControls(mediaKeyAction = AirVisionHudMediaKeyAction.None),
             )
 

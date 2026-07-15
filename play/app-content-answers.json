@@ -6,7 +6,7 @@
     "sourceFile": "play/privacy-policy.md",
     "hostedPageSource": "docs/privacy-policy.html",
     "hostedUrlCandidate": "https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html",
-    "inAppLocation": "Settings > AirVision M1 > App Preferences > Privacy Policy",
+    "inAppLocation": "Settings > External Display HUD > App Preferences > Privacy Policy",
     "requiresHostedUrlBeforeSubmission": true
   },
   "ads": {
@@ -14,12 +14,12 @@
   },
   "appAccess": {
     "restrictedFeatures": true,
-    "reviewAccessInstructions": "OpenClaw HUD can be reviewed without a live gateway by opening Settings > AirVision M1 > App Preferences and enabling Demo Mode. Gateway pairing is optional for the HUD surface. If Google Play review needs live gateway features, provide a temporary setup code or demo gateway credentials in the Play Console App access form only; do not store those credentials in this repository."
+    "reviewAccessInstructions": "OpenClaw HUD can be reviewed without a live gateway by opening Settings > External Display HUD > App Preferences and enabling Demo Mode. Gateway pairing is optional for the HUD surface. If Google Play review needs live gateway features, provide a temporary setup code or demo gateway credentials in the Play Console App access form only; do not store those credentials in this repository."
   },
   "targetAudience": {
     "designedForChildren": false,
     "recommendedAgeGroups": ["18+"],
-    "rationale": "OpenClaw HUD is a developer/operator assistant HUD for Samsung DeX and wearable display workflows, not a children-directed app."
+    "rationale": "OpenClaw HUD is a developer/operator assistant HUD for Android external-display workflows, not a children-directed app."
   },
   "contentRating": {
     "category": "Productivity",
@@ -89,7 +89,7 @@
     "submissionVerifier": "node scripts/verify-play-submission-package.mjs",
     "screenshotCapture": "scripts/capture-play-screenshots.sh",
     "ciWorkflow": ".github/workflows/android-hud.yml",
-    "demoMode": "Settings > AirVision M1 > App Preferences > Demo Mode",
+    "demoMode": "Settings > External Display HUD > App Preferences > Demo Mode",
     "airVisionCompanionReviewSteps": [
       "Settings > AirVision M1 > App Preferences > Demo Mode",
       "Settings > AirVision M1 > Windows Spatial & Mirror Controls > Cast",

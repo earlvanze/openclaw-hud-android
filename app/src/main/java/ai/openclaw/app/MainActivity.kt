@@ -389,7 +389,7 @@ class MainActivity : ComponentActivity() {
                 keyCode = event.keyCode,
                 action = event.action,
                 eventTimeMs = event.eventTime.takeIf { it > 0L } ?: SystemClock.uptimeMillis(),
-                isAirVisionM1Event = event.isAirVisionM1Event(),
+                isHudAccessoryEvent = event.isHudAccessoryEvent(),
                 controls = viewModel.airVisionHudControls.value,
             )
         handleHudKeyCommand(decision.command, event = event, source = source)
@@ -415,30 +415,30 @@ class MainActivity : ComponentActivity() {
         when (command) {
             is AirVisionHudKeyCommand.ScrollChat -> {
                 viewModel.requestHudScroll(command.deltaPx)
-                Log.d(TAG, "M1/brightness key scrolled HUD keyCode=${event?.keyCode} delta=${command.deltaPx}")
+                Log.d(TAG, "HUD brightness key scrolled chat keyCode=${event?.keyCode} delta=${command.deltaPx}")
             }
             is AirVisionHudKeyCommand.AdjustBrightness -> {
                 viewModel.adjustAirVisionBrightnessPercent(command.deltaPercent)
                 Log.d(
                     TAG,
-                    "M1/brightness key adjusted HUD brightness keyCode=${event?.keyCode} delta=${command.deltaPercent}",
+                    "HUD brightness key adjusted dimming keyCode=${event?.keyCode} delta=${command.deltaPercent}",
                 )
             }
             is AirVisionHudKeyCommand.AdjustDistance -> {
                 viewModel.adjustAirVisionDistanceCm(command.deltaCm)
-                Log.d(TAG, "M1/brightness key adjusted distance keyCode=${event?.keyCode} deltaCm=${command.deltaCm}")
+                Log.d(TAG, "HUD brightness key adjusted distance keyCode=${event?.keyCode} deltaCm=${command.deltaCm}")
             }
             AirVisionHudKeyCommand.ToggleMic -> {
                 toggleMicFromHudInput()
-                Log.d(TAG, "M1 $source double-tap toggled mic enabled=${viewModel.micEnabled.value}")
+                Log.d(TAG, "HUD $source double-tap toggled mic enabled=${viewModel.micEnabled.value}")
                 refreshHudMediaSessionState()
                 applyPhoneSystemBars()
             }
             AirVisionHudKeyCommand.ArmMicDoubleTap -> {
-                Log.d(TAG, "M1 $source tap armed mic double-tap")
+                Log.d(TAG, "HUD $source tap armed mic double-tap")
             }
-            AirVisionHudKeyCommand.LogUnhandledM1Key -> {
-                Log.d(TAG, "unhandled M1 key keyCode=${event?.keyCode} scanCode=${event?.scanCode}")
+            AirVisionHudKeyCommand.LogUnhandledHudAccessoryKey -> {
+                Log.d(TAG, "unhandled HUD accessory key keyCode=${event?.keyCode} scanCode=${event?.scanCode}")
             }
             null -> Unit
         }
@@ -467,9 +467,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun KeyEvent.isAirVisionM1Event(): Boolean {
+    private fun KeyEvent.isHudAccessoryEvent(): Boolean {
         val inputDevice = device ?: InputDevice.getDevice(deviceId) ?: return false
-        return inputDevice.name.contains("AirVision", ignoreCase = true) ||
+        return inputDevice.isExternal ||
+            inputDevice.name.contains("AirVision", ignoreCase = true) ||
             inputDevice.name.contains("ASUS AirVision M1", ignoreCase = true) ||
             (inputDevice.vendorId == ASUS_VENDOR_ID && inputDevice.productId == AIRVISION_M1_PRODUCT_ID)
     }

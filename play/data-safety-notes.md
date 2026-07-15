@@ -19,7 +19,7 @@ Expected Google Play declarations for the HUD build:
 - App account creation: No. Data deletion path: Android app storage clear-data
   or uninstall for local app state; gateway/provider data is controlled by the
   configured gateway/provider.
-- App access for review: Use AirVision Demo Mode without a live gateway, or
+- App access for review: Use HUD Demo Mode without a live gateway, or
   provide temporary setup code/demo gateway credentials only inside Play Console
   App access instructions.
 

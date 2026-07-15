@@ -5,7 +5,30 @@ import org.junit.Test
 
 class AirVisionHudDisplayRouterTest {
     @Test
-    fun choose_prefersAirVisionNamedDisplayByDefault() {
+    fun choose_automaticUsesLargestPresentationDisplay() {
+        val candidates =
+            listOf(
+                AirVisionHudDisplayCandidate(
+                    displayId = 2,
+                    name = "Generic HDMI",
+                    widthPx = 3840,
+                    heightPx = 2160,
+                ),
+                AirVisionHudDisplayCandidate(
+                    displayId = 5,
+                    name = "ASUS AirVision M1",
+                    widthPx = 1920,
+                    heightPx = 1080,
+                ),
+            )
+
+        val selected = AirVisionHudDisplayRouter.choose(candidates, AirVisionHudDisplayTarget.Automatic)
+
+        assertEquals(2, selected?.displayId)
+    }
+
+    @Test
+    fun choose_airVisionPreferenceRemainsAvailableExplicitly() {
         val candidates =
             listOf(
                 AirVisionHudDisplayCandidate(
@@ -104,10 +127,18 @@ class AirVisionHudDisplayRouterTest {
     }
 
     @Test
-    fun fromRawValue_fallsBackToAirVisionPreferred() {
+    fun fromRawValue_fallsBackToAutomatic() {
+        assertEquals(
+            AirVisionHudDisplayTarget.Automatic,
+            AirVisionHudDisplayTarget.fromRawValue("unknown"),
+        )
+    }
+
+    @Test
+    fun fromRawValue_preservesExplicitAirVisionPreference() {
         assertEquals(
             AirVisionHudDisplayTarget.AirVisionPreferred,
-            AirVisionHudDisplayTarget.fromRawValue("unknown"),
+            AirVisionHudDisplayTarget.fromRawValue("airvision_preferred"),
         )
     }
 

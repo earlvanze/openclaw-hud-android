@@ -123,6 +123,7 @@ fun HudScreen(viewModel: MainViewModel) {
     val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
     val airVisionDemoModeEnabled by viewModel.airVisionDemoModeEnabled.collectAsState()
     val airVisionIdentifyToken by viewModel.airVisionIdentifyToken.collectAsState()
+    val hudDisplayRoute by viewModel.airVisionHudDisplayRoute.collectAsState()
     val prompt by viewModel.hudPromptDraft.collectAsState()
     var identifyVisible by remember { mutableStateOf(false) }
     var transientHudText by remember { mutableStateOf<String?>(null) }
@@ -223,7 +224,7 @@ fun HudScreen(viewModel: MainViewModel) {
     val warning = !airVisionDemoModeEnabled && (chatError != null || (!isConnected && !isNodeConnected))
     val sessionLine =
         if (airVisionDemoModeEnabled) {
-            "airvision demo / session hud / mic listening"
+            "hud demo / session hud / mic listening"
         } else {
             hudSessionText(
                 mainSessionKey = mainSessionKey,
@@ -479,6 +480,7 @@ fun HudScreen(viewModel: MainViewModel) {
 
         if (identifyVisible) {
             HudDisplayIdentifyOverlay(
+                displayLabel = hudDisplayRoute.selectedCandidate?.name?.ifBlank { null } ?: "External display",
                 modifier =
                     Modifier
                         .align(Alignment.Center)
@@ -513,7 +515,10 @@ private fun HudTransientTextOverlay(
 }
 
 @Composable
-private fun HudDisplayIdentifyOverlay(modifier: Modifier = Modifier) {
+private fun HudDisplayIdentifyOverlay(
+    displayLabel: String,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -530,7 +535,7 @@ private fun HudDisplayIdentifyOverlay(modifier: Modifier = Modifier) {
             maxLines = 1,
         )
         Text(
-            "AirVision M1",
+            displayLabel,
             style = hudPrimaryTextStyle.copy(fontWeight = FontWeight.SemiBold),
             color = hudSecondary,
             maxLines = 1,

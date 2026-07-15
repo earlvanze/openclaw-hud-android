@@ -337,8 +337,11 @@ async function verifyListing(listingDir, language) {
   const shortDescription = await readListingFile(join(languageDir, "short-description.txt"));
   const fullDescription = await readListingFile(join(languageDir, "full-description.txt"));
   const releaseNotes = await readListingFile(join(languageDir, "release-notes.txt"));
-  requireIncludes("Short description", shortDescription, ["Samsung DeX", "Asus AirVision M1"]);
+  requireIncludes("Short description", shortDescription, ["Android external", "wearable displays"]);
   requireIncludes("Full description", fullDescription, [
+    "Android Presentation",
+    "USB-C",
+    "wireless",
     "Samsung DeX",
     "Galaxy Fold 7",
     "AirVision M1",
@@ -348,6 +351,9 @@ async function verifyListing(listingDir, language) {
     "protocol-capture targets",
   ]);
   requireIncludes("Release notes", releaseNotes, [
+    "Automatic Android Presentation routing",
+    "external and wearable displays",
+    "Runtime display names",
     "USB firmware-link diagnostics",
     "HID report paths",
     "feature readiness",
@@ -465,7 +471,7 @@ async function verifyRuntimeLocaleBundleConfig() {
 async function verifyReadmeAirVisionParity() {
   const readme = await readFile(readmePath, "utf8");
   requireIncludes("README AirVision positioning", readme, [
-    "optimized for Samsung DeX",
+    "Android Presentation APIs",
     "Samsung Galaxy Fold 7",
     "Windows AirVision feature",
   ]);

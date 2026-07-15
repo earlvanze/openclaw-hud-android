@@ -4,6 +4,7 @@ enum class AirVisionHudDisplayTarget(
     val rawValue: String,
     val label: String,
 ) {
+    Automatic("automatic", "Automatic"),
     AirVisionPreferred("airvision_preferred", "AirVision Preferred"),
     LargestExternal("largest_external", "Largest External"),
     FirstExternal("first_external", "First External"),
@@ -11,8 +12,10 @@ enum class AirVisionHudDisplayTarget(
     ;
 
     companion object {
-        fun fromRawValue(rawValue: String?): AirVisionHudDisplayTarget =
-            entries.firstOrNull { it.rawValue == rawValue?.trim()?.lowercase() } ?: AirVisionPreferred
+        fun fromRawValue(rawValue: String?): AirVisionHudDisplayTarget {
+            val normalized = rawValue?.trim()?.lowercase()
+            return entries.firstOrNull { it.rawValue == normalized } ?: Automatic
+        }
     }
 }
 
@@ -28,7 +31,7 @@ data class AirVisionHudDisplayCandidate(
 }
 
 data class AirVisionHudDisplayRoute(
-    val target: AirVisionHudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
+    val target: AirVisionHudDisplayTarget = AirVisionHudDisplayTarget.Automatic,
     val candidateCount: Int = 0,
     val presentationCandidateCount: Int = 0,
     val selectedCandidate: AirVisionHudDisplayCandidate? = null,
@@ -99,6 +102,12 @@ object AirVisionHudDisplayRouter {
         target: AirVisionHudDisplayTarget,
     ): AirVisionHudDisplayCandidate? =
         when (target) {
+            AirVisionHudDisplayTarget.Automatic ->
+                candidates.maxWithOrNull(
+                    compareBy<AirVisionHudDisplayCandidate> { it.areaPx }
+                        .thenBy { scoreAirVisionPreferred(it) }
+                        .thenBy { it.displayId },
+                )
             AirVisionHudDisplayTarget.AirVisionPreferred ->
                 candidates.maxWithOrNull(
                     compareBy<AirVisionHudDisplayCandidate> { scoreAirVisionPreferred(it) }

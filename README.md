@@ -1,17 +1,19 @@
 ## OpenClaw HUD Android
 
 Status: **active HUD prototype**. This repository contains the Android
-companion/HUD app for OpenClaw, optimized for Samsung DeX and the Asus
-AirVision M1 display. It has been live-tested with a Samsung Galaxy Fold 7. The
-app is still pre-release, but the HUD path is usable for live testing.
+companion/HUD app for OpenClaw. It uses Android Presentation APIs with USB-C,
+HDMI, wireless, and wearable external displays; AirVision support is an
+optional device integration. It has been live-tested with a Samsung Galaxy Fold 7
+and ASUS AirVision M1. The app is still pre-release, but the HUD path is
+usable for live testing.
 
 Current live target:
 
 - Host context: Cyber gateway / Umbrel OpenClaw.
-- Device path: Fold over wireless ADB, with the M1 connected to the Fold.
+- Device path: Android host over wireless ADB, with an external display attached.
 - HUD package: `ai.openclaw.app.hud`, labeled **OpenClaw HUD**.
-- Default launch mode: Android `Presentation` mode. The phone Activity stays on
-  display 0 and the HUD presentation owns the external M1 display.
+- Default launch mode: Android `Presentation` mode. The host Activity stays on
+  display 0 and the HUD presentation owns the selected external display.
 - Visual mode: green text on black, minimal status lights, chat input retained.
 - Known caveat: Samsung/DeX may still composite its shelf over the external
   display when focus changes. The HUD layout avoids the shelf area, but Android
@@ -84,6 +86,9 @@ AirVision / HUD debug flavor:
 
 The HUD flavor installs as `ai.openclaw.app.hud`, is labeled **OpenClaw HUD**,
 does not request SMS or Call Log permissions, and opens directly to the HUD tab.
+Fresh installs automatically select the largest presentation-capable external
+display. Users can explicitly prefer AirVision hardware or choose the first,
+last, or largest external display.
 
 `scripts/install-launch-hud.sh` now defaults to `--display presentation`.
 Presentation mode starts the Android Activity on display 0 and lets

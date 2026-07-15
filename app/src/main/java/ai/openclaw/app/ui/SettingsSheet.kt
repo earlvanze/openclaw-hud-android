@@ -964,10 +964,10 @@ fun SettingsSheet(viewModel: MainViewModel) {
                 }
             }
 
-            // -- AirVision M1 --
+            // -- External display HUD and optional device integrations --
             item {
                 Text(
-                    "AIRVISION M1",
+                    "EXTERNAL DISPLAY HUD",
                     style = mobileCaption1.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
                     color = mobileAccent,
                 )
@@ -977,7 +977,19 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
-                        headlineContent = { Text("Firmware Link", style = mobileHeadline) },
+                        headlineContent = { Text("Display Compatibility", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Uses Android Presentation on compatible USB-C, HDMI, wireless, and wearable displays. AirVision hardware controls are optional.",
+                                style = mobileCallout,
+                            )
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("AirVision Firmware Link", style = mobileHeadline) },
                         supportingContent = {
                             Text(
                                 airVisionUsbStatusText(
@@ -1152,7 +1164,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("Diagnostics Export", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                "Save current M1 USB readiness, descriptors, active AirVision settings, and derived HUD runtime state for protocol capture.",
+                                "Save current AirVision USB readiness, descriptors, active device settings, and derived HUD runtime state for protocol capture.",
                                 style = mobileCallout,
                             )
                         },
@@ -1319,9 +1331,9 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         supportingContent = {
                             Text(
                                 if (airVisionPhysicalMainScreenVisible) {
-                                    "Phone controls stay visible while the M1 presentation is active. Saved with this viewing mode."
+                                    "Android controls stay visible while the external HUD presentation is active. Saved with this viewing mode."
                                 } else {
-                                    "When the M1 presentation is active, this viewing mode switches the phone to a black restore screen."
+                                    "When the external HUD presentation is active, this viewing mode switches the Android device to a black restore screen."
                                 },
                                 style = mobileCallout,
                             )
@@ -1337,7 +1349,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     AirVisionOptionGroup(
                         title = "HUD Placement",
                         currentLabel = airVisionDisplaySettings.hudPlacement.label,
-                        supportingText = "Positions the presentation content inside the M1 view.",
+                        supportingText = "Positions HUD content inside the selected external display.",
                         options = AirVisionHudPlacement.entries.toList(),
                         selected = airVisionDisplaySettings.hudPlacement,
                         optionLabel = { it.label },
@@ -1360,7 +1372,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     AirVisionSliderRow(
                         label = "Brightness",
                         valueText = "${airVisionDisplaySettings.brightnessPercent}%",
-                        supportingText = "Software HUD dimming while firmware brightness remains controlled by the M1 touch bar.",
+                        supportingText = "Software HUD dimming; hardware brightness remains controlled by the display or Android system.",
                         value = airVisionDisplaySettings.brightnessPercent.toFloat(),
                         valueRange =
                             AirVisionDisplaySettings.MIN_BRIGHTNESS_PERCENT
@@ -2718,6 +2730,7 @@ private fun airVisionHudPlacementDescription(placement: AirVisionHudPlacement): 
 
 private fun airVisionHudDisplayTargetDescription(target: AirVisionHudDisplayTarget): String =
     when (target) {
+        AirVisionHudDisplayTarget.Automatic -> "Use the largest Android Presentation display, with stable tie-breaking."
         AirVisionHudDisplayTarget.AirVisionPreferred -> "Prefer displays whose name looks like ASUS AirVision M1."
         AirVisionHudDisplayTarget.LargestExternal -> "Use the largest external display Android exposes."
         AirVisionHudDisplayTarget.FirstExternal -> "Use the lowest-numbered external display."

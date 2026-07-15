@@ -73,7 +73,12 @@ class AirVisionFirmwareUpdateHandoffTest {
         assertTrue(markdown.contains("- Input interface: yes"))
         assertTrue(markdown.contains("writable: out if=2 interrupt addr=0x2 max=64 int=1"))
         assertTrue(markdown.contains("## Imported Protocol-Capture Evidence"))
-        assertTrue(markdown.contains("capture results: 1 validated, 0 captured-review, 8 pending, 1 protocol-ready, 8 blocked"))
+        assertTrue(
+            markdown.contains(
+                "capture results: 1 validated, 0 captured-review, 8 pending, " +
+                    "1 protocol-ready, 0 validated-blocked, 8 blocked",
+            ),
+        )
         assertTrue(markdown.contains("- Source evidence: complete"))
         assertTrue(markdown.contains("host=Cyber, tool=USBPcap/Wireshark"))
         assertTrue(markdown.contains("- Schema/version: openclaw.airvision.firmwareCaptureResults v1"))
