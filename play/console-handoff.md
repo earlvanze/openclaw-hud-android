@@ -12,8 +12,8 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.15-hud-release.aab`
-- SHA-256: `b7f237402b62a5927d5ac80ef94dfdf9457bc3ac5757999c1f62d1aa16b6025e`
-- Version: 2026.7.15 (2026071503)
+- SHA-256: `3f91f11dbba672de11898d2f92a2329d57f184e3785295e438bc476d95f65c78`
+- Version: 2026.7.15 (2026071504)
 
 ## Remaining Console Blockers
 
@@ -38,7 +38,7 @@ The app uses Android Presentation mode and automatically targets a compatible US
 
 Key features:
 - Automatic Android Presentation routing with first, last, largest, and optional AirVision-preferred display targets
-- Remembered-display pinning that survives Android display-ID changes and waits safely when selected hardware disconnects
+- Remembered-display pinning that survives Android display-ID changes, waits safely when selected hardware disconnects, and recovers from transient Presentation failures
 - Runtime display names in identification and host restore screens
 - Minimal always-on HUD for external displays
 - OpenClaw gateway pairing and secure local setup storage
@@ -59,11 +59,12 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 
 Release notes:
 
-OpenClaw HUD external-display update:
-- Remember USB-C, HDMI, wireless, or wearable displays across Android display-ID changes.
-- Wait when a pinned display disconnects instead of moving the HUD to another screen.
-- Use display-scoped density, dimensions, and resources.
-- Include remembered display identity in backup/import and diagnostics.
+OpenClaw HUD update:
+- Remember USB-C, HDMI, wireless, or wearable displays across display-ID changes.
+- Wait when a pinned display disconnects instead of moving the HUD.
+- Recover from failed Presentation starts and stale callbacks.
+- Use display-scoped density and resources.
+- Back up remembered display identity in diagnostics.
 - Automatic Presentation routing and generic accessory-key controls.
 - Chat, notifications, voice, captions, reporting, and In-app privacy policy.
 
