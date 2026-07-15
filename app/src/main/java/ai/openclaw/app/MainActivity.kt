@@ -113,6 +113,14 @@ class MainActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.airVisionRememberedDisplay.collect {
+                    showHudPresentationIfAvailable()
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.airVisionAppLanguage.collect { language ->
                     val previous = appliedAirVisionAppLanguage
                     appliedAirVisionAppLanguage = language
@@ -242,6 +250,7 @@ class MainActivity : ComponentActivity() {
             viewModel.setAirVisionHudDisplayRoute(
                 AirVisionHudDisplayRoute(
                     target = viewModel.airVisionHudDisplayTarget.value,
+                    rememberedDisplay = viewModel.airVisionRememberedDisplay.value,
                     reason = "activity_on_external_display",
                 ),
             )
@@ -254,6 +263,7 @@ class MainActivity : ComponentActivity() {
                     viewModel.setAirVisionHudDisplayRoute(
                         AirVisionHudDisplayRoute(
                             target = viewModel.airVisionHudDisplayTarget.value,
+                            rememberedDisplay = viewModel.airVisionRememberedDisplay.value,
                             reason = "display_manager_unavailable",
                         ),
                     )
@@ -270,6 +280,7 @@ class MainActivity : ComponentActivity() {
             AirVisionHudDisplayRouter.select(
                 candidates = externalDisplays.map { it.toHudDisplayCandidate(presentationDisplayIds) },
                 target = viewModel.airVisionHudDisplayTarget.value,
+                rememberedDisplay = viewModel.airVisionRememberedDisplay.value,
             )
         viewModel.setAirVisionHudDisplayRoute(displayRoute)
         val targetDisplay =

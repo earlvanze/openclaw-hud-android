@@ -278,6 +278,9 @@ data class AirVisionDiagnosticsHudRuntime(
     val nonDefaultDisplayFallbackEnabled: Boolean,
     val displayCandidateCount: Int,
     val presentationDisplayCandidateCount: Int,
+    val rememberedDisplayName: String?,
+    val rememberedDisplayWidthPx: Int?,
+    val rememberedDisplayHeightPx: Int?,
     val selectedDisplayId: Int?,
     val selectedDisplayName: String?,
     val selectedDisplayWidthPx: Int?,
@@ -450,10 +453,10 @@ data class AirVisionDiagnosticsShortcutMenu(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 36
+    const val VERSION = 37
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
-    private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, AirVisionProfileBackups.VERSION)
+    private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, 4, AirVisionProfileBackups.VERSION)
 
     private val json =
         Json {
@@ -613,6 +616,9 @@ object AirVisionDiagnosticsSnapshots {
                     nonDefaultDisplayFallbackEnabled = true,
                     displayCandidateCount = hudDisplayRoute.candidateCount,
                     presentationDisplayCandidateCount = hudDisplayRoute.presentationCandidateCount,
+                    rememberedDisplayName = hudDisplayRoute.rememberedDisplay?.name,
+                    rememberedDisplayWidthPx = hudDisplayRoute.rememberedDisplay?.widthPx,
+                    rememberedDisplayHeightPx = hudDisplayRoute.rememberedDisplay?.heightPx,
                     selectedDisplayId = hudDisplayRoute.selectedCandidate?.displayId,
                     selectedDisplayName = hudDisplayRoute.selectedCandidate?.name,
                     selectedDisplayWidthPx = hudDisplayRoute.selectedCandidate?.widthPx,
@@ -643,7 +649,7 @@ object AirVisionDiagnosticsSnapshots {
                             "view mode profiles",
                             "custom profile labels",
                             "HUD gesture and hotkey controls",
-                            "startup view and display target",
+                            "startup view, display target, and remembered display identity",
                             "speaker and captions preferences",
                             "translation caption languages",
                             "demo mode preference",
@@ -769,6 +775,10 @@ object AirVisionDiagnosticsSnapshots {
                     language = appLanguage.rawValue,
                     startupDestination = startupDestination.rawValue,
                     hudDisplayTarget = hudDisplayTarget.rawValue,
+                    rememberedHudDisplay =
+                        hudDisplayRoute.rememberedDisplay?.let {
+                            AirVisionBackupDisplayFingerprint(it.name, it.widthPx, it.heightPx)
+                        },
                     demoModeEnabled = demoModeEnabled,
                     speakerEnabled = speakerEnabled,
                     nativeCaptionsEnabled = nativeCaptionsEnabled,

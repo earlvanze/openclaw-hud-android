@@ -340,6 +340,8 @@ async function verifyListing(listingDir, language) {
   requireIncludes("Short description", shortDescription, ["Android external", "wearable displays"]);
   requireIncludes("Full description", fullDescription, [
     "Android Presentation",
+    "Remembered-display pinning",
+    "display-ID changes",
     "USB-C",
     "wireless",
     "Samsung DeX",
@@ -351,17 +353,15 @@ async function verifyListing(listingDir, language) {
     "protocol-capture targets",
   ]);
   requireIncludes("Release notes", releaseNotes, [
-    "Automatic Android Presentation routing",
-    "external and wearable displays",
-    "Display-scoped density",
-    "USB-C",
-    "HDMI",
-    "Runtime display names",
-    "USB firmware-link diagnostics",
-    "HID report paths",
-    "feature readiness",
-    "desired firmware-sync state",
-    "protocol-capture targets",
+    "Remember USB-C",
+    "wireless, or wearable displays",
+    "display-ID changes",
+    "display-scoped density",
+    "pinned display disconnects",
+    "remembered display identity",
+    "Automatic Presentation routing",
+    "generic accessory-key controls",
+    "Chat, notifications, voice, captions, reporting, and In-app privacy policy",
   ]);
 
   return {

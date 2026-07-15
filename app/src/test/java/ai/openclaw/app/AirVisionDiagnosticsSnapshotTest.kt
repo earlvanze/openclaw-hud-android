@@ -80,6 +80,7 @@ class AirVisionDiagnosticsSnapshotTest {
                         target = AirVisionHudDisplayTarget.AirVisionPreferred,
                         candidateCount = 2,
                         presentationCandidateCount = 1,
+                        rememberedDisplay = AirVisionHudDisplayFingerprint("Samsung DeX Monitor", 2560, 1440),
                         selectedCandidate =
                             AirVisionHudDisplayCandidate(
                                 displayId = 5,
@@ -148,7 +149,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("36", root.getValue("version").jsonPrimitive.content)
+        assertEquals("37", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -405,6 +406,9 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("true", hudRuntime.getValue("nonDefaultDisplayFallbackEnabled").jsonPrimitive.content)
         assertEquals("2", hudRuntime.getValue("displayCandidateCount").jsonPrimitive.content)
         assertEquals("1", hudRuntime.getValue("presentationDisplayCandidateCount").jsonPrimitive.content)
+        assertEquals("Samsung DeX Monitor", hudRuntime.getValue("rememberedDisplayName").jsonPrimitive.content)
+        assertEquals("2560", hudRuntime.getValue("rememberedDisplayWidthPx").jsonPrimitive.content)
+        assertEquals("1440", hudRuntime.getValue("rememberedDisplayHeightPx").jsonPrimitive.content)
         assertEquals("5", hudRuntime.getValue("selectedDisplayId").jsonPrimitive.content)
         assertEquals("ASUS AirVision M1", hudRuntime.getValue("selectedDisplayName").jsonPrimitive.content)
         assertEquals("1920", hudRuntime.getValue("selectedDisplayWidthPx").jsonPrimitive.content)
@@ -413,9 +417,9 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("false", hudRuntime.getValue("usedNonDefaultDisplayFallback").jsonPrimitive.content)
         assertEquals("selected_presentation_display", hudRuntime.getValue("displayRouteReason").jsonPrimitive.content)
         assertEquals("openclaw.airvision.m1.profile-backup", profileBackup.getValue("schema").jsonPrimitive.content)
-        assertEquals("4", profileBackup.getValue("currentVersion").jsonPrimitive.content)
+        assertEquals("5", profileBackup.getValue("currentVersion").jsonPrimitive.content)
         assertEquals(
-            listOf("1", "2", "3", "4"),
+            listOf("1", "2", "3", "4", "5"),
             profileBackup.getValue("supportedVersions").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals("working", profileBackup.getValue("activeViewMode").jsonPrimitive.content)
@@ -502,7 +506,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 "view mode profiles",
                 "custom profile labels",
                 "HUD gesture and hotkey controls",
-                "startup view and display target",
+                "startup view, display target, and remembered display identity",
                 "speaker and captions preferences",
                 "translation caption languages",
                 "demo mode preference",
@@ -511,7 +515,7 @@ class AirVisionDiagnosticsSnapshotTest {
             profileBackup.getValue("restoreScope").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals(
-            "profile backup v4: 5/5 profiles, 5 runtime profiles, HUD controls and app preferences included.",
+            "profile backup v5: 5/5 profiles, 5 runtime profiles, HUD controls and app preferences included.",
             profileBackup.getValue("summary").jsonPrimitive.content,
         )
         assertEquals("67", fitAndClarity.getValue("ipdMm").jsonPrimitive.content)

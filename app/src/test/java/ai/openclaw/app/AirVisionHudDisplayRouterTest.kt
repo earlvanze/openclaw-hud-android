@@ -143,6 +143,82 @@ class AirVisionHudDisplayRouterTest {
     }
 
     @Test
+    fun choose_rememberedDisplaySurvivesDisplayIdChanges() {
+        val remembered = AirVisionHudDisplayFingerprint("Generic HDMI", 1920, 1080)
+        val candidates =
+            listOf(
+                AirVisionHudDisplayCandidate(12, "Projector", 1920, 1080),
+                AirVisionHudDisplayCandidate(41, "Generic HDMI", 1920, 1080),
+            )
+
+        val selected =
+            AirVisionHudDisplayRouter.choose(
+                candidates,
+                AirVisionHudDisplayTarget.RememberedExternal,
+                remembered,
+            )
+
+        assertEquals(41, selected?.displayId)
+    }
+
+    @Test
+    fun choose_rememberedDisplayUsesUniqueNameWhenDisplayModeChanges() {
+        val remembered = AirVisionHudDisplayFingerprint("Wireless living room", 1920, 1080)
+        val candidates =
+            listOf(
+                AirVisionHudDisplayCandidate(4, "Wireless living room", 1280, 720),
+                AirVisionHudDisplayCandidate(8, "Desk monitor", 1920, 1080),
+            )
+
+        val selected =
+            AirVisionHudDisplayRouter.choose(
+                candidates,
+                AirVisionHudDisplayTarget.RememberedExternal,
+                remembered,
+            )
+
+        assertEquals(4, selected?.displayId)
+    }
+
+    @Test
+    fun choose_rememberedDisplayRefusesAmbiguousFallback() {
+        val remembered = AirVisionHudDisplayFingerprint("Disconnected display", 1920, 1080)
+        val candidates =
+            listOf(
+                AirVisionHudDisplayCandidate(4, "External display", 1920, 1080),
+                AirVisionHudDisplayCandidate(8, "External display", 1920, 1080),
+            )
+
+        val selection =
+            AirVisionHudDisplayRouter.select(
+                candidates,
+                AirVisionHudDisplayTarget.RememberedExternal,
+                remembered,
+            )
+
+        assertEquals(null, selection.selectedCandidate)
+        assertEquals("remembered_display_unavailable", selection.reason)
+        assertEquals(false, selection.usedNonDefaultDisplayFallback)
+    }
+
+    @Test
+    fun select_reportsRememberedDisplayNotConfigured() {
+        val selection =
+            AirVisionHudDisplayRouter.select(
+                candidates = listOf(AirVisionHudDisplayCandidate(2, "HDMI", 1920, 1080)),
+                target = AirVisionHudDisplayTarget.RememberedExternal,
+            )
+
+        assertEquals(null, selection.selectedCandidate)
+        assertEquals("remembered_display_not_configured", selection.reason)
+        assertEquals(
+            "No external display has been remembered. 1/1 presentation-capable external display(s). " +
+                "Waiting for an Android Presentation display.",
+            selection.summaryText(),
+        )
+    }
+
+    @Test
     fun choose_prefersPresentationEligibleDisplays() {
         val candidates =
             listOf(

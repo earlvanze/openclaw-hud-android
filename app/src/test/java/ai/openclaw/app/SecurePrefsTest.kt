@@ -229,7 +229,8 @@ class SecurePrefsTest {
         prefs.setAirVisionHudMediaKeyAction(AirVisionHudMediaKeyAction.None)
         prefs.setAirVisionAppLanguage(AirVisionAppLanguage.Spanish)
         prefs.setAirVisionStartupDestination(AirVisionStartupDestination.Voice)
-        prefs.setAirVisionHudDisplayTarget(AirVisionHudDisplayTarget.LargestExternal)
+        prefs.setAirVisionRememberedDisplay(AirVisionHudDisplayFingerprint("Samsung DeX Monitor", 2560, 1440))
+        prefs.setAirVisionHudDisplayTarget(AirVisionHudDisplayTarget.RememberedExternal)
         prefs.setAirVisionDemoModeEnabled(true)
         prefs.setSpeakerEnabled(false)
         prefs.setNativeCaptionsEnabled(true)
@@ -264,12 +265,21 @@ class SecurePrefsTest {
                 .first { it.jsonObject.getValue("viewMode").jsonPrimitive.content == AirVisionViewMode.Infinity.rawValue }
                 .jsonObject
 
-        assertEquals("4", backupRoot.getValue("version").jsonPrimitive.content)
+        assertEquals("5", backupRoot.getValue("version").jsonPrimitive.content)
         assertEquals(AirVisionViewMode.entries.size, runtimeProfiles.size)
         assertEquals(false, appPreferences.getValue("speakerEnabled").jsonPrimitive.boolean)
         assertEquals(true, appPreferences.getValue("nativeCaptionsEnabled").jsonPrimitive.boolean)
         assertEquals("pt", appPreferences.getValue("translationCaptionSourceLanguage").jsonPrimitive.content)
         assertEquals("ja", appPreferences.getValue("translationCaptionTargetLanguage").jsonPrimitive.content)
+        assertEquals(
+            "Samsung DeX Monitor",
+            appPreferences
+                .getValue("rememberedHudDisplay")
+                .jsonObject
+                .getValue("name")
+                .jsonPrimitive
+                .content,
+        )
         assertEquals(
             AirVisionDisplaySettings.LIGHT_LOAD_HUD_TRANSCRIPT_ENTRY_COUNT,
             infinityRuntime.getValue("hudTranscriptEntryCount").jsonPrimitive.int,
@@ -308,7 +318,11 @@ class SecurePrefsTest {
         assertEquals(AirVisionHudMediaKeyAction.None, importedPrefs.airVisionHudControls.value.mediaKeyAction)
         assertEquals(AirVisionAppLanguage.Spanish, importedPrefs.airVisionAppLanguage.value)
         assertEquals(AirVisionStartupDestination.Voice, importedPrefs.airVisionStartupDestination.value)
-        assertEquals(AirVisionHudDisplayTarget.LargestExternal, importedPrefs.airVisionHudDisplayTarget.value)
+        assertEquals(AirVisionHudDisplayTarget.RememberedExternal, importedPrefs.airVisionHudDisplayTarget.value)
+        assertEquals(
+            AirVisionHudDisplayFingerprint("Samsung DeX Monitor", 2560, 1440),
+            importedPrefs.airVisionRememberedDisplay.value,
+        )
         assertEquals(true, importedPrefs.airVisionDemoModeEnabled.value)
         assertEquals(false, importedPrefs.speakerEnabled.value)
         assertEquals(true, importedPrefs.nativeCaptionsEnabled.value)
@@ -321,6 +335,25 @@ class SecurePrefsTest {
         assertEquals(88, importedPrefs.airVisionDisplaySettings.value.hudScalePercent)
         assertEquals(AirVisionHudPlacement.UpperRight, importedPrefs.airVisionDisplaySettings.value.hudPlacement)
         assertEquals(false, importedPrefs.airVisionDisplaySettings.value.physicalMainScreenVisible)
+    }
+
+    @Test
+    fun airVisionRememberedDisplay_persistsAndCanBeCleared() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+        val prefs = SecurePrefs(context)
+
+        prefs.setAirVisionRememberedDisplay(AirVisionHudDisplayFingerprint("USB-C projector", 1920, 1200))
+
+        assertEquals(
+            AirVisionHudDisplayFingerprint("USB-C projector", 1920, 1200),
+            SecurePrefs(context).airVisionRememberedDisplay.value,
+        )
+
+        prefs.setAirVisionRememberedDisplay(null)
+
+        assertNull(SecurePrefs(context).airVisionRememberedDisplay.value)
     }
 
     @Test

@@ -1,7 +1,7 @@
 OpenClaw HUD external-display update:
-- Automatic Android Presentation routing for external and wearable displays.
-- Display-scoped density, dimensions, and resources for USB-C, HDMI, wireless, and wearable targets.
-- Runtime display names and generic accessory-key controls.
-- Compact chat, notifications, voice, captions, and reporting.
-- USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
-- In-app privacy policy.
+- Remember USB-C, HDMI, wireless, or wearable displays across Android display-ID changes.
+- Wait when a pinned display disconnects instead of moving the HUD to another screen.
+- Use display-scoped density, dimensions, and resources.
+- Include remembered display identity in backup/import and diagnostics.
+- Automatic Presentation routing and generic accessory-key controls.
+- Chat, notifications, voice, captions, reporting, and In-app privacy policy.

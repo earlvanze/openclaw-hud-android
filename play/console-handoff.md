@@ -12,8 +12,8 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.15-hud-release.aab`
-- SHA-256: `62b690be4f8b9105dc524762d10a882291f31b69bca4e80bf2741329d26beefb`
-- Version: 2026.7.15 (2026071502)
+- SHA-256: `d69f3b2d56092a0f51abbd5cfe4b1f90026c149db048dbd6582658dcff87a446`
+- Version: 2026.7.15 (2026071503)
 
 ## Remaining Console Blockers
 
@@ -38,6 +38,7 @@ The app uses Android Presentation mode and automatically targets a compatible US
 
 Key features:
 - Automatic Android Presentation routing with first, last, largest, and optional AirVision-preferred display targets
+- Remembered-display pinning that survives Android display-ID changes and waits safely when selected hardware disconnects
 - Runtime display names in identification and host restore screens
 - Minimal always-on HUD for external displays
 - OpenClaw gateway pairing and secure local setup storage
@@ -59,12 +60,12 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD external-display update:
-- Automatic Android Presentation routing for external and wearable displays.
-- Display-scoped density, dimensions, and resources for USB-C, HDMI, wireless, and wearable targets.
-- Runtime display names and generic accessory-key controls.
-- Compact chat, notifications, voice, captions, and reporting.
-- USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.
-- In-app privacy policy.
+- Remember USB-C, HDMI, wireless, or wearable displays across Android display-ID changes.
+- Wait when a pinned display disconnects instead of moving the HUD to another screen.
+- Use display-scoped density, dimensions, and resources.
+- Include remembered display identity in backup/import and diagnostics.
+- Automatic Presentation routing and generic accessory-key controls.
+- Chat, notifications, voice, captions, reporting, and In-app privacy policy.
 
 ## Privacy Policy
 

@@ -52,12 +52,15 @@ const validListingFiles = {
   "short-description.txt": "Minimal assistant HUD for Android external and wearable displays.",
   "full-description.txt": [
     "OpenClaw HUD uses Android Presentation with USB-C and wireless displays, including Samsung DeX on Galaxy Fold 7 and AirVision M1.",
+    "Remembered-display pinning survives Android display-ID changes.",
     "It includes HID report-path summaries, per-feature firmware-apply readiness, desired firmware-sync state, and protocol-capture targets.",
   ].join("\n"),
   "release-notes.txt": [
-    "Automatic Android Presentation routing for external and wearable displays with Runtime display names.",
-    "- Display-scoped density and resources for USB-C and HDMI targets.",
-    "- USB firmware-link diagnostics with HID report paths, feature readiness, desired firmware-sync state, and protocol-capture targets.",
+    "Remember USB-C, HDMI, wireless, or wearable displays across Android display-ID changes.",
+    "- Wait when the pinned display disconnects and keep remembered display identity.",
+    "- Use display-scoped density and resources.",
+    "- Automatic Presentation routing with generic accessory-key controls.",
+    "- Chat, notifications, voice, captions, reporting, and In-app privacy policy.",
   ].join("\n"),
 };
 

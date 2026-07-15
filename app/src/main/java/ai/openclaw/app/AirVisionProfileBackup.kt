@@ -37,11 +37,19 @@ data class AirVisionBackupAppPreferences(
     val language: String,
     val startupDestination: String,
     val hudDisplayTarget: String,
+    val rememberedHudDisplay: AirVisionBackupDisplayFingerprint? = null,
     val demoModeEnabled: Boolean,
     val speakerEnabled: Boolean = true,
     val nativeCaptionsEnabled: Boolean = false,
     val translationCaptionSourceLanguage: String = TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
     val translationCaptionTargetLanguage: String = TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
+)
+
+@Serializable
+data class AirVisionBackupDisplayFingerprint(
+    val name: String,
+    val widthPx: Int = 0,
+    val heightPx: Int = 0,
 )
 
 @Serializable
@@ -76,8 +84,8 @@ data class AirVisionBackupRuntimeProfile(
 
 object AirVisionProfileBackups {
     const val SCHEMA = "openclaw.airvision.m1.profile-backup"
-    const val VERSION = 4
-    private val SUPPORTED_VERSIONS = setOf(1, 2, 3, VERSION)
+    const val VERSION = 5
+    private val SUPPORTED_VERSIONS = setOf(1, 2, 3, 4, VERSION)
 
     private val json =
         Json {
@@ -168,7 +176,9 @@ object AirVisionProfileBackups {
                     labels = labels,
                     runtimeByMode = runtimeByMode,
                 ).toTypedArray(),
-                "Startup ${preferences.startupDestination.label}; display target ${preferences.hudDisplayTarget.label}; language ${preferences.language.label}",
+                "Startup ${preferences.startupDestination.label}; display target ${preferences.hudDisplayTarget.label}; " +
+                    "remembered display ${preferences.rememberedHudDisplay?.label() ?: "none"}; " +
+                    "language ${preferences.language.label}",
                 "Speaker ${enabledDisabled(preferences.speakerEnabled)}; " +
                     "Samsung/native captions ${enabledDisabled(preferences.nativeCaptionsEnabled)}; " +
                     "translation captions ${sourceLanguage.label} -> ${targetLanguage.label}",
@@ -304,11 +314,24 @@ object AirVisionProfileBackups {
             mediaKeyAction = requireMediaKeyAction(controls.mediaKeyAction),
         )
 
-    fun appPreferencesFromBackup(preferences: AirVisionBackupAppPreferences): AirVisionBackupResolvedAppPreferences =
-        AirVisionBackupResolvedAppPreferences(
+    fun appPreferencesFromBackup(preferences: AirVisionBackupAppPreferences): AirVisionBackupResolvedAppPreferences {
+        val displayTarget = requireHudDisplayTarget(preferences.hudDisplayTarget)
+        val rememberedDisplay =
+            preferences.rememberedHudDisplay?.let {
+                AirVisionHudDisplayFingerprint(
+                    name = it.name.trim(),
+                    widthPx = it.widthPx.coerceAtLeast(0),
+                    heightPx = it.heightPx.coerceAtLeast(0),
+                ).takeIf { display -> display.isConfigured }
+            }
+        require(displayTarget != AirVisionHudDisplayTarget.RememberedExternal || rememberedDisplay != null) {
+            "Remembered HUD display target requires a display fingerprint."
+        }
+        return AirVisionBackupResolvedAppPreferences(
             language = requireAppLanguage(preferences.language),
             startupDestination = requireStartupDestination(preferences.startupDestination),
-            hudDisplayTarget = requireHudDisplayTarget(preferences.hudDisplayTarget),
+            hudDisplayTarget = displayTarget,
+            rememberedHudDisplay = rememberedDisplay,
             demoModeEnabled = preferences.demoModeEnabled,
             speakerEnabled = preferences.speakerEnabled,
             nativeCaptionsEnabled = preferences.nativeCaptionsEnabled,
@@ -323,6 +346,7 @@ object AirVisionProfileBackups {
                     TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
                 ),
         )
+    }
 
     fun requireViewMode(rawValue: String): AirVisionViewMode =
         AirVisionViewMode.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }
@@ -402,6 +426,7 @@ data class AirVisionBackupResolvedAppPreferences(
     val language: AirVisionAppLanguage,
     val startupDestination: AirVisionStartupDestination,
     val hudDisplayTarget: AirVisionHudDisplayTarget,
+    val rememberedHudDisplay: AirVisionHudDisplayFingerprint?,
     val demoModeEnabled: Boolean,
     val speakerEnabled: Boolean,
     val nativeCaptionsEnabled: Boolean,

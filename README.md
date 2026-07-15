@@ -35,6 +35,9 @@ Current live target:
 - [x] Voice tab full functionality
 - [x] Agents tab for agent/session selection and provider/model controls
 - [x] HUD presentation mode for wearable display testing
+- [x] Remembered-display routing for USB-C, HDMI, wireless, and wearable
+  targets that survives Android display-ID changes and waits when the pinned
+  display is disconnected
 - [x] Minimal HUD gestures: single-tap dismisses clearable notifications,
   double-tap toggles mic, and swipe scrolls chat
 - [x] HUD input: Enter sends, Shift+Enter inserts a newline
@@ -88,7 +91,9 @@ The HUD flavor installs as `ai.openclaw.app.hud`, is labeled **OpenClaw HUD**,
 does not request SMS or Call Log permissions, and opens directly to the HUD tab.
 Fresh installs automatically select the largest presentation-capable external
 display. Users can explicitly prefer AirVision hardware or choose the first,
-last, or largest external display.
+last, or largest external display. Remembered Display pins the current target
+by runtime name and resolution, so reconnecting hardware remains selected even
+when Android assigns it a different display ID.
 The HUD Compose tree uses the selected Presentation display's context, so
 density, dimensions, and resource configuration follow the USB-C, HDMI,
 wireless, or wearable target instead of the phone display.
@@ -330,8 +335,10 @@ the phone controls on display 0 while the HUD owns the M1 presentation. AirVisio
 Preferred keeps the default behavior of selecting presentation displays named
 like ASUS AirVision M1. Largest External, First External, and Last External
 provide manual fallbacks for Samsung DeX or adapter setups where Android exposes
-multiple presentation displays. If Android does not expose any presentation
-targets, the router falls back to the older non-default display list. Settings
+multiple presentation displays. Remembered Display pins any current USB-C,
+HDMI, wireless, or wearable target and waits if that target is unavailable
+instead of silently moving the HUD to another screen. If Android does not
+expose any presentation targets, the router falls back to the older non-default display list. Settings
 also shows the current HUD Display Route with candidate counts, selected display
 identity, and whether fallback routing is active.
 
@@ -342,7 +349,8 @@ duplicate the active profile settings into a custom slot.
 
 Profile Backup lives under Settings -> AirVision M1 -> App Preferences. Export
 writes a JSON file containing AirVision M1 tuning profiles, custom labels,
-gesture/hotkey settings, display targeting, startup view, language preference,
+gesture/hotkey settings, display targeting and remembered-display identity,
+startup view, language preference,
 speaker state, Samsung/native captions preference, OpenClaw translation caption
 source/target languages, demo mode, and derived HUD runtime metadata such as Light Load limits and
 locked control availability. Import validates the same AirVision-only schema,

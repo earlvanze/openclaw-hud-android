@@ -8,6 +8,7 @@ import ai.openclaw.app.AirVisionDiagnosticsCompanionParity
 import ai.openclaw.app.AirVisionFirmwareCaptureResultsSummary
 import ai.openclaw.app.AirVisionFirmwareSyncItem
 import ai.openclaw.app.AirVisionFirmwareSyncPlans
+import ai.openclaw.app.AirVisionHudDisplayFingerprint
 import ai.openclaw.app.AirVisionHudDisplayTarget
 import ai.openclaw.app.AirVisionHudControls
 import ai.openclaw.app.AirVisionHudDoubleTapAction
@@ -126,6 +127,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionAppLanguage by viewModel.airVisionAppLanguage.collectAsState()
     val airVisionStartupDestination by viewModel.airVisionStartupDestination.collectAsState()
     val airVisionHudDisplayTarget by viewModel.airVisionHudDisplayTarget.collectAsState()
+    val airVisionRememberedDisplay by viewModel.airVisionRememberedDisplay.collectAsState()
     val airVisionHudDisplayRoute by viewModel.airVisionHudDisplayRoute.collectAsState()
     val airVisionCustomProfileLabels by viewModel.airVisionCustomProfileLabels.collectAsState()
     val airVisionPhysicalMainScreenVisible by viewModel.airVisionPhysicalMainScreenVisible.collectAsState()
@@ -1185,12 +1187,19 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     HorizontalDivider(color = mobileBorder)
                     AirVisionOptionGroup(
                         title = "HUD Display Target",
-                        currentLabel = airVisionHudDisplayTarget.label,
+                        currentLabel =
+                            if (airVisionHudDisplayTarget == AirVisionHudDisplayTarget.RememberedExternal) {
+                                airVisionRememberedDisplay?.label() ?: airVisionHudDisplayTarget.label
+                            } else {
+                                airVisionHudDisplayTarget.label
+                            },
                         supportingText = "Chooses which external display receives the Android Presentation HUD.",
                         options = AirVisionHudDisplayTarget.entries.toList(),
                         selected = airVisionHudDisplayTarget,
                         optionLabel = { it.label },
-                        optionDescription = ::airVisionHudDisplayTargetDescription,
+                        optionDescription = { target ->
+                            airVisionHudDisplayTargetDescription(target, airVisionRememberedDisplay)
+                        },
                         onSelected = viewModel::setAirVisionHudDisplayTarget,
                     )
                     HorizontalDivider(color = mobileBorder)
@@ -1203,6 +1212,17 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 airVisionHudDisplayRoute.summaryText(),
                                 style = mobileCallout,
                             )
+                        },
+                        trailingContent = {
+                            if (airVisionHudDisplayRoute.selectedCandidate != null) {
+                                Button(
+                                    onClick = viewModel::rememberCurrentAirVisionHudDisplay,
+                                    colors = settingsPrimaryButtonColors(),
+                                    shape = RoundedCornerShape(14.dp),
+                                ) {
+                                    Text("Remember", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                                }
+                            }
                         },
                     )
                     HorizontalDivider(color = mobileBorder)
@@ -2728,9 +2748,15 @@ private fun airVisionHudPlacementDescription(placement: AirVisionHudPlacement): 
         AirVisionHudPlacement.LowerCenter -> "Drops content lower when top captions or system UI need space."
     }
 
-private fun airVisionHudDisplayTargetDescription(target: AirVisionHudDisplayTarget): String =
+private fun airVisionHudDisplayTargetDescription(
+    target: AirVisionHudDisplayTarget,
+    rememberedDisplay: AirVisionHudDisplayFingerprint?,
+): String =
     when (target) {
         AirVisionHudDisplayTarget.Automatic -> "Use the largest Android Presentation display, with stable tie-breaking."
+        AirVisionHudDisplayTarget.RememberedExternal ->
+            rememberedDisplay?.let { "Keep the HUD on ${it.label()}, even if Android changes its display ID." }
+                ?: "Remember the currently selected external display and keep the HUD pinned to it."
         AirVisionHudDisplayTarget.AirVisionPreferred -> "Prefer displays whose name looks like ASUS AirVision M1."
         AirVisionHudDisplayTarget.LargestExternal -> "Use the largest external display Android exposes."
         AirVisionHudDisplayTarget.FirstExternal -> "Use the lowest-numbered external display."

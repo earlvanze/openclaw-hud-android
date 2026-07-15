@@ -385,6 +385,9 @@ object AirVisionWindowsProfileHandoffs {
             )
         add("- Startup view: ${AirVisionStartupDestination.fromRawValue(preferences.startupDestination).label}")
         add("- HUD display target: ${AirVisionHudDisplayTarget.fromRawValue(preferences.hudDisplayTarget).label}")
+        preferences.rememberedHudDisplay?.let {
+            add("- Remembered display: ${AirVisionHudDisplayFingerprint(it.name, it.widthPx, it.heightPx).label()}")
+        }
         add("- Companion language: ${AirVisionAppLanguage.fromRawValue(preferences.language).label}")
         add("- Speaker output: ${onOff(preferences.speakerEnabled)}")
         add("- Samsung/native captions: ${onOff(preferences.nativeCaptionsEnabled)}")

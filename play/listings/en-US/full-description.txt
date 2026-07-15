@@ -4,6 +4,7 @@ The app uses Android Presentation mode and automatically targets a compatible US
 
 Key features:
 - Automatic Android Presentation routing with first, last, largest, and optional AirVision-preferred display targets
+- Remembered-display pinning that survives Android display-ID changes and waits safely when selected hardware disconnects
 - Runtime display names in identification and host restore screens
 - Minimal always-on HUD for external displays
 - OpenClaw gateway pairing and secure local setup storage

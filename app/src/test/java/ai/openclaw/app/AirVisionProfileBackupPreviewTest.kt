@@ -79,6 +79,41 @@ class AirVisionProfileBackupPreviewTest {
 
         assertEquals("Profile backup is missing: Custom 2.", error.message)
     }
+
+    @Test
+    fun resolve_restoresRememberedDisplayFromVersionFiveBackup() {
+        val raw =
+            profileBackupJson()
+                .replace("\"version\": 4", "\"version\": 5")
+                .replace(
+                    "\"hudDisplayTarget\": \"airvision_preferred\",",
+                    """"hudDisplayTarget": "remembered_external",
+        "rememberedHudDisplay": { "name": "USB-C projector", "widthPx": 1920, "heightPx": 1200 },""",
+                )
+
+        val preferences = AirVisionProfileBackups.resolve(raw).appPreferences
+
+        assertEquals(AirVisionHudDisplayTarget.RememberedExternal, preferences.hudDisplayTarget)
+        assertEquals(
+            AirVisionHudDisplayFingerprint("USB-C projector", 1920, 1200),
+            preferences.rememberedHudDisplay,
+        )
+    }
+
+    @Test
+    fun resolve_rejectsRememberedTargetWithoutFingerprint() {
+        val raw =
+            profileBackupJson()
+                .replace("\"version\": 4", "\"version\": 5")
+                .replace("\"airvision_preferred\"", "\"remembered_external\"")
+
+        val error =
+            org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
+                AirVisionProfileBackups.resolve(raw)
+            }
+
+        assertEquals("Remembered HUD display target requires a display fingerprint.", error.message)
+    }
 }
 
 private fun profileBackupJson(

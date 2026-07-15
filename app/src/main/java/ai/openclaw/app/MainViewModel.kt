@@ -130,6 +130,7 @@ class MainViewModel(
     val airVisionAppLanguage: StateFlow<AirVisionAppLanguage> = prefs.airVisionAppLanguage
     val airVisionStartupDestination: StateFlow<AirVisionStartupDestination> = prefs.airVisionStartupDestination
     val airVisionHudDisplayTarget: StateFlow<AirVisionHudDisplayTarget> = prefs.airVisionHudDisplayTarget
+    val airVisionRememberedDisplay: StateFlow<AirVisionHudDisplayFingerprint?> = prefs.airVisionRememberedDisplay
     val airVisionCustomProfileLabels: StateFlow<AirVisionCustomProfileLabels> = prefs.airVisionCustomProfileLabels
     val airVisionPhysicalMainScreenVisible: StateFlow<Boolean> = prefs.airVisionPhysicalMainScreenVisible
     val airVisionDemoModeEnabled: StateFlow<Boolean> = prefs.airVisionDemoModeEnabled
@@ -505,7 +506,23 @@ class MainViewModel(
     }
 
     fun setAirVisionHudDisplayTarget(target: AirVisionHudDisplayTarget) {
+        if (target == AirVisionHudDisplayTarget.RememberedExternal) {
+            rememberCurrentAirVisionHudDisplay()
+            return
+        }
         prefs.setAirVisionHudDisplayTarget(target)
+    }
+
+    fun rememberCurrentAirVisionHudDisplay(): Boolean {
+        val candidate = airVisionHudDisplayRoute.value.selectedCandidate
+        if (candidate == null) {
+            showHudTransientMessage("Connect and select an external display before remembering it")
+            return false
+        }
+        prefs.setAirVisionRememberedDisplay(candidate.fingerprint())
+        prefs.setAirVisionHudDisplayTarget(AirVisionHudDisplayTarget.RememberedExternal)
+        showHudTransientMessage("Remembered ${candidate.fingerprint().label()}")
+        return true
     }
 
     fun setAirVisionCustomProfileLabel(

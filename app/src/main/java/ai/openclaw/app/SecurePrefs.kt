@@ -57,6 +57,9 @@ class SecurePrefs(
         private const val AIR_VISION_APP_LANGUAGE_KEY = "airVision.app.language"
         private const val AIR_VISION_STARTUP_DESTINATION_KEY = "airVision.app.startupDestination"
         private const val AIR_VISION_HUD_DISPLAY_TARGET_KEY = "airVision.app.hudDisplayTarget"
+        private const val AIR_VISION_REMEMBERED_DISPLAY_NAME_KEY = "airVision.app.rememberedDisplay.name"
+        private const val AIR_VISION_REMEMBERED_DISPLAY_WIDTH_KEY = "airVision.app.rememberedDisplay.widthPx"
+        private const val AIR_VISION_REMEMBERED_DISPLAY_HEIGHT_KEY = "airVision.app.rememberedDisplay.heightPx"
         private const val AIR_VISION_CUSTOM_1_LABEL_KEY = "airVision.profile.custom1.label"
         private const val AIR_VISION_CUSTOM_2_LABEL_KEY = "airVision.profile.custom2.label"
         private const val AIR_VISION_PHYSICAL_MAIN_SCREEN_VISIBLE_KEY = "airVision.physicalMainScreenVisible"
@@ -225,6 +228,9 @@ class SecurePrefs(
             ),
         )
     val airVisionHudDisplayTarget: StateFlow<AirVisionHudDisplayTarget> = _airVisionHudDisplayTarget
+
+    private val _airVisionRememberedDisplay = MutableStateFlow(loadAirVisionRememberedDisplay())
+    val airVisionRememberedDisplay: StateFlow<AirVisionHudDisplayFingerprint?> = _airVisionRememberedDisplay
 
     private val _airVisionCustomProfileLabels =
         MutableStateFlow(loadAirVisionCustomProfileLabels())
@@ -810,6 +816,22 @@ class SecurePrefs(
         _airVisionHudDisplayTarget.value = target
     }
 
+    fun setAirVisionRememberedDisplay(display: AirVisionHudDisplayFingerprint?) {
+        val configured = display?.takeIf { it.isConfigured }
+        plainPrefs.edit {
+            if (configured == null) {
+                remove(AIR_VISION_REMEMBERED_DISPLAY_NAME_KEY)
+                remove(AIR_VISION_REMEMBERED_DISPLAY_WIDTH_KEY)
+                remove(AIR_VISION_REMEMBERED_DISPLAY_HEIGHT_KEY)
+            } else {
+                putString(AIR_VISION_REMEMBERED_DISPLAY_NAME_KEY, configured.name.trim())
+                putInt(AIR_VISION_REMEMBERED_DISPLAY_WIDTH_KEY, configured.widthPx.coerceAtLeast(0))
+                putInt(AIR_VISION_REMEMBERED_DISPLAY_HEIGHT_KEY, configured.heightPx.coerceAtLeast(0))
+            }
+        }
+        _airVisionRememberedDisplay.value = configured
+    }
+
     fun setAirVisionCustomProfileLabel(
         mode: AirVisionViewMode,
         label: String,
@@ -882,6 +904,14 @@ class SecurePrefs(
                     language = _airVisionAppLanguage.value.rawValue,
                     startupDestination = _airVisionStartupDestination.value.rawValue,
                     hudDisplayTarget = _airVisionHudDisplayTarget.value.rawValue,
+                    rememberedHudDisplay =
+                        _airVisionRememberedDisplay.value?.let {
+                            AirVisionBackupDisplayFingerprint(
+                                name = it.name,
+                                widthPx = it.widthPx,
+                                heightPx = it.heightPx,
+                            )
+                        },
                     demoModeEnabled = _airVisionDemoModeEnabled.value,
                     speakerEnabled = _speakerEnabled.value,
                     nativeCaptionsEnabled = _nativeCaptionsEnabled.value,
@@ -922,6 +952,15 @@ class SecurePrefs(
             putString(AIR_VISION_APP_LANGUAGE_KEY, appPreferences.language.rawValue)
             putString(AIR_VISION_STARTUP_DESTINATION_KEY, appPreferences.startupDestination.rawValue)
             putString(AIR_VISION_HUD_DISPLAY_TARGET_KEY, appPreferences.hudDisplayTarget.rawValue)
+            appPreferences.rememberedHudDisplay?.let {
+                putString(AIR_VISION_REMEMBERED_DISPLAY_NAME_KEY, it.name)
+                putInt(AIR_VISION_REMEMBERED_DISPLAY_WIDTH_KEY, it.widthPx)
+                putInt(AIR_VISION_REMEMBERED_DISPLAY_HEIGHT_KEY, it.heightPx)
+            } ?: run {
+                remove(AIR_VISION_REMEMBERED_DISPLAY_NAME_KEY)
+                remove(AIR_VISION_REMEMBERED_DISPLAY_WIDTH_KEY)
+                remove(AIR_VISION_REMEMBERED_DISPLAY_HEIGHT_KEY)
+            }
             putBoolean(AIR_VISION_DEMO_MODE_ENABLED_KEY, appPreferences.demoModeEnabled)
             putBoolean("voice.speakerEnabled", appPreferences.speakerEnabled)
             putBoolean("nativeCaptions.enabled", appPreferences.nativeCaptionsEnabled)
@@ -937,6 +976,7 @@ class SecurePrefs(
         _airVisionAppLanguage.value = appPreferences.language
         _airVisionStartupDestination.value = appPreferences.startupDestination
         _airVisionHudDisplayTarget.value = appPreferences.hudDisplayTarget
+        _airVisionRememberedDisplay.value = appPreferences.rememberedHudDisplay
         _airVisionDemoModeEnabled.value = appPreferences.demoModeEnabled
         _speakerEnabled.value = appPreferences.speakerEnabled
         _nativeCaptionsEnabled.value = appPreferences.nativeCaptionsEnabled
@@ -944,6 +984,16 @@ class SecurePrefs(
         _translationCaptionTargetLanguage.value = appPreferences.translationCaptionTargetLanguage
         _airVisionDisplaySettings.value = activeSettings
         _airVisionPhysicalMainScreenVisible.value = activeSettings.physicalMainScreenVisible
+    }
+
+    private fun loadAirVisionRememberedDisplay(): AirVisionHudDisplayFingerprint? {
+        val display =
+            AirVisionHudDisplayFingerprint(
+                name = plainPrefs.getString(AIR_VISION_REMEMBERED_DISPLAY_NAME_KEY, null).orEmpty(),
+                widthPx = plainPrefs.getInt(AIR_VISION_REMEMBERED_DISPLAY_WIDTH_KEY, 0),
+                heightPx = plainPrefs.getInt(AIR_VISION_REMEMBERED_DISPLAY_HEIGHT_KEY, 0),
+            )
+        return display.takeIf { it.isConfigured }
     }
 
     fun setAirVisionPhysicalMainScreenVisible(visible: Boolean) {
