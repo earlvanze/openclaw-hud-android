@@ -387,9 +387,9 @@ ADB=/home/linuxbrew/.linuxbrew/bin/adb \
 
 `node scripts/build-release-aab.mjs` auto-bumps Android
 `versionName`/`versionCode` in `app/build.gradle.kts`, then builds signed
-release bundles. The HUD/M1 bundle is the Google Play target package:
+release bundles. The HUD bundle is the Google Play target package:
 
-- HUD/M1 build: `build/release-bundles/openclaw-<version>-hud-release.aab`
+- HUD build: `build/release-bundles/openclaw-<version>-hud-release.aab`
   (`ai.openclaw.app.hud`)
 - Play build: `build/release-bundles/openclaw-<version>-play-release.aab`
   (`ai.openclaw.app`)
@@ -533,7 +533,7 @@ screenshots must be Play-sized, 24-bit RGB, visibly nonblank, and include the
 green OpenClaw HUD accent so Samsung lock/protection overlays do not pass as
 release screenshots.
 
-`verify-play-hud-release.mjs` is the offline-safe local gate for the HUD/M1
+`verify-play-hud-release.mjs` is the offline-safe local gate for the HUD
 Play target. It verifies the newest signed HUD AAB, confirms the generated
 manifest package is `ai.openclaw.app.hud`, fails if restricted Play-risk
 permissions drift back into the HUD flavor, confirms the notification-listener

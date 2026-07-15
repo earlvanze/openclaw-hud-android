@@ -1,7 +1,8 @@
-OpenClaw HUD external-display update:
-- Remember USB-C, HDMI, wireless, or wearable displays across Android display-ID changes.
-- Wait when a pinned display disconnects instead of moving the HUD to another screen.
-- Use display-scoped density, dimensions, and resources.
-- Include remembered display identity in backup/import and diagnostics.
-- Automatic Presentation routing and generic accessory-key controls.
-- Chat, notifications, voice, captions, reporting, and In-app privacy policy.
+OpenClaw HUD display update:
+- Remember USB-C, HDMI, wireless, and wearable displays across Android ID changes.
+- Wait for pinned displays instead of moving the HUD.
+- Recover from failed Presentation starts and stale callbacks.
+- Use display-scoped density and resources.
+- Back up remembered display identity in diagnostics.
+- Generic automatic routing and accessory-key controls.
+- Chat, notifications, voice, captions, reporting, and privacy policy.

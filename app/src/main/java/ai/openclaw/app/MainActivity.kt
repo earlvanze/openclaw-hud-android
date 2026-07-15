@@ -43,7 +43,8 @@ class MainActivity : ComponentActivity() {
     private var didAttachRuntimeUi = false
     private var didStartNodeService = false
     private var hudMediaSession: MediaSession? = null
-    private var hudPresentation: HudPresentation? = null
+    private val hudPresentationSession = HudPresentationSessionController<HudPresentation>()
+    private var hudPresentationRecoveryRunnable: Runnable? = null
     private var hudDisplayListenerRegistered = false
     private var appliedAirVisionAppLanguage: AirVisionAppLanguage? = null
     private val hudKeyInputController = AirVisionHudKeyInputController()
@@ -59,11 +60,9 @@ class MainActivity : ComponentActivity() {
             }
 
             override fun onDisplayRemoved(displayId: Int) {
-                val presentation = hudPresentation ?: return
-                if (presentation.display.displayId == displayId) {
-                    presentation.dismiss()
-                    hudPresentation = null
-                    viewModel.setAirVisionHudPresentationActive(false)
+                val presentation = hudPresentationSession.current
+                if (presentation?.display?.displayId == displayId) {
+                    releaseHudPresentation(presentation, dismiss = true)
                 }
                 showHudPresentationIfAvailable()
             }
@@ -183,7 +182,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
-        if (BuildConfig.OPENCLAW_DEFAULT_HUD && hudPresentation?.isShowing == true) {
+        if (BuildConfig.OPENCLAW_DEFAULT_HUD && hudPresentationSession.current?.isShowing == true) {
             setHudMediaSessionActive(true)
             viewModel.setForeground(true)
         } else {
@@ -195,8 +194,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         unregisterHudDisplayListener()
-        hudPresentation?.dismiss()
-        hudPresentation = null
+        cancelHudPresentationRecovery(resetAttempts = true)
+        hudPresentationSession.current?.let { releaseHudPresentation(it, dismiss = true) }
         viewModel.setAirVisionHudPresentationActive(false)
         hudMediaSession?.release()
         hudMediaSession = null
@@ -244,8 +243,8 @@ class MainActivity : ComponentActivity() {
     private fun showHudPresentationIfAvailable() {
         if (!BuildConfig.OPENCLAW_DEFAULT_HUD || isFinishing || isDestroyed) return
         if (isOnExternalDisplay()) {
-            hudPresentation?.dismiss()
-            hudPresentation = null
+            cancelHudPresentationRecovery(resetAttempts = true)
+            hudPresentationSession.current?.let { releaseHudPresentation(it, dismiss = true) }
             viewModel.setAirVisionHudPresentationActive(false)
             viewModel.setAirVisionHudDisplayRoute(
                 AirVisionHudDisplayRoute(
@@ -267,6 +266,9 @@ class MainActivity : ComponentActivity() {
                             reason = "display_manager_unavailable",
                         ),
                     )
+                    if (hudPresentationSession.current == null) {
+                        scheduleHudPresentationRecovery("display_manager_unavailable")
+                    }
                     return
                 }
         val presentationDisplayIds =
@@ -286,34 +288,87 @@ class MainActivity : ComponentActivity() {
         val targetDisplay =
             externalDisplays.firstOrNull { it.displayId == displayRoute.selectedCandidate?.displayId }
                 ?: run {
-                    hudPresentation?.dismiss()
-                    hudPresentation = null
+                    cancelHudPresentationRecovery(resetAttempts = true)
+                    hudPresentationSession.current?.let { releaseHudPresentation(it, dismiss = true) }
                     viewModel.setAirVisionHudPresentationActive(false)
                     return
                 }
 
-        hudPresentation?.let { current ->
+        hudPresentationSession.current?.let { current ->
             if (current.display.displayId == targetDisplay.displayId && current.isShowing) {
+                cancelHudPresentationRecovery(resetAttempts = true)
+                hudPresentationSession.markShown(current)
                 viewModel.setAirVisionHudPresentationActive(true)
                 return
             }
-            current.dismiss()
-            viewModel.setAirVisionHudPresentationActive(false)
+            releaseHudPresentation(current, dismiss = true)
         }
 
-        hudPresentation =
-            HudPresentation(this, targetDisplay, viewModel, onHudKeyEvent = ::handleHudKeyEvent).also { presentation ->
-                runCatching { presentation.show() }
-                    .onSuccess {
-                        Log.d(TAG, "HUD presentation shown on display ${targetDisplay.displayId} ${targetDisplay.name}")
-                        viewModel.setAirVisionHudPresentationActive(true)
-                        applyPhoneSystemBars()
-                    }.onFailure { error ->
-                        Log.w(TAG, "Failed to show HUD presentation on display ${targetDisplay.displayId}", error)
-                        hudPresentation = null
-                        viewModel.setAirVisionHudPresentationActive(false)
-                    }
+        val presentation = HudPresentation(this, targetDisplay, viewModel, onHudKeyEvent = ::handleHudKeyEvent)
+        hudPresentationSession.attach(presentation)
+        presentation.setOnDismissListener {
+            if (hudPresentationSession.release(presentation)) {
+                viewModel.setAirVisionHudPresentationActive(false)
+                scheduleHudPresentationRecovery("presentation_dismissed")
             }
+        }
+        runCatching { presentation.show() }
+            .onSuccess {
+                if (hudPresentationSession.markShown(presentation)) {
+                    cancelHudPresentationRecovery(resetAttempts = true)
+                    Log.d(TAG, "HUD presentation shown on display ${targetDisplay.displayId} ${targetDisplay.name}")
+                    viewModel.setAirVisionHudPresentationActive(true)
+                    applyPhoneSystemBars()
+                }
+            }.onFailure { error ->
+                Log.w(TAG, "Failed to show HUD presentation on display ${targetDisplay.displayId}", error)
+                if (releaseHudPresentation(presentation, dismiss = true)) {
+                    scheduleHudPresentationRecovery("presentation_show_failed")
+                }
+            }
+    }
+
+    private fun releaseHudPresentation(
+        presentation: HudPresentation,
+        dismiss: Boolean,
+    ): Boolean {
+        if (!hudPresentationSession.release(presentation)) return false
+        if (dismiss) {
+            runCatching { presentation.dismiss() }
+                .onFailure { error -> Log.w(TAG, "Failed to dismiss HUD presentation", error) }
+        }
+        viewModel.setAirVisionHudPresentationActive(false)
+        return true
+    }
+
+    private fun scheduleHudPresentationRecovery(reason: String) {
+        if (
+            !BuildConfig.OPENCLAW_DEFAULT_HUD ||
+            isFinishing ||
+            isDestroyed ||
+            hudPresentationRecoveryRunnable != null
+        ) {
+            return
+        }
+        val delayMs = hudPresentationSession.nextRecoveryDelayMs()
+        lateinit var recovery: Runnable
+        recovery =
+            Runnable {
+                if (hudPresentationRecoveryRunnable !== recovery) return@Runnable
+                hudPresentationRecoveryRunnable = null
+                showHudPresentationIfAvailable()
+            }
+        hudPresentationRecoveryRunnable = recovery
+        hudSystemBarsHandler.postDelayed(recovery, delayMs)
+        Log.d(TAG, "Scheduled HUD presentation recovery in ${delayMs}ms reason=$reason")
+    }
+
+    private fun cancelHudPresentationRecovery(resetAttempts: Boolean) {
+        hudPresentationRecoveryRunnable?.let(hudSystemBarsHandler::removeCallbacks)
+        hudPresentationRecoveryRunnable = null
+        if (resetAttempts) {
+            hudPresentationSession.resetRecovery()
+        }
     }
 
     private fun Display.toHudDisplayCandidate(presentationDisplayIds: Set<Int>): AirVisionHudDisplayCandidate =
