@@ -19,7 +19,7 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 - [x] Create app in Play Console (verifiedAt=2026-07-15; source=Google Play Console > All apps > OpenClaw HUD (ai.openclaw.app.hud); notes=Verified that the separate OpenClaw HUD app exists as Play app 4973554177385209084.)
 - [x] Configure internal testers (verifiedAt=2026-07-15; source=Google Play Console > Test and release > Testing > Internal testing > Testers; notes=Verified that the dedicated OpenClaw HUD Internal Testers list is attached with one intended tester.)
-- [x] Configure reviewer app access (verifiedAt=2026-07-15; source=Google Play Console > Policy and programs > App content > Sign in details; notes=Verified that Play contains account-free Demo Mode instructions covering the HUD without a gateway or external hardware.)
+- [x] Configure reviewer app access (verifiedAt=2026-07-15; source=Google Play Console > Policy and programs > App content > Sign in details; notes=Verified that Play contains account-free Demo Mode instructions covering the HUD without a gateway or external hardware, plus the assistant-response flag and report flow.)
 - [x] Implement in-app AI-content reporting to the developer
 
 Console flags and evidence entries live in `play/app-content-answers.json` under `finalSubmission`. The AI-content gate lives under `aiGeneratedContent`. Flip a flag only after the matching setup or implementation is complete.
@@ -82,7 +82,7 @@ Use the tracked fallback screenshots when live Fold/M1 capture is unavailable. T
 
 ## App Access
 
-Open the app and go to Settings > External Display HUD > App Preferences, then enable Demo Mode. Demo Mode exposes the HUD surface without a gateway account, credentials, pairing code, purchase, or external hardware. Gateway pairing is optional. Reviewers can inspect chat, notifications, voice/caption controls, display placement, and external-display settings in Demo Mode. Each assistant response has a flag button that opens the in-app offensive-content report form and shows the exact data disclosure before submission.
+Open the app, go to Settings > External Display HUD > App Preferences, and enable Demo Mode. It exposes the HUD without an account, credentials, pairing code, purchase, or external hardware; gateway pairing is optional. Reviewers can inspect chat, notifications, voice/caption controls, display placement, and external-display settings. Each assistant response has a flag button that opens the offensive-content report form and displays the exact submitted-data disclosure before confirmation.
 
 ## AirVision Companion Review Evidence
 

@@ -14,7 +14,7 @@
   },
   "appAccess": {
     "restrictedFeatures": true,
-    "reviewAccessInstructions": "Open the app and go to Settings > External Display HUD > App Preferences, then enable Demo Mode. Demo Mode exposes the HUD surface without a gateway account, credentials, pairing code, purchase, or external hardware. Gateway pairing is optional. Reviewers can inspect chat, notifications, voice/caption controls, display placement, and external-display settings in Demo Mode. Each assistant response has a flag button that opens the in-app offensive-content report form and shows the exact data disclosure before submission."
+    "reviewAccessInstructions": "Open the app, go to Settings > External Display HUD > App Preferences, and enable Demo Mode. It exposes the HUD without an account, credentials, pairing code, purchase, or external hardware; gateway pairing is optional. Reviewers can inspect chat, notifications, voice/caption controls, display placement, and external-display settings. Each assistant response has a flag button that opens the offensive-content report form and displays the exact submitted-data disclosure before confirmation."
   },
   "targetAudience": {
     "designedForChildren": false,
@@ -353,13 +353,13 @@
       "reviewerAccessConfiguredInPlayConsole": {
         "source": "Google Play Console > Policy and programs > App content > Sign in details",
         "verifiedAt": "2026-07-15",
-        "notes": "Verified that Play contains account-free Demo Mode instructions covering the HUD without a gateway or external hardware."
+        "notes": "Verified that Play contains account-free Demo Mode instructions covering the HUD without a gateway or external hardware, plus the assistant-response flag and report flow."
       }
     },
     "phoneScreenshots": [
       "play/screenshots/phone/hud-demo.png",
       "play/screenshots/phone/settings-demo.png"
     ],
-    "notes": "Play app creation, internal tester selection, privacy policy, reviewer Demo Mode access, store listing, category/contact details, and signed version 2026071500 upload were verified on 2026-07-15. The internal release remains a draft and has not been sent for review or rolled out. A replacement signed bundle containing in-app AI-content reporting must be uploaded before review."
+    "notes": "Play app creation, internal tester selection, privacy policy, reviewer Demo Mode and reporting access, store listing, category/contact details, and signed version 2026071501 upload were verified on 2026-07-15. The internal release contains only version 2026071501 and remains a draft. Data safety now includes Developer communications for optional Other in-app messages. These changes have not been sent for review or rolled out."
   }
 }
