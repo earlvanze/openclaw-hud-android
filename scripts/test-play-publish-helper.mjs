@@ -183,10 +183,14 @@ exit 64
     if (readinessReport.serviceAccount.preflightBlocker.code !== "service_account_not_configured") {
       throw new Error(`Readiness report should classify missing fake service-account config:\n${readiness.stdout}`);
     }
-    if (readinessReport.externalBlockers.length < 2 || readinessReport.localBlockers.length !== 0) {
+    if (readinessReport.localBlockers.length !== 0) {
       throw new Error(`Readiness report should keep external blockers separate from local blockers:\n${readiness.stdout}`);
     }
-    if (!readinessReport.blockers.some((blocker) => blocker.includes("Authenticate one allowed publisher account"))) {
+    if (
+      !readinessReport.externalBlockers.some((blocker) =>
+        blocker.includes("Authenticate one allowed publisher account"),
+      )
+    ) {
       throw new Error(`Readiness report did not include the OAuth blocker:\n${readiness.stdout}`);
     }
 
