@@ -567,6 +567,11 @@ async function verifyFinalSubmissionReadiness(
   if (finalSubmission.reviewerAccessConfiguredInPlayConsole !== true) {
     problems.push("finalSubmission.reviewerAccessConfiguredInPlayConsole must be true after App access review instructions/codes are entered in Play Console.");
   }
+  if (appContent.aiGeneratedContent?.inAppReportingImplemented !== true) {
+    problems.push(
+      "aiGeneratedContent.inAppReportingImplemented must be true after an in-app offensive-content report reaches the developer without leaving the app.",
+    );
+  }
   verifyFinalConsoleEvidence(finalSubmission, problems);
   const phoneScreenshots = Array.isArray(finalSubmission.phoneScreenshots) ? finalSubmission.phoneScreenshots : [];
   if (phoneScreenshots.length < 2) {
@@ -622,6 +627,10 @@ function verifyAppContentShape(appContent) {
   requireBoolean(appContent.dataSafety?.sellsData, false, "Data sale declaration");
   requireBoolean(appContent.dataSafety?.dataUsedForAdvertising, false, "Advertising data declaration");
   requireBoolean(appContent.dataSafety?.dataDeletionSupported, true, "Data deletion support declaration");
+  requireBoolean(appContent.aiGeneratedContent?.present, true, "AI-generated content declaration");
+  if (!isHttpsUrl(appContent.aiGeneratedContent?.policyUrl)) {
+    throw new Error("AI-generated content policyUrl must be a public https:// URL.");
+  }
   if (appContent.dataSafety?.dataEncryptedInTransitAnswer !== "no_not_all_paths") {
     throw new Error("Data safety transport-security answer must reflect that not all self-hosted gateway paths are encrypted.");
   }
@@ -676,7 +685,17 @@ function verifyAppContentShape(appContent) {
     ["Advertising ID", "Precise location", "Contacts", "Calendar", "SMS", "Call logs", "Photos and videos"],
   );
   const dataTypes = (appContent.dataSafety?.collectedData ?? []).map((entry) => entry.playType);
-  requireArrayIncludes("Data safety collected data types", dataTypes, ["Audio", "App activity", "App info and performance"]);
+  requireArrayIncludes(
+    "Data safety collected data types",
+    dataTypes,
+    ["Messages", "Audio files", "App activity", "App info and performance"],
+  );
+  const dataSubtypes = (appContent.dataSafety?.collectedData ?? []).map((entry) => entry.playSubtype);
+  requireArrayIncludes(
+    "Data safety collected data subtypes",
+    dataSubtypes,
+    ["Other in-app messages", "Voice or sound recordings", "Other actions", "Diagnostics"],
+  );
 }
 
 function verifyAirVisionWindowsAppEvidence(evidence) {

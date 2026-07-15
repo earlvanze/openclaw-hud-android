@@ -24,9 +24,9 @@ const evidenceTemplates = [
   {
     key: "reviewerAccessConfiguredInPlayConsole",
     label: "Configure reviewer app access",
-    source: () => "Google Play Console > Policy and programs > App content > App access",
+    source: () => "Google Play Console > Policy and programs > App content > Sign in details",
     notes: () =>
-      "Verified App access contains Demo Mode review instructions, the AirVision Companion Review Evidence steps from play/console-handoff.md, and any temporary live-gateway access details needed by reviewers.",
+      "Verified Sign in details contains account-free Demo Mode review instructions that expose the HUD without a gateway or external hardware.",
   },
 ];
 

@@ -14,7 +14,7 @@
   },
   "appAccess": {
     "restrictedFeatures": true,
-    "reviewAccessInstructions": "OpenClaw HUD can be reviewed without a live gateway by opening Settings > External Display HUD > App Preferences and enabling Demo Mode. Gateway pairing is optional for the HUD surface. If Google Play review needs live gateway features, provide a temporary setup code or demo gateway credentials in the Play Console App access form only; do not store those credentials in this repository."
+    "reviewAccessInstructions": "Open the app and go to Settings > External Display HUD > App Preferences, then enable Demo Mode. Demo Mode exposes the HUD surface without a gateway account, credentials, pairing code, purchase, or external hardware. Gateway pairing is optional. Reviewers can inspect chat, notifications, voice/caption controls, display placement, and external-display settings in Demo Mode."
   },
   "targetAudience": {
     "designedForChildren": false,
@@ -24,6 +24,12 @@
   "contentRating": {
     "category": "Productivity",
     "notes": "No gambling, financial trading, dating, UGC social feed, or ads. Assistant responses depend on the user-configured OpenClaw gateway and selected model/provider."
+  },
+  "aiGeneratedContent": {
+    "present": true,
+    "policyUrl": "https://support.google.com/googleplay/android-developer/answer/13985936",
+    "inAppReportingImplemented": false,
+    "notes": "The HUD displays conversational AI output from the configured OpenClaw gateway. Do not send the Play release for review until assistant responses have an in-app offensive-content report action that submits the report to ECO Systems LLC without leaving the app."
   },
   "dataDeletion": {
     "accountCreationInApp": false,
@@ -39,25 +45,36 @@
     "dataDeletionSupported": true,
     "collectedData": [
       {
-        "playType": "Audio",
+        "playType": "Audio files",
+        "playSubtype": "Voice or sound recordings",
         "optional": true,
         "purpose": ["App functionality"],
         "whereUsed": "Wake word, push-to-talk, and realtime caption/translation workflows when enabled by the user.",
         "destination": "Configured OpenClaw gateway and the model/provider selected through that gateway."
       },
       {
-        "playType": "App activity",
+        "playType": "Messages",
+        "playSubtype": "Other in-app messages",
         "optional": true,
         "purpose": ["App functionality"],
-        "whereUsed": "HUD chat messages, assistant run status, active session/provider selections, and notification summaries when enabled.",
+        "whereUsed": "HUD chat prompts, assistant responses, and notification summaries when the user connects to a gateway.",
+        "destination": "Configured OpenClaw gateway."
+      },
+      {
+        "playType": "App activity",
+        "playSubtype": "Other actions",
+        "optional": true,
+        "purpose": ["App functionality"],
+        "whereUsed": "Assistant run controls plus active session, agent, provider, and model selections when enabled.",
         "destination": "Configured OpenClaw gateway."
       },
       {
         "playType": "App info and performance",
-        "optional": false,
+        "playSubtype": "Diagnostics",
+        "optional": true,
         "purpose": ["App functionality"],
-        "whereUsed": "Local gateway connection state, device capability status, AirVision profile settings, and diagnostics exports created explicitly by the user.",
-        "destination": "Stored locally unless the user exports diagnostics or connects to a gateway."
+        "whereUsed": "Gateway connection state, external-display capability status, optional AirVision profile state, and diagnostics exports created explicitly by the user.",
+        "destination": "Stored locally unless the user explicitly sends or exports diagnostics."
       }
     ],
     "notCollected": [
@@ -317,18 +334,30 @@
   },
   "finalSubmission": {
     "hostedPrivacyPolicyUrl": "https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html",
-    "appCreatedInPlayConsole": false,
-    "internalTestersConfiguredInPlayConsole": false,
-    "reviewerAccessConfiguredInPlayConsole": false,
+    "appCreatedInPlayConsole": true,
+    "internalTestersConfiguredInPlayConsole": true,
+    "reviewerAccessConfiguredInPlayConsole": true,
     "consoleEvidence": {
-      "appCreatedInPlayConsole": null,
-      "internalTestersConfiguredInPlayConsole": null,
-      "reviewerAccessConfiguredInPlayConsole": null
+      "appCreatedInPlayConsole": {
+        "source": "Google Play Console > All apps > OpenClaw HUD (ai.openclaw.app.hud)",
+        "verifiedAt": "2026-07-15",
+        "notes": "Verified that the separate OpenClaw HUD app exists as Play app 4973554177385209084."
+      },
+      "internalTestersConfiguredInPlayConsole": {
+        "source": "Google Play Console > Test and release > Testing > Internal testing > Testers",
+        "verifiedAt": "2026-07-15",
+        "notes": "Verified that the dedicated OpenClaw HUD Internal Testers list is attached with one intended tester."
+      },
+      "reviewerAccessConfiguredInPlayConsole": {
+        "source": "Google Play Console > Policy and programs > App content > Sign in details",
+        "verifiedAt": "2026-07-15",
+        "notes": "Verified that Play contains account-free Demo Mode instructions covering the HUD without a gateway or external hardware."
+      }
     },
     "phoneScreenshots": [
       "play/screenshots/phone/hud-demo.png",
       "play/screenshots/phone/settings-demo.png"
     ],
-    "notes": "Fill these external Play Console artifacts before running scripts/verify-play-submission-package.mjs --final and publish-play-internal.mjs --commit. Local screenshot paths listed here are validated as Play-compliant JPEG or 24-bit PNG files."
+    "notes": "Play app creation, internal tester selection, privacy policy, reviewer Demo Mode access, store listing, category/contact details, and signed version 2026071500 upload were verified on 2026-07-15. The internal release remains a draft and has not been sent for review or rolled out. Google Play AI-content reporting remains a hard gate before review."
   }
 }

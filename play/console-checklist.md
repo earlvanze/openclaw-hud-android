@@ -13,9 +13,12 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
   `GOOGLE_PLAY_GCLOUD_ACCOUNT` and `gcloud config set account <email>` are also
   supported. The publish helper rejects other gcloud accounts by default.
 - Complete App content forms, including Data safety, Ads, App access, Content rating, Target audience, and Data deletion.
+- Implement and verify an in-app offensive-content report action for assistant
+  responses that reaches ECO Systems LLC without leaving the app. Google Play's
+  AI-generated content policy makes this a release gate.
 - Use the copy in `play/listings/en-US/` for the initial English listing.
 - Use `play/privacy-policy.md` as the hosted privacy-policy source; the same
-  disclosure is available in-app at Settings -> AirVision M1 -> App Preferences
+  disclosure is available in-app at Settings -> External Display HUD -> App Preferences
   -> Privacy Policy.
 - Run `node scripts/render-privacy-policy-site.mjs --check` to verify
   `docs/privacy-policy.html` matches `play/privacy-policy.md`.
@@ -27,7 +30,7 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
   `finalSubmission.hostedPrivacyPolicyUrl` to that URL.
 - Run `node scripts/verify-play-hud-release.mjs` before every Play upload.
   This also confirms App Bundle language splits remain disabled for the
-  AirVision companion language menu.
+  HUD language menu.
 - Run `node scripts/verify-play-submission-package.mjs` before filling or
   updating Play Console App content answers.
 - Run `node scripts/report-play-readiness.mjs` before attempting preflight or
@@ -75,16 +78,12 @@ Current local status:
 - OAuth publishing is restricted to `earlvanze@gmail.com` or
   `earl@earlbnb.com`; `--auth-check` verifies the selected account before any
   Play API request once that account is authenticated locally.
-- Current Cyber gcloud auth state still needs OAuth login for both allowed
-  publisher accounts. `--auth-check` currently fails early for
-  `earlvanze@gmail.com` and `earl@earlbnb.com` because only the existing service
-  account is authenticated locally. A configured Google Play service-account JSON
-  passes local `--auth service-account --auth-check`, but Play API preflight is
-  classified as `play_package_missing_or_ungranted` because it currently returns
-  `Package not found: ai.openclaw.app.hud`, so the app still needs to be created
-  in Play Console and the service account needs package access.
-  `node scripts/report-play-readiness.mjs` summarizes OAuth,
-  service-account, local artifact, and dry-run gates together.
+- Browser staging verified the separate `ai.openclaw.app.hud` app, internal
+  tester list, reviewer Demo Mode instructions, app-content forms, listing,
+  contact details, graphics, screenshots, and signed AAB upload on 2026-07-15.
+  API/OAuth preflight remains a separate authentication and package-access gate.
+  `node scripts/report-play-readiness.mjs` summarizes OAuth, service-account,
+  local artifact, and dry-run gates together.
 - `node scripts/publish-play-internal.mjs --commit` is guarded by
   `node scripts/verify-play-submission-package.mjs --final` before any Play API
   upload.
@@ -107,17 +106,14 @@ Current local status:
   `node scripts/test-airvision-firmware-capture-results.mjs` pass against the
   structured AirVision firmware capture-results gate. Android firmware writes
   remain blocked until sanitized Windows ASUS HID evidence is validated.
-- `play/app-content-answers.json` contains the draft App content answers for
-  Privacy policy, Ads, App access, Target audience, Content rating, Data
-  deletion, and Data safety. Keep it aligned with the final Play Console forms.
-- `play/app-content-answers.json` also tracks final external readiness fields
-  for hosted privacy URL, app creation, internal testers, reviewer access, and
-  phone screenshots. Each completed Play Console blocker also needs
-  source/date/notes evidence under `finalSubmission.consoleEvidence`. These are
-  intentionally incomplete until Play Console is configured. Generate the
-  evidence shape with `node scripts/render-play-console-evidence-template.mjs
-  --verified-at YYYY-MM-DD --json-only` after verifying the matching Console
-  page. Local screenshot paths are validated by the final submission verifier
+- `play/app-content-answers.json` mirrors the Play Console App content answers
+  and records evidence for the hosted privacy URL, app creation, internal
+  testers, reviewer access, and phone screenshots. Keep it aligned with the
+  exact Console forms and draft release.
+- The same file records the unfinished in-app AI-content reporting requirement.
+  Final-mode verification must remain blocked until that feature submits
+  reports to ECO Systems LLC without leaving the app. Local screenshot paths
+  are validated by the final submission verifier.
   before commit publishing.
 - `docs/privacy-policy.html` is the generated GitHub Pages privacy-policy page.
   It is published at

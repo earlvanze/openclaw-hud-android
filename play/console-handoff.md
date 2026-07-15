@@ -17,11 +17,12 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Remaining Console Blockers
 
-- [ ] Create app in Play Console (evidence: not recorded)
-- [ ] Configure internal testers (evidence: not recorded)
-- [ ] Configure reviewer app access (evidence: not recorded)
+- [x] Create app in Play Console (verifiedAt=2026-07-15; source=Google Play Console > All apps > OpenClaw HUD (ai.openclaw.app.hud); notes=Verified that the separate OpenClaw HUD app exists as Play app 4973554177385209084.)
+- [x] Configure internal testers (verifiedAt=2026-07-15; source=Google Play Console > Test and release > Testing > Internal testing > Testers; notes=Verified that the dedicated OpenClaw HUD Internal Testers list is attached with one intended tester.)
+- [x] Configure reviewer app access (verifiedAt=2026-07-15; source=Google Play Console > Policy and programs > App content > Sign in details; notes=Verified that Play contains account-free Demo Mode instructions covering the HUD without a gateway or external hardware.)
+- [ ] Implement in-app AI-content reporting to the developer
 
-These flags and evidence entries live in `play/app-content-answers.json` under `finalSubmission`. Flip a flag only after the matching Google Play Console setup is complete, and record `source`, `verifiedAt`, and `notes` evidence before final publish.
+Console flags and evidence entries live in `play/app-content-answers.json` under `finalSubmission`. The AI-content gate lives under `aiGeneratedContent`. Flip a flag only after the matching setup or implementation is complete.
 
 ## Store Listing
 
@@ -79,7 +80,7 @@ Use the tracked fallback screenshots when live Fold/M1 capture is unavailable. T
 
 ## App Access
 
-OpenClaw HUD can be reviewed without a live gateway by opening Settings > External Display HUD > App Preferences and enabling Demo Mode. Gateway pairing is optional for the HUD surface. If Google Play review needs live gateway features, provide a temporary setup code or demo gateway credentials in the Play Console App access form only; do not store those credentials in this repository.
+Open the app and go to Settings > External Display HUD > App Preferences, then enable Demo Mode. Demo Mode exposes the HUD surface without a gateway account, credentials, pairing code, purchase, or external hardware. Gateway pairing is optional. Reviewers can inspect chat, notifications, voice/caption controls, display placement, and external-display settings in Demo Mode.
 
 ## AirVision Companion Review Evidence
 
@@ -246,9 +247,10 @@ Reviewer evidence sources:
 
 Collected data:
 
-- Audio: optional; purpose App functionality; Wake word, push-to-talk, and realtime caption/translation workflows when enabled by the user.
-- App activity: optional; purpose App functionality; HUD chat messages, assistant run status, active session/provider selections, and notification summaries when enabled.
-- App info and performance: required; purpose App functionality; Local gateway connection state, device capability status, AirVision profile settings, and diagnostics exports created explicitly by the user.
+- Audio files: optional; purpose App functionality; Wake word, push-to-talk, and realtime caption/translation workflows when enabled by the user.
+- Messages: optional; purpose App functionality; HUD chat prompts, assistant responses, and notification summaries when the user connects to a gateway.
+- App activity: optional; purpose App functionality; Assistant run controls plus active session, agent, provider, and model selections when enabled.
+- App info and performance: optional; purpose App functionality; Gateway connection state, external-display capability status, optional AirVision profile state, and diagnostics exports created explicitly by the user.
 
 Not collected:
 

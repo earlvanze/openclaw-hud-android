@@ -169,6 +169,10 @@ function runNode(args, label, expectedStatus = 0) {
 
 async function writeFinalAppContent(path, screenshotPath) {
   const appContent = JSON.parse(await readFile(join(androidDir, "play", "app-content-answers.json"), "utf8"));
+  appContent.aiGeneratedContent = {
+    ...appContent.aiGeneratedContent,
+    inAppReportingImplemented: true,
+  };
   appContent.finalSubmission = {
     hostedPrivacyPolicyUrl: "https://example.com/openclaw-hud-privacy",
     appCreatedInPlayConsole: true,
