@@ -7,6 +7,67 @@ import org.junit.Test
 
 class AirVisionHudKeyInputControllerTest {
     @Test
+    fun accessoryCancelKeysAbortOnlyWhileRunIsActive() {
+        val controller = AirVisionHudKeyInputController()
+
+        for (keyCode in listOf(KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_ESCAPE)) {
+            assertEquals(
+                AirVisionHudKeyDecision(
+                    consume = true,
+                    command = AirVisionHudKeyCommand.AbortActiveRun,
+                ),
+                controller.handleKeyEvent(
+                    keyCode = keyCode,
+                    action = KeyEvent.ACTION_DOWN,
+                    eventTimeMs = 1_000L,
+                    isHudAccessoryEvent = true,
+                    controls = AirVisionHudControls(),
+                    hasActiveRun = true,
+                ),
+            )
+            assertEquals(
+                AirVisionHudKeyDecision(consume = false),
+                controller.handleKeyEvent(
+                    keyCode = keyCode,
+                    action = KeyEvent.ACTION_DOWN,
+                    eventTimeMs = 1_100L,
+                    isHudAccessoryEvent = true,
+                    controls = AirVisionHudControls(),
+                    hasActiveRun = false,
+                ),
+            )
+            assertEquals(
+                AirVisionHudKeyDecision(consume = true),
+                controller.handleKeyEvent(
+                    keyCode = keyCode,
+                    action = KeyEvent.ACTION_UP,
+                    eventTimeMs = 1_200L,
+                    isHudAccessoryEvent = true,
+                    controls = AirVisionHudControls(),
+                    hasActiveRun = true,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun internalCancelKeysNeverAbortActiveRun() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(consume = false),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_ESCAPE,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isHudAccessoryEvent = false,
+                controls = AirVisionHudControls(),
+                hasActiveRun = true,
+            ),
+        )
+    }
+
+    @Test
     fun accessoryGamepadXStartsNotificationReply() {
         val controller = AirVisionHudKeyInputController()
 

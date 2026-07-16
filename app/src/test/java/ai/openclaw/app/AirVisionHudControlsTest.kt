@@ -5,6 +5,13 @@ import org.junit.Test
 
 class AirVisionHudControlsTest {
     @Test
+    fun chatAbortMessagesDescribeRequestedRunCount() {
+        assertEquals("No active OpenClaw run", hudChatAbortRequestMessage(0))
+        assertEquals("Stopping OpenClaw", hudChatAbortRequestMessage(1))
+        assertEquals("Stopping 3 OpenClaw runs", hudChatAbortRequestMessage(3))
+    }
+
+    @Test
     fun fromRawValue_defaultsToHudProfile() {
         assertEquals(
             AirVisionHudTouchAction.OpenNotification,

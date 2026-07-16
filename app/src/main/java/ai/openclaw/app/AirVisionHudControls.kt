@@ -168,6 +168,13 @@ internal fun hudNotificationReplyResultMessage(
         else -> "Could not send reply"
     }
 
+internal fun hudChatAbortRequestMessage(pendingRunCount: Int): String =
+    when {
+        pendingRunCount <= 0 -> "No active OpenClaw run"
+        pendingRunCount == 1 -> "Stopping OpenClaw"
+        else -> "Stopping $pendingRunCount OpenClaw runs"
+    }
+
 private fun dismissNotificationCommand(
     notificationKey: String?,
     notificationClearable: Boolean,

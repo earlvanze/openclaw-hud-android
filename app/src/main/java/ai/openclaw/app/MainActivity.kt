@@ -587,6 +587,7 @@ class MainActivity : ComponentActivity() {
                 eventTimeMs = event.eventTime.takeIf { it > 0L } ?: SystemClock.uptimeMillis(),
                 isHudAccessoryEvent = event.isHudAccessoryEvent(),
                 controls = viewModel.airVisionHudControls.value,
+                hasActiveRun = viewModel.pendingRunCount.value > 0,
             )
         handleHudKeyCommand(decision.command, event = event, source = source)
         return decision.consume
@@ -684,6 +685,12 @@ class MainActivity : ComponentActivity() {
             AirVisionHudKeyCommand.StartNotificationReply -> {
                 viewModel.requestHudNotificationReply()
                 Log.d(TAG, "HUD $source key requested notification reply keyCode=${event?.keyCode}")
+            }
+            AirVisionHudKeyCommand.AbortActiveRun -> {
+                val pendingRunCount = viewModel.pendingRunCount.value
+                viewModel.abortChat()
+                viewModel.showHudTransientMessage(hudChatAbortRequestMessage(pendingRunCount))
+                Log.d(TAG, "HUD $source key requested chat abort keyCode=${event?.keyCode} runs=$pendingRunCount")
             }
             AirVisionHudKeyCommand.ToggleMic -> {
                 toggleMicFromHudInput()

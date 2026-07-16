@@ -41,6 +41,7 @@ Current live target:
 - [x] Minimal HUD controls: single-tap opens notifications, double-tap toggles mic,
   vertical swipe scrolls chat, and horizontal swipe or DPAD/gamepad controls browse notifications
 - [x] HUD input: Enter sends, Shift+Enter inserts a newline, and compatible messaging notifications support direct replies
+- [x] Active OpenClaw runs can be stopped from the HUD or with external gamepad B / keyboard Escape
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
 - [x] Per-mode external HUD profiles with viewing mode, animated frame shape,
@@ -159,6 +160,7 @@ HUD controls:
   -> OpenClaw translation -> Off.
 - Press Enter on a hardware keyboard to send the chat input.
 - Press Shift+Enter for a newline.
+- Stop an active OpenClaw run from the composer or press gamepad B / Escape on an external keyboard.
 
 The single-tap, double-tap, vertical-swipe, horizontal-swipe, brightness-key, and media/tap-key actions are
 configurable in Settings -> AirVision M1 -> External HUD Input. External

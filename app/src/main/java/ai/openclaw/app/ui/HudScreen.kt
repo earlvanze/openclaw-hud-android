@@ -16,6 +16,7 @@ import ai.openclaw.app.TranslationCaptionMode
 import ai.openclaw.app.airVisionHudDoubleTapCommand
 import ai.openclaw.app.airVisionHudSingleTapCommand
 import ai.openclaw.app.chat.ChatMessage
+import ai.openclaw.app.hudChatAbortRequestMessage
 import ai.openclaw.app.hudNotificationOpenResultMessage
 import ai.openclaw.app.hudNotificationReplyResultMessage
 import ai.openclaw.app.openNativeCaptionSettings
@@ -50,6 +51,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -590,6 +592,15 @@ fun HudScreen(viewModel: MainViewModel) {
                             replyDraft = ""
                         }
                     },
+                onAbort =
+                    if (!airVisionDemoModeEnabled && pendingRunCount > 0) {
+                        {
+                            viewModel.abortChat()
+                            viewModel.showHudTransientMessage(hudChatAbortRequestMessage(pendingRunCount))
+                        }
+                    } else {
+                        null
+                    },
                 onSend = {
                     val target = replyTarget
                     val text = (target?.let { replyDraft } ?: prompt).trim()
@@ -1052,6 +1063,7 @@ private fun HudChatInputBar(
     onPromptChange: (String) -> Unit,
     onSend: () -> Unit,
     onCancel: (() -> Unit)?,
+    onAbort: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -1104,6 +1116,17 @@ private fun HudChatInputBar(
                         .size(36.dp)
                         .clickable(onClick = onCancel),
                 tint = hudMuted,
+            )
+        }
+        if (onAbort != null) {
+            Icon(
+                imageVector = Icons.Filled.StopCircle,
+                contentDescription = "Stop OpenClaw run",
+                modifier =
+                    Modifier
+                        .size(36.dp)
+                        .clickable(onClick = onAbort),
+                tint = hudWarn,
             )
         }
         Text(

@@ -1,5 +1,5 @@
 OpenClaw HUD update:
-- Open alerts; reply to compatible messages by HUD or gamepad X.
+- Reply to compatible messages; stop OpenClaw runs by HUD, B, or Esc.
 - Browse by swipe, DPAD, or gamepad.
 - Keep Presentation recovery, display pinning, and frame-shape morphing.
 - Route external touchscreens, touchpads, mice, styli, and trackballs.

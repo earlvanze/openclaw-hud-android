@@ -21,6 +21,8 @@ internal sealed interface AirVisionHudKeyCommand {
 
     data object StartNotificationReply : AirVisionHudKeyCommand
 
+    data object AbortActiveRun : AirVisionHudKeyCommand
+
     data object ToggleMic : AirVisionHudKeyCommand
 
     data object ArmMicDoubleTap : AirVisionHudKeyCommand
@@ -44,7 +46,20 @@ internal class AirVisionHudKeyInputController(
         eventTimeMs: Long,
         isHudAccessoryEvent: Boolean,
         controls: AirVisionHudControls,
+        hasActiveRun: Boolean = false,
     ): AirVisionHudKeyDecision {
+        if (keyCode in hudAbortRunKeys && isHudAccessoryEvent && hasActiveRun) {
+            return AirVisionHudKeyDecision(
+                consume = action == KeyEvent.ACTION_DOWN || action == KeyEvent.ACTION_UP,
+                command =
+                    if (action == KeyEvent.ACTION_DOWN) {
+                        AirVisionHudKeyCommand.AbortActiveRun
+                    } else {
+                        null
+                    },
+            )
+        }
+
         if (keyCode in hudNotificationReplyKeys && isHudAccessoryEvent) {
             return AirVisionHudKeyDecision(
                 consume = action == KeyEvent.ACTION_DOWN || action == KeyEvent.ACTION_UP,
@@ -202,6 +217,7 @@ internal class AirVisionHudKeyInputController(
                 KeyEvent.KEYCODE_BUTTON_R1 to 1,
             )
         private val hudNotificationReplyKeys = setOf(KeyEvent.KEYCODE_BUTTON_X)
+        private val hudAbortRunKeys = setOf(KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_ESCAPE)
         private val hudBrightnessKeyDeltas =
             mapOf(
                 KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_BRIGHTNESS_STEP_PERCENT,
