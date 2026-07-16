@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.16.1-hud-release.aab`
-- SHA-256: `b72809324b7b7310ddbd5900d7200714c22a50ea81a7abe003d39e7aa1095e13`
-- Version: 2026.7.16.1 (2026071601)
+- AAB: `build/release-bundles/openclaw-2026.7.16.2-hud-release.aab`
+- SHA-256: `e86d3dad6b1ed4770e6d9d44c090c9f87821f05ee4884bd8862e575a14b5e890`
+- Version: 2026.7.16.2 (2026071602)
 
 ## Remaining Console Blockers
 
@@ -61,11 +61,12 @@ Release notes:
 
 OpenClaw HUD update:
 - Fix taps, swipes, and external touchscreen/joystick routing.
-- Add animated Full, Wide, Compact, and Panoramic frame shapes per profile.
+- Keep and wake the host on the phone when launched from DeX.
+- Add Full, Wide, Compact, and Panoramic frame shapes.
 - Recover Presentation after device unlock.
 - Remember USB-C, HDMI, wireless, and wearable displays across ID changes.
-- Handle pinned disconnects, display-scoped density, and remembered identity.
-- Keep chat, notifications, voice, captions, reporting, accessory keys, and in-app privacy policy.
+- Handle pinned disconnects and display-scoped density.
+- Keep chat, voice, captions, accessory keys, and in-app privacy policy.
 - Live-verified on USB-C display.
 
 ## Privacy Policy

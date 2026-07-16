@@ -4,6 +4,7 @@ import ai.openclaw.app.ui.OpenClawTheme
 import ai.openclaw.app.ui.RootScreen
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -93,6 +94,8 @@ class MainActivity : ComponentActivity() {
             requestWindowFeature(Window.FEATURE_NO_TITLE)
         }
         super.onCreate(savedInstanceState)
+        if (relaunchHudHostOnDefaultDisplayIfNeeded()) return
+        wakeDefaultDisplayForExternalHudInputIfNeeded()
         handleGatewaySetupIntent(intent)
         handleAssistantIntent(intent)
         handlePlayReviewDemoIntent(intent)
@@ -648,6 +651,45 @@ class MainActivity : ComponentActivity() {
                 DeviceProductInfo.CONNECTION_TO_SINK_BUILT_IN
         } == true
 
+    private fun relaunchHudHostOnDefaultDisplayIfNeeded(): Boolean {
+        val attempted = intent.getBooleanExtra(EXTRA_HUD_HOST_RELAUNCH_ATTEMPTED, false)
+        if (!shouldRelaunchHudHostOnDefaultDisplay(BuildConfig.OPENCLAW_DEFAULT_HUD, isOnExternalDisplay(), attempted)) {
+            return false
+        }
+
+        val relaunchIntent =
+            Intent(intent).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                putExtra(EXTRA_HUD_HOST_RELAUNCH_ATTEMPTED, true)
+            }
+        val options =
+            ActivityOptions
+                .makeBasic()
+                .setLaunchDisplayId(Display.DEFAULT_DISPLAY)
+                .toBundle()
+        return runCatching {
+            startActivity(relaunchIntent, options)
+            Log.i(TAG, "Relaunching HUD host on display ${Display.DEFAULT_DISPLAY} for external input routing")
+            finish()
+            true
+        }.getOrElse { error ->
+            Log.w(TAG, "Failed to relaunch HUD host on the default display", error)
+            false
+        }
+    }
+
+    private fun wakeDefaultDisplayForExternalHudInputIfNeeded() {
+        if (
+            !BuildConfig.OPENCLAW_DEFAULT_HUD ||
+            !intent.getBooleanExtra(EXTRA_HUD_HOST_RELAUNCH_ATTEMPTED, false) ||
+            display?.displayId != Display.DEFAULT_DISPLAY
+        ) {
+            return
+        }
+        setTurnScreenOn(true)
+        Log.i(TAG, "Waking display ${Display.DEFAULT_DISPLAY} for external HUD input routing")
+    }
+
     @Suppress("DEPRECATION")
     private fun applyPhoneSystemBars() {
         if (!BuildConfig.OPENCLAW_DEFAULT_HUD) return
@@ -671,5 +713,7 @@ class MainActivity : ComponentActivity() {
         private const val ASUS_VENDOR_ID = 0x0b05
         private const val AIRVISION_M1_PRODUCT_ID = 0x1b3c
         private const val PRESENTATION_STABILITY_INTERVAL_MS = 10_000L
+        private const val EXTRA_HUD_HOST_RELAUNCH_ATTEMPTED =
+            "ai.openclaw.app.extra.HUD_HOST_RELAUNCH_ATTEMPTED"
     }
 }
