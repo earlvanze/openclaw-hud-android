@@ -345,7 +345,7 @@ async function verifyListing(listingDir, language) {
     "USB-C",
     "wireless",
     "Samsung DeX",
-    "Galaxy Fold 7",
+    "foldable Android phones",
     "AirVision M1",
     "HID report-path summaries",
     "per-feature firmware-apply readiness",
@@ -475,7 +475,7 @@ async function verifyReadmeAirVisionParity() {
   const readme = await readFile(readmePath, "utf8");
   requireIncludes("README AirVision positioning", readme, [
     "Android Presentation APIs",
-    "Samsung Galaxy Fold 7",
+    "foldable Android phone",
     "Windows AirVision feature",
   ]);
   requireIncludes("README Windows AirVision feature matrix", readme, [

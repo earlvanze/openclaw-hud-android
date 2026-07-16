@@ -12,8 +12,8 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 ## Signed Bundle
 
 - AAB: `build/release-bundles/openclaw-2026.7.15-hud-release.aab`
-- SHA-256: `fd3443d894538cb5c00a40bf36ae69ed1e1435b2253335db342da524169b1989`
-- Version: 2026.7.15 (2026071505)
+- SHA-256: `dee4fd12f834a5bee0fa6e6b3801de5894b12fb4d087858beaaf7f2a15426c7d`
+- Version: 2026.7.15 (2026071506)
 
 ## Remaining Console Blockers
 
@@ -34,7 +34,7 @@ Full description:
 
 OpenClaw HUD is a low-distraction assistant companion for Android devices connected to external or wearable displays.
 
-The app uses Android Presentation mode and automatically targets a compatible USB-C, HDMI, wireless, or wearable display. It has been tested with Samsung DeX, Galaxy Fold 7, and AirVision M1. Glanceable green text on black keeps status, chat, notifications, captions, microphone state, and speaker state readable without filling the display with a full desktop interface.
+The app uses Android Presentation mode and automatically targets a compatible USB-C, HDMI, wireless, or wearable display. It has been tested with Samsung DeX, foldable Android phones, and AirVision M1. Glanceable green text on black keeps status, chat, notifications, captions, microphone state, and speaker state readable without filling the display with a full desktop interface.
 
 Key features:
 - Automatic Android Presentation routing with first, last, largest, and optional AirVision-preferred display targets
@@ -60,13 +60,12 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD update:
-- Remember USB-C, HDMI, wireless, or wearable displays across display-ID changes.
-- Wait when a pinned display disconnects instead of moving the HUD.
-- Recover from failed Presentation starts and stale callbacks.
-- Use display-scoped density and resources.
-- Back up remembered display identity in diagnostics.
+- Ignore inactive built-in panels on foldables; fix Presentation theme-context crashes.
+- Remember USB-C, wireless, or wearable displays across display-ID changes.
+- Wait when a pinned display disconnects; use display-scoped density; back up remembered display identity.
 - Automatic Presentation routing and generic accessory-key controls.
 - Chat, notifications, voice, captions, reporting, and In-app privacy policy.
+- Live-verified on a connected USB-C display.
 
 ## Privacy Policy
 

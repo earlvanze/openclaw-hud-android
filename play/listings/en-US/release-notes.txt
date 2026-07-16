@@ -1,11 +1,7 @@
 OpenClaw HUD update:
-- Ignore inactive built-in panels when routing HUD presentations on foldable hosts.
-- Fix a theme-context crash when Compose renders inside an external-display Presentation.
-- Live-verify stable HUD presentation on a connected USB-C display.
-- Remember USB-C, HDMI, wireless, or wearable displays across display-ID changes.
-- Wait when a pinned display disconnects instead of moving the HUD.
-- Recover from failed Presentation starts and stale callbacks.
-- Use display-scoped density and resources.
-- Back up remembered display identity in diagnostics.
+- Ignore inactive built-in panels on foldables; fix Presentation theme-context crashes.
+- Remember USB-C, wireless, or wearable displays across display-ID changes.
+- Wait when a pinned display disconnects; use display-scoped density; back up remembered display identity.
 - Automatic Presentation routing and generic accessory-key controls.
 - Chat, notifications, voice, captions, reporting, and In-app privacy policy.
+- Live-verified on a connected USB-C display.

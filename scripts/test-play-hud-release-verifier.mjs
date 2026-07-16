@@ -51,7 +51,7 @@ const validListingFiles = {
   "title.txt": "OpenClaw HUD",
   "short-description.txt": "Minimal assistant HUD for Android external and wearable displays.",
   "full-description.txt": [
-    "OpenClaw HUD uses Android Presentation with USB-C and wireless displays, including Samsung DeX on Galaxy Fold 7 and AirVision M1.",
+    "OpenClaw HUD uses Android Presentation with USB-C and wireless displays, including Samsung DeX on foldable Android phones and AirVision M1.",
     "Remembered-display pinning survives Android display-ID changes.",
     "It includes HID report-path summaries, per-feature firmware-apply readiness, desired firmware-sync state, and protocol-capture targets.",
   ].join("\n"),
@@ -65,7 +65,7 @@ const validListingFiles = {
 };
 
 const validReadme = [
-  "OpenClaw HUD uses Android Presentation APIs and has been live-tested with a Samsung Galaxy Fold 7.",
+  "OpenClaw HUD uses Android Presentation APIs and has been live-tested with a foldable Android phone.",
   "",
   "The single-tap, double-tap, swipe, M1 brightness-key, and M1 media/tap-key actions are configurable.",
   "Defaults are tuned for walking HUD use: single-tap clears the current notification, double-tap toggles mic, vertical swipe scrolls chat, and M1 brightness-key events can scroll chat.",
