@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.16.4-hud-release.aab`
-- SHA-256: `8fa721d46a4f09932a25111c1ea4efa0e64a58e18267ab0e2d5476fd3499734e`
-- Version: 2026.7.16.4 (2026071604)
+- AAB: `build/release-bundles/openclaw-2026.7.16.5-hud-release.aab`
+- SHA-256: `70bc4c0a0ba8c2919d970456455fc9ce99e22683295f3d4adb01e706c612186c`
+- Version: 2026.7.16.5 (2026071605)
 
 ## Remaining Console Blockers
 
@@ -48,7 +48,7 @@ Key features:
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - External-display profiles for view mode, animated Full/Wide/Compact/Panoramic frame shapes, custom labels, JSON backup/import, placement, main-screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, gesture/hotkey behavior, profile reset, and low-overhead preferences
-- Generic external accessory keys plus media-button mic control while the HUD is focused
+- Capability-driven input for external touchscreens, touchpads, mice, styli, trackballs, wheels, rotary controls, DPAD/Page keys, gamepads, joystick/hat axes, and media-button mic control while the HUD is focused
 - Optional speaker routing, IPD calibration, Eye Care, 3D Mode, USB diagnostics, and Windows handoff tools for AirVision M1
 - AirVision Windows app handoff export for applying saved Android profile values and reviewing active HUD runtime scale/caption capacity, all-profile runtime summaries, runtime metadata freshness, HUD controls, 18-feature companion parity states, Cyber-observed ASUS AirVision 1.0.7.1 settings-key evidence, Windows-only spatial/mirror capability status, and companion preferences during ASUS AirVision sessions on Cyber or another Windows host
 - AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
@@ -60,13 +60,11 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD update:
-- Route M1 tap keys through configured single/double-tap actions.
-- Translate the M1 swipe axis into HUD chat scrolling.
-- Keep external touch and joystick routing on the HUD display.
-- Keep and wake the phone host after DeX launch.
-- Add Full, Wide, Compact, and Panoramic frame shapes.
-- Recover Presentation after device unlock.
-- Remember external displays across Android ID changes.
+- Route external touchscreens, touchpads, mice, styli, and trackballs to the HUD.
+- Scroll with wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.
+- Keep M1 tap and swipe support through the same capability-driven input path.
+- Configure gestures and accessory keys under External HUD Input.
+- Keep Presentation recovery, display pinning, and frame-shape morphing.
 - Keep the in-app privacy policy.
 
 ## Privacy Policy

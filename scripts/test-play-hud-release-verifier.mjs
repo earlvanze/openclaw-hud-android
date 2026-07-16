@@ -222,6 +222,26 @@ async function main() {
       );
     }
 
+    await writeFile(
+      readmePath,
+      validReadme
+        .replace("single-tap clears the current", "single-tap clears the\ncurrent")
+        .replace("External touchscreens, touchpads", "External touchscreens,\ntouchpads")
+        .replace("without making ASUS identity", "without making ASUS\nidentity"),
+    );
+    const wrappedReadmePassing = runVerifier(gradlePath, localePath, null, readmePath, settingsSheetPath);
+    if (wrappedReadmePassing.status !== 0) {
+      throw new Error(
+        [
+          "Expected verifier to normalize README line wrapping.",
+          `status=${wrappedReadmePassing.status}`,
+          `stderr=${wrappedReadmePassing.stderr.trim()}`,
+          `stdout=${wrappedReadmePassing.stdout.trim()}`,
+        ].join("\n"),
+      );
+    }
+    await writeFile(readmePath, validReadme);
+
     await writeListing(listingPath);
     const listingPassing = runListingVerifier(gradlePath, localePath, listingPath, readmePath, settingsSheetPath);
     if (listingPassing.status !== 0) {

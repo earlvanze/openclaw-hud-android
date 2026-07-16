@@ -476,7 +476,7 @@ async function verifyRuntimeLocaleBundleConfig() {
 }
 
 async function verifyReadmeAirVisionParity() {
-  const readme = await readFile(readmePath, "utf8");
+  const readme = (await readFile(readmePath, "utf8")).replace(/\s+/gu, " ");
   requireIncludes("README AirVision positioning", readme, [
     "Android Presentation APIs",
     "foldable Android phone",

@@ -165,9 +165,10 @@ path. Absolute joystick, hat, and wearable touch-strip axes are normalized to
 their reported Android motion ranges before scrolling chat. M1 accessory tap
 keys and `AXIS_GENERIC_1` remain supported without making ASUS identity a
 requirement. Defaults are tuned for walking HUD use: single-tap clears the
-current notification, double-tap toggles mic, vertical swipe scrolls chat and accessory input does too, and
-brightness-key events can scroll chat, step Android HUD brightness, or step
-virtual distance while the HUD is focused. Brightness and distance key changes
+current notification, double-tap toggles mic, and vertical swipe scrolls chat.
+Accessory input does the same, while brightness-key events can scroll chat,
+step Android HUD brightness, or step virtual distance while the HUD is focused.
+Brightness and distance key changes
 show a temporary green HUD text confirmation.
 
 AirVision M1 companion settings live in Settings -> AirVision M1:
