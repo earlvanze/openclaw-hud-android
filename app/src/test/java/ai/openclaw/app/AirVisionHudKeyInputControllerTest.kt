@@ -7,6 +7,67 @@ import org.junit.Test
 
 class AirVisionHudKeyInputControllerTest {
     @Test
+    fun accessoryDpadBrowsesNotifications() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.BrowseNotifications(-1),
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_DPAD_LEFT,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.BrowseNotifications(1),
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BUTTON_R1,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_100L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(),
+            ),
+        )
+    }
+
+    @Test
+    fun notificationBrowseKeysRequireAccessoryAndEnabledControl() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(consume = false),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_DPAD_RIGHT,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isHudAccessoryEvent = false,
+                controls = AirVisionHudControls(),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(consume = false),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_DPAD_RIGHT,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_100L,
+                isHudAccessoryEvent = true,
+                controls =
+                    AirVisionHudControls(
+                        horizontalSwipeAction = AirVisionHudHorizontalSwipeAction.None,
+                    ),
+            ),
+        )
+    }
+
+    @Test
     fun brightnessKeysDefaultToScrollChatAndConsumeUpEvents() {
         val controller = AirVisionHudKeyInputController()
 

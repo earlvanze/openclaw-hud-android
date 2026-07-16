@@ -76,6 +76,8 @@ class HudNotificationFormatterTest {
         assertEquals("two", adjacentHudNotification(lines, "one", HudHorizontalSwipeDirection.Left)?.key)
         assertEquals("three", adjacentHudNotification(lines, "one", HudHorizontalSwipeDirection.Right)?.key)
         assertEquals("one", adjacentHudNotification(lines, "three", HudHorizontalSwipeDirection.Left)?.key)
+        assertEquals("three", adjacentHudNotification(lines, "one", offset = -1)?.key)
+        assertEquals("two", adjacentHudNotification(lines, "one", offset = 1)?.key)
         assertNull(adjacentHudNotification(emptyList(), "one", HudHorizontalSwipeDirection.Left))
     }
 

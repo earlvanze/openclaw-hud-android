@@ -75,6 +75,10 @@ Current local status:
   Presentation display with external touch classification, an external
   keyboard/DPAD/joystick accessory path, and the v1608 Demo Mode HUD rendered
   on the M1 while the Fold continued using a separate app.
+- Live Fold/M1 validation on 2026-07-17 installed v2026071700 in place without
+  clearing app state, retained notification-listener access, and instantiated
+  the 1920 x 1080 HUD Presentation window on display 8. The M1 panel slept
+  before capture, so the resulting black screenshot is not visual-render proof.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, release notes character limits, and local Play
   submission packet. It refuses stale local artifacts when HUD source/build

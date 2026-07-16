@@ -38,8 +38,8 @@ Current live target:
 - [x] Remembered-display routing for USB-C, HDMI, wireless, and wearable
   targets that survives Android display-ID changes and waits when the pinned
   display is disconnected
-- [x] Minimal HUD gestures: single-tap dismisses clearable notifications,
-  double-tap toggles mic, vertical swipe scrolls chat, and horizontal swipe browses notifications
+- [x] Minimal HUD controls: single-tap opens notifications, double-tap toggles mic,
+  vertical swipe scrolls chat, and horizontal swipe or DPAD/gamepad controls browse notifications
 - [x] HUD input: Enter sends, Shift+Enter inserts a newline
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
@@ -169,7 +169,8 @@ keys and `AXIS_GENERIC_1` remain supported without making ASUS identity a
 requirement. Defaults are tuned for walking HUD use: single-tap opens the
 current notification on the phone, double-tap toggles mic, vertical swipe
 scrolls chat, and horizontal swipe browses ranked navigation and message
-notifications.
+notifications. External DPAD left/right and gamepad L1/R1 browse the same
+notification list; DPAD up/down and Page Up/Down scroll the transcript.
 Accessory input does the same, while brightness-key events can scroll chat,
 step Android HUD brightness, or step virtual distance while the HUD is focused.
 Brightness and distance key changes

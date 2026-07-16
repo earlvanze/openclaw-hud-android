@@ -677,6 +677,10 @@ class MainActivity : ComponentActivity() {
                 viewModel.adjustAirVisionDistanceCm(command.deltaCm)
                 Log.d(TAG, "HUD brightness key adjusted distance keyCode=${event?.keyCode} deltaCm=${command.deltaCm}")
             }
+            is AirVisionHudKeyCommand.BrowseNotifications -> {
+                viewModel.requestHudNotificationBrowse(command.offset)
+                Log.d(TAG, "HUD $source key browsed notifications keyCode=${event?.keyCode} offset=${command.offset}")
+            }
             AirVisionHudKeyCommand.ToggleMic -> {
                 toggleMicFromHudInput()
                 Log.d(TAG, "HUD $source double-tap toggled mic enabled=${viewModel.micEnabled.value}")

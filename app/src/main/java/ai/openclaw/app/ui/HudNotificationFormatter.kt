@@ -56,10 +56,20 @@ internal fun adjacentHudNotification(
     notifications: List<HudNotificationLine>,
     currentKey: String?,
     direction: HudHorizontalSwipeDirection,
+): HudNotificationLine? =
+    adjacentHudNotification(
+        notifications = notifications,
+        currentKey = currentKey,
+        offset = if (direction == HudHorizontalSwipeDirection.Left) 1 else -1,
+    )
+
+internal fun adjacentHudNotification(
+    notifications: List<HudNotificationLine>,
+    currentKey: String?,
+    offset: Int,
 ): HudNotificationLine? {
     if (notifications.isEmpty()) return null
     val currentIndex = notifications.indexOfFirst { it.key == currentKey }.takeIf { it >= 0 } ?: 0
-    val offset = if (direction == HudHorizontalSwipeDirection.Left) 1 else -1
     val nextIndex = (currentIndex + offset).mod(notifications.size)
     return notifications[nextIndex]
 }

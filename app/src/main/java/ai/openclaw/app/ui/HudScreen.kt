@@ -172,6 +172,25 @@ fun HudScreen(viewModel: MainViewModel) {
             selectedNotificationKey = notificationKeys.firstOrNull()
         }
     }
+    LaunchedEffect(viewModel, notificationKeys) {
+        viewModel.hudNotificationBrowseRequests.collect { offset ->
+            val next =
+                adjacentHudNotification(
+                    notifications = notificationLines,
+                    currentKey = selectedNotificationKey,
+                    offset = offset,
+                )
+            when {
+                next == null -> viewModel.showHudTransientMessage("No notifications")
+                notificationLines.size == 1 -> viewModel.showHudTransientMessage("1 notification")
+                else -> {
+                    selectedNotificationKey = next.key
+                    val position = notificationLines.indexOfFirst { it.key == next.key } + 1
+                    viewModel.showHudTransientMessage("${next.source} $position/${notificationLines.size}")
+                }
+            }
+        }
+    }
     val notificationLine =
         notificationLines.firstOrNull { it.key == selectedNotificationKey }
             ?: notificationLines.firstOrNull()
