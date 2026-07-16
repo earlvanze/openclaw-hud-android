@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.15-hud-release.aab`
-- SHA-256: `dee4fd12f834a5bee0fa6e6b3801de5894b12fb4d087858beaaf7f2a15426c7d`
-- Version: 2026.7.15 (2026071506)
+- AAB: `build/release-bundles/openclaw-2026.7.16-hud-release.aab`
+- SHA-256: `187827e624bc23fa64a22c1b9d164fe3cb3f74facce0beef5683f04de40ffae5`
+- Version: 2026.7.16 (2026071600)
 
 ## Remaining Console Blockers
 
@@ -60,10 +60,11 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD update:
-- Ignore inactive built-in panels on foldables; fix Presentation theme-context crashes.
+- Fix touch gestures and external touchscreen routing.
+- Ignore inactive built-in panels; fix Presentation context crashes.
 - Remember USB-C, wireless, or wearable displays across display-ID changes.
-- Wait when a pinned display disconnects; use display-scoped density; back up remembered display identity.
-- Automatic Presentation routing and generic accessory-key controls.
+- Handle pinned display disconnects; display-scoped density; remembered display identity.
+- Automatic Presentation routing; generic accessory-key controls.
 - Chat, notifications, voice, captions, reporting, and In-app privacy policy.
 - Live-verified on a connected USB-C display.
 
