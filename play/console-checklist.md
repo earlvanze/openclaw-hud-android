@@ -80,7 +80,8 @@ Current local status:
   Play API request once that account is authenticated locally.
 - Browser staging verified the separate `ai.openclaw.app.hud` app, internal
   tester list, reviewer Demo Mode instructions, app-content forms, listing,
-  contact details, graphics, screenshots, and signed AAB upload on 2026-07-15.
+  contact details, graphics, screenshots, and replacement signed AAB version
+  `2026071601` on 2026-07-16. The release remains a saved draft.
   API/OAuth preflight remains a separate authentication and package-access gate.
   `node scripts/report-play-readiness.mjs` summarizes OAuth, service-account,
   local artifact, and dry-run gates together.
