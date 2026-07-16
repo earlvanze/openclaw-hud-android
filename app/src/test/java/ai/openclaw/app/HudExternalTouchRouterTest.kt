@@ -39,6 +39,25 @@ class HudExternalTouchRouterTest {
     }
 
     @Test
+    fun forwardsExternalMouseStylusAndTrackballInput() {
+        listOf(
+            InputDevice.SOURCE_MOUSE,
+            InputDevice.SOURCE_MOUSE_RELATIVE,
+            InputDevice.SOURCE_STYLUS,
+            InputDevice.SOURCE_TRACKBALL,
+        ).forEach { source ->
+            assertTrue(
+                shouldForwardExternalHudTouch(
+                    deviceIsExternal = true,
+                    eventSource = source,
+                    eventDisplayId = 0,
+                    hudDisplayId = 7,
+                ),
+            )
+        }
+    }
+
+    @Test
     fun leavesInternalAndAlreadyRoutedTouchAlone() {
         assertFalse(
             shouldForwardExternalHudTouch(
@@ -53,14 +72,6 @@ class HudExternalTouchRouterTest {
                 deviceIsExternal = true,
                 eventSource = InputDevice.SOURCE_TOUCHSCREEN,
                 eventDisplayId = 7,
-                hudDisplayId = 7,
-            ),
-        )
-        assertFalse(
-            shouldForwardExternalHudTouch(
-                deviceIsExternal = true,
-                eventSource = InputDevice.SOURCE_MOUSE,
-                eventDisplayId = 0,
                 hudDisplayId = 7,
             ),
         )

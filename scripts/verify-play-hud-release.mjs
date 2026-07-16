@@ -347,19 +347,25 @@ async function verifyListing(listingDir, language) {
     "Samsung DeX",
     "foldable Android phones",
     "AirVision M1",
+    "Capability-driven input",
+    "external touchscreens",
+    "rotary controls",
+    "joystick/hat axes",
     "HID report-path summaries",
     "per-feature firmware-apply readiness",
     "desired firmware-sync state",
     "protocol-capture targets",
   ]);
   requireIncludes("Release notes", releaseNotes, [
-    "M1 tap keys",
-    "M1 swipe axis",
-    "external touch and joystick routing",
-    "Full, Wide, Compact, and Panoramic frame shapes",
-    "Recover Presentation after device unlock",
-    "Remember external displays",
-    "Android ID changes",
+    "external touchscreens, touchpads, mice, styli, and trackballs",
+    "wheels, rotary controls, DPAD/Page keys, gamepads",
+    "normalized joystick or hat axes",
+    "M1 tap and swipe support",
+    "capability-driven input path",
+    "External HUD Input",
+    "Presentation recovery",
+    "display pinning",
+    "frame-shape morphing",
   ]);
 
   return {
@@ -565,6 +571,14 @@ async function verifyReadmeAirVisionParity() {
     "double-tap toggles mic",
     "vertical swipe scrolls chat",
     "brightness-key events can scroll chat",
+  ]);
+  requireIncludes("README generic external HUD input", readme, [
+    "External HUD Input",
+    "External touchscreens, touchpads, mice, styli, trackballs",
+    "DPAD/gamepad controls",
+    "rotary encoders",
+    "normalized to",
+    "without making ASUS identity a requirement",
   ]);
   requireIncludes("README captions parity", readme, [
     "Samsung/Android native captioning",

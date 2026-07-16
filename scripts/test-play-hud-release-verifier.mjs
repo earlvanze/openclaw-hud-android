@@ -53,22 +53,23 @@ const validListingFiles = {
   "full-description.txt": [
     "OpenClaw HUD uses Android Presentation with USB-C and wireless displays, including Samsung DeX on foldable Android phones and AirVision M1.",
     "Remembered-display pinning survives Android display-ID changes.",
+    "Capability-driven input supports external touchscreens, rotary controls, and joystick/hat axes.",
     "It includes HID report-path summaries, per-feature firmware-apply readiness, desired firmware-sync state, and protocol-capture targets.",
   ].join("\n"),
   "release-notes.txt": [
-    "Route M1 tap keys through configured single/double-tap actions.",
-    "- Translate the M1 swipe axis into HUD chat scrolling.",
-    "- Keep external touch and joystick routing on the HUD display.",
-    "- Add Full, Wide, Compact, and Panoramic frame shapes.",
-    "- Recover Presentation after device unlock.",
-    "- Remember external displays across Android ID changes.",
+    "Route external touchscreens, touchpads, mice, styli, and trackballs to the HUD.",
+    "- Scroll with wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.",
+    "- Keep M1 tap and swipe support through the same capability-driven input path.",
+    "- Configure gestures and accessory keys under External HUD Input.",
+    "- Keep Presentation recovery, display pinning, and frame-shape morphing.",
   ].join("\n"),
 };
 
 const validReadme = [
   "OpenClaw HUD uses Android Presentation APIs and has been live-tested with a foldable Android phone.",
   "",
-  "The single-tap, double-tap, swipe, M1 brightness-key, and M1 media/tap-key actions are configurable. M1 accessory tap keys use the same HUD tap actions, and its Android AXIS_GENERIC_1 swipe strip is translated into HUD chat scrolling.",
+  "The controls are configurable under External HUD Input. External touchscreens, touchpads, mice, styli, trackballs, DPAD/gamepad controls, rotary encoders, and axes route to the HUD.",
+  "Absolute axes are normalized to their Android ranges. M1 remains supported without making ASUS identity a requirement.",
   "Defaults are tuned for walking HUD use: single-tap clears the current notification, double-tap toggles mic, vertical swipe scrolls chat, and M1 brightness-key events can scroll chat.",
   "",
   "| Windows AirVision feature | Android HUD status |",

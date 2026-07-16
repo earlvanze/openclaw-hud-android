@@ -6,24 +6,33 @@ import kotlin.math.abs
 internal class AirVisionHudMotionInputController(
     private val absoluteAxisTimeoutMs: Long = ABSOLUTE_AXIS_TIMEOUT_MS,
 ) {
+    private data class AxisKey(
+        val deviceId: Int,
+        val axisId: Int,
+    )
+
     private data class AxisState(
         val value: Float,
         val eventTimeMs: Long,
     )
 
-    private val absoluteAxisStateByDevice = mutableMapOf<Int, AxisState>()
+    private val absoluteAxisState = mutableMapOf<AxisKey, AxisState>()
 
     fun absoluteAxisScrollDelta(
         deviceId: Int,
         value: Float,
         eventTimeMs: Long,
+        axisId: Int = 0,
+        rangeSpan: Float? = null,
     ): Float? {
         if (!value.isFinite()) return null
 
-        val previous = absoluteAxisStateByDevice.put(deviceId, AxisState(value, eventTimeMs)) ?: return null
+        val key = AxisKey(deviceId = deviceId, axisId = axisId)
+        val previous = absoluteAxisState.put(key, AxisState(value, eventTimeMs)) ?: return null
         if (eventTimeMs - previous.eventTimeMs !in 0..absoluteAxisTimeoutMs) return null
 
-        val axisDelta = value - previous.value
+        val span = rangeSpan?.takeIf { it.isFinite() && abs(it) > ABSOLUTE_AXIS_DEAD_ZONE }
+        val axisDelta = (value - previous.value) / (span ?: 1f)
         if (abs(axisDelta) < ABSOLUTE_AXIS_DEAD_ZONE) return null
         return -axisDelta * ABSOLUTE_AXIS_SCROLL_RANGE_PX
     }

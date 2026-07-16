@@ -78,6 +78,74 @@ class AirVisionHudKeyInputControllerTest {
     }
 
     @Test
+    fun externalDpadAndPageKeysScrollWithSwipePolicy() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.ScrollChat(160f),
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_DPAD_UP,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.ScrollChat(-480f),
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_PAGE_DOWN,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_100L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(consume = true),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_DPAD_UP,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_200L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(),
+            ),
+        )
+    }
+
+    @Test
+    fun navigationKeysPassThroughForInternalDevicesOrDisabledSwipe() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(consume = false),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_DPAD_DOWN,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isHudAccessoryEvent = false,
+                controls = AirVisionHudControls(),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(consume = false),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_DPAD_DOWN,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_100L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(swipeAction = AirVisionHudSwipeAction.None),
+            ),
+        )
+    }
+
+    @Test
     fun firstMediaTapOnlyArmsDoubleTapEvenNearBoot() {
         val controller = AirVisionHudKeyInputController()
 

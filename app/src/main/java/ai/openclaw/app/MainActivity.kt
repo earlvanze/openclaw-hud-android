@@ -599,15 +599,12 @@ class MainActivity : ComponentActivity() {
         val scrollDelta =
             when (event.actionMasked) {
                 MotionEvent.ACTION_MOVE ->
-                    hudMotionInputController.absoluteAxisScrollDelta(
-                        deviceId = event.deviceId,
-                        value = event.getAxisValue(MotionEvent.AXIS_GENERIC_1),
-                        eventTimeMs = event.eventTime.takeIf { it > 0L } ?: SystemClock.uptimeMillis(),
-                    )
+                    absoluteHudScrollDelta(event)
                 MotionEvent.ACTION_SCROLL -> {
                     val relativeValue =
                         listOf(
                             event.getAxisValue(MotionEvent.AXIS_VSCROLL),
+                            event.getAxisValue(MotionEvent.AXIS_SCROLL),
                             event.getAxisValue(MotionEvent.AXIS_HSCROLL),
                             event.getAxisValue(MotionEvent.AXIS_GENERIC_1),
                         ).firstOrNull { kotlin.math.abs(it) > 0.001f } ?: 0f
@@ -623,6 +620,29 @@ class MainActivity : ComponentActivity() {
                 "source=0x${event.source.toString(16)}",
         )
         return true
+    }
+
+    private fun absoluteHudScrollDelta(event: MotionEvent): Float? {
+        val eventTimeMs = event.eventTime.takeIf { it > 0L } ?: SystemClock.uptimeMillis()
+        for (axisId in HUD_ABSOLUTE_SCROLL_AXES) {
+            val value = event.getAxisValue(axisId)
+            val motionRange =
+                event.device?.getMotionRange(axisId, event.source)
+                    ?: event.device?.getMotionRange(axisId)
+            if (motionRange == null && kotlin.math.abs(value) <= HUD_AXIS_EPSILON) {
+                continue
+            }
+            val delta =
+                hudMotionInputController.absoluteAxisScrollDelta(
+                    deviceId = event.deviceId,
+                    axisId = axisId,
+                    value = value,
+                    rangeSpan = motionRange?.range,
+                    eventTimeMs = eventTimeMs,
+                )
+            if (delta != null) return delta
+        }
+        return null
     }
 
     private fun handleHudMicTap(source: String) {
@@ -776,6 +796,15 @@ class MainActivity : ComponentActivity() {
         private const val TAG = "MainActivity"
         private const val ASUS_VENDOR_ID = 0x0b05
         private const val AIRVISION_M1_PRODUCT_ID = 0x1b3c
+        private const val HUD_AXIS_EPSILON = 0.001f
+        private val HUD_ABSOLUTE_SCROLL_AXES =
+            intArrayOf(
+                MotionEvent.AXIS_GENERIC_1,
+                MotionEvent.AXIS_HAT_Y,
+                MotionEvent.AXIS_Y,
+                MotionEvent.AXIS_RY,
+                MotionEvent.AXIS_RZ,
+            )
         private const val PRESENTATION_STABILITY_INTERVAL_MS = 10_000L
         private const val EXTRA_HUD_HOST_RELAUNCH_ATTEMPTED =
             "ai.openclaw.app.extra.HUD_HOST_RELAUNCH_ATTEMPTED"

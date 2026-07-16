@@ -39,6 +39,22 @@ internal class AirVisionHudKeyInputController(
         isHudAccessoryEvent: Boolean,
         controls: AirVisionHudControls,
     ): AirVisionHudKeyDecision {
+        val navigationScrollDelta = hudNavigationScrollKeyDeltas[keyCode]
+        if (navigationScrollDelta != null && isHudAccessoryEvent) {
+            if (controls.swipeAction != AirVisionHudSwipeAction.ScrollChat) {
+                return AirVisionHudKeyDecision(consume = false)
+            }
+            return AirVisionHudKeyDecision(
+                consume = action == KeyEvent.ACTION_DOWN || action == KeyEvent.ACTION_UP,
+                command =
+                    if (action == KeyEvent.ACTION_DOWN) {
+                        AirVisionHudKeyCommand.ScrollChat(navigationScrollDelta)
+                    } else {
+                        null
+                    },
+            )
+        }
+
         val scrollDelta = hudScrollKeyDeltas[keyCode]
         if (scrollDelta != null) {
             val command =
@@ -137,6 +153,13 @@ internal class AirVisionHudKeyInputController(
                 KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_SCROLL_PIXELS,
                 KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_SCROLL_PIXELS,
             )
+        private val hudNavigationScrollKeyDeltas =
+            mapOf(
+                KeyEvent.KEYCODE_DPAD_UP to HUD_KEY_SCROLL_PIXELS,
+                KeyEvent.KEYCODE_DPAD_DOWN to -HUD_KEY_SCROLL_PIXELS,
+                KeyEvent.KEYCODE_PAGE_UP to HUD_KEY_PAGE_SCROLL_PIXELS,
+                KeyEvent.KEYCODE_PAGE_DOWN to -HUD_KEY_PAGE_SCROLL_PIXELS,
+            )
         private val hudBrightnessKeyDeltas =
             mapOf(
                 KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_BRIGHTNESS_STEP_PERCENT,
@@ -148,6 +171,7 @@ internal class AirVisionHudKeyInputController(
                 KeyEvent.KEYCODE_BRIGHTNESS_UP to HUD_KEY_DISTANCE_STEP_CM,
             )
         private const val HUD_KEY_SCROLL_PIXELS = 160f
+        private const val HUD_KEY_PAGE_SCROLL_PIXELS = 480f
         private const val HUD_KEY_BRIGHTNESS_STEP_PERCENT = 5
         private const val HUD_KEY_DISTANCE_STEP_CM = 5
         private const val HUD_MIC_DOUBLE_TAP_TIMEOUT_MS = 500L

@@ -39,6 +39,56 @@ class AirVisionHudMotionInputControllerTest {
     }
 
     @Test
+    fun tracksAbsoluteAxesIndependentlyAndNormalizesTheirRanges() {
+        val controller = AirVisionHudMotionInputController()
+
+        assertNull(
+            controller.absoluteAxisScrollDelta(
+                deviceId = 22,
+                axisId = 1,
+                value = -1f,
+                rangeSpan = 2f,
+                eventTimeMs = 1_000L,
+            ),
+        )
+        assertNull(
+            controller.absoluteAxisScrollDelta(
+                deviceId = 22,
+                axisId = 15,
+                value = 0f,
+                rangeSpan = 1f,
+                eventTimeMs = 1_000L,
+            ),
+        )
+        assertEquals(
+            -360f,
+            requireNotNull(
+                controller.absoluteAxisScrollDelta(
+                    deviceId = 22,
+                    axisId = 1,
+                    value = 0f,
+                    rangeSpan = 2f,
+                    eventTimeMs = 1_040L,
+                ),
+            ),
+            0.001f,
+        )
+        assertEquals(
+            360f,
+            requireNotNull(
+                controller.absoluteAxisScrollDelta(
+                    deviceId = 22,
+                    axisId = 15,
+                    value = -0.5f,
+                    rangeSpan = 1f,
+                    eventTimeMs = 1_040L,
+                ),
+            ),
+            0.001f,
+        )
+    }
+
+    @Test
     fun recognizesAccessoryTapKeys() {
         assertTrue(isHudAccessoryTapKey(KeyEvent.KEYCODE_ENTER))
         assertTrue(isHudAccessoryTapKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE))

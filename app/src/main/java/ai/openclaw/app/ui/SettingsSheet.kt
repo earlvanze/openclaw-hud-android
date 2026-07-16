@@ -1618,10 +1618,10 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
-                        headlineContent = { Text("Gesture & Hotkey Settings", style = mobileHeadline) },
+                        headlineContent = { Text("External HUD Input", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                "Configures HUD touch gestures and M1 key handling while the HUD is focused.",
+                                "Configures touch surfaces, remotes, gamepads, mice, and accessory keys while the HUD is focused.",
                                 style = mobileCallout,
                             )
                         },
@@ -1661,7 +1661,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     )
                     HorizontalDivider(color = mobileBorder)
                     AirVisionOptionGroup(
-                        title = "M1 Brightness Keys",
+                        title = "Brightness Keys",
                         currentLabel = airVisionHudControls.brightnessKeyAction.label,
                         supportingText = "Controls brightness key handling while the HUD is focused.",
                         options = AirVisionHudKeyAction.entries.toList(),
@@ -1672,9 +1672,9 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     )
                     HorizontalDivider(color = mobileBorder)
                     AirVisionOptionGroup(
-                        title = "M1 Media/Tap Key",
+                        title = "Media / Tap Keys",
                         currentLabel = airVisionHudControls.mediaKeyAction.label,
-                        supportingText = "Controls media-key handling from the M1 touch hardware.",
+                        supportingText = "Controls media and tap-key handling from external HUD accessories.",
                         options = AirVisionHudMediaKeyAction.entries.toList(),
                         selected = airVisionHudControls.mediaKeyAction,
                         optionLabel = { it.label },
@@ -2806,7 +2806,7 @@ private fun airVisionSwipeActionDescription(action: AirVisionHudSwipeAction): St
 
 private fun airVisionBrightnessKeyActionDescription(action: AirVisionHudKeyAction): String =
     when (action) {
-        AirVisionHudKeyAction.None -> "Let Android or M1 firmware handle brightness keys."
+        AirVisionHudKeyAction.None -> "Let Android or accessory firmware handle brightness keys."
         AirVisionHudKeyAction.ScrollChat -> "Use brightness key events as chat scroll controls."
         AirVisionHudKeyAction.AdjustBrightness -> "Use brightness up and down to step Android HUD brightness."
         AirVisionHudKeyAction.AdjustDistance -> "Use brightness up and down to step virtual distance farther or closer."
