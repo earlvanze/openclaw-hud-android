@@ -5,6 +5,35 @@ import org.junit.Test
 
 class AirVisionHudDisplayRouterTest {
     @Test
+    fun `secondary internal panels are not external candidates`() {
+        val route =
+            AirVisionHudDisplayRouter.select(
+                candidates =
+                    listOf(
+                        AirVisionHudDisplayCandidate(
+                            displayId = 1,
+                            name = "Built-in Screen",
+                            widthPx = 1968,
+                            heightPx = 2184,
+                            isPresentation = true,
+                            isInternal = true,
+                        ),
+                        AirVisionHudDisplayCandidate(
+                            displayId = 2,
+                            name = "USB-C display",
+                            widthPx = 1920,
+                            heightPx = 1080,
+                            isPresentation = true,
+                        ),
+                    ),
+                target = AirVisionHudDisplayTarget.Automatic,
+            )
+
+        assertEquals(1, route.candidateCount)
+        assertEquals(2, route.selectedCandidate?.displayId)
+    }
+
+    @Test
     fun choose_automaticUsesLargestPresentationDisplay() {
         val candidates =
             listOf(

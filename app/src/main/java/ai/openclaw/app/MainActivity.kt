@@ -2,12 +2,13 @@ package ai.openclaw.app
 
 import ai.openclaw.app.ui.OpenClawTheme
 import ai.openclaw.app.ui.RootScreen
-import android.annotation.SuppressLint
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.hardware.display.DeviceProductInfo
 import android.hardware.display.DisplayManager
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -406,6 +407,9 @@ class MainActivity : ComponentActivity() {
             widthPx = mode?.physicalWidth ?: 0,
             heightPx = mode?.physicalHeight ?: 0,
             isPresentation = displayId in presentationDisplayIds,
+            isInternal =
+                deviceProductInfo?.connectionToSinkType ==
+                    DeviceProductInfo.CONNECTION_TO_SINK_BUILT_IN,
         )
 
     private fun setupHudMediaSession() {
@@ -569,7 +573,12 @@ class MainActivity : ComponentActivity() {
             (inputDevice.vendorId == ASUS_VENDOR_ID && inputDevice.productId == AIRVISION_M1_PRODUCT_ID)
     }
 
-    private fun isOnExternalDisplay(): Boolean = display?.displayId?.let { it != Display.DEFAULT_DISPLAY } == true
+    private fun isOnExternalDisplay(): Boolean =
+        display?.let { activeDisplay ->
+            activeDisplay.displayId != Display.DEFAULT_DISPLAY &&
+                activeDisplay.deviceProductInfo?.connectionToSinkType !=
+                DeviceProductInfo.CONNECTION_TO_SINK_BUILT_IN
+        } == true
 
     @Suppress("DEPRECATION")
     private fun applyPhoneSystemBars() {

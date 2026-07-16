@@ -3,7 +3,7 @@
 Status: **active HUD prototype**. This repository contains the Android
 companion/HUD app for OpenClaw. It uses Android Presentation APIs with USB-C,
 HDMI, wireless, and wearable external displays; AirVision support is an
-optional device integration. It has been live-tested with a Samsung Galaxy Fold 7
+optional device integration. It has been live-tested with a foldable Android phone
 and ASUS AirVision M1. The app is still pre-release, but the HUD path is
 usable for live testing.
 

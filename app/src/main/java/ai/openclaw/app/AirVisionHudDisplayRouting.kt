@@ -26,6 +26,7 @@ data class AirVisionHudDisplayCandidate(
     val widthPx: Int = 0,
     val heightPx: Int = 0,
     val isPresentation: Boolean = true,
+    val isInternal: Boolean = false,
 ) {
     val areaPx: Long
         get() = widthPx.coerceAtLeast(0).toLong() * heightPx.coerceAtLeast(0).toLong()
@@ -101,7 +102,10 @@ object AirVisionHudDisplayRouter {
         target: AirVisionHudDisplayTarget,
         rememberedDisplay: AirVisionHudDisplayFingerprint? = null,
     ): AirVisionHudDisplayRoute {
-        val externalCandidates = candidates.filter { it.displayId != ANDROID_DEFAULT_DISPLAY_ID }
+        val externalCandidates =
+            candidates.filter { candidate ->
+                candidate.displayId != ANDROID_DEFAULT_DISPLAY_ID && !candidate.isInternal
+            }
         if (externalCandidates.isEmpty()) {
             return AirVisionHudDisplayRoute(
                 target = target,

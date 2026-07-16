@@ -1,6 +1,5 @@
 package ai.openclaw.app.ui
 
-import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -23,10 +22,11 @@ fun OpenClawTheme(content: @Composable () -> Unit) {
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
-            WindowCompat
-                .getInsetsController(window, window.decorView)
-                .isAppearanceLightStatusBars = !isDark
+            view.context.findActivityOrNull()?.window?.let { window ->
+                WindowCompat
+                    .getInsetsController(window, window.decorView)
+                    .isAppearanceLightStatusBars = !isDark
+            }
         }
     }
 
