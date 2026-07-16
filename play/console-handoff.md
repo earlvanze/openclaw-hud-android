@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.16.7-hud-release.aab`
-- SHA-256: `04cf30bbe69c39a46338c550736eb60d917d914716c83a27f1b1125416220f5a`
-- Version: 2026.7.16.7 (2026071607)
+- AAB: `build/release-bundles/openclaw-2026.7.16.8-hud-release.aab`
+- SHA-256: `3d2e52fe5f3b74df237b580abadff64ac6458d52af5ed4b6d801c8633774d678`
+- Version: 2026.7.16.8 (2026071608)
 
 ## Remaining Console Blockers
 
@@ -44,7 +44,7 @@ Key features:
 - OpenClaw gateway pairing and secure local setup storage
 - Compact chat with hardware keyboard send support
 - In-app offensive-response reporting with explicit payload review, direct developer delivery, and receipt confirmation
-- Notification summaries for navigation and assistant context
+- Actionable notification summaries with tap-to-open and swipe browsing
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - External-display profiles for view mode, animated Full/Wide/Compact/Panoramic frame shapes, custom labels, JSON backup/import, placement, main-screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, gesture/hotkey behavior, profile reset, and low-overhead preferences
@@ -60,8 +60,9 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD update:
-- Browse alerts with left/right swipe and separate horizontal/vertical controls.
-- Reuse one host activity; keep Presentation recovery, display pinning, and frame-shape morphing.
+- Tap alerts to open them on the phone; configure dismiss/mic instead.
+- Browse alerts with left/right swipe.
+- Keep Presentation recovery, display pinning, and frame-shape morphing.
 - Route external touchscreens, touchpads, mice, styli, and trackballs.
 - Route wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.
 - Keep M1 tap and swipe support on the capability-driven input path under External HUD Input.
@@ -101,7 +102,7 @@ Capability states:
 
 - HUD presentation and DeX display targeting: Reviewable offline
   Review path: Enable Demo Mode, then open the HUD tab or launch the HUD presentation.
-  Evidence: Fallback screenshots and CI exercise the phone review path; live M1 testing is only needed before claiming display-specific framing on hardware.
+  Evidence: Live validation on 2026-07-16 rendered Demo Mode on a 1920 x 1080, 60 Hz M1 Android Presentation display while the Fold used another app; fallback screenshots and CI also exercise the phone review path.
 - Windows-like profile controls: Reviewable offline
   Review path: Settings > AirVision M1 profile controls, profile backup/import, and Windows App Handoff export.
   Evidence: Saved Android values, per-profile runtime summaries, and export text are generated without raw USB serials.

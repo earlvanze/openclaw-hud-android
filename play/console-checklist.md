@@ -63,14 +63,18 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.16.7-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.16.8-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `04cf30bbe69c39a46338c550736eb60d917d914716c83a27f1b1125416220f5a`
-- Latest HUD bundle version: `2026.7.16.7 (2026071607)`.
+  `3d2e52fe5f3b74df237b580abadff64ac6458d52af5ed4b6d801c8633774d678`
+- Latest HUD bundle version: `2026.7.16.8 (2026071608)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
 - `testHudDebugUnitTest` passes.
+- Live M1 validation on 2026-07-16 exposed a 1920 x 1080, 60 Hz external
+  Presentation display with external touch classification, an external
+  keyboard/DPAD/joystick accessory path, and the v1608 Demo Mode HUD rendered
+  on the M1 while the Fold continued using a separate app.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, release notes character limits, and local Play
   submission packet. It refuses stale local artifacts when HUD source/build
