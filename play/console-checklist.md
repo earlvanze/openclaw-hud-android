@@ -89,9 +89,9 @@ Current local status:
 - Browser staging verified the separate `ai.openclaw.app.hud` app, internal
   tester list, reviewer Demo Mode instructions, app-content forms, listing,
   contact details, graphics, screenshots, and replacement signed AAB version
-  `2026071608` on 2026-07-16; `2026071607` is absent. The release adds
-  tap-to-open notification handling and remains a saved draft; `Next` was not
-  used.
+  `2026071700` on 2026-07-17; `2026071608` is absent. The saved release name is
+  `OpenClaw HUD 2026.7.17.0 hardware browsing`; exact release notes persisted
+  after a full page reload, `Save as draft` is disabled, and `Next` was not used.
   API/OAuth preflight remains a separate authentication and package-access gate.
   `node scripts/report-play-readiness.mjs` summarizes OAuth, service-account,
   local artifact, and dry-run gates together.

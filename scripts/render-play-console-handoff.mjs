@@ -312,7 +312,6 @@ async function render() {
     "- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account earl@earlbnb.com --auth-check` after OAuth login",
     "- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account <allowed-account> --preflight` after the Play Console app exists",
     "- `node scripts/publish-play-internal.mjs --auth gcloud --gcloud-account <allowed-account> --commit` for the first internal draft upload",
-    "",
   ].join("\n")}\n`;
 }
 
