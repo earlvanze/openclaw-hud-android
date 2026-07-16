@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.16.3-hud-release.aab`
-- SHA-256: `2dc77989d239ac7c597253b045c8e4fb3760afad65c0a790ae0604002873f501`
-- Version: 2026.7.16.3 (2026071603)
+- AAB: `build/release-bundles/openclaw-2026.7.16.4-hud-release.aab`
+- SHA-256: `8fa721d46a4f09932a25111c1ea4efa0e64a58e18267ab0e2d5476fd3499734e`
+- Version: 2026.7.16.4 (2026071604)
 
 ## Remaining Console Blockers
 
@@ -60,14 +60,14 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD update:
-- Fix taps, swipes, and external touchscreen/joystick routing.
-- Keep and wake the host on the phone when launched from DeX.
+- Route M1 tap keys through configured single/double-tap actions.
+- Translate the M1 swipe axis into HUD chat scrolling.
+- Keep external touch and joystick routing on the HUD display.
+- Keep and wake the phone host after DeX launch.
 - Add Full, Wide, Compact, and Panoramic frame shapes.
 - Recover Presentation after device unlock.
-- Remember USB-C, HDMI, wireless, and wearable displays across ID changes.
-- Handle pinned disconnects and display-scoped density.
-- Keep chat, voice, captions, accessory keys, and in-app privacy policy.
-- Live-verified on USB-C display.
+- Remember external displays across Android ID changes.
+- Keep the in-app privacy policy.
 
 ## Privacy Policy
 

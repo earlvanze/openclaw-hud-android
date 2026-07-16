@@ -6,3 +6,4 @@ OpenClaw HUD update:
 - Add Full, Wide, Compact, and Panoramic frame shapes.
 - Recover Presentation after device unlock.
 - Remember external displays across Android ID changes.
+- Keep the in-app privacy policy.
