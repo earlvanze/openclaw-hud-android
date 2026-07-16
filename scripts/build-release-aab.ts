@@ -130,8 +130,13 @@ function resolveNextVersion(buildGradleText: string, date: Date): VersionState {
     throw new Error(`Invalid Android versionCode in ${buildGradlePath}`);
   }
 
-  const versionName = formatVersionName(date);
-  const versionCode = resolveNextVersionCode(currentVersionCode, formatVersionCodePrefix(date));
+  const todayPrefix = formatVersionCodePrefix(date);
+  const versionCode = resolveNextVersionCode(currentVersionCode, todayPrefix);
+  const versionSuffix = Number.parseInt(versionCode.toString().slice(todayPrefix.length), 10);
+  if (!Number.isInteger(versionSuffix)) {
+    throw new Error(`Invalid Android version suffix for ${versionCode}`);
+  }
+  const versionName = `${formatVersionName(date)}.${versionSuffix}`;
   return { versionName, versionCode };
 }
 

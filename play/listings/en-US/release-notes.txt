@@ -1,6 +1,7 @@
 OpenClaw HUD update:
-- Browse alerts with left/right swipe and separate horizontal/vertical controls.
-- Reuse one host activity; keep Presentation recovery, display pinning, and frame-shape morphing.
+- Tap alerts to open them on the phone; configure dismiss/mic instead.
+- Browse alerts with left/right swipe.
+- Keep Presentation recovery, display pinning, and frame-shape morphing.
 - Route external touchscreens, touchpads, mice, styli, and trackballs.
 - Route wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.
 - Keep M1 tap and swipe support on the capability-driven input path under External HUD Input.

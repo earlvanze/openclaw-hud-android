@@ -5,13 +5,14 @@ enum class AirVisionHudTouchAction(
     val label: String,
 ) {
     None("none", "None"),
+    OpenNotification("open_notification", "Open notification"),
     DismissNotification("dismiss_notification", "Dismiss notification"),
     ToggleMic("toggle_mic", "Toggle mic"),
     ;
 
     companion object {
         fun fromRawValue(rawValue: String?): AirVisionHudTouchAction =
-            entries.firstOrNull { it.rawValue == rawValue?.trim()?.lowercase() } ?: DismissNotification
+            entries.firstOrNull { it.rawValue == rawValue?.trim()?.lowercase() } ?: OpenNotification
     }
 }
 
@@ -21,6 +22,7 @@ enum class AirVisionHudDoubleTapAction(
 ) {
     None("none", "None"),
     ToggleMic("toggle_mic", "Toggle mic"),
+    OpenNotification("open_notification", "Open notification"),
     DismissNotification("dismiss_notification", "Dismiss notification"),
     ;
 
@@ -89,7 +91,7 @@ enum class AirVisionHudMediaKeyAction(
 }
 
 data class AirVisionHudControls(
-    val singleTapAction: AirVisionHudTouchAction = AirVisionHudTouchAction.DismissNotification,
+    val singleTapAction: AirVisionHudTouchAction = AirVisionHudTouchAction.OpenNotification,
     val doubleTapAction: AirVisionHudDoubleTapAction = AirVisionHudDoubleTapAction.ToggleMic,
     val swipeAction: AirVisionHudSwipeAction = AirVisionHudSwipeAction.ScrollChat,
     val horizontalSwipeAction: AirVisionHudHorizontalSwipeAction =
@@ -100,6 +102,10 @@ data class AirVisionHudControls(
 
 internal sealed interface AirVisionHudTouchCommand {
     data object ToggleMic : AirVisionHudTouchCommand
+
+    data class OpenNotification(
+        val key: String,
+    ) : AirVisionHudTouchCommand
 
     data class DismissNotification(
         val key: String,
@@ -113,6 +119,7 @@ internal fun airVisionHudSingleTapCommand(
 ): AirVisionHudTouchCommand? =
     when (action) {
         AirVisionHudTouchAction.None -> null
+        AirVisionHudTouchAction.OpenNotification -> openNotificationCommand(notificationKey)
         AirVisionHudTouchAction.DismissNotification -> dismissNotificationCommand(notificationKey, notificationClearable)
         AirVisionHudTouchAction.ToggleMic -> AirVisionHudTouchCommand.ToggleMic
     }
@@ -125,7 +132,26 @@ internal fun airVisionHudDoubleTapCommand(
     when (action) {
         AirVisionHudDoubleTapAction.None -> null
         AirVisionHudDoubleTapAction.ToggleMic -> AirVisionHudTouchCommand.ToggleMic
+        AirVisionHudDoubleTapAction.OpenNotification -> openNotificationCommand(notificationKey)
         AirVisionHudDoubleTapAction.DismissNotification -> dismissNotificationCommand(notificationKey, notificationClearable)
+    }
+
+private fun openNotificationCommand(notificationKey: String?): AirVisionHudTouchCommand? =
+    notificationKey
+        ?.takeIf { it.isNotBlank() }
+        ?.let { AirVisionHudTouchCommand.OpenNotification(it) }
+
+internal fun hudNotificationOpenResultMessage(
+    ok: Boolean,
+    code: String?,
+): String =
+    when {
+        ok -> "Opened on phone"
+        code == "NOTIFICATIONS_DISABLED" -> "Enable notification access"
+        code == "NOTIFICATIONS_UNAVAILABLE" -> "Notification access reconnecting"
+        code == "NOTIFICATION_NOT_FOUND" -> "Notification no longer available"
+        code == "ACTION_UNAVAILABLE" -> "Notification cannot be opened"
+        else -> "Could not open notification"
     }
 
 private fun dismissNotificationCommand(

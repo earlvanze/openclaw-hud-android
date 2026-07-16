@@ -567,7 +567,7 @@ async function verifyReadmeAirVisionParity() {
     "fit/clarity/text-size guidance",
   ]);
   requireIncludes("README HUD walking defaults", readme, [
-    "single-tap clears the current",
+    "single-tap opens the current",
     "double-tap toggles mic",
     "vertical swipe scrolls chat",
     "brightness-key events can scroll chat",

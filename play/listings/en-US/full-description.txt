@@ -10,7 +10,7 @@ Key features:
 - OpenClaw gateway pairing and secure local setup storage
 - Compact chat with hardware keyboard send support
 - In-app offensive-response reporting with explicit payload review, direct developer delivery, and receipt confirmation
-- Notification summaries for navigation and assistant context
+- Actionable notification summaries with tap-to-open and swipe browsing
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - External-display profiles for view mode, animated Full/Wide/Compact/Panoramic frame shapes, custom labels, JSON backup/import, placement, main-screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, gesture/hotkey behavior, profile reset, and low-overhead preferences

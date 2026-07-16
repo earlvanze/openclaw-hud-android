@@ -33,6 +33,7 @@ import ai.openclaw.app.node.LocationHandler
 import ai.openclaw.app.node.MotionHandler
 import ai.openclaw.app.node.NotificationActionKind
 import ai.openclaw.app.node.NotificationActionRequest
+import ai.openclaw.app.node.NotificationActionResult
 import ai.openclaw.app.node.NotificationsHandler
 import ai.openclaw.app.node.PhotosHandler
 import ai.openclaw.app.node.Quad
@@ -905,6 +906,20 @@ class NodeRuntime(
             refreshHudNotifications()
         }
     }
+
+    fun openNotification(key: String): NotificationActionResult =
+        if (key.isBlank()) {
+            NotificationActionResult(
+                ok = false,
+                code = "INVALID_REQUEST",
+                message = "INVALID_REQUEST: notification key required",
+            )
+        } else {
+            DeviceNotificationListenerService.executeAction(
+                appContext,
+                NotificationActionRequest(key = key, kind = NotificationActionKind.Open),
+            )
+        }
 
     fun setVoiceScreenActive(active: Boolean) {
         if (!active) {

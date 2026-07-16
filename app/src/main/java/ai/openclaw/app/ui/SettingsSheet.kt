@@ -2799,6 +2799,7 @@ private fun airVisionHudDisplayTargetDescription(
 private fun airVisionTouchActionDescription(action: AirVisionHudTouchAction): String =
     when (action) {
         AirVisionHudTouchAction.None -> "Let the tap pass without a HUD action."
+        AirVisionHudTouchAction.OpenNotification -> "Open the visible notification on the phone."
         AirVisionHudTouchAction.DismissNotification -> "Clear the visible notification when it can be dismissed."
         AirVisionHudTouchAction.ToggleMic -> "Toggle microphone capture on each tap."
     }
@@ -2807,6 +2808,7 @@ private fun airVisionDoubleTapActionDescription(action: AirVisionHudDoubleTapAct
     when (action) {
         AirVisionHudDoubleTapAction.None -> "Let double taps pass without a HUD action."
         AirVisionHudDoubleTapAction.ToggleMic -> "Toggle microphone capture on double tap."
+        AirVisionHudDoubleTapAction.OpenNotification -> "Open the visible notification on the phone."
         AirVisionHudDoubleTapAction.DismissNotification -> "Clear the visible notification when it can be dismissed."
     }
 

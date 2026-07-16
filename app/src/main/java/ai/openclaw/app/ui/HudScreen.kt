@@ -16,6 +16,7 @@ import ai.openclaw.app.TranslationCaptionMode
 import ai.openclaw.app.airVisionHudDoubleTapCommand
 import ai.openclaw.app.airVisionHudSingleTapCommand
 import ai.openclaw.app.chat.ChatMessage
+import ai.openclaw.app.hudNotificationOpenResultMessage
 import ai.openclaw.app.openNativeCaptionSettings
 import ai.openclaw.app.voice.VoiceConversationEntry
 import ai.openclaw.app.voice.VoiceConversationRole
@@ -300,6 +301,7 @@ fun HudScreen(viewModel: MainViewModel) {
                         performHudSingleTapAction(
                             action = airVisionHudControls.singleTapAction,
                             notificationLine = notificationLine,
+                            demoMode = airVisionDemoModeEnabled,
                             viewModel = viewModel,
                         )
                     },
@@ -307,6 +309,7 @@ fun HudScreen(viewModel: MainViewModel) {
                         performHudDoubleTapAction(
                             action = airVisionHudControls.doubleTapAction,
                             notificationLine = notificationLine,
+                            demoMode = airVisionDemoModeEnabled,
                             viewModel = viewModel,
                         )
                     },
@@ -430,11 +433,15 @@ fun HudScreen(viewModel: MainViewModel) {
                         ),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                notificationLine?.let { line ->
-                    HudNotificationBlock(
-                        line = line,
-                        onDismiss = { viewModel.dismissNotification(line.key) },
-                    )
+                if (transientHudText != null) {
+                    HudTransientText(message = transientHudText.orEmpty())
+                } else {
+                    notificationLine?.let { line ->
+                        HudNotificationBlock(
+                            line = line,
+                            onDismiss = { viewModel.dismissNotification(line.key) },
+                        )
+                    }
                 }
 
                 prompt.trim().takeIf { it.isNotEmpty() && !airVisionDemoModeEnabled }?.let { draft ->
@@ -538,26 +545,15 @@ fun HudScreen(viewModel: MainViewModel) {
                         .zIndex(2f),
             )
         }
-        transientHudText?.let { message ->
-            HudTransientTextOverlay(
-                message = message,
-                modifier =
-                    Modifier
-                        .align(Alignment.TopCenter)
-                        .zIndex(2f),
-            )
-        }
     }
 }
 
 @Composable
-private fun HudTransientTextOverlay(
+private fun HudTransientText(
     message: String,
-    modifier: Modifier = Modifier,
 ) {
     Text(
         message,
-        modifier = modifier.padding(top = 28.dp),
         style = hudPrimaryTextStyle.copy(fontWeight = FontWeight.SemiBold),
         color = hudAccent,
         maxLines = 1,
@@ -699,6 +695,7 @@ private fun hudLayoutSpec(placement: AirVisionHudPlacement): HudLayoutSpec =
 private fun performHudSingleTapAction(
     action: AirVisionHudTouchAction,
     notificationLine: HudNotificationLine?,
+    demoMode: Boolean,
     viewModel: MainViewModel,
 ) {
     val command =
@@ -707,16 +704,25 @@ private fun performHudSingleTapAction(
             notificationKey = notificationLine?.key,
             notificationClearable = notificationLine?.isClearable == true,
         )
-    if (command == null && action == AirVisionHudTouchAction.DismissNotification) {
-        viewModel.showHudTransientMessage("No notification to dismiss")
-    } else {
-        performHudTouchCommand(command, viewModel = viewModel)
+    when {
+        command == null && action == AirVisionHudTouchAction.OpenNotification ->
+            viewModel.showHudTransientMessage("No notification to open")
+        command == null && action == AirVisionHudTouchAction.DismissNotification ->
+            viewModel.showHudTransientMessage("No notification to dismiss")
+        else ->
+            performHudTouchCommand(
+                command = command,
+                notificationSource = notificationLine?.source,
+                demoMode = demoMode,
+                viewModel = viewModel,
+            )
     }
 }
 
 private fun performHudDoubleTapAction(
     action: AirVisionHudDoubleTapAction,
     notificationLine: HudNotificationLine?,
+    demoMode: Boolean,
     viewModel: MainViewModel,
 ) {
     val command =
@@ -725,15 +731,25 @@ private fun performHudDoubleTapAction(
             notificationKey = notificationLine?.key,
             notificationClearable = notificationLine?.isClearable == true,
         )
-    if (command == null && action == AirVisionHudDoubleTapAction.DismissNotification) {
-        viewModel.showHudTransientMessage("No notification to dismiss")
-    } else {
-        performHudTouchCommand(command, viewModel = viewModel)
+    when {
+        command == null && action == AirVisionHudDoubleTapAction.OpenNotification ->
+            viewModel.showHudTransientMessage("No notification to open")
+        command == null && action == AirVisionHudDoubleTapAction.DismissNotification ->
+            viewModel.showHudTransientMessage("No notification to dismiss")
+        else ->
+            performHudTouchCommand(
+                command = command,
+                notificationSource = notificationLine?.source,
+                demoMode = demoMode,
+                viewModel = viewModel,
+            )
     }
 }
 
 private fun performHudTouchCommand(
     command: AirVisionHudTouchCommand?,
+    notificationSource: String?,
+    demoMode: Boolean,
     viewModel: MainViewModel,
 ) {
     when (command) {
@@ -741,6 +757,16 @@ private fun performHudTouchCommand(
         AirVisionHudTouchCommand.ToggleMic -> {
             viewModel.toggleMicEnabled()
             viewModel.showHudTransientMessage("Mic toggled")
+        }
+        is AirVisionHudTouchCommand.OpenNotification -> {
+            if (demoMode) {
+                viewModel.showHudTransientMessage("Demo: would open ${notificationSource ?: "notification"} on phone")
+            } else {
+                val result = viewModel.openNotification(command.key)
+                viewModel.showHudTransientMessage(
+                    hudNotificationOpenResultMessage(ok = result.ok, code = result.code),
+                )
+            }
         }
         is AirVisionHudTouchCommand.DismissNotification -> {
             viewModel.dismissNotification(command.key)

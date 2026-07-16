@@ -67,4 +67,5 @@ jobs:
           node scripts/test-play-submission-verifier.mjs
           node scripts/render-play-console-evidence-template.mjs --verified-at 2026-07-10 --json-only
           node scripts/test-play-publish-helper.mjs
+          node scripts/test-build-release-version.mjs
           node scripts/publish-play-internal.mjs --dry-run

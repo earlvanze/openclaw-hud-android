@@ -313,6 +313,8 @@ class MainViewModel(
         ensureRuntime().dismissNotification(key)
     }
 
+    fun openNotification(key: String) = ensureRuntime().openNotification(key)
+
     fun requestHudScroll(deltaPx: Float) {
         _hudScrollRequests.tryEmit(deltaPx)
     }

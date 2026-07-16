@@ -70,7 +70,7 @@ const validReadme = [
   "",
   "The controls are configurable under External HUD Input. External touchscreens, touchpads, mice, styli, trackballs, DPAD/gamepad controls, rotary encoders, and axes route to the HUD.",
   "Absolute axes are normalized to their Android ranges. M1 remains supported without making ASUS identity a requirement.",
-  "Defaults are tuned for walking HUD use: single-tap clears the current notification, double-tap toggles mic, vertical swipe scrolls chat, and M1 brightness-key events can scroll chat.",
+  "Defaults are tuned for walking HUD use: single-tap opens the current notification on the phone, double-tap toggles mic, vertical swipe scrolls chat, and M1 brightness-key events can scroll chat.",
   "",
   "| Windows AirVision feature | Android HUD status |",
   "| --- | --- |",
@@ -225,7 +225,7 @@ async function main() {
     await writeFile(
       readmePath,
       validReadme
-        .replace("single-tap clears the current", "single-tap clears the\ncurrent")
+        .replace("single-tap opens the current", "single-tap opens the\ncurrent")
         .replace("External touchscreens, touchpads", "External touchscreens,\ntouchpads")
         .replace("without making ASUS identity", "without making ASUS\nidentity"),
     );

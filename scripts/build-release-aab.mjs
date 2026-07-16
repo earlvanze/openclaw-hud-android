@@ -2,7 +2,7 @@
 
 import { createHash } from "node:crypto";
 import { access, copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 
@@ -73,7 +73,7 @@ function parseVersionMatches(buildGradleText) {
   return { versionCodeMatch, versionNameMatch };
 }
 
-function resolveNextVersionCode(currentVersionCode, todayPrefix) {
+export function resolveNextVersionCode(currentVersionCode, todayPrefix) {
   const currentRaw = currentVersionCode.toString();
   let nextSuffix = 0;
 
@@ -89,17 +89,20 @@ function resolveNextVersionCode(currentVersionCode, todayPrefix) {
   return Number.parseInt(`${todayPrefix}${nextSuffix.toString().padStart(2, "0")}`, 10);
 }
 
-function resolveNextVersion(buildGradleText, date) {
+export function resolveNextVersion(buildGradleText, date) {
   const { versionCodeMatch } = parseVersionMatches(buildGradleText);
   const currentVersionCode = Number.parseInt(versionCodeMatch[1] ?? "", 10);
   if (!Number.isInteger(currentVersionCode)) {
     throw new Error(`Invalid Android versionCode in ${buildGradlePath}`);
   }
 
-  return {
-    versionName: formatVersionName(date),
-    versionCode: resolveNextVersionCode(currentVersionCode, formatVersionCodePrefix(date)),
-  };
+  const todayPrefix = formatVersionCodePrefix(date);
+  const versionCode = resolveNextVersionCode(currentVersionCode, todayPrefix);
+  const versionSuffix = Number.parseInt(versionCode.toString().slice(todayPrefix.length), 10);
+  if (!Number.isInteger(versionSuffix)) {
+    throw new Error(`Invalid Android version suffix for ${versionCode}`);
+  }
+  return { versionName: `${formatVersionName(date)}.${versionSuffix}`, versionCode };
 }
 
 function updateBuildGradleVersions(buildGradleText, nextVersion) {
@@ -188,4 +191,6 @@ async function main() {
   }
 }
 
-await main();
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await main();
+}

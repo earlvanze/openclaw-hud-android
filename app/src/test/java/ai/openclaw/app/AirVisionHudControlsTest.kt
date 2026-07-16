@@ -7,7 +7,7 @@ class AirVisionHudControlsTest {
     @Test
     fun fromRawValue_defaultsToHudProfile() {
         assertEquals(
-            AirVisionHudTouchAction.DismissNotification,
+            AirVisionHudTouchAction.OpenNotification,
             AirVisionHudTouchAction.fromRawValue(null),
         )
         assertEquals(
@@ -61,7 +61,23 @@ class AirVisionHudControlsTest {
     }
 
     @Test
-    fun singleTapCommandDefaultsToClearableNotificationDismiss() {
+    fun singleTapCommandCanOpenOrDismissNotification() {
+        assertEquals(
+            AirVisionHudTouchCommand.OpenNotification("maps:1"),
+            airVisionHudSingleTapCommand(
+                action = AirVisionHudTouchAction.OpenNotification,
+                notificationKey = "maps:1",
+                notificationClearable = false,
+            ),
+        )
+        assertEquals(
+            null,
+            airVisionHudSingleTapCommand(
+                action = AirVisionHudTouchAction.OpenNotification,
+                notificationKey = null,
+                notificationClearable = false,
+            ),
+        )
         assertEquals(
             AirVisionHudTouchCommand.DismissNotification("maps:1"),
             airVisionHudSingleTapCommand(
@@ -99,6 +115,22 @@ class AirVisionHudControlsTest {
             ),
         )
         assertEquals(
+            AirVisionHudTouchCommand.OpenNotification("maps:1"),
+            airVisionHudDoubleTapCommand(
+                action = AirVisionHudDoubleTapAction.OpenNotification,
+                notificationKey = "maps:1",
+                notificationClearable = false,
+            ),
+        )
+        assertEquals(
+            null,
+            airVisionHudDoubleTapCommand(
+                action = AirVisionHudDoubleTapAction.OpenNotification,
+                notificationKey = " ",
+                notificationClearable = false,
+            ),
+        )
+        assertEquals(
             AirVisionHudTouchCommand.DismissNotification("maps:1"),
             airVisionHudDoubleTapCommand(
                 action = AirVisionHudDoubleTapAction.DismissNotification,
@@ -114,5 +146,23 @@ class AirVisionHudControlsTest {
                 notificationClearable = false,
             ),
         )
+    }
+
+    @Test
+    fun notificationOpenResultMessageExplainsActionState() {
+        assertEquals("Opened on phone", hudNotificationOpenResultMessage(ok = true, code = null))
+        assertEquals(
+            "Enable notification access",
+            hudNotificationOpenResultMessage(ok = false, code = "NOTIFICATIONS_DISABLED"),
+        )
+        assertEquals(
+            "Notification no longer available",
+            hudNotificationOpenResultMessage(ok = false, code = "NOTIFICATION_NOT_FOUND"),
+        )
+        assertEquals(
+            "Notification cannot be opened",
+            hudNotificationOpenResultMessage(ok = false, code = "ACTION_UNAVAILABLE"),
+        )
+        assertEquals("Could not open notification", hudNotificationOpenResultMessage(ok = false, code = "ACTION_FAILED"))
     }
 }

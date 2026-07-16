@@ -149,7 +149,7 @@ interface.
 
 HUD controls:
 
-- Single-tap a clearable notification to dismiss it.
+- Single-tap a notification to open it on the phone. Dismiss and mic actions remain configurable.
 - Double-tap the HUD/touch surface to toggle mic capture when available.
 - Swipe vertically to scroll the compact chat transcript.
 - Swipe left or right to browse ranked HUD notifications.
@@ -166,9 +166,10 @@ encoders, and mouse wheels route through the same Presentation-owned HUD input
 path. Absolute joystick, hat, and wearable touch-strip axes are normalized to
 their reported Android motion ranges before scrolling chat. M1 accessory tap
 keys and `AXIS_GENERIC_1` remain supported without making ASUS identity a
-requirement. Defaults are tuned for walking HUD use: single-tap clears the
-current notification, double-tap toggles mic, vertical swipe scrolls chat, and
-horizontal swipe browses ranked navigation and message notifications.
+requirement. Defaults are tuned for walking HUD use: single-tap opens the
+current notification on the phone, double-tap toggles mic, vertical swipe
+scrolls chat, and horizontal swipe browses ranked navigation and message
+notifications.
 Accessory input does the same, while brightness-key events can scroll chat,
 step Android HUD brightness, or step virtual distance while the HUD is focused.
 Brightness and distance key changes
@@ -395,8 +396,9 @@ ADB=/home/linuxbrew/.linuxbrew/bin/adb \
 ```
 
 `node scripts/build-release-aab.mjs` auto-bumps Android
-`versionName`/`versionCode` in `app/build.gradle.kts`, then builds signed
-release bundles. The HUD bundle is the Google Play target package:
+`versionName`/`versionCode` in `app/build.gradle.kts`, preserving the daily
+numeric suffix in both values, then builds signed release bundles. The HUD
+bundle is the Google Play target package:
 
 - HUD build: `build/release-bundles/openclaw-<version>-hud-release.aab`
   (`ai.openclaw.app.hud`)
