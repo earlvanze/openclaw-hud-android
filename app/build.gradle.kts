@@ -72,8 +72,8 @@ android {
         applicationId = "ai.openclaw.app"
         minSdk = 31
         targetSdk = 36
-        versionCode = 2026071602
-        versionName = "2026.7.16.2"
+        versionCode = 2026071603
+        versionName = "2026.7.16.3"
         buildConfigField(
             "String",
             "OPENCLAW_CONTENT_REPORT_URL",
