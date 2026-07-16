@@ -47,6 +47,8 @@ class MainViewModel(
     val hudScrollRequests: SharedFlow<Float> = _hudScrollRequests
     private val _hudNotificationBrowseRequests = MutableSharedFlow<Int>(extraBufferCapacity = 16)
     val hudNotificationBrowseRequests: SharedFlow<Int> = _hudNotificationBrowseRequests
+    private val _hudNotificationReplyRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
+    val hudNotificationReplyRequests: SharedFlow<Unit> = _hudNotificationReplyRequests
     private val _hudTransientMessages = MutableSharedFlow<String>(extraBufferCapacity = 16)
     val hudTransientMessages: SharedFlow<String> = _hudTransientMessages
     private val _airVisionIdentifyToken = MutableStateFlow(0L)
@@ -317,6 +319,11 @@ class MainViewModel(
 
     fun openNotification(key: String) = ensureRuntime().openNotification(key)
 
+    fun replyToNotification(
+        key: String,
+        replyText: String,
+    ) = ensureRuntime().replyToNotification(key = key, replyText = replyText)
+
     fun requestHudScroll(deltaPx: Float) {
         _hudScrollRequests.tryEmit(deltaPx)
     }
@@ -325,6 +332,10 @@ class MainViewModel(
         if (offset != 0) {
             _hudNotificationBrowseRequests.tryEmit(offset)
         }
+    }
+
+    fun requestHudNotificationReply() {
+        _hudNotificationReplyRequests.tryEmit(Unit)
     }
 
     fun setHudPromptDraft(value: String) {

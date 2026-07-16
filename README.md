@@ -40,7 +40,7 @@ Current live target:
   display is disconnected
 - [x] Minimal HUD controls: single-tap opens notifications, double-tap toggles mic,
   vertical swipe scrolls chat, and horizontal swipe or DPAD/gamepad controls browse notifications
-- [x] HUD input: Enter sends, Shift+Enter inserts a newline
+- [x] HUD input: Enter sends, Shift+Enter inserts a newline, and compatible messaging notifications support direct replies
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
 - [x] Per-mode external HUD profiles with viewing mode, animated frame shape,
@@ -153,6 +153,7 @@ HUD controls:
 - Double-tap the HUD/touch surface to toggle mic capture when available.
 - Swipe vertically to scroll the compact chat transcript.
 - Swipe left or right to browse ranked HUD notifications.
+- Reply directly to compatible messaging notifications from the HUD; gamepad X opens reply mode for the selected notification.
 - Tap the thinking-level text in the status lights to cycle thinking level.
 - Tap `cc` in the HUD status lights to cycle captions: Off -> Samsung/native
   -> OpenClaw translation -> Off.

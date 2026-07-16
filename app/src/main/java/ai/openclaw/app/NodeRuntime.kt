@@ -921,6 +921,33 @@ class NodeRuntime(
             )
         }
 
+    fun replyToNotification(
+        key: String,
+        replyText: String,
+    ): NotificationActionResult {
+        val normalizedReply = replyText.trim()
+        if (key.isBlank() || normalizedReply.isEmpty()) {
+            return NotificationActionResult(
+                ok = false,
+                code = "INVALID_REQUEST",
+                message = "INVALID_REQUEST: notification key and reply text required",
+            )
+        }
+        val result =
+            DeviceNotificationListenerService.executeAction(
+                appContext,
+                NotificationActionRequest(
+                    key = key,
+                    kind = NotificationActionKind.Reply,
+                    replyText = normalizedReply,
+                ),
+            )
+        if (result.ok) {
+            scope.launch { refreshHudNotifications() }
+        }
+        return result
+    }
+
     fun setVoiceScreenActive(active: Boolean) {
         if (!active) {
             stopActiveVoiceSession()

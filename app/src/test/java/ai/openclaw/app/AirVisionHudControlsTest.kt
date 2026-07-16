@@ -165,4 +165,16 @@ class AirVisionHudControlsTest {
         )
         assertEquals("Could not open notification", hudNotificationOpenResultMessage(ok = false, code = "ACTION_FAILED"))
     }
+
+    @Test
+    fun notificationReplyResultMessageExplainsActionState() {
+        assertEquals("Reply sent", hudNotificationReplyResultMessage(ok = true, code = null))
+        assertEquals(
+            "Enable notification access",
+            hudNotificationReplyResultMessage(ok = false, code = "NOTIFICATIONS_DISABLED"),
+        )
+        assertEquals("Reply unavailable", hudNotificationReplyResultMessage(ok = false, code = "ACTION_UNAVAILABLE"))
+        assertEquals("Enter a reply", hudNotificationReplyResultMessage(ok = false, code = "INVALID_REQUEST"))
+        assertEquals("Could not send reply", hudNotificationReplyResultMessage(ok = false, code = "ACTION_FAILED"))
+    }
 }

@@ -38,6 +38,7 @@ data class DeviceNotificationEntry(
     val postTimeMs: Long,
     val isOngoing: Boolean,
     val isClearable: Boolean,
+    val canReply: Boolean = false,
 )
 
 internal fun DeviceNotificationEntry.toJsonObject(): JsonObject =
@@ -47,6 +48,7 @@ internal fun DeviceNotificationEntry.toJsonObject(): JsonObject =
         put("postTimeMs", JsonPrimitive(postTimeMs))
         put("isOngoing", JsonPrimitive(isOngoing))
         put("isClearable", JsonPrimitive(isClearable))
+        put("canReply", JsonPrimitive(canReply))
         title?.let { put("title", JsonPrimitive(it)) }
         text?.let { put("text", JsonPrimitive(it)) }
         subText?.let { put("subText", JsonPrimitive(it)) }
@@ -237,6 +239,7 @@ class DeviceNotificationListenerService : NotificationListenerService() {
             put("postTimeMs", JsonPrimitive(postTimeMs))
             put("isOngoing", JsonPrimitive(isOngoing))
             put("isClearable", JsonPrimitive(isClearable))
+            entry?.let { put("canReply", JsonPrimitive(it.canReply)) }
             policy.sessionKey?.let { put("sessionKey", JsonPrimitive(it)) }
             entry?.title?.let { put("title", JsonPrimitive(it)) }
             entry?.text?.let { put("text", JsonPrimitive(it)) }
@@ -275,6 +278,10 @@ class DeviceNotificationListenerService : NotificationListenerService() {
             postTimeMs = postTime,
             isOngoing = isOngoing,
             isClearable = isClearable,
+            canReply =
+                notification.actions?.any { action ->
+                    action.actionIntent != null && !action.remoteInputs.isNullOrEmpty()
+                } == true,
         )
     }
 

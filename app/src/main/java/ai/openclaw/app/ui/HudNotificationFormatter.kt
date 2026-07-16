@@ -16,6 +16,7 @@ internal data class HudNotificationLine(
     val secondary: String?,
     val kind: HudNotificationKind,
     val isClearable: Boolean,
+    val canReply: Boolean = false,
 )
 
 private const val MAPS_PACKAGE = "com.google.android.apps.maps"
@@ -96,6 +97,7 @@ private fun DeviceNotificationEntry.toHudNotificationLine(): HudNotificationLine
         secondary = secondary,
         kind = kind,
         isClearable = isClearable,
+        canReply = canReply,
     )
 }
 

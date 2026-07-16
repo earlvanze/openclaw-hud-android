@@ -7,6 +7,35 @@ import org.junit.Test
 
 class AirVisionHudKeyInputControllerTest {
     @Test
+    fun accessoryGamepadXStartsNotificationReply() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.StartNotificationReply,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BUTTON_X,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(),
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(consume = false),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BUTTON_X,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_100L,
+                isHudAccessoryEvent = false,
+                controls = AirVisionHudControls(),
+            ),
+        )
+    }
+
+    @Test
     fun accessoryDpadBrowsesNotifications() {
         val controller = AirVisionHudKeyInputController()
 

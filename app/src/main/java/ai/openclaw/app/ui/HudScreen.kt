@@ -17,6 +17,7 @@ import ai.openclaw.app.airVisionHudDoubleTapCommand
 import ai.openclaw.app.airVisionHudSingleTapCommand
 import ai.openclaw.app.chat.ChatMessage
 import ai.openclaw.app.hudNotificationOpenResultMessage
+import ai.openclaw.app.hudNotificationReplyResultMessage
 import ai.openclaw.app.openNativeCaptionSettings
 import ai.openclaw.app.voice.VoiceConversationEntry
 import ai.openclaw.app.voice.VoiceConversationRole
@@ -47,6 +48,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.automirrored.filled.Reply
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -58,6 +61,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -128,6 +132,8 @@ fun HudScreen(viewModel: MainViewModel) {
     val prompt by viewModel.hudPromptDraft.collectAsState()
     var identifyVisible by remember { mutableStateOf(false) }
     var transientHudText by remember { mutableStateOf<String?>(null) }
+    var replyTargetKey by remember { mutableStateOf<String?>(null) }
+    var replyDraft by remember { mutableStateOf("") }
 
     LaunchedEffect(mainSessionKey) {
         viewModel.loadChat(mainSessionKey)
@@ -194,6 +200,33 @@ fun HudScreen(viewModel: MainViewModel) {
     val notificationLine =
         notificationLines.firstOrNull { it.key == selectedNotificationKey }
             ?: notificationLines.firstOrNull()
+    val replyTarget =
+        notificationLines
+            .firstOrNull { it.key == replyTargetKey }
+            ?.takeIf { it.canReply }
+    val currentReplyNotificationLines by rememberUpdatedState(notificationLines)
+    val currentReplySelectedKey by rememberUpdatedState(selectedNotificationKey)
+    LaunchedEffect(replyTargetKey, notificationKeys) {
+        if (replyTargetKey != null && replyTarget == null) {
+            replyTargetKey = null
+            replyDraft = ""
+        }
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.hudNotificationReplyRequests.collect {
+            val target =
+                currentReplyNotificationLines
+                    .firstOrNull { it.key == currentReplySelectedKey }
+                    ?: currentReplyNotificationLines.firstOrNull()
+            if (target?.canReply == true) {
+                replyTargetKey = target.key
+                replyDraft = ""
+                viewModel.showHudTransientMessage("Reply to ${target.source}")
+            } else {
+                viewModel.showHudTransientMessage("Reply unavailable")
+            }
+        }
+    }
     val runningLine =
         if (airVisionDemoModeEnabled) {
             null
@@ -459,6 +492,15 @@ fun HudScreen(viewModel: MainViewModel) {
                         HudNotificationBlock(
                             line = line,
                             onDismiss = { viewModel.dismissNotification(line.key) },
+                            onReply =
+                                if (line.canReply) {
+                                    {
+                                        replyTargetKey = line.key
+                                        replyDraft = ""
+                                    }
+                                } else {
+                                    null
+                                },
                         )
                     }
                 }
@@ -530,18 +572,52 @@ fun HudScreen(viewModel: MainViewModel) {
             }
 
             HudChatInputBar(
-                prompt = prompt,
-                enabled = !airVisionDemoModeEnabled && healthOk && pendingRunCount == 0,
-                onPromptChange = viewModel::setHudPromptDraft,
+                prompt = replyTarget?.let { replyDraft } ?: prompt,
+                enabled = replyTarget != null || (!airVisionDemoModeEnabled && healthOk && pendingRunCount == 0),
+                placeholder = replyTarget?.let { "reply to ${it.source}" } ?: "ask",
+                actionLabel = if (replyTarget == null) "send" else "reply",
+                onPromptChange = { value ->
+                    if (replyTarget == null) {
+                        viewModel.setHudPromptDraft(value)
+                    } else {
+                        replyDraft = value
+                    }
+                },
+                onCancel =
+                    replyTarget?.let {
+                        {
+                            replyTargetKey = null
+                            replyDraft = ""
+                        }
+                    },
                 onSend = {
-                    val text = prompt.trim()
-                    if (text.isNotEmpty()) {
-                        viewModel.clearHudPromptDraft()
-                        viewModel.sendChat(
-                            message = text,
-                            thinking = if (translationCaptionsEnabled) "off" else thinkingLevel,
-                            attachments = emptyList(),
-                        )
+                    val target = replyTarget
+                    val text = (target?.let { replyDraft } ?: prompt).trim()
+                    when {
+                        text.isEmpty() -> Unit
+                        target != null && airVisionDemoModeEnabled -> {
+                            viewModel.showHudTransientMessage("Demo: would reply to ${target.source}")
+                            replyTargetKey = null
+                            replyDraft = ""
+                        }
+                        target != null -> {
+                            val result = viewModel.replyToNotification(key = target.key, replyText = text)
+                            viewModel.showHudTransientMessage(
+                                hudNotificationReplyResultMessage(ok = result.ok, code = result.code),
+                            )
+                            if (result.ok) {
+                                replyTargetKey = null
+                                replyDraft = ""
+                            }
+                        }
+                        else -> {
+                            viewModel.clearHudPromptDraft()
+                            viewModel.sendChat(
+                                message = text,
+                                thinking = if (translationCaptionsEnabled) "off" else thinkingLevel,
+                                attachments = emptyList(),
+                            )
+                        }
                     }
                 },
                 modifier =
@@ -798,6 +874,7 @@ private fun performHudTouchCommand(
 private fun HudNotificationBlock(
     line: HudNotificationLine,
     onDismiss: () -> Unit,
+    onReply: (() -> Unit)?,
 ) {
     Row(
         modifier =
@@ -827,6 +904,21 @@ private fun HudNotificationBlock(
                 )
             }
         }
+        if (onReply != null) {
+            Box(
+                modifier =
+                    Modifier
+                        .size(44.dp)
+                        .clickable(onClick = onReply),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Reply,
+                    contentDescription = "Reply",
+                    tint = hudAccent,
+                )
+            }
+        }
         if (line.isClearable) {
             Box(
                 modifier =
@@ -835,7 +927,11 @@ private fun HudNotificationBlock(
                         .clickable(onClick = onDismiss),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("x", style = hudReadableTextStyle, color = hudMuted, maxLines = 1)
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Dismiss notification",
+                    tint = hudMuted,
+                )
             }
         }
     }
@@ -951,8 +1047,11 @@ private fun HudPromptMirror(draft: String) {
 private fun HudChatInputBar(
     prompt: String,
     enabled: Boolean,
+    placeholder: String,
+    actionLabel: String,
     onPromptChange: (String) -> Unit,
     onSend: () -> Unit,
+    onCancel: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -990,14 +1089,25 @@ private fun HudChatInputBar(
             decorationBox = { innerTextField ->
                 Box {
                     if (prompt.isBlank()) {
-                        Text("ask", style = hudReadableTextStyle, color = hudMuted)
+                        Text(placeholder, style = hudReadableTextStyle, color = hudMuted)
                     }
                     innerTextField()
                 }
             },
         )
+        if (onCancel != null) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = "Cancel reply",
+                modifier =
+                    Modifier
+                        .size(36.dp)
+                        .clickable(onClick = onCancel),
+                tint = hudMuted,
+            )
+        }
         Text(
-            text = "send",
+            text = actionLabel,
             modifier =
                 Modifier
                     .clickable(enabled = enabled && prompt.trim().isNotEmpty(), onClick = onSend)
@@ -1168,6 +1278,7 @@ private val demoHudNotificationLines =
             secondary = "Meeting moved to 3:30 PM",
             kind = HudNotificationKind.Message,
             isClearable = false,
+            canReply = true,
         ),
     )
 

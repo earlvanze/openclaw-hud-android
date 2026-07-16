@@ -154,6 +154,20 @@ internal fun hudNotificationOpenResultMessage(
         else -> "Could not open notification"
     }
 
+internal fun hudNotificationReplyResultMessage(
+    ok: Boolean,
+    code: String?,
+): String =
+    when {
+        ok -> "Reply sent"
+        code == "NOTIFICATIONS_DISABLED" -> "Enable notification access"
+        code == "NOTIFICATIONS_UNAVAILABLE" -> "Notification access reconnecting"
+        code == "NOTIFICATION_NOT_FOUND" -> "Notification no longer available"
+        code == "ACTION_UNAVAILABLE" -> "Reply unavailable"
+        code == "INVALID_REQUEST" -> "Enter a reply"
+        else -> "Could not send reply"
+    }
+
 private fun dismissNotificationCommand(
     notificationKey: String?,
     notificationClearable: Boolean,

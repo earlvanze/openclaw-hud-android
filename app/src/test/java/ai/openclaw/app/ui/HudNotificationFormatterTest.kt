@@ -149,6 +149,24 @@ class HudNotificationFormatterTest {
     }
 
     @Test
+    fun selectHudNotification_preservesReplyCapability() {
+        val line =
+            selectHudNotification(
+                listOf(
+                    entry(
+                        packageName = "com.example.messages",
+                        title = "Alex",
+                        text = "On my way",
+                        category = "msg",
+                        canReply = true,
+                    ),
+                ),
+            )
+
+        assertTrue(line?.canReply == true)
+    }
+
+    @Test
     fun selectHudNotification_redactsSecretShapedNotificationText() {
         val line =
             selectHudNotification(
@@ -178,6 +196,7 @@ class HudNotificationFormatterTest {
         postTimeMs: Long = 1,
         isOngoing: Boolean = false,
         isClearable: Boolean = !isOngoing,
+        canReply: Boolean = false,
     ): DeviceNotificationEntry =
         DeviceNotificationEntry(
             key = "$packageName:$postTimeMs",
@@ -190,5 +209,6 @@ class HudNotificationFormatterTest {
             postTimeMs = postTimeMs,
             isOngoing = isOngoing,
             isClearable = isClearable,
+            canReply = canReply,
         )
 }

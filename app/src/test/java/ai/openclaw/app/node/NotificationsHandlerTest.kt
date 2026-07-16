@@ -96,6 +96,31 @@ class NotificationsHandlerTest {
         }
 
     @Test
+    fun notificationsListExposesReplyCapability() =
+        runTest {
+            val provider =
+                FakeNotificationsStateProvider(
+                    DeviceNotificationSnapshot(
+                        enabled = true,
+                        connected = true,
+                        notifications = listOf(sampleEntry("reply").copy(canReply = true)),
+                    ),
+                )
+            val handler = NotificationsHandler.forTesting(appContext = appContext(), stateProvider = provider)
+
+            val result = handler.handleNotificationsList(null)
+
+            assertTrue(result.ok)
+            val notification =
+                parsePayload(result)
+                    .getValue("notifications")
+                    .jsonArray
+                    .single()
+                    .jsonObject
+            assertTrue(notification.getValue("canReply").jsonPrimitive.boolean)
+        }
+
+    @Test
     fun notificationsActions_executesDismissAction() =
         runTest {
             val provider =
