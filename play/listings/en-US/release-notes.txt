@@ -1,8 +1,8 @@
 OpenClaw HUD update:
-- Tap alerts to open them; configure dismiss/mic instead.
+- Open alerts by tap; configure dismiss/mic.
 - Browse by swipe, DPAD, or gamepad shoulder buttons.
-- Recover Presentation windows and pin displays.
-- Route touchscreens, touchpads, mice, styli, and trackballs.
-- Route wheels, rotary controls, page keys, gamepads, and joystick/hat axes.
-- Keep M1 input on the generic External HUD Input path.
+- Keep Presentation recovery, display pinning, and frame-shape morphing.
+- Route external touchscreens, touchpads, mice, styli, and trackballs.
+- Route wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.
+- Keep M1 tap and swipe support on the capability-driven input path under External HUD Input.
 - Keep the in-app privacy policy.

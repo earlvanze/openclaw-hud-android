@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.16.8-hud-release.aab`
-- SHA-256: `3d2e52fe5f3b74df237b580abadff64ac6458d52af5ed4b6d801c8633774d678`
-- Version: 2026.7.16.8 (2026071608)
+- AAB: `build/release-bundles/openclaw-2026.7.17.0-hud-release.aab`
+- SHA-256: `fbd6e53c03846bfbc1226dde9e14c30ec91702a0ef54addc85549c7cbd5ab56c`
+- Version: 2026.7.17.0 (2026071700)
 
 ## Remaining Console Blockers
 
@@ -44,7 +44,7 @@ Key features:
 - OpenClaw gateway pairing and secure local setup storage
 - Compact chat with hardware keyboard send support
 - In-app offensive-response reporting with explicit payload review, direct developer delivery, and receipt confirmation
-- Actionable notification summaries with tap-to-open plus swipe, DPAD, and gamepad browsing
+- Actionable notification summaries with tap-to-open and swipe browsing
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - External-display profiles for view mode, animated Full/Wide/Compact/Panoramic frame shapes, custom labels, JSON backup/import, placement, main-screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, gesture/hotkey behavior, profile reset, and low-overhead preferences
@@ -60,12 +60,12 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD update:
-- Tap alerts to open them; configure dismiss/mic instead.
+- Open alerts by tap; configure dismiss/mic.
 - Browse by swipe, DPAD, or gamepad shoulder buttons.
-- Recover Presentation windows and pin displays.
-- Route touchscreens, touchpads, mice, styli, and trackballs.
-- Route wheels, rotary controls, page keys, gamepads, and joystick/hat axes.
-- Keep M1 input on the generic External HUD Input path.
+- Keep Presentation recovery, display pinning, and frame-shape morphing.
+- Route external touchscreens, touchpads, mice, styli, and trackballs.
+- Route wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.
+- Keep M1 tap and swipe support on the capability-driven input path under External HUD Input.
 - Keep the in-app privacy policy.
 
 ## Privacy Policy
