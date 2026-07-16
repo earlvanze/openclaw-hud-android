@@ -65,7 +65,7 @@ Current local status:
 - Latest signed HUD AAB builds successfully from the current release commit:
   `build/release-bundles/openclaw-2026.7.16.7-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `68765a66809fecd774d79ce0e38f6fee0b82e2ba50a7664750bc5d809c797620`
+  `04cf30bbe69c39a46338c550736eb60d917d914716c83a27f1b1125416220f5a`
 - Latest HUD bundle version: `2026.7.16.7 (2026071607)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
