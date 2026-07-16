@@ -132,6 +132,7 @@ DeX/taskbar state, display topology, audio route hints, and recent HUD logs with
 
 ```bash
 ./scripts/diagnose-hud-presentation.sh --serial <adb-serial>
+./scripts/diagnose-hud-presentation.sh --serial <adb-serial> --watch-input-seconds 20
 ```
 
 The HUD flavor is designed to remain Google Play publishable: it uses the

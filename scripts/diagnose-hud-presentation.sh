@@ -3,6 +3,7 @@ set -euo pipefail
 
 PACKAGE_NAME="${OPENCLAW_HUD_PACKAGE:-ai.openclaw.app.hud}"
 SERIAL="${ANDROID_SERIAL:-}"
+WATCH_INPUT_SECONDS=0
 
 WINDOWS_ADB="/mnt/c/Users/digit/AppData/Local/Microsoft/WinGet/Packages/Google.PlatformTools_Microsoft.Winget.Source_8wekyb3d8bbwe/platform-tools/adb.exe"
 if [[ -n "${ADB:-}" ]]; then
@@ -16,10 +17,14 @@ fi
 usage() {
     cat <<'USAGE'
 Usage: scripts/diagnose-hud-presentation.sh [--serial SERIAL] [--package PACKAGE]
+       [--watch-input-seconds SECONDS]
 
 Prints a compact ADB report for HUD presentation launches: display topology,
 task/window placement, DeX/taskbar settings, Samsung external-display audio
-settings, audio device hints, and recent HUD logs.
+settings, audio device hints, input-device capabilities, and recent HUD logs.
+
+With --watch-input-seconds, also records bounded raw Android input events while
+the HUD accessory is operated. SECONDS must be between 1 and 60.
 USAGE
 }
 
@@ -31,6 +36,15 @@ while [[ $# -gt 0 ]]; do
             ;;
         --package)
             PACKAGE_NAME="${2:?missing package}"
+            shift 2
+            ;;
+        --watch-input-seconds)
+            WATCH_INPUT_SECONDS="${2:?missing seconds}"
+            if [[ ! "$WATCH_INPUT_SECONDS" =~ ^[0-9]+$ ]] ||
+                (( WATCH_INPUT_SECONDS < 1 || WATCH_INPUT_SECONDS > 60 )); then
+                echo "--watch-input-seconds must be an integer from 1 to 60." >&2
+                exit 2
+            fi
             shift 2
             ;;
         -h|--help)
@@ -100,8 +114,28 @@ adb_shell dumpsys audio |
     grep -Ei 'AirVision|usb|speaker|external|communication|mCommunicationDevice|DEVICE_OUT|preferred device' |
     sed -n '1,160p' || true
 
+section "External Input Devices"
+adb_shell dumpsys input |
+    grep -Ei 'Input Device|Device [0-9]+:|Name:|Descriptor:|Sources:|IsExternal:|Location: external|Motion Ranges|AXIS_|KEYBOARD_TYPE|Vibrator' |
+    sed -n '1,240p' || true
+
+if (( WATCH_INPUT_SECONDS > 0 )); then
+    section "Live Raw Input Events (${WATCH_INPUT_SECONDS}s)"
+    echo "Operate the HUD touch surface or accessory now."
+    timeout "${WATCH_INPUT_SECONDS}s" \
+        "$ADB_BIN" -s "$SERIAL" shell getevent -lt 2>/dev/null |
+        tr -d '\r' |
+        sed -n '1,320p' || true
+fi
+
 section "Recent HUD Logs"
 "$ADB_BIN" -s "$SERIAL" logcat -d -t 300 \
     -s MainActivity HudPresentation AirVisionAudioRouter AirVisionUsbController 2>/dev/null |
     tr -d '\r' |
     sed -n '1,160p' || true
+
+section "Recent Routed HUD Input"
+"$ADB_BIN" -s "$SERIAL" logcat -d -t 1200 -s MainActivity 2>/dev/null |
+    tr -d '\r' |
+    grep -E 'Forwarded external HUD touch|Forwarded HUD accessory tap|HUD accessory swipe|HUD .*double-tap|unhandled HUD accessory key' |
+    tail -n 160 || true
