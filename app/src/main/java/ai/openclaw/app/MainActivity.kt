@@ -21,6 +21,7 @@ import android.util.Log
 import android.view.Display
 import android.view.InputDevice
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
@@ -181,6 +182,31 @@ class MainActivity : ComponentActivity() {
             return true
         }
         return super.dispatchKeyEvent(event)
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        val presentation = hudPresentationSession.current
+        val inputDevice = event.device
+        if (
+            presentation?.isShowing == true &&
+            inputDevice != null &&
+            shouldForwardExternalHudTouch(
+                deviceIsExternal = inputDevice.isExternal,
+                eventSource = event.source,
+                eventDisplayId = Display.DEFAULT_DISPLAY,
+                hudDisplayId = presentation.display.displayId,
+            ) &&
+            presentation.dispatchExternalTouchEvent(event)
+        ) {
+            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                Log.d(
+                    TAG,
+                    "Forwarded external HUD touch from ${inputDevice.name} to display ${presentation.display.displayId}",
+                )
+            }
+            return true
+        }
+        return super.dispatchTouchEvent(event)
     }
 
     override fun onStop() {

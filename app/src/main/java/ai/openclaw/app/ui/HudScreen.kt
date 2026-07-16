@@ -19,8 +19,6 @@ import ai.openclaw.app.voice.VoiceConversationEntry
 import ai.openclaw.app.voice.VoiceConversationRole
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -55,7 +53,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,7 +65,6 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -79,7 +75,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 private val hudBackground = Color.Black
 private val hudText = Color(0xFFB8FFB0)
@@ -181,7 +176,6 @@ fun HudScreen(viewModel: MainViewModel) {
             }
         }
     val chatScrollState = rememberScrollState()
-    val gestureScope = rememberCoroutineScope()
     LaunchedEffect(viewModel, chatScrollState) {
         viewModel.hudScrollRequests.collect { deltaPx ->
             chatScrollState.scrollBy(deltaPx)
@@ -263,43 +257,40 @@ fun HudScreen(viewModel: MainViewModel) {
                 .fillMaxSize()
                 .background(hudBackground)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
-                .padding(safePadding),
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .zIndex(-1f)
-                    .pointerInput(notificationLine?.key, airVisionHudControls.singleTapAction, airVisionHudControls.doubleTapAction) {
-                        detectTapGestures(
-                            onTap = {
-                                performHudSingleTapAction(
-                                    action = airVisionHudControls.singleTapAction,
-                                    notificationLine = notificationLine,
-                                    viewModel = viewModel,
-                                )
-                            },
-                            onDoubleTap = {
-                                performHudDoubleTapAction(
-                                    action = airVisionHudControls.doubleTapAction,
-                                    notificationLine = notificationLine,
-                                    viewModel = viewModel,
-                                )
-                            },
+                .padding(safePadding)
+                .hudTouchGestures(
+                    singleTapKey = notificationLine?.key to airVisionHudControls.singleTapAction,
+                    doubleTapKey = notificationLine?.key to airVisionHudControls.doubleTapAction,
+                    swipeKey = airVisionHudControls.swipeAction,
+                    onSingleTap = {
+                        performHudSingleTapAction(
+                            action = airVisionHudControls.singleTapAction,
+                            notificationLine = notificationLine,
+                            viewModel = viewModel,
                         )
-                    }.pointerInput(chatScrollState, airVisionHudControls.swipeAction) {
-                        detectDragGestures { change, dragAmount ->
-                            if (airVisionHudControls.swipeAction != AirVisionHudSwipeAction.ScrollChat) {
-                                return@detectDragGestures
-                            }
-                            change.consume()
-                            gestureScope.launch {
-                                chatScrollState.scrollBy(-dragAmount.y)
-                            }
+                    },
+                    onDoubleTap = {
+                        performHudDoubleTapAction(
+                            action = airVisionHudControls.doubleTapAction,
+                            notificationLine = notificationLine,
+                            viewModel = viewModel,
+                        )
+                    },
+                    onSwipeStarted = {
+                        if (
+                            airVisionHudControls.swipeAction == AirVisionHudSwipeAction.ScrollChat &&
+                            chatScrollState.maxValue == 0
+                        ) {
+                            viewModel.showHudTransientMessage("Nothing to scroll")
                         }
                     },
-        )
-
+                    onVerticalSwipe = { deltaPx ->
+                        if (airVisionHudControls.swipeAction == AirVisionHudSwipeAction.ScrollChat) {
+                            chatScrollState.dispatchRawDelta(deltaPx)
+                        }
+                    },
+                ),
+    ) {
         if (splendidOverlayAlpha > 0f) {
             Box(
                 modifier =
@@ -615,14 +606,17 @@ private fun performHudSingleTapAction(
     notificationLine: HudNotificationLine?,
     viewModel: MainViewModel,
 ) {
-    performHudTouchCommand(
+    val command =
         airVisionHudSingleTapCommand(
             action = action,
             notificationKey = notificationLine?.key,
             notificationClearable = notificationLine?.isClearable == true,
-        ),
-        viewModel = viewModel,
-    )
+        )
+    if (command == null && action == AirVisionHudTouchAction.DismissNotification) {
+        viewModel.showHudTransientMessage("No notification to dismiss")
+    } else {
+        performHudTouchCommand(command, viewModel = viewModel)
+    }
 }
 
 private fun performHudDoubleTapAction(
@@ -630,14 +624,17 @@ private fun performHudDoubleTapAction(
     notificationLine: HudNotificationLine?,
     viewModel: MainViewModel,
 ) {
-    performHudTouchCommand(
+    val command =
         airVisionHudDoubleTapCommand(
             action = action,
             notificationKey = notificationLine?.key,
             notificationClearable = notificationLine?.isClearable == true,
-        ),
-        viewModel = viewModel,
-    )
+        )
+    if (command == null && action == AirVisionHudDoubleTapAction.DismissNotification) {
+        viewModel.showHudTransientMessage("No notification to dismiss")
+    } else {
+        performHudTouchCommand(command, viewModel = viewModel)
+    }
 }
 
 private fun performHudTouchCommand(
@@ -646,8 +643,14 @@ private fun performHudTouchCommand(
 ) {
     when (command) {
         null -> Unit
-        AirVisionHudTouchCommand.ToggleMic -> viewModel.toggleMicEnabled()
-        is AirVisionHudTouchCommand.DismissNotification -> viewModel.dismissNotification(command.key)
+        AirVisionHudTouchCommand.ToggleMic -> {
+            viewModel.toggleMicEnabled()
+            viewModel.showHudTransientMessage("Mic toggled")
+        }
+        is AirVisionHudTouchCommand.DismissNotification -> {
+            viewModel.dismissNotification(command.key)
+            viewModel.showHudTransientMessage("Notification dismissed")
+        }
     }
 }
 

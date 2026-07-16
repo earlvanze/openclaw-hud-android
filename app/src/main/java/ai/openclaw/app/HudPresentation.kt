@@ -1,18 +1,20 @@
 package ai.openclaw.app
 
-import ai.openclaw.app.ui.HudScreen
-import ai.openclaw.app.ui.OpenClawTheme
 import android.app.Presentation
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Matrix
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Display
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import ai.openclaw.app.ui.HudScreen
+import ai.openclaw.app.ui.OpenClawTheme
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.material3.Surface
@@ -91,6 +93,34 @@ internal class HudPresentation(
             return true
         }
         return super.dispatchKeyEvent(event)
+    }
+
+    internal fun dispatchExternalTouchEvent(event: MotionEvent): Boolean {
+        val sourceView = activity.window.decorView
+        val targetView = window?.decorView ?: return false
+        if (
+            sourceView.width <= 0 ||
+            sourceView.height <= 0 ||
+            targetView.width <= 0 ||
+            targetView.height <= 0
+        ) {
+            return false
+        }
+
+        val transformed = MotionEvent.obtain(event)
+        return try {
+            transformed.transform(
+                Matrix().apply {
+                    setScale(
+                        targetView.width.toFloat() / sourceView.width,
+                        targetView.height.toFloat() / sourceView.height,
+                    )
+                },
+            )
+            dispatchTouchEvent(transformed)
+        } finally {
+            transformed.recycle()
+        }
     }
 
     internal fun composeDisplayContext(): Context = context
