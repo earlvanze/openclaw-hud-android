@@ -234,6 +234,13 @@ function extractAttributeValues(source, tagName, attributeName) {
   return unique(values);
 }
 
+function openingTagForNamedComponent(source, tagName, componentName) {
+  const tagPattern = new RegExp(`<${tagName}\\b[^>]*>`, "gu");
+  return [...source.matchAll(tagPattern)]
+    .map((match) => match[0])
+    .find((tag) => tag.includes(`android:name="${componentName}"`));
+}
+
 function parseBuildConfig(source) {
   const values = {};
   for (const match of source.matchAll(/public static final (?:String|boolean) (\w+) = (true|false|"[^"]*");/gu)) {
@@ -289,6 +296,10 @@ async function verifyVariant(variant) {
     `${variant.name} services`,
   );
   requireIncludesAll(activityNames, ["ai.openclaw.app.MainActivity"], `${variant.name} activities`);
+  const mainActivityTag = openingTagForNamedComponent(manifest, "activity", "ai.openclaw.app.MainActivity");
+  if (!mainActivityTag?.includes('android:launchMode="singleTask"')) {
+    throw new Error(`${variant.name} MainActivity must use singleTask to keep one external HUD presentation owner`);
+  }
   requireIncludesAll(providerAuthorities, [variant.expectedFileProviderAuthority], `${variant.name} providers`);
 
   for (const [key, expected] of Object.entries(variant.expectedBuildConfig)) {
