@@ -353,15 +353,14 @@ async function verifyListing(listingDir, language) {
     "protocol-capture targets",
   ]);
   requireIncludes("Release notes", releaseNotes, [
+    "Fix taps, swipes",
+    "external touchscreen/joystick routing",
+    "Full, Wide, Compact, and Panoramic frame shapes",
+    "Recover Presentation after device unlock",
     "Remember USB-C",
-    "wireless, or wearable displays",
-    "display-ID changes",
+    "wireless, and wearable displays",
     "display-scoped density",
-    "pinned display disconnects",
-    "remembered display identity",
-    "Automatic Presentation routing",
-    "generic accessory-key controls",
-    "Chat, notifications, voice, captions, reporting, and In-app privacy policy",
+    "in-app privacy policy",
   ]);
 
   return {
