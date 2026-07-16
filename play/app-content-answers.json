@@ -360,6 +360,6 @@
       "play/screenshots/phone/hud-demo.png",
       "play/screenshots/phone/settings-demo.png"
     ],
-    "notes": "Play app creation, internal tester selection, privacy policy, reviewer Demo Mode and reporting access, store listing, category/contact details, and signed version 2026071602 upload were verified through 2026-07-16. The internal release contains only version 2026071602, adds frame shapes, broader external input routing, default-display host recovery and wake, and unlock recovery, and remains a draft. Data safety includes Developer communications for optional Other in-app messages. These changes have not been sent for review or rolled out."
+    "notes": "Play app creation, internal tester selection, privacy policy, reviewer Demo Mode and reporting access, store listing, category/contact details, and signed version 2026071603 upload were verified through 2026-07-16. The internal release contains only version 2026071603, adds frame shapes, broader external input routing, default-display host recovery and wake, and unlock recovery, and remains a draft. Data safety includes Developer communications for optional Other in-app messages. These changes have not been sent for review or rolled out."
   }
 }
