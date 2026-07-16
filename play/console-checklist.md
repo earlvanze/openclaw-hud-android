@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.0-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.1-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `fbd6e53c03846bfbc1226dde9e14c30ec91702a0ef54addc85549c7cbd5ab56c`
-- Latest HUD bundle version: `2026.7.17.0 (2026071700)`.
+  `3c6d9af35dd512ca119aa79f612d8dfbc194db1e939b9fa1229bdad92ebce3a8`
+- Latest HUD bundle version: `2026.7.17.1 (2026071701)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -75,10 +75,12 @@ Current local status:
   Presentation display with external touch classification, an external
   keyboard/DPAD/joystick accessory path, and the v1608 Demo Mode HUD rendered
   on the M1 while the Fold continued using a separate app.
-- Live Fold/M1 validation on 2026-07-17 installed v2026071700 in place without
-  clearing app state, retained notification-listener access, and instantiated
-  the 1920 x 1080 HUD Presentation window on display 8. The M1 panel slept
-  before capture, so the resulting black screenshot is not visual-render proof.
+- Live Fold/M1 validation on 2026-07-17 installed the exact AAB-derived
+  v2026071701 APK in place without clearing app state, retained
+  notification-listener access, and instantiated the 1920 x 1080 HUD
+  Presentation window on display 8. Demo Mode exercised the reply-capable HUD
+  state. Secure M1 screenshots remained black, so physical touch reply proof is
+  still separate from the runtime and automated evidence.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, release notes character limits, and local Play
   submission packet. It refuses stale local artifacts when HUD source/build
@@ -89,8 +91,8 @@ Current local status:
 - Browser staging verified the separate `ai.openclaw.app.hud` app, internal
   tester list, reviewer Demo Mode instructions, app-content forms, listing,
   contact details, graphics, screenshots, and replacement signed AAB version
-  `2026071700` on 2026-07-17; `2026071608` is absent. The saved release name is
-  `OpenClaw HUD 2026.7.17.0 hardware browsing`; exact release notes persisted
+  `2026071701` on 2026-07-17; `2026071700` is absent. The saved release name is
+  `OpenClaw HUD 2026.7.17.1 notification replies`; exact release notes persisted
   after a full page reload, `Save as draft` is disabled, and `Next` was not used.
   API/OAuth preflight remains a separate authentication and package-access gate.
   `node scripts/report-play-readiness.mjs` summarizes OAuth, service-account,
