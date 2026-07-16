@@ -360,6 +360,6 @@
       "play/screenshots/phone/hud-demo.png",
       "play/screenshots/phone/settings-demo.png"
     ],
-    "notes": "Play app creation, internal tester selection, privacy policy, reviewer Demo Mode and reporting access, store listing, category/contact details, and signed version 2026071600 upload were verified through 2026-07-16. The internal release contains only version 2026071600, includes the touch and external touchscreen routing fix, and remains a draft. Data safety includes Developer communications for optional Other in-app messages. These changes have not been sent for review or rolled out."
+    "notes": "Play app creation, internal tester selection, privacy policy, reviewer Demo Mode and reporting access, store listing, category/contact details, and signed version 2026071600 upload were verified through 2026-07-16. Version 2026071601 adds frame shapes, broader external input routing, and unlock recovery; it is prepared for draft replacement only. Data safety includes Developer communications for optional Other in-app messages. These changes have not been sent for review or rolled out."
   }
 }

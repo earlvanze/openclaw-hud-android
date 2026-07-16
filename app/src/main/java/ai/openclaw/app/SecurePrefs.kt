@@ -40,6 +40,7 @@ class SecurePrefs(
         private const val AIR_VISION_VIEW_MODE_KEY = "airVision.viewMode"
         private const val AIR_VISION_SPLENDID_MODE_KEY = "airVision.splendidMode"
         private const val AIR_VISION_HUD_PLACEMENT_KEY = "airVision.hudPlacement"
+        private const val AIR_VISION_HUD_FRAME_SHAPE_KEY = "airVision.hudFrameShape"
         private const val AIR_VISION_BRIGHTNESS_PERCENT_KEY = "airVision.brightnessPercent"
         private const val AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY = "airVision.blueLightFilterPercent"
         private const val AIR_VISION_DISTANCE_CM_KEY = "airVision.distanceCm"
@@ -615,6 +616,7 @@ class SecurePrefs(
             putString(AIR_VISION_VIEW_MODE_KEY, viewMode.rawValue)
             putString(AIR_VISION_SPLENDID_MODE_KEY, defaults.splendidMode.rawValue)
             putString(AIR_VISION_HUD_PLACEMENT_KEY, defaults.hudPlacement.rawValue)
+            putString(AIR_VISION_HUD_FRAME_SHAPE_KEY, defaults.hudFrameShape.rawValue)
             putInt(AIR_VISION_BRIGHTNESS_PERCENT_KEY, defaults.brightnessPercent)
             putInt(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, defaults.blueLightFilterPercent)
             putInt(AIR_VISION_DISTANCE_CM_KEY, defaults.distanceCm)
@@ -626,6 +628,7 @@ class SecurePrefs(
             putBoolean(AIR_VISION_LIGHT_LOAD_MODE_ENABLED_KEY, defaults.lightLoadModeEnabled)
             putString(airVisionProfileKey(AIR_VISION_SPLENDID_MODE_KEY, viewMode), defaults.splendidMode.rawValue)
             putString(airVisionProfileKey(AIR_VISION_HUD_PLACEMENT_KEY, viewMode), defaults.hudPlacement.rawValue)
+            putString(airVisionProfileKey(AIR_VISION_HUD_FRAME_SHAPE_KEY, viewMode), defaults.hudFrameShape.rawValue)
             putInt(airVisionProfileKey(AIR_VISION_BRIGHTNESS_PERCENT_KEY, viewMode), defaults.brightnessPercent)
             putInt(
                 airVisionProfileKey(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, viewMode),
@@ -666,6 +669,15 @@ class SecurePrefs(
             putString(airVisionProfileKey(AIR_VISION_HUD_PLACEMENT_KEY, viewMode), value.rawValue)
         }
         _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(hudPlacement = value)
+    }
+
+    fun setAirVisionHudFrameShape(value: AirVisionHudFrameShape) {
+        val viewMode = _airVisionDisplaySettings.value.viewMode
+        plainPrefs.edit {
+            putString(AIR_VISION_HUD_FRAME_SHAPE_KEY, value.rawValue)
+            putString(airVisionProfileKey(AIR_VISION_HUD_FRAME_SHAPE_KEY, viewMode), value.rawValue)
+        }
+        _airVisionDisplaySettings.value = _airVisionDisplaySettings.value.copy(hudFrameShape = value)
     }
 
     fun setAirVisionBrightnessPercent(value: Int) {
@@ -1112,6 +1124,17 @@ class SecurePrefs(
                         defaultValue = defaults.hudPlacement.rawValue,
                     ),
                 ),
+            hudFrameShape =
+                AirVisionHudFrameShape.fromRawValue(
+                    rawValue =
+                        getAirVisionProfileString(
+                            key = AIR_VISION_HUD_FRAME_SHAPE_KEY,
+                            mode = viewMode,
+                            allowLegacyFallback = allowLegacyFallback,
+                            defaultValue = defaults.hudFrameShape.rawValue,
+                        ),
+                    fallback = defaults.hudFrameShape,
+                ),
             brightnessPercent =
                 getAirVisionProfileInt(
                     key = AIR_VISION_BRIGHTNESS_PERCENT_KEY,
@@ -1195,6 +1218,7 @@ class SecurePrefs(
             listOf(
                 AIR_VISION_SPLENDID_MODE_KEY,
                 AIR_VISION_HUD_PLACEMENT_KEY,
+                AIR_VISION_HUD_FRAME_SHAPE_KEY,
                 AIR_VISION_BRIGHTNESS_PERCENT_KEY,
                 AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY,
                 AIR_VISION_DISTANCE_CM_KEY,
@@ -1215,6 +1239,7 @@ class SecurePrefs(
         val viewMode = settings.viewMode
         putString(airVisionProfileKey(AIR_VISION_SPLENDID_MODE_KEY, viewMode), settings.splendidMode.rawValue)
         putString(airVisionProfileKey(AIR_VISION_HUD_PLACEMENT_KEY, viewMode), settings.hudPlacement.rawValue)
+        putString(airVisionProfileKey(AIR_VISION_HUD_FRAME_SHAPE_KEY, viewMode), settings.hudFrameShape.rawValue)
         putInt(airVisionProfileKey(AIR_VISION_BRIGHTNESS_PERCENT_KEY, viewMode), settings.brightnessPercent)
         putInt(airVisionProfileKey(AIR_VISION_BLUE_LIGHT_FILTER_PERCENT_KEY, viewMode), settings.blueLightFilterPercent)
         putInt(airVisionProfileKey(AIR_VISION_DISTANCE_CM_KEY, viewMode), settings.distanceCm)

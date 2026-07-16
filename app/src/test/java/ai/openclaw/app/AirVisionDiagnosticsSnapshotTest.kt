@@ -417,9 +417,9 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("false", hudRuntime.getValue("usedNonDefaultDisplayFallback").jsonPrimitive.content)
         assertEquals("selected_presentation_display", hudRuntime.getValue("displayRouteReason").jsonPrimitive.content)
         assertEquals("openclaw.airvision.m1.profile-backup", profileBackup.getValue("schema").jsonPrimitive.content)
-        assertEquals("5", profileBackup.getValue("currentVersion").jsonPrimitive.content)
+        assertEquals("6", profileBackup.getValue("currentVersion").jsonPrimitive.content)
         assertEquals(
-            listOf("1", "2", "3", "4", "5"),
+            listOf("1", "2", "3", "4", "5", "6"),
             profileBackup.getValue("supportedVersions").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals("working", profileBackup.getValue("activeViewMode").jsonPrimitive.content)
@@ -515,7 +515,7 @@ class AirVisionDiagnosticsSnapshotTest {
             profileBackup.getValue("restoreScope").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals(
-            "profile backup v5: 5/5 profiles, 5 runtime profiles, HUD controls and app preferences included.",
+            "profile backup v6: 5/5 profiles, 5 runtime profiles, HUD controls and app preferences included.",
             profileBackup.getValue("summary").jsonPrimitive.content,
         )
         assertEquals("67", fitAndClarity.getValue("ipdMm").jsonPrimitive.content)

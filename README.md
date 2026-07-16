@@ -43,8 +43,8 @@ Current live target:
 - [x] HUD input: Enter sends, Shift+Enter inserts a newline
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
-- [x] AirVision M1 per-mode settings profiles with viewing mode, HUD placement,
-  safe area, Splendid mode, brightness, blue-light filter, distance, HUD scale, IPD,
+- [x] Per-mode external HUD profiles with viewing mode, animated frame shape,
+  placement, safe area, Splendid mode, brightness, blue-light filter, distance, HUD scale, IPD,
   Motion Sync, 3D Mode, Light Load, and active-profile reset controls
 - [x] Optional AirVision M1 USB firmware-link detection, permission flow, and
   interface/endpoint diagnostics
@@ -169,7 +169,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 
 | Windows AirVision feature | Android HUD status |
 | --- | --- |
-| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with mode-specific defaults, user-named Custom 1 / Custom 2 labels, copy-current-to-custom actions, JSON profile backup/import, active-profile reset, HUD placement, physical main screen behavior, safe area, explicit HUD scale/zoom, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
+| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with distinct Wide, Compact, and Panoramic frame defaults, animated frame morphing on any Android Presentation display, explicit Full/Wide/Compact/Panoramic overrides, user-named Custom 1 / Custom 2 labels, copy-current-to-custom actions, JSON profile backup/import, active-profile reset, HUD placement, physical main screen behavior, safe area, explicit HUD scale/zoom, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
 | Brightness | Implemented as software HUD dimming. Hardware brightness remains available from the M1 touch bar. |
 | Screen distance | Implemented as virtual HUD distance scaling. |
 | HUD scale / zoom | Implemented as a per-profile Android Presentation scale percentage layered with view-mode and virtual-distance scaling. |
@@ -191,7 +191,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, derived readable/writable HID report-path capability summaries with endpoint packet sizes, per-feature firmware-apply readiness for Windows-style controls, per-feature Windows protocol-capture targets for View Mode/brightness/distance/IPD/Splendid/Eye Care/Motion Sync/Light Load/3D Mode, USB interface/endpoint diagnostics for protocol capture work, and a JSON diagnostics export that omits raw USB serial values. |
 | Firmware update | Surfaced as a Windows-only workflow in Android settings and diagnostics. Android can export a firmware-update handoff with USB descriptor/version context, interface readiness, sanitized imported protocol-capture evidence, and ASUS support links, but ASUS firmware update checks and installs still require the Windows AirVision app. |
 | Identify | Implemented as a temporary `HUD 1` marker on the Android Presentation display. |
-| Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports configurable external-display targeting, per-mode placement, per-mode physical main screen visibility, and safe-area layout profiles for the M1 presentation. |
+| Multi-screen desktop layouts | Android cannot own DeX topology like the Windows app, but the HUD now supports configurable external-display targeting, animated per-mode frame geometry, per-mode placement, per-mode physical main screen visibility, and safe-area layout profiles on USB-C, HDMI, wireless, and wearable Presentation displays. |
 
 Firmware controls are intentionally read-only/status-only for now. The app can
 detect the M1 USB HID control interface, request Android USB permission, and

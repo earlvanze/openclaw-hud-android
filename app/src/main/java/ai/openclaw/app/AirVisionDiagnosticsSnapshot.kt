@@ -456,7 +456,7 @@ object AirVisionDiagnosticsSnapshots {
     const val VERSION = 37
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
-    private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, 4, AirVisionProfileBackups.VERSION)
+    private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, 4, 5, AirVisionProfileBackups.VERSION)
 
     private val json =
         Json {

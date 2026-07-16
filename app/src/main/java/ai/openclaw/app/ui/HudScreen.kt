@@ -4,10 +4,11 @@ package ai.openclaw.app.ui
 
 import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionHudDoubleTapAction
+import ai.openclaw.app.AirVisionHudFrameShape
 import ai.openclaw.app.AirVisionHudPlacement
 import ai.openclaw.app.AirVisionHudSwipeAction
-import ai.openclaw.app.AirVisionHudTouchCommand
 import ai.openclaw.app.AirVisionHudTouchAction
+import ai.openclaw.app.AirVisionHudTouchCommand
 import ai.openclaw.app.AirVisionSplendidMode
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.TranslationCaptionMode
@@ -17,6 +18,8 @@ import ai.openclaw.app.chat.ChatMessage
 import ai.openclaw.app.openNativeCaptionSettings
 import ai.openclaw.app.voice.VoiceConversationEntry
 import ai.openclaw.app.voice.VoiceConversationRole
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollBy
@@ -86,6 +89,7 @@ private val hudDanger = Color(0xFF7CFF7C)
 private val hudMicOn = Color(0xFFFF2D2D)
 private val hudMicOff = Color(0xFF3A0505)
 private val hudConnectedOff = Color(0xFF07210D)
+private const val HUD_FRAME_MORPH_DURATION_MS = 320
 
 @Composable
 fun HudScreen(viewModel: MainViewModel) {
@@ -250,6 +254,25 @@ fun HudScreen(viewModel: MainViewModel) {
     val captionEntryCount = AirVisionDisplaySettings.hudCaptionEntryCount(airVisionSettings.lightLoadModeEnabled)
     val safePadding = (22 + airVisionSettings.safeAreaPercent * 3).dp
     val layoutSpec = hudLayoutSpec(airVisionSettings.hudPlacement)
+    val frameSpec = hudFrameSpec(airVisionSettings.hudFrameShape)
+    val frameWidthFraction by
+        animateFloatAsState(
+            targetValue = (layoutSpec.widthFraction * frameSpec.widthMultiplier).coerceIn(0.42f, 0.98f),
+            animationSpec = tween(durationMillis = HUD_FRAME_MORPH_DURATION_MS),
+            label = "HUD frame width",
+        )
+    val frameHeightFraction by
+        animateFloatAsState(
+            targetValue = frameSpec.heightFraction,
+            animationSpec = tween(durationMillis = HUD_FRAME_MORPH_DURATION_MS),
+            label = "HUD frame height",
+        )
+    val framePaddingScale by
+        animateFloatAsState(
+            targetValue = frameSpec.paddingScale,
+            animationSpec = tween(durationMillis = HUD_FRAME_MORPH_DURATION_MS),
+            label = "HUD frame padding",
+        )
 
     Box(
         modifier =
@@ -356,8 +379,8 @@ fun HudScreen(viewModel: MainViewModel) {
                 Modifier
                     .align(layoutSpec.alignment)
                     .zIndex(1f)
-                    .fillMaxWidth(layoutSpec.widthFraction)
-                    .fillMaxHeight(),
+                    .fillMaxWidth(frameWidthFraction)
+                    .fillMaxHeight(frameHeightFraction),
         ) {
             Column(
                 modifier =
@@ -368,9 +391,10 @@ fun HudScreen(viewModel: MainViewModel) {
                             scaleX = hudScale
                             scaleY = hudScale
                             transformOrigin = layoutSpec.transformOrigin
-                        }
-                        .padding(top = layoutSpec.topPadding)
-                        .padding(end = layoutSpec.trailingPadding),
+                        }.padding(top = layoutSpec.topPadding * framePaddingScale)
+                        .padding(
+                            end = layoutSpec.trailingPadding * framePaddingScale,
+                        ),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 notificationLine?.let { line ->
@@ -465,7 +489,10 @@ fun HudScreen(viewModel: MainViewModel) {
                     Modifier
                         .fillMaxWidth()
                         .imePadding()
-                        .padding(end = layoutSpec.trailingPadding, bottom = layoutSpec.bottomPadding),
+                        .padding(
+                            end = layoutSpec.trailingPadding * framePaddingScale,
+                            bottom = layoutSpec.bottomPadding * framePaddingScale,
+                        ),
             )
         }
 
@@ -517,11 +544,12 @@ private fun HudDisplayIdentifyOverlay(
     ) {
         Text(
             "HUD 1",
-            style = TextStyle(
-                fontSize = 72.sp,
-                lineHeight = 78.sp,
-                fontWeight = FontWeight.Bold,
-            ),
+            style =
+                TextStyle(
+                    fontSize = 72.sp,
+                    lineHeight = 78.sp,
+                    fontWeight = FontWeight.Bold,
+                ),
             color = hudAccent,
             maxLines = 1,
         )
@@ -542,6 +570,40 @@ private data class HudLayoutSpec(
     val trailingPadding: Dp,
     val transformOrigin: TransformOrigin,
 )
+
+internal data class HudFrameSpec(
+    val widthMultiplier: Float,
+    val heightFraction: Float,
+    val paddingScale: Float,
+)
+
+internal fun hudFrameSpec(shape: AirVisionHudFrameShape): HudFrameSpec =
+    when (shape) {
+        AirVisionHudFrameShape.Full ->
+            HudFrameSpec(
+                widthMultiplier = 1.08f,
+                heightFraction = 1.0f,
+                paddingScale = 1.0f,
+            )
+        AirVisionHudFrameShape.Wide ->
+            HudFrameSpec(
+                widthMultiplier = 1.0f,
+                heightFraction = 0.82f,
+                paddingScale = 0.76f,
+            )
+        AirVisionHudFrameShape.Compact ->
+            HudFrameSpec(
+                widthMultiplier = 0.78f,
+                heightFraction = 0.66f,
+                paddingScale = 0.46f,
+            )
+        AirVisionHudFrameShape.Panoramic ->
+            HudFrameSpec(
+                widthMultiplier = 1.10f,
+                heightFraction = 0.46f,
+                paddingScale = 0.18f,
+            )
+    }
 
 private fun hudSplendidOverlayColor(mode: AirVisionSplendidMode): Color =
     when (mode) {

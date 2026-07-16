@@ -121,14 +121,26 @@ class AirVisionDisplaySettingsTest {
         assertEquals(AirVisionViewMode.Working, working.viewMode)
         assertEquals(AirVisionSplendidMode.Standard, working.splendidMode)
         assertEquals(AirVisionHudPlacement.UpperLeft, working.hudPlacement)
+        assertEquals(AirVisionHudFrameShape.Wide, working.hudFrameShape)
         assertEquals(AirVisionViewMode.Gaming, gaming.viewMode)
         assertEquals(AirVisionSplendidMode.Game, gaming.splendidMode)
         assertEquals(AirVisionHudPlacement.Center, gaming.hudPlacement)
+        assertEquals(AirVisionHudFrameShape.Compact, gaming.hudFrameShape)
         assertEquals(100, gaming.brightnessPercent)
         assertEquals(AirVisionViewMode.Infinity, infinity.viewMode)
         assertEquals(AirVisionHudPlacement.UpperCenter, infinity.hudPlacement)
+        assertEquals(AirVisionHudFrameShape.Panoramic, infinity.hudFrameShape)
         assertTrue(infinity.distanceCm > working.distanceCm)
         assertTrue(infinity.lightLoadModeEnabled)
+    }
+
+    @Test
+    fun hudFrameShape_parsesSavedValuesAndUsesExplicitFallback() {
+        assertEquals(AirVisionHudFrameShape.Full, AirVisionHudFrameShape.fromRawValue("FULL"))
+        assertEquals(
+            AirVisionHudFrameShape.Panoramic,
+            AirVisionHudFrameShape.fromRawValue("unknown", fallback = AirVisionHudFrameShape.Panoramic),
+        )
     }
 
     @Test

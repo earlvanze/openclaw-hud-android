@@ -19,6 +19,26 @@ class HudExternalTouchRouterTest {
     }
 
     @Test
+    fun forwardsExternalJoystickAndTouchpadMappings() {
+        assertTrue(
+            shouldForwardExternalHudTouch(
+                deviceIsExternal = true,
+                eventSource = InputDevice.SOURCE_JOYSTICK,
+                eventDisplayId = 0,
+                hudDisplayId = 7,
+            ),
+        )
+        assertTrue(
+            shouldForwardExternalHudTouch(
+                deviceIsExternal = true,
+                eventSource = InputDevice.SOURCE_TOUCHPAD,
+                eventDisplayId = 0,
+                hudDisplayId = 7,
+            ),
+        )
+    }
+
+    @Test
     fun leavesInternalAndAlreadyRoutedTouchAlone() {
         assertFalse(
             shouldForwardExternalHudTouch(

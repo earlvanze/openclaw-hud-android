@@ -3,15 +3,16 @@ package ai.openclaw.app.ui
 import ai.openclaw.app.AirVisionAppLanguage
 import ai.openclaw.app.AirVisionCaptionModeStatus
 import ai.openclaw.app.AirVisionCompanionParity
-import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionDiagnosticsCompanionParity
+import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionFirmwareCaptureResultsSummary
 import ai.openclaw.app.AirVisionFirmwareSyncItem
 import ai.openclaw.app.AirVisionFirmwareSyncPlans
+import ai.openclaw.app.AirVisionHudControls
 import ai.openclaw.app.AirVisionHudDisplayFingerprint
 import ai.openclaw.app.AirVisionHudDisplayTarget
-import ai.openclaw.app.AirVisionHudControls
 import ai.openclaw.app.AirVisionHudDoubleTapAction
+import ai.openclaw.app.AirVisionHudFrameShape
 import ai.openclaw.app.AirVisionHudKeyAction
 import ai.openclaw.app.AirVisionHudMediaKeyAction
 import ai.openclaw.app.AirVisionHudPlacement
@@ -1377,6 +1378,18 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         onSelected = viewModel::setAirVisionHudPlacement,
                     )
                     HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "HUD Frame Shape",
+                        currentLabel = airVisionDisplaySettings.hudFrameShape.label,
+                        supportingText =
+                            "Morphs the usable HUD canvas without changing the external display resolution. Saved with this viewing mode.",
+                        options = AirVisionHudFrameShape.entries.toList(),
+                        selected = airVisionDisplaySettings.hudFrameShape,
+                        optionLabel = { it.label },
+                        optionDescription = ::airVisionHudFrameShapeDescription,
+                        onSelected = viewModel::setAirVisionHudFrameShape,
+                    )
+                    HorizontalDivider(color = mobileBorder)
                     AirVisionSliderRow(
                         label = "Safe Area",
                         valueText = "${airVisionDisplaySettings.safeAreaPercent}%",
@@ -1467,7 +1480,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         supportingContent = {
                             Text(
                                 "Restore ${airVisionCustomProfileLabels.labelFor(airVisionDisplaySettings.viewMode)} " +
-                                    "placement, safe area, brightness, distance, IPD, color, and performance defaults.",
+                                    "placement, frame shape, safe area, brightness, distance, IPD, color, and performance defaults.",
                                 style = mobileCallout,
                             )
                         },
@@ -2742,10 +2755,18 @@ private fun airVisionSplendidModeDescription(mode: AirVisionSplendidMode): Strin
 private fun airVisionHudPlacementDescription(placement: AirVisionHudPlacement): String =
     when (placement) {
         AirVisionHudPlacement.UpperLeft -> "Keeps glance text high and left for walking HUD use."
-        AirVisionHudPlacement.UpperCenter -> "Centers glance text near the top of the M1 display."
+        AirVisionHudPlacement.UpperCenter -> "Centers glance text near the top of the external display."
         AirVisionHudPlacement.UpperRight -> "Moves content away from left-side app or DeX overlays."
         AirVisionHudPlacement.Center -> "Places content in the central view for focused seated use."
         AirVisionHudPlacement.LowerCenter -> "Drops content lower when top captions or system UI need space."
+    }
+
+private fun airVisionHudFrameShapeDescription(shape: AirVisionHudFrameShape): String =
+    when (shape) {
+        AirVisionHudFrameShape.Full -> "Uses the full-height canvas for dense dashboards and long transcripts."
+        AirVisionHudFrameShape.Wide -> "Uses a wide, moderately shallow canvas for balanced HUD work."
+        AirVisionHudFrameShape.Compact -> "Concentrates controls and status near the selected placement."
+        AirVisionHudFrameShape.Panoramic -> "Uses a low panoramic strip for distant, low-distraction overlays."
     }
 
 private fun airVisionHudDisplayTargetDescription(

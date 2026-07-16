@@ -1,5 +1,7 @@
 package ai.openclaw.app
 
+import ai.openclaw.app.ui.HudScreen
+import ai.openclaw.app.ui.OpenClawTheme
 import android.app.Presentation
 import android.content.Context
 import android.graphics.Color
@@ -8,19 +10,17 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Display
+import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import ai.openclaw.app.ui.HudScreen
-import ai.openclaw.app.ui.OpenClawTheme
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import androidx.compose.ui.graphics.Color as ComposeColor
 
 internal class HudPresentation(
     private val activity: ComponentActivity,
@@ -109,6 +110,7 @@ internal class HudPresentation(
 
         val transformed = MotionEvent.obtain(event)
         return try {
+            transformed.source = InputDevice.SOURCE_TOUCHSCREEN
             transformed.transform(
                 Matrix().apply {
                     setScale(
@@ -139,11 +141,11 @@ internal class HudPresentation(
         WindowCompat.setDecorFitsSystemWindows(presentationWindow, false)
         presentationWindow.decorView.systemUiVisibility =
             View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                View.SYSTEM_UI_FLAG_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            View.SYSTEM_UI_FLAG_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         presentationWindow.attributes =
             presentationWindow.attributes.apply {
                 layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES

@@ -1,8 +1,8 @@
 OpenClaw HUD update:
-- Fix touch gestures and external touchscreen routing.
-- Ignore inactive built-in panels; fix Presentation context crashes.
-- Remember USB-C, wireless, or wearable displays across display-ID changes.
-- Handle pinned display disconnects; display-scoped density; remembered display identity.
-- Automatic Presentation routing; generic accessory-key controls.
-- Chat, notifications, voice, captions, reporting, and In-app privacy policy.
-- Live-verified on a connected USB-C display.
+- Fix taps, swipes, and external touchscreen/joystick routing.
+- Add animated Full, Wide, Compact, and Panoramic frame shapes per profile.
+- Recover Presentation after device unlock.
+- Remember USB-C, HDMI, wireless, and wearable displays across ID changes.
+- Handle pinned disconnects, display-scoped density, and remembered identity.
+- Keep chat, notifications, voice, captions, reporting, accessory keys, and in-app privacy policy.
+- Live-verified on USB-C display.

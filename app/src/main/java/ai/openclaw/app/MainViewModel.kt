@@ -431,6 +431,10 @@ class MainViewModel(
         prefs.setAirVisionHudPlacement(value)
     }
 
+    fun setAirVisionHudFrameShape(value: AirVisionHudFrameShape) {
+        prefs.setAirVisionHudFrameShape(value)
+    }
+
     fun setAirVisionBrightnessPercent(value: Int) {
         prefs.setAirVisionBrightnessPercent(value)
     }

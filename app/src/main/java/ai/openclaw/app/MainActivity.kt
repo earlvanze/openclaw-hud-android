@@ -4,8 +4,10 @@ import ai.openclaw.app.ui.OpenClawTheme
 import ai.openclaw.app.ui.RootScreen
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.hardware.display.DeviceProductInfo
@@ -49,6 +51,7 @@ class MainActivity : ComponentActivity() {
     private var hudPresentationRecoveryRunnable: Runnable? = null
     private var hudPresentationStabilityRunnable: Runnable? = null
     private var hudDisplayListenerRegistered = false
+    private var hudUnlockReceiverRegistered = false
     private var appliedAirVisionAppLanguage: AirVisionAppLanguage? = null
     private val hudKeyInputController = AirVisionHudKeyInputController()
     private val hudSystemBarsHandler = Handler(Looper.getMainLooper())
@@ -68,6 +71,16 @@ class MainActivity : ComponentActivity() {
                     releaseHudPresentation(presentation, dismiss = true)
                 }
                 showHudPresentationIfAvailable()
+            }
+        }
+    private val hudUnlockReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(
+                context: Context?,
+                intent: Intent?,
+            ) {
+                if (intent?.action != Intent.ACTION_USER_PRESENT) return
+                recoverHudPresentationAfterUnlock()
             }
         }
 
@@ -92,6 +105,7 @@ class MainActivity : ComponentActivity() {
         permissionRequester = PermissionRequester(this)
         setupHudMediaSession()
         registerHudDisplayListener()
+        registerHudUnlockReceiver()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -201,7 +215,8 @@ class MainActivity : ComponentActivity() {
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
                 Log.d(
                     TAG,
-                    "Forwarded external HUD touch from ${inputDevice.name} to display ${presentation.display.displayId}",
+                    "Forwarded external HUD touch from ${inputDevice.name} source=0x${event.source.toString(16)} " +
+                        "to HUD display ${presentation.display.displayId}",
                 )
             }
             return true
@@ -222,6 +237,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         unregisterHudDisplayListener()
+        unregisterHudUnlockReceiver()
         cancelHudPresentationRecovery(resetAttempts = true)
         cancelHudPresentationStability()
         hudPresentationSession.current?.let { releaseHudPresentation(it, dismiss = true) }
@@ -267,6 +283,32 @@ class MainActivity : ComponentActivity() {
         val displayManager = getSystemService(DisplayManager::class.java) ?: return
         displayManager.unregisterDisplayListener(hudDisplayListener)
         hudDisplayListenerRegistered = false
+    }
+
+    private fun registerHudUnlockReceiver() {
+        if (!BuildConfig.OPENCLAW_DEFAULT_HUD || hudUnlockReceiverRegistered) return
+        ContextCompat.registerReceiver(
+            this,
+            hudUnlockReceiver,
+            IntentFilter(Intent.ACTION_USER_PRESENT),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+        hudUnlockReceiverRegistered = true
+    }
+
+    private fun unregisterHudUnlockReceiver() {
+        if (!hudUnlockReceiverRegistered) return
+        unregisterReceiver(hudUnlockReceiver)
+        hudUnlockReceiverRegistered = false
+    }
+
+    private fun recoverHudPresentationAfterUnlock() {
+        val current = hudPresentationSession.current
+        if (current != null) {
+            Log.d(TAG, "Recreating HUD presentation after device unlock")
+            releaseHudPresentation(current, dismiss = true)
+        }
+        showHudPresentationIfAvailable()
     }
 
     private fun showHudPresentationIfAvailable() {

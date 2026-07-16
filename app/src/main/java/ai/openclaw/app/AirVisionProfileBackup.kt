@@ -57,6 +57,7 @@ data class AirVisionBackupDisplayProfile(
     val viewMode: String,
     val splendidMode: String,
     val hudPlacement: String,
+    val hudFrameShape: String = "",
     val brightnessPercent: Int,
     val blueLightFilterPercent: Int,
     val distanceCm: Int,
@@ -72,6 +73,7 @@ data class AirVisionBackupDisplayProfile(
 @Serializable
 data class AirVisionBackupRuntimeProfile(
     val viewMode: String,
+    val hudFrameShape: String = "",
     val ipdAdjustmentEnabled: Boolean,
     val threeDModeAvailable: Boolean,
     val blueLightFilterAvailable: Boolean,
@@ -84,8 +86,8 @@ data class AirVisionBackupRuntimeProfile(
 
 object AirVisionProfileBackups {
     const val SCHEMA = "openclaw.airvision.m1.profile-backup"
-    const val VERSION = 5
-    private val SUPPORTED_VERSIONS = setOf(1, 2, 3, 4, VERSION)
+    const val VERSION = 6
+    private val SUPPORTED_VERSIONS = setOf(1, 2, 3, 4, 5, VERSION)
 
     private val json =
         Json {
@@ -102,7 +104,7 @@ object AirVisionProfileBackups {
                 json.decodeFromString<AirVisionProfileBackup>(raw)
             } catch (error: IllegalArgumentException) {
                 throw IllegalArgumentException("Profile backup is not valid JSON.", error)
-        }
+            }
 
         require(backup.schema == SCHEMA) { "Profile backup schema is not supported." }
         require(backup.version in SUPPORTED_VERSIONS) { "Profile backup version is not supported." }
@@ -164,7 +166,8 @@ object AirVisionProfileBackups {
                 "Version ${resolved.backup.version}; ${resolved.profileByMode.size} profiles: $profileLabels",
                 "Active: ${labels.labelFor(resolved.activeViewMode)}",
                 "Brightness ${active.brightnessPercent}%, distance ${active.distanceCm} cm, HUD scale ${active.hudScalePercent}%, IPD ${active.ipdMm} mm",
-                "Splendid ${active.splendidMode.label}, Eye Care ${active.blueLightFilterPercent}%, ${active.hudPlacement.label}",
+                "Splendid ${active.splendidMode.label}, Eye Care ${active.blueLightFilterPercent}%, " +
+                    "${active.hudPlacement.label}, ${active.hudFrameShape.label} frame",
                 "Single tap ${controls.singleTapAction.label}; double tap ${controls.doubleTapAction.label}; swipe ${controls.swipeAction.label}",
                 "Brightness key ${controls.brightnessKeyAction.label}; media key ${controls.mediaKeyAction.label}",
                 "Runtime effective HUD scale ${runtime.effectiveHudScalePercent}%, " +
@@ -238,6 +241,7 @@ object AirVisionProfileBackups {
             viewMode = settings.viewMode.rawValue,
             splendidMode = settings.splendidMode.rawValue,
             hudPlacement = settings.hudPlacement.rawValue,
+            hudFrameShape = settings.hudFrameShape.rawValue,
             brightnessPercent = settings.brightnessPercent,
             blueLightFilterPercent = settings.blueLightFilterPercent,
             distanceCm = settings.distanceCm,
@@ -253,6 +257,7 @@ object AirVisionProfileBackups {
     fun runtimeProfileFromSettings(settings: AirVisionDisplaySettings): AirVisionBackupRuntimeProfile =
         AirVisionBackupRuntimeProfile(
             viewMode = settings.viewMode.rawValue,
+            hudFrameShape = settings.hudFrameShape.rawValue,
             ipdAdjustmentEnabled = settings.ipdAdjustmentEnabled,
             threeDModeAvailable = settings.threeDModeAvailable,
             blueLightFilterAvailable = settings.blueLightFilterAvailable,
@@ -274,11 +279,14 @@ object AirVisionProfileBackups {
                 AirVisionDisplaySettings.hudDimAlphaForBrightnessPercent(settings.brightnessPercent) > 0f,
         )
 
-    fun settingsFromProfile(profile: AirVisionBackupDisplayProfile): AirVisionDisplaySettings =
-        AirVisionDisplaySettings(
-            viewMode = requireViewMode(profile.viewMode),
+    fun settingsFromProfile(profile: AirVisionBackupDisplayProfile): AirVisionDisplaySettings {
+        val viewMode = requireViewMode(profile.viewMode)
+        val defaultFrameShape = AirVisionDisplaySettings.defaultsForViewMode(viewMode).hudFrameShape
+        return AirVisionDisplaySettings(
+            viewMode = viewMode,
             splendidMode = requireSplendidMode(profile.splendidMode),
             hudPlacement = requireHudPlacement(profile.hudPlacement),
+            hudFrameShape = requireHudFrameShape(profile.hudFrameShape, defaultFrameShape),
             brightnessPercent = profile.brightnessPercent,
             blueLightFilterPercent = profile.blueLightFilterPercent,
             distanceCm = profile.distanceCm,
@@ -290,6 +298,7 @@ object AirVisionProfileBackups {
             threeDModeEnabled = profile.threeDModeEnabled,
             lightLoadModeEnabled = profile.lightLoadModeEnabled,
         ).normalized
+    }
 
     fun labelsFromBackup(labels: AirVisionBackupCustomLabels): AirVisionCustomProfileLabels =
         AirVisionCustomProfileLabels(
@@ -360,6 +369,15 @@ object AirVisionProfileBackups {
         AirVisionHudPlacement.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }
             ?: throw IllegalArgumentException("Unsupported AirVision HUD placement: $rawValue")
 
+    private fun requireHudFrameShape(
+        rawValue: String,
+        fallback: AirVisionHudFrameShape,
+    ): AirVisionHudFrameShape {
+        if (rawValue.isBlank()) return fallback
+        return AirVisionHudFrameShape.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }
+            ?: throw IllegalArgumentException("Unsupported HUD frame shape: $rawValue")
+    }
+
     private fun requireSingleTapAction(rawValue: String): AirVisionHudTouchAction =
         AirVisionHudTouchAction.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }
             ?: throw IllegalArgumentException("Unsupported AirVision single-tap action: $rawValue")
@@ -402,6 +420,7 @@ object AirVisionProfileBackups {
         modes.mapNotNull { mode ->
             val runtime = runtimeByMode[mode] ?: return@mapNotNull null
             "Runtime ${labels.labelFor(mode)}: effective HUD scale ${runtime.effectiveHudScalePercent}%, " +
+                "${runtime.hudFrameShape.ifBlank { "mode default" }} frame, " +
                 "transcript ${runtime.hudTranscriptEntryCount}, captions ${runtime.hudCaptionEntryCount}, " +
                 "overlays ${enabledDisabled(runtime.colorPreviewOverlaysEnabled)}, " +
                 "dimming ${enabledDisabled(runtime.brightnessDimmingEnabled)}"
@@ -412,6 +431,7 @@ object AirVisionProfileBackups {
         derived: AirVisionBackupRuntimeProfile,
     ): Boolean =
         imported.viewMode.trim().lowercase() == derived.viewMode &&
+            (imported.hudFrameShape.isBlank() || imported.hudFrameShape == derived.hudFrameShape) &&
             imported.ipdAdjustmentEnabled == derived.ipdAdjustmentEnabled &&
             imported.threeDModeAvailable == derived.threeDModeAvailable &&
             imported.blueLightFilterAvailable == derived.blueLightFilterAvailable &&

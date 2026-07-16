@@ -75,10 +75,29 @@ enum class AirVisionHudPlacement(
     }
 }
 
+enum class AirVisionHudFrameShape(
+    val rawValue: String,
+    val label: String,
+) {
+    Full("full", "Full"),
+    Wide("wide", "Wide"),
+    Compact("compact", "Compact"),
+    Panoramic("panoramic", "Panoramic"),
+    ;
+
+    companion object {
+        fun fromRawValue(
+            rawValue: String?,
+            fallback: AirVisionHudFrameShape = Wide,
+        ): AirVisionHudFrameShape = entries.firstOrNull { it.rawValue == rawValue?.trim()?.lowercase() } ?: fallback
+    }
+}
+
 data class AirVisionDisplaySettings(
     val viewMode: AirVisionViewMode = AirVisionViewMode.Working,
     val splendidMode: AirVisionSplendidMode = AirVisionSplendidMode.Standard,
     val hudPlacement: AirVisionHudPlacement = AirVisionHudPlacement.UpperLeft,
+    val hudFrameShape: AirVisionHudFrameShape = AirVisionHudFrameShape.Wide,
     val brightnessPercent: Int = DEFAULT_BRIGHTNESS_PERCENT,
     val blueLightFilterPercent: Int = DEFAULT_BLUE_LIGHT_FILTER_PERCENT,
     val distanceCm: Int = DEFAULT_DISTANCE_CM,
@@ -144,6 +163,7 @@ data class AirVisionDisplaySettings(
                         viewMode = mode,
                         splendidMode = AirVisionSplendidMode.Standard,
                         hudPlacement = AirVisionHudPlacement.UpperLeft,
+                        hudFrameShape = AirVisionHudFrameShape.Wide,
                         brightnessPercent = DEFAULT_BRIGHTNESS_PERCENT,
                         blueLightFilterPercent = DEFAULT_BLUE_LIGHT_FILTER_PERCENT,
                         distanceCm = DEFAULT_DISTANCE_CM,
@@ -160,6 +180,7 @@ data class AirVisionDisplaySettings(
                         viewMode = mode,
                         splendidMode = AirVisionSplendidMode.Game,
                         hudPlacement = AirVisionHudPlacement.Center,
+                        hudFrameShape = AirVisionHudFrameShape.Compact,
                         brightnessPercent = 100,
                         blueLightFilterPercent = 0,
                         distanceCm = 65,
@@ -176,6 +197,7 @@ data class AirVisionDisplaySettings(
                         viewMode = mode,
                         splendidMode = AirVisionSplendidMode.Standard,
                         hudPlacement = AirVisionHudPlacement.UpperCenter,
+                        hudFrameShape = AirVisionHudFrameShape.Panoramic,
                         brightnessPercent = 70,
                         blueLightFilterPercent = 10,
                         distanceCm = 120,
@@ -192,6 +214,7 @@ data class AirVisionDisplaySettings(
                         viewMode = mode,
                         splendidMode = AirVisionSplendidMode.Office,
                         hudPlacement = AirVisionHudPlacement.UpperLeft,
+                        hudFrameShape = AirVisionHudFrameShape.Wide,
                         brightnessPercent = DEFAULT_BRIGHTNESS_PERCENT,
                         blueLightFilterPercent = 15,
                         distanceCm = 90,
@@ -208,6 +231,7 @@ data class AirVisionDisplaySettings(
                         viewMode = mode,
                         splendidMode = AirVisionSplendidMode.EyeCare,
                         hudPlacement = AirVisionHudPlacement.LowerCenter,
+                        hudFrameShape = AirVisionHudFrameShape.Compact,
                         brightnessPercent = 75,
                         blueLightFilterPercent = 30,
                         distanceCm = 60,
