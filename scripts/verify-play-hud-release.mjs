@@ -353,14 +353,13 @@ async function verifyListing(listingDir, language) {
     "protocol-capture targets",
   ]);
   requireIncludes("Release notes", releaseNotes, [
-    "Fix taps, swipes",
-    "external touchscreen/joystick routing",
+    "M1 tap keys",
+    "M1 swipe axis",
+    "external touch and joystick routing",
     "Full, Wide, Compact, and Panoramic frame shapes",
     "Recover Presentation after device unlock",
-    "Remember USB-C",
-    "wireless, and wearable displays",
-    "display-scoped density",
-    "in-app privacy policy",
+    "Remember external displays",
+    "Android ID changes",
   ]);
 
   return {

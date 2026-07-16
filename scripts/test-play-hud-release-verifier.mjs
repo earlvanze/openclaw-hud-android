@@ -56,18 +56,19 @@ const validListingFiles = {
     "It includes HID report-path summaries, per-feature firmware-apply readiness, desired firmware-sync state, and protocol-capture targets.",
   ].join("\n"),
   "release-notes.txt": [
-    "Remember USB-C, HDMI, wireless, or wearable displays across Android display-ID changes.",
-    "- Wait when the pinned display disconnects and keep remembered display identity.",
-    "- Use display-scoped density and resources.",
-    "- Automatic Presentation routing with generic accessory-key controls.",
-    "- Chat, notifications, voice, captions, reporting, and In-app privacy policy.",
+    "Route M1 tap keys through configured single/double-tap actions.",
+    "- Translate the M1 swipe axis into HUD chat scrolling.",
+    "- Keep external touch and joystick routing on the HUD display.",
+    "- Add Full, Wide, Compact, and Panoramic frame shapes.",
+    "- Recover Presentation after device unlock.",
+    "- Remember external displays across Android ID changes.",
   ].join("\n"),
 };
 
 const validReadme = [
   "OpenClaw HUD uses Android Presentation APIs and has been live-tested with a foldable Android phone.",
   "",
-  "The single-tap, double-tap, swipe, M1 brightness-key, and M1 media/tap-key actions are configurable.",
+  "The single-tap, double-tap, swipe, M1 brightness-key, and M1 media/tap-key actions are configurable. M1 accessory tap keys use the same HUD tap actions, and its Android AXIS_GENERIC_1 swipe strip is translated into HUD chat scrolling.",
   "Defaults are tuned for walking HUD use: single-tap clears the current notification, double-tap toggles mic, vertical swipe scrolls chat, and M1 brightness-key events can scroll chat.",
   "",
   "| Windows AirVision feature | Android HUD status |",

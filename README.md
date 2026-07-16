@@ -159,7 +159,9 @@ HUD controls:
 
 The single-tap, double-tap, swipe, M1 brightness-key, and M1 media/tap-key
 actions are configurable in Settings -> AirVision M1 -> Gesture & Hotkey
-Settings. Defaults are tuned for walking HUD use: single-tap clears the current
+Settings. M1 accessory tap keys use the same HUD tap actions, and its Android
+`AXIS_GENERIC_1` swipe strip is translated into HUD chat scrolling. Defaults
+are tuned for walking HUD use: single-tap clears the current
 notification, double-tap toggles mic, vertical swipe scrolls chat, and M1
 brightness-key events can scroll chat, step Android HUD brightness, or step
 virtual distance while the HUD is focused. Brightness and distance key changes

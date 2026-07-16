@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
     private var hudUnlockReceiverRegistered = false
     private var appliedAirVisionAppLanguage: AirVisionAppLanguage? = null
     private val hudKeyInputController = AirVisionHudKeyInputController()
+    private val hudMotionInputController = AirVisionHudMotionInputController()
     private val hudSystemBarsHandler = Handler(Looper.getMainLooper())
     private val hudDisplayListener =
         object : DisplayManager.DisplayListener {
@@ -227,6 +228,13 @@ class MainActivity : ComponentActivity() {
         return super.dispatchTouchEvent(event)
     }
 
+    override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
+        if (handleHudMotionEvent(event)) {
+            return true
+        }
+        return super.dispatchGenericMotionEvent(event)
+    }
+
     override fun onStop() {
         if (BuildConfig.OPENCLAW_DEFAULT_HUD && hudPresentationSession.current?.isShowing == true) {
             setHudMediaSessionActive(true)
@@ -383,7 +391,14 @@ class MainActivity : ComponentActivity() {
             releaseHudPresentation(current, dismiss = true)
         }
 
-        val presentation = HudPresentation(this, targetDisplay, viewModel, onHudKeyEvent = ::handleHudKeyEvent)
+        val presentation =
+            HudPresentation(
+                this,
+                targetDisplay,
+                viewModel,
+                onHudKeyEvent = ::handleHudKeyEvent,
+                onHudMotionEvent = ::handleHudMotionEvent,
+            )
         hudPresentationSession.attach(presentation)
         presentation.setOnDismissListener {
             if (hudPresentationSession.release(presentation)) {
@@ -546,15 +561,25 @@ class MainActivity : ComponentActivity() {
                 1f,
             ).build()
 
-    internal fun handleHudKeyEvent(event: KeyEvent): Boolean {
-        return handleHudKeyEvent(event, source = "key")
-    }
+    internal fun handleHudKeyEvent(event: KeyEvent): Boolean = handleHudKeyEvent(event, source = "key")
 
     private fun handleHudKeyEvent(
         event: KeyEvent,
         source: String,
     ): Boolean {
         if (!BuildConfig.OPENCLAW_DEFAULT_HUD) return false
+        if (event.isHudAccessoryEvent() && isHudAccessoryTapKey(event.keyCode)) {
+            val presentation = hudPresentationSession.current
+            if (presentation?.isShowing == true) {
+                if (event.action == KeyEvent.ACTION_UP) {
+                    presentation.dispatchAccessoryTap(
+                        event.eventTime.takeIf { it > 0L } ?: SystemClock.uptimeMillis(),
+                    )
+                    Log.d(TAG, "Forwarded HUD accessory tap keyCode=${event.keyCode} to touch controls")
+                }
+                return event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
+            }
+        }
         val decision =
             hudKeyInputController.handleKeyEvent(
                 keyCode = event.keyCode,
@@ -565,6 +590,39 @@ class MainActivity : ComponentActivity() {
             )
         handleHudKeyCommand(decision.command, event = event, source = source)
         return decision.consume
+    }
+
+    private fun handleHudMotionEvent(event: MotionEvent): Boolean {
+        if (!BuildConfig.OPENCLAW_DEFAULT_HUD || !event.isHudAccessoryEvent()) return false
+        if (viewModel.airVisionHudControls.value.swipeAction != AirVisionHudSwipeAction.ScrollChat) return false
+
+        val scrollDelta =
+            when (event.actionMasked) {
+                MotionEvent.ACTION_MOVE ->
+                    hudMotionInputController.absoluteAxisScrollDelta(
+                        deviceId = event.deviceId,
+                        value = event.getAxisValue(MotionEvent.AXIS_GENERIC_1),
+                        eventTimeMs = event.eventTime.takeIf { it > 0L } ?: SystemClock.uptimeMillis(),
+                    )
+                MotionEvent.ACTION_SCROLL -> {
+                    val relativeValue =
+                        listOf(
+                            event.getAxisValue(MotionEvent.AXIS_VSCROLL),
+                            event.getAxisValue(MotionEvent.AXIS_HSCROLL),
+                            event.getAxisValue(MotionEvent.AXIS_GENERIC_1),
+                        ).firstOrNull { kotlin.math.abs(it) > 0.001f } ?: 0f
+                    hudMotionInputController.relativeAxisScrollDelta(relativeValue)
+                }
+                else -> null
+            } ?: return false
+
+        viewModel.requestHudScroll(scrollDelta)
+        Log.d(
+            TAG,
+            "HUD accessory swipe scrolled chat device=${event.device?.name} delta=$scrollDelta " +
+                "source=0x${event.source.toString(16)}",
+        )
+        return true
     }
 
     private fun handleHudMicTap(source: String) {
@@ -638,13 +696,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun KeyEvent.isHudAccessoryEvent(): Boolean {
-        val inputDevice = device ?: InputDevice.getDevice(deviceId) ?: return false
-        return inputDevice.isExternal ||
-            inputDevice.name.contains("AirVision", ignoreCase = true) ||
-            inputDevice.name.contains("ASUS AirVision M1", ignoreCase = true) ||
-            (inputDevice.vendorId == ASUS_VENDOR_ID && inputDevice.productId == AIRVISION_M1_PRODUCT_ID)
-    }
+    private fun KeyEvent.isHudAccessoryEvent(): Boolean =
+        (device ?: InputDevice.getDevice(deviceId))?.isHudAccessory() == true
+
+    private fun MotionEvent.isHudAccessoryEvent(): Boolean =
+        (device ?: InputDevice.getDevice(deviceId))?.isHudAccessory() == true
+
+    private fun InputDevice.isHudAccessory(): Boolean =
+        isExternal ||
+            name.contains("AirVision", ignoreCase = true) ||
+            name.contains("ASUS AirVision M1", ignoreCase = true) ||
+            (vendorId == ASUS_VENDOR_ID && productId == AIRVISION_M1_PRODUCT_ID)
 
     private fun isOnExternalDisplay(): Boolean =
         display?.let { activeDisplay ->

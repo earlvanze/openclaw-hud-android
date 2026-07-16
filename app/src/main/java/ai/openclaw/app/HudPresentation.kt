@@ -35,6 +35,7 @@ internal class HudPresentation(
     display: Display,
     private val viewModel: MainViewModel,
     private val onHudKeyEvent: (KeyEvent) -> Boolean,
+    private val onHudMotionEvent: (MotionEvent) -> Boolean = { false },
 ) : Presentation(activity, display) {
     private val systemBarsHandler = Handler(Looper.getMainLooper())
     private val keepSystemBarsHidden =
@@ -94,6 +95,32 @@ internal class HudPresentation(
             return true
         }
         return super.dispatchKeyEvent(event)
+    }
+
+    override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
+        if (onHudMotionEvent(event)) {
+            return true
+        }
+        return super.dispatchGenericMotionEvent(event)
+    }
+
+    internal fun dispatchAccessoryTap(eventTimeMs: Long): Boolean {
+        val targetView = window?.decorView ?: return false
+        if (targetView.width <= 0 || targetView.height <= 0) return false
+
+        val x = targetView.width / 2f
+        val y = targetView.height / 2f
+        val down = MotionEvent.obtain(eventTimeMs, eventTimeMs, MotionEvent.ACTION_DOWN, x, y, 0)
+        val up = MotionEvent.obtain(eventTimeMs, eventTimeMs + 1L, MotionEvent.ACTION_UP, x, y, 0)
+        return try {
+            down.source = InputDevice.SOURCE_TOUCHSCREEN
+            up.source = InputDevice.SOURCE_TOUCHSCREEN
+            val downHandled = dispatchTouchEvent(down)
+            dispatchTouchEvent(up) || downHandled
+        } finally {
+            down.recycle()
+            up.recycle()
+        }
     }
 
     internal fun dispatchExternalTouchEvent(event: MotionEvent): Boolean {

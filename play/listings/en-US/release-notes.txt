@@ -1,9 +1,8 @@
 OpenClaw HUD update:
-- Fix taps, swipes, and external touchscreen/joystick routing.
-- Keep and wake the host on the phone when launched from DeX.
+- Route M1 tap keys through configured single/double-tap actions.
+- Translate the M1 swipe axis into HUD chat scrolling.
+- Keep external touch and joystick routing on the HUD display.
+- Keep and wake the phone host after DeX launch.
 - Add Full, Wide, Compact, and Panoramic frame shapes.
 - Recover Presentation after device unlock.
-- Remember USB-C, HDMI, wireless, and wearable displays across ID changes.
-- Handle pinned disconnects and display-scoped density.
-- Keep chat, voice, captions, accessory keys, and in-app privacy policy.
-- Live-verified on USB-C display.
+- Remember external displays across Android ID changes.
