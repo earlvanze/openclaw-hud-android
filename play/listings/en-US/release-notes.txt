@@ -1,6 +1,6 @@
 OpenClaw HUD update:
-- Reuse one host activity across launcher, assistant, and Demo Mode intents.
-- Prevent stacked external presentations after repeated launches.
-- Route touchscreens, touchpads, mice, styli, trackballs, wheels, DPAD/Page keys, and gamepads to the HUD.
-- Keep normalized joystick, hat-axis, and M1 input on the same capability-driven path.
-- Keep display pinning, frame-shape morphing, and the in-app privacy policy.
+- Reuse one host activity for launcher, assistant, and Demo Mode; prevent stacked presentations.
+- Route external touchscreens, touchpads, mice, styli, and trackballs.
+- Route wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.
+- Keep M1 tap and swipe support on the capability-driven input path under External HUD Input.
+- Keep Presentation recovery, display pinning, frame-shape morphing, and the in-app privacy policy.

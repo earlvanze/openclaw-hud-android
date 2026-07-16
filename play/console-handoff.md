@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.16.5-hud-release.aab`
-- SHA-256: `70bc4c0a0ba8c2919d970456455fc9ce99e22683295f3d4adb01e706c612186c`
-- Version: 2026.7.16.5 (2026071605)
+- AAB: `build/release-bundles/openclaw-2026.7.16.6-hud-release.aab`
+- SHA-256: `161a691defa51fa3dbe28db6a5bf37e2b5ba9ce258162559edd757299c5cea79`
+- Version: 2026.7.16.6 (2026071606)
 
 ## Remaining Console Blockers
 
@@ -60,12 +60,11 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD update:
-- Route external touchscreens, touchpads, mice, styli, and trackballs to the HUD.
-- Scroll with wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.
-- Keep M1 tap and swipe support through the same capability-driven input path.
-- Configure gestures and accessory keys under External HUD Input.
-- Keep Presentation recovery, display pinning, and frame-shape morphing.
-- Keep the in-app privacy policy.
+- Reuse one host activity for launcher, assistant, and Demo Mode; prevent stacked presentations.
+- Route external touchscreens, touchpads, mice, styli, and trackballs.
+- Route wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.
+- Keep M1 tap and swipe support on the capability-driven input path under External HUD Input.
+- Keep Presentation recovery, display pinning, frame-shape morphing, and the in-app privacy policy.
 
 ## Privacy Policy
 
