@@ -51,6 +51,35 @@ class HudNotificationFormatterTest {
     }
 
     @Test
+    fun selectHudNotifications_returnsRankedBrowsableLines() {
+        val lines =
+            selectHudNotifications(
+                listOf(
+                    entry(packageName = "com.example.old", title = "Old", category = "msg", postTimeMs = 10),
+                    entry(packageName = "com.google.android.apps.maps", text = "Turn left", postTimeMs = 5),
+                    entry(packageName = "com.example.new", title = "New", category = "msg", postTimeMs = 20),
+                ),
+            )
+
+        assertEquals(listOf("Maps", "New", "Old"), lines.map { it.source })
+    }
+
+    @Test
+    fun adjacentHudNotification_wrapsLeftAsNextAndRightAsPrevious() {
+        val lines =
+            listOf(
+                HudNotificationLine("one", "One", "First", null, HudNotificationKind.Message, true),
+                HudNotificationLine("two", "Two", "Second", null, HudNotificationKind.Message, true),
+                HudNotificationLine("three", "Three", "Third", null, HudNotificationKind.Message, true),
+            )
+
+        assertEquals("two", adjacentHudNotification(lines, "one", HudHorizontalSwipeDirection.Left)?.key)
+        assertEquals("three", adjacentHudNotification(lines, "one", HudHorizontalSwipeDirection.Right)?.key)
+        assertEquals("one", adjacentHudNotification(lines, "three", HudHorizontalSwipeDirection.Left)?.key)
+        assertNull(adjacentHudNotification(emptyList(), "one", HudHorizontalSwipeDirection.Left))
+    }
+
+    @Test
     fun selectHudNotification_ignoresEmptyNotifications() {
         val line =
             selectHudNotification(

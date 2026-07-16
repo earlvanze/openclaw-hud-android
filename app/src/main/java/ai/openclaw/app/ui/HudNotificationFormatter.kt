@@ -32,6 +32,10 @@ private val hudPrivateKeyBlockRegex =
     )
 
 internal fun selectHudNotification(notifications: List<DeviceNotificationEntry>): HudNotificationLine? {
+    return selectHudNotifications(notifications).firstOrNull()
+}
+
+internal fun selectHudNotifications(notifications: List<DeviceNotificationEntry>): List<HudNotificationLine> {
     val rankedNotifications =
         notifications
             .asSequence()
@@ -45,7 +49,19 @@ internal fun selectHudNotification(notifications: List<DeviceNotificationEntry>)
     return rankedNotifications
         .mapNotNull { it.toHudNotificationLine() }
         .filterNot { it.kind == HudNotificationKind.Status }
-        .firstOrNull()
+        .toList()
+}
+
+internal fun adjacentHudNotification(
+    notifications: List<HudNotificationLine>,
+    currentKey: String?,
+    direction: HudHorizontalSwipeDirection,
+): HudNotificationLine? {
+    if (notifications.isEmpty()) return null
+    val currentIndex = notifications.indexOfFirst { it.key == currentKey }.takeIf { it >= 0 } ?: 0
+    val offset = if (direction == HudHorizontalSwipeDirection.Left) 1 else -1
+    val nextIndex = (currentIndex + offset).mod(notifications.size)
+    return notifications[nextIndex]
 }
 
 private fun DeviceNotificationEntry.toHudNotificationLine(): HudNotificationLine? {

@@ -13,6 +13,7 @@ import ai.openclaw.app.AirVisionHudDisplayFingerprint
 import ai.openclaw.app.AirVisionHudDisplayTarget
 import ai.openclaw.app.AirVisionHudDoubleTapAction
 import ai.openclaw.app.AirVisionHudFrameShape
+import ai.openclaw.app.AirVisionHudHorizontalSwipeAction
 import ai.openclaw.app.AirVisionHudKeyAction
 import ai.openclaw.app.AirVisionHudMediaKeyAction
 import ai.openclaw.app.AirVisionHudPlacement
@@ -1650,14 +1651,25 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     )
                     HorizontalDivider(color = mobileBorder)
                     AirVisionOptionGroup(
-                        title = "Swipe",
+                        title = "Vertical Swipe",
                         currentLabel = airVisionHudControls.swipeAction.label,
-                        supportingText = "Controls drag gestures on the HUD surface.",
+                        supportingText = "Controls up and down gestures on the HUD surface.",
                         options = AirVisionHudSwipeAction.entries.toList(),
                         selected = airVisionHudControls.swipeAction,
                         optionLabel = { it.label },
                         optionDescription = ::airVisionSwipeActionDescription,
                         onSelected = viewModel::setAirVisionHudSwipeAction,
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "Horizontal Swipe",
+                        currentLabel = airVisionHudControls.horizontalSwipeAction.label,
+                        supportingText = "Controls left and right gestures on the HUD surface.",
+                        options = AirVisionHudHorizontalSwipeAction.entries.toList(),
+                        selected = airVisionHudControls.horizontalSwipeAction,
+                        optionLabel = { it.label },
+                        optionDescription = ::airVisionHorizontalSwipeActionDescription,
+                        onSelected = viewModel::setAirVisionHudHorizontalSwipeAction,
                     )
                     HorizontalDivider(color = mobileBorder)
                     AirVisionOptionGroup(
@@ -2802,6 +2814,13 @@ private fun airVisionSwipeActionDescription(action: AirVisionHudSwipeAction): St
     when (action) {
         AirVisionHudSwipeAction.None -> "Let Android or device firmware handle the gesture."
         AirVisionHudSwipeAction.ScrollChat -> "Drag up or down on the HUD to scroll chat history."
+    }
+
+private fun airVisionHorizontalSwipeActionDescription(action: AirVisionHudHorizontalSwipeAction): String =
+    when (action) {
+        AirVisionHudHorizontalSwipeAction.None -> "Let Android or device firmware handle the gesture."
+        AirVisionHudHorizontalSwipeAction.BrowseNotifications ->
+            "Swipe left for the next notification or right for the previous notification."
     }
 
 private fun airVisionBrightnessKeyActionDescription(action: AirVisionHudKeyAction): String =

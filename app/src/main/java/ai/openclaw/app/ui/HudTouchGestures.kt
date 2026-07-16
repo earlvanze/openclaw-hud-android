@@ -12,8 +12,15 @@ import kotlin.math.abs
 
 internal enum class HudGestureMotionResult {
     Tap,
-    Swipe,
+    VerticalSwipe,
+    SwipeLeft,
+    SwipeRight,
     Ignore,
+}
+
+internal enum class HudHorizontalSwipeDirection {
+    Left,
+    Right,
 }
 
 internal class HudGestureMotionTracker(
@@ -21,6 +28,7 @@ internal class HudGestureMotionTracker(
 ) {
     private var total = Offset.Zero
     private var verticalSwipe = false
+    private var horizontalSwipe = false
     private var canceled = false
 
     fun add(
@@ -33,9 +41,9 @@ internal class HudGestureMotionTracker(
         }
 
         total += delta
-        if (!verticalSwipe && total.getDistance() > touchSlop) {
+        if (!verticalSwipe && !horizontalSwipe && total.getDistance() > touchSlop) {
             if (abs(total.y) <= abs(total.x)) {
-                canceled = true
+                horizontalSwipe = true
                 return null
             }
             verticalSwipe = true
@@ -51,7 +59,9 @@ internal class HudGestureMotionTracker(
     fun finish(consumed: Boolean): HudGestureMotionResult =
         when {
             consumed || canceled -> HudGestureMotionResult.Ignore
-            verticalSwipe -> HudGestureMotionResult.Swipe
+            verticalSwipe -> HudGestureMotionResult.VerticalSwipe
+            horizontalSwipe && total.x < 0f -> HudGestureMotionResult.SwipeLeft
+            horizontalSwipe -> HudGestureMotionResult.SwipeRight
             total.getDistance() <= touchSlop -> HudGestureMotionResult.Tap
             else -> HudGestureMotionResult.Ignore
         }
@@ -65,6 +75,7 @@ internal fun Modifier.hudTouchGestures(
     onDoubleTap: () -> Unit,
     onSwipeStarted: () -> Unit,
     onVerticalSwipe: (Float) -> Unit,
+    onHorizontalSwipe: (HudHorizontalSwipeDirection) -> Unit,
 ): Modifier =
     pointerInput(singleTapKey, doubleTapKey, swipeKey) {
         var lastTapUptimeMs = 0L
@@ -111,20 +122,28 @@ internal fun Modifier.hudTouchGestures(
                     }
 
                     if (!change.pressed) {
-                        if (tracker.finish(consumed = change.isConsumed) == HudGestureMotionResult.Tap) {
-                            val elapsedMs = eventUptimeMs - lastTapUptimeMs
-                            if (lastTapUptimeMs > 0L && elapsedMs in 1..doubleTapTimeoutMs) {
-                                pendingSingleTap?.let(mainHandler::removeCallbacks)
-                                pendingSingleTap = null
-                                lastTapUptimeMs = 0L
-                                onDoubleTap()
-                            } else {
-                                if (lastTapUptimeMs > 0L) {
+                        when (tracker.finish(consumed = change.isConsumed)) {
+                            HudGestureMotionResult.Tap -> {
+                                val elapsedMs = eventUptimeMs - lastTapUptimeMs
+                                if (lastTapUptimeMs > 0L && elapsedMs in 1..doubleTapTimeoutMs) {
                                     pendingSingleTap?.let(mainHandler::removeCallbacks)
-                                    onSingleTap()
+                                    pendingSingleTap = null
+                                    lastTapUptimeMs = 0L
+                                    onDoubleTap()
+                                } else {
+                                    if (lastTapUptimeMs > 0L) {
+                                        pendingSingleTap?.let(mainHandler::removeCallbacks)
+                                        onSingleTap()
+                                    }
+                                    armSingleTap(eventUptimeMs)
                                 }
-                                armSingleTap(eventUptimeMs)
                             }
+
+                            HudGestureMotionResult.SwipeLeft -> onHorizontalSwipe(HudHorizontalSwipeDirection.Left)
+                            HudGestureMotionResult.SwipeRight -> onHorizontalSwipe(HudHorizontalSwipeDirection.Right)
+                            HudGestureMotionResult.VerticalSwipe,
+                            HudGestureMotionResult.Ignore,
+                            -> Unit
                         }
                         break
                     }

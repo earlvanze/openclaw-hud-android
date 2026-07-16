@@ -767,6 +767,7 @@ object AirVisionDiagnosticsSnapshots {
                     singleTapAction = hudControls.singleTapAction.rawValue,
                     doubleTapAction = hudControls.doubleTapAction.rawValue,
                     swipeAction = hudControls.swipeAction.rawValue,
+                    horizontalSwipeAction = hudControls.horizontalSwipeAction.rawValue,
                     brightnessKeyAction = hudControls.brightnessKeyAction.rawValue,
                     mediaKeyAction = hudControls.mediaKeyAction.rawValue,
                 ),
@@ -1051,7 +1052,8 @@ object AirVisionDiagnosticsSnapshots {
                     windowsAppTarget = "none",
                     androidEffect =
                         "single tap ${controls.singleTapAction.label}, double tap ${controls.doubleTapAction.label}, " +
-                            "swipe ${controls.swipeAction.label}, brightness key ${controls.brightnessKeyAction.label}, " +
+                            "vertical swipe ${controls.swipeAction.label}, horizontal swipe ${controls.horizontalSwipeAction.label}, " +
+                            "brightness key ${controls.brightnessKeyAction.label}, " +
                             "media key ${controls.mediaKeyAction.label}",
                     liveM1ProofRequired = true,
                     firmwareGate = "none",

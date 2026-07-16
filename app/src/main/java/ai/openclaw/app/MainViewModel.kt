@@ -493,6 +493,10 @@ class MainViewModel(
         prefs.setAirVisionHudSwipeAction(action)
     }
 
+    fun setAirVisionHudHorizontalSwipeAction(action: AirVisionHudHorizontalSwipeAction) {
+        prefs.setAirVisionHudHorizontalSwipeAction(action)
+    }
+
     fun setAirVisionHudBrightnessKeyAction(action: AirVisionHudKeyAction) {
         prefs.setAirVisionHudBrightnessKeyAction(action)
     }

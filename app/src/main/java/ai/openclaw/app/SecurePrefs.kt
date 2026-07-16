@@ -53,6 +53,7 @@ class SecurePrefs(
         private const val AIR_VISION_HUD_SINGLE_TAP_ACTION_KEY = "airVision.hud.singleTapAction"
         private const val AIR_VISION_HUD_DOUBLE_TAP_ACTION_KEY = "airVision.hud.doubleTapAction"
         private const val AIR_VISION_HUD_SWIPE_ACTION_KEY = "airVision.hud.swipeAction"
+        private const val AIR_VISION_HUD_HORIZONTAL_SWIPE_ACTION_KEY = "airVision.hud.horizontalSwipeAction"
         private const val AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY = "airVision.hud.brightnessKeyAction"
         private const val AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY = "airVision.hud.mediaKeyAction"
         private const val AIR_VISION_APP_LANGUAGE_KEY = "airVision.app.language"
@@ -803,6 +804,11 @@ class SecurePrefs(
         _airVisionHudControls.value = _airVisionHudControls.value.copy(swipeAction = action)
     }
 
+    fun setAirVisionHudHorizontalSwipeAction(action: AirVisionHudHorizontalSwipeAction) {
+        plainPrefs.edit { putString(AIR_VISION_HUD_HORIZONTAL_SWIPE_ACTION_KEY, action.rawValue) }
+        _airVisionHudControls.value = _airVisionHudControls.value.copy(horizontalSwipeAction = action)
+    }
+
     fun setAirVisionHudBrightnessKeyAction(action: AirVisionHudKeyAction) {
         plainPrefs.edit { putString(AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY, action.rawValue) }
         _airVisionHudControls.value = _airVisionHudControls.value.copy(brightnessKeyAction = action)
@@ -908,6 +914,7 @@ class SecurePrefs(
                     singleTapAction = _airVisionHudControls.value.singleTapAction.rawValue,
                     doubleTapAction = _airVisionHudControls.value.doubleTapAction.rawValue,
                     swipeAction = _airVisionHudControls.value.swipeAction.rawValue,
+                    horizontalSwipeAction = _airVisionHudControls.value.horizontalSwipeAction.rawValue,
                     brightnessKeyAction = _airVisionHudControls.value.brightnessKeyAction.rawValue,
                     mediaKeyAction = _airVisionHudControls.value.mediaKeyAction.rawValue,
                 ),
@@ -959,6 +966,7 @@ class SecurePrefs(
             putString(AIR_VISION_HUD_SINGLE_TAP_ACTION_KEY, controls.singleTapAction.rawValue)
             putString(AIR_VISION_HUD_DOUBLE_TAP_ACTION_KEY, controls.doubleTapAction.rawValue)
             putString(AIR_VISION_HUD_SWIPE_ACTION_KEY, controls.swipeAction.rawValue)
+            putString(AIR_VISION_HUD_HORIZONTAL_SWIPE_ACTION_KEY, controls.horizontalSwipeAction.rawValue)
             putString(AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY, controls.brightnessKeyAction.rawValue)
             putString(AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY, controls.mediaKeyAction.rawValue)
             putString(AIR_VISION_APP_LANGUAGE_KEY, appPreferences.language.rawValue)
@@ -1312,6 +1320,10 @@ class SecurePrefs(
             swipeAction =
                 AirVisionHudSwipeAction.fromRawValue(
                     plainPrefs.getString(AIR_VISION_HUD_SWIPE_ACTION_KEY, null),
+                ),
+            horizontalSwipeAction =
+                AirVisionHudHorizontalSwipeAction.fromRawValue(
+                    plainPrefs.getString(AIR_VISION_HUD_HORIZONTAL_SWIPE_ACTION_KEY, null),
                 ),
             brightnessKeyAction =
                 AirVisionHudKeyAction.fromRawValue(

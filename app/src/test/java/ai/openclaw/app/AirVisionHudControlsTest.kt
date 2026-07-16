@@ -19,6 +19,10 @@ class AirVisionHudControlsTest {
             AirVisionHudSwipeAction.fromRawValue(null),
         )
         assertEquals(
+            AirVisionHudHorizontalSwipeAction.BrowseNotifications,
+            AirVisionHudHorizontalSwipeAction.fromRawValue(null),
+        )
+        assertEquals(
             AirVisionHudKeyAction.ScrollChat,
             AirVisionHudKeyAction.fromRawValue(null),
         )
@@ -41,6 +45,10 @@ class AirVisionHudControlsTest {
         assertEquals(
             AirVisionHudSwipeAction.None,
             AirVisionHudSwipeAction.fromRawValue(" NONE "),
+        )
+        assertEquals(
+            AirVisionHudHorizontalSwipeAction.None,
+            AirVisionHudHorizontalSwipeAction.fromRawValue(" NONE "),
         )
         assertEquals(
             AirVisionHudKeyAction.None,

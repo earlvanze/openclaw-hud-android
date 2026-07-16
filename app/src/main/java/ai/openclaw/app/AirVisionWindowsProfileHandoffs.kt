@@ -507,6 +507,7 @@ object AirVisionWindowsProfileHandoffs {
             singleTapAction = AirVisionHudTouchAction.fromRawValue(singleTapAction),
             doubleTapAction = AirVisionHudDoubleTapAction.fromRawValue(doubleTapAction),
             swipeAction = AirVisionHudSwipeAction.fromRawValue(swipeAction),
+            horizontalSwipeAction = AirVisionHudHorizontalSwipeAction.fromRawValue(horizontalSwipeAction),
             brightnessKeyAction = AirVisionHudKeyAction.fromRawValue(brightnessKeyAction),
             mediaKeyAction = AirVisionHudMediaKeyAction.fromRawValue(mediaKeyAction),
         )

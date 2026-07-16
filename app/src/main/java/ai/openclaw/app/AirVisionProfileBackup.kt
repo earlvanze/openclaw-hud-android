@@ -28,6 +28,7 @@ data class AirVisionBackupHudControls(
     val singleTapAction: String,
     val doubleTapAction: String,
     val swipeAction: String,
+    val horizontalSwipeAction: String = AirVisionHudHorizontalSwipeAction.BrowseNotifications.rawValue,
     val brightnessKeyAction: String,
     val mediaKeyAction: String,
 )
@@ -168,7 +169,8 @@ object AirVisionProfileBackups {
                 "Brightness ${active.brightnessPercent}%, distance ${active.distanceCm} cm, HUD scale ${active.hudScalePercent}%, IPD ${active.ipdMm} mm",
                 "Splendid ${active.splendidMode.label}, Eye Care ${active.blueLightFilterPercent}%, " +
                     "${active.hudPlacement.label}, ${active.hudFrameShape.label} frame",
-                "Single tap ${controls.singleTapAction.label}; double tap ${controls.doubleTapAction.label}; swipe ${controls.swipeAction.label}",
+                "Single tap ${controls.singleTapAction.label}; double tap ${controls.doubleTapAction.label}; " +
+                    "vertical swipe ${controls.swipeAction.label}; horizontal swipe ${controls.horizontalSwipeAction.label}",
                 "Brightness key ${controls.brightnessKeyAction.label}; media key ${controls.mediaKeyAction.label}",
                 "Runtime effective HUD scale ${runtime.effectiveHudScalePercent}%, " +
                     "transcript ${runtime.hudTranscriptEntryCount}, captions ${runtime.hudCaptionEntryCount}",
@@ -319,6 +321,7 @@ object AirVisionProfileBackups {
             singleTapAction = requireSingleTapAction(controls.singleTapAction),
             doubleTapAction = requireDoubleTapAction(controls.doubleTapAction),
             swipeAction = requireSwipeAction(controls.swipeAction),
+            horizontalSwipeAction = requireHorizontalSwipeAction(controls.horizontalSwipeAction),
             brightnessKeyAction = requireBrightnessKeyAction(controls.brightnessKeyAction),
             mediaKeyAction = requireMediaKeyAction(controls.mediaKeyAction),
         )
@@ -389,6 +392,10 @@ object AirVisionProfileBackups {
     private fun requireSwipeAction(rawValue: String): AirVisionHudSwipeAction =
         AirVisionHudSwipeAction.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }
             ?: throw IllegalArgumentException("Unsupported AirVision swipe action: $rawValue")
+
+    private fun requireHorizontalSwipeAction(rawValue: String): AirVisionHudHorizontalSwipeAction =
+        AirVisionHudHorizontalSwipeAction.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }
+            ?: throw IllegalArgumentException("Unsupported AirVision horizontal swipe action: $rawValue")
 
     private fun requireBrightnessKeyAction(rawValue: String): AirVisionHudKeyAction =
         AirVisionHudKeyAction.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }

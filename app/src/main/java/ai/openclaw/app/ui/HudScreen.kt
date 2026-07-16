@@ -5,6 +5,7 @@ package ai.openclaw.app.ui
 import ai.openclaw.app.AirVisionDisplaySettings
 import ai.openclaw.app.AirVisionHudDoubleTapAction
 import ai.openclaw.app.AirVisionHudFrameShape
+import ai.openclaw.app.AirVisionHudHorizontalSwipeAction
 import ai.openclaw.app.AirVisionHudPlacement
 import ai.openclaw.app.AirVisionHudSwipeAction
 import ai.openclaw.app.AirVisionHudTouchAction
@@ -157,12 +158,22 @@ fun HudScreen(viewModel: MainViewModel) {
         )
     }
 
-    val notificationLine =
+    val notificationLines =
         if (airVisionDemoModeEnabled) {
-            demoHudNotificationLine
+            demoHudNotificationLines
         } else {
-            selectHudNotification(notificationSnapshot.notifications)
+            selectHudNotifications(notificationSnapshot.notifications)
         }
+    val notificationKeys = notificationLines.map { it.key }
+    var selectedNotificationKey by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(notificationKeys) {
+        if (selectedNotificationKey !in notificationKeys) {
+            selectedNotificationKey = notificationKeys.firstOrNull()
+        }
+    }
+    val notificationLine =
+        notificationLines.firstOrNull { it.key == selectedNotificationKey }
+            ?: notificationLines.firstOrNull()
     val runningLine =
         if (airVisionDemoModeEnabled) {
             null
@@ -284,7 +295,7 @@ fun HudScreen(viewModel: MainViewModel) {
                 .hudTouchGestures(
                     singleTapKey = notificationLine?.key to airVisionHudControls.singleTapAction,
                     doubleTapKey = notificationLine?.key to airVisionHudControls.doubleTapAction,
-                    swipeKey = airVisionHudControls.swipeAction,
+                    swipeKey = airVisionHudControls.swipeAction to airVisionHudControls.horizontalSwipeAction,
                     onSingleTap = {
                         performHudSingleTapAction(
                             action = airVisionHudControls.singleTapAction,
@@ -310,6 +321,28 @@ fun HudScreen(viewModel: MainViewModel) {
                     onVerticalSwipe = { deltaPx ->
                         if (airVisionHudControls.swipeAction == AirVisionHudSwipeAction.ScrollChat) {
                             chatScrollState.dispatchRawDelta(deltaPx)
+                        }
+                    },
+                    onHorizontalSwipe = { direction ->
+                        if (
+                            airVisionHudControls.horizontalSwipeAction ==
+                            AirVisionHudHorizontalSwipeAction.BrowseNotifications
+                        ) {
+                            val next =
+                                adjacentHudNotification(
+                                    notifications = notificationLines,
+                                    currentKey = notificationLine?.key,
+                                    direction = direction,
+                                )
+                            when {
+                                next == null -> viewModel.showHudTransientMessage("No notifications")
+                                notificationLines.size == 1 -> viewModel.showHudTransientMessage("1 notification")
+                                else -> {
+                                    selectedNotificationKey = next.key
+                                    val position = notificationLines.indexOfFirst { it.key == next.key } + 1
+                                    viewModel.showHudTransientMessage("${next.source} $position/${notificationLines.size}")
+                                }
+                            }
                         }
                     },
                 ),
@@ -1073,14 +1106,24 @@ private data class HudChatTranscriptEntry(
     val text: String,
 )
 
-private val demoHudNotificationLine =
-    HudNotificationLine(
-        key = "airvision-demo-navigation",
-        source = "Maps",
-        primary = "Turn right on Madison St",
-        secondary = "0.2 mi, then continue toward the station",
-        kind = HudNotificationKind.Navigation,
-        isClearable = false,
+private val demoHudNotificationLines =
+    listOf(
+        HudNotificationLine(
+            key = "airvision-demo-navigation",
+            source = "Maps",
+            primary = "Turn right on Madison St",
+            secondary = "0.2 mi, then continue toward the station",
+            kind = HudNotificationKind.Navigation,
+            isClearable = false,
+        ),
+        HudNotificationLine(
+            key = "airvision-demo-message",
+            source = "Messages",
+            primary = "Jordan",
+            secondary = "Meeting moved to 3:30 PM",
+            kind = HudNotificationKind.Message,
+            isClearable = false,
+        ),
     )
 
 private val demoHudChatTranscript =

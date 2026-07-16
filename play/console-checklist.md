@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.16.6-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.16.7-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `161a691defa51fa3dbe28db6a5bf37e2b5ba9ce258162559edd757299c5cea79`
-- Latest HUD bundle version: `2026.7.16.6 (2026071606)`.
+  `68765a66809fecd774d79ce0e38f6fee0b82e2ba50a7664750bc5d809c797620`
+- Latest HUD bundle version: `2026.7.16.7 (2026071607)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.

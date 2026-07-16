@@ -705,7 +705,8 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("false", layoutApply.getValue("liveM1ProofRequired").jsonPrimitive.content)
         assertEquals("none", layoutApply.getValue("firmwareGate").jsonPrimitive.content)
         assertEquals(
-            "single tap Dismiss notification, double tap Toggle mic, swipe Scroll chat, brightness key Scroll chat, media key Double-tap mic",
+            "single tap Dismiss notification, double tap Toggle mic, vertical swipe Scroll chat, " +
+                "horizontal swipe Browse notifications, brightness key Scroll chat, media key Double-tap mic",
             gestureApply.getValue("androidEffect").jsonPrimitive.content,
         )
         assertEquals("Cursor Follow, Center Cursor, 3DoF, or Unity mirror when needed", spatialApply.getValue("windowsAppTarget").jsonPrimitive.content)

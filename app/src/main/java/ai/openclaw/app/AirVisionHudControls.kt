@@ -44,6 +44,20 @@ enum class AirVisionHudSwipeAction(
     }
 }
 
+enum class AirVisionHudHorizontalSwipeAction(
+    val rawValue: String,
+    val label: String,
+) {
+    None("none", "None"),
+    BrowseNotifications("browse_notifications", "Browse notifications"),
+    ;
+
+    companion object {
+        fun fromRawValue(rawValue: String?): AirVisionHudHorizontalSwipeAction =
+            entries.firstOrNull { it.rawValue == rawValue?.trim()?.lowercase() } ?: BrowseNotifications
+    }
+}
+
 enum class AirVisionHudKeyAction(
     val rawValue: String,
     val label: String,
@@ -78,6 +92,8 @@ data class AirVisionHudControls(
     val singleTapAction: AirVisionHudTouchAction = AirVisionHudTouchAction.DismissNotification,
     val doubleTapAction: AirVisionHudDoubleTapAction = AirVisionHudDoubleTapAction.ToggleMic,
     val swipeAction: AirVisionHudSwipeAction = AirVisionHudSwipeAction.ScrollChat,
+    val horizontalSwipeAction: AirVisionHudHorizontalSwipeAction =
+        AirVisionHudHorizontalSwipeAction.BrowseNotifications,
     val brightnessKeyAction: AirVisionHudKeyAction = AirVisionHudKeyAction.ScrollChat,
     val mediaKeyAction: AirVisionHudMediaKeyAction = AirVisionHudMediaKeyAction.DoubleTapToggleMic,
 )

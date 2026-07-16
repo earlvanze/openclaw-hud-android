@@ -39,7 +39,7 @@ Current live target:
   targets that survives Android display-ID changes and waits when the pinned
   display is disconnected
 - [x] Minimal HUD gestures: single-tap dismisses clearable notifications,
-  double-tap toggles mic, and swipe scrolls chat
+  double-tap toggles mic, vertical swipe scrolls chat, and horizontal swipe browses notifications
 - [x] HUD input: Enter sends, Shift+Enter inserts a newline
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
@@ -152,13 +152,14 @@ HUD controls:
 - Single-tap a clearable notification to dismiss it.
 - Double-tap the HUD/touch surface to toggle mic capture when available.
 - Swipe vertically to scroll the compact chat transcript.
+- Swipe left or right to browse ranked HUD notifications.
 - Tap the thinking-level text in the status lights to cycle thinking level.
 - Tap `cc` in the HUD status lights to cycle captions: Off -> Samsung/native
   -> OpenClaw translation -> Off.
 - Press Enter on a hardware keyboard to send the chat input.
 - Press Shift+Enter for a newline.
 
-The single-tap, double-tap, swipe, brightness-key, and media/tap-key actions are
+The single-tap, double-tap, vertical-swipe, horizontal-swipe, brightness-key, and media/tap-key actions are
 configurable in Settings -> AirVision M1 -> External HUD Input. External
 touchscreens, touchpads, mice, styli, trackballs, DPAD/gamepad controls, rotary
 encoders, and mouse wheels route through the same Presentation-owned HUD input
@@ -166,7 +167,8 @@ path. Absolute joystick, hat, and wearable touch-strip axes are normalized to
 their reported Android motion ranges before scrolling chat. M1 accessory tap
 keys and `AXIS_GENERIC_1` remain supported without making ASUS identity a
 requirement. Defaults are tuned for walking HUD use: single-tap clears the
-current notification, double-tap toggles mic, and vertical swipe scrolls chat.
+current notification, double-tap toggles mic, vertical swipe scrolls chat, and
+horizontal swipe browses ranked navigation and message notifications.
 Accessory input does the same, while brightness-key events can scroll chat,
 step Android HUD brightness, or step virtual distance while the HUD is focused.
 Brightness and distance key changes

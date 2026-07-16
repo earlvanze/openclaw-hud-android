@@ -70,6 +70,8 @@ data class AirVisionSpatialMirrorFallback(
                     singleTapAction = AirVisionHudTouchAction.fromRawValue(controls.singleTapAction),
                     doubleTapAction = AirVisionHudDoubleTapAction.fromRawValue(controls.doubleTapAction),
                     swipeAction = AirVisionHudSwipeAction.fromRawValue(controls.swipeAction),
+                    horizontalSwipeAction =
+                        AirVisionHudHorizontalSwipeAction.fromRawValue(controls.horizontalSwipeAction),
                     brightnessKeyAction = AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction),
                     mediaKeyAction = AirVisionHudMediaKeyAction.fromRawValue(controls.mediaKeyAction),
                 ),
