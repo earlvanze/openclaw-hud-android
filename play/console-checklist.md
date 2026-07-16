@@ -81,7 +81,8 @@ Current local status:
 - Browser staging verified the separate `ai.openclaw.app.hud` app, internal
   tester list, reviewer Demo Mode instructions, app-content forms, listing,
   contact details, graphics, screenshots, and replacement signed AAB version
-  `2026071606` on 2026-07-16. The release remains a saved draft.
+  `2026071607` on 2026-07-16; `2026071606` is absent. The release remains a
+  saved draft, and `Next` was not used.
   API/OAuth preflight remains a separate authentication and package-access gate.
   `node scripts/report-play-readiness.mjs` summarizes OAuth, service-account,
   local artifact, and dry-run gates together.
