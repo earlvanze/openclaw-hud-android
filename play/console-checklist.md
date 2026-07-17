@@ -99,10 +99,10 @@ Current local status:
 - Browser staging verified the separate `ai.openclaw.app.hud` app, internal
   tester list, reviewer Demo Mode instructions, app-content forms, listing,
   contact details, graphics, screenshots, and replacement signed AAB version
-  `2026071704` on 2026-07-17; `2026071703`, `2026071702`, and `2026071701`
-  are absent. The
+  `2026071705` on 2026-07-17; `2026071704`, `2026071703`, `2026071702`, and
+  `2026071701` are absent. The
   saved release name is
-  `OpenClaw HUD 2026.7.17.4 agent switching`; exact release notes
+  `OpenClaw HUD 2026.7.17.5 session switching`; exact release notes
   persisted after a full page reload, `Save as draft` is disabled, and `Next`
   was not used.
   API/OAuth preflight remains a separate authentication and package-access gate.
