@@ -1,8 +1,5 @@
 OpenClaw HUD update:
-- Reply to compatible messages; stop OpenClaw runs by HUD, B, or Esc.
-- Browse by swipe, DPAD, or gamepad.
-- Keep Presentation recovery, display pinning, and frame-shape morphing.
-- Route external touchscreens, touchpads, mice, styli, and trackballs.
-- Route wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.
+- Review execution requests; deny or allow once. Optional global approvals require explicit gateway administrator scope. Gamepad Y allows once; B or Esc denies.
+- Keep external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; and normalized joystick or hat axes.
 - Keep M1 tap and swipe support on the capability-driven input path in External HUD Input.
-- Keep the In-app privacy policy.
+- Reply to compatible messages and stop active runs.
