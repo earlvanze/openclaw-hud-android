@@ -101,10 +101,10 @@ Current local status:
 - Browser staging verified the separate `ai.openclaw.app.hud` app, internal
   tester list, reviewer Demo Mode instructions, app-content forms, listing,
   contact details, graphics, screenshots, and replacement signed AAB version
-  `2026071708` on 2026-07-17; `2026071707`, `2026071705`, `2026071704`,
+  `2026071709` on 2026-07-17; `2026071708`, `2026071707`, `2026071705`, `2026071704`,
   `2026071703`, `2026071702`, and `2026071701` are absent. The
   saved release name is
-  `OpenClaw HUD 2026.7.17.8 M1 mic fix`; exact release notes
+  `OpenClaw HUD 2026.7.17.9 mic key modes`; exact release notes
   persisted after a full page reload, `Save as draft` is disabled, and `Next`
   was not used.
   API/OAuth preflight remains a separate authentication and package-access gate.
