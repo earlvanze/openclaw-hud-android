@@ -1,6 +1,5 @@
 OpenClaw HUD:
-- Configurable single-tap, double-tap, or hold-to-talk microphone control for external HUD keys.
-- Fix physical M1 media-key double-tap microphone routing using measured hardware timing.
-- External touch, pointer, wheel, rotary, DPAD, Page, gamepad, joystick, and hat input.
+- Single-tap, double-tap, or hold-to-talk microphone keys.
+- external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
 - M1 tap and swipe support uses the capability-driven input path in External HUD Input.
 - Presentation recovery, display pinning, frame-shape morphing, In-app privacy policy.

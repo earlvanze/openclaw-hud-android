@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.17.8-hud-release.aab`
-- SHA-256: `444f2c187142215479745f50e87c23d8bf200c0ea794a1272ff3828da0d81a1b`
-- Version: 2026.7.17.8 (2026071708)
+- AAB: `build/release-bundles/openclaw-2026.7.17.9-hud-release.aab`
+- SHA-256: `ad8658d27a04f4862f678b19ed8d31a3b4e41d1bb5bca93f3074b4799e3e015f`
+- Version: 2026.7.17.9 (2026071709)
 
 ## Remaining Console Blockers
 
@@ -62,7 +62,7 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD:
-- Fix physical M1 media-key double-tap microphone control using measured hardware timing.
+- Single-tap, double-tap, or hold-to-talk microphone keys.
 - external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
 - M1 tap and swipe support uses the capability-driven input path in External HUD Input.
 - Presentation recovery, display pinning, frame-shape morphing, In-app privacy policy.
@@ -122,7 +122,7 @@ Capability states:
   Evidence: Light Load trims Android HUD work offline; Motion Sync and panel 3D writes remain firmware-protocol gated.
 - Gesture and hotkey settings: M1 optional for review
   Review path: Settings > AirVision M1 > Gesture & Hotkey Settings and Diagnostics Export.
-  Evidence: Single-tap, double-tap, swipe, brightness-key, and media-key mappings are stored offline. Settings and diagnostics export shortcut-menu parity for ASUS brightness/volume/distance behavior, plus the active M1 brightness-key/media-key mode, Android consumption state, step sizes, firmware passthrough expectation, and Windows gesture catalog entries for ASUS brightness swipe, play/pause tap, instant transparent, center virtual screens, 3D hold, and shortcut-menu hold/slide behavior; live M1 proof is needed for firmware-delivered events.
+  Evidence: Single-tap, double-tap, hold-to-talk, swipe, brightness-key, and media-key mappings are stored offline. Settings and diagnostics export shortcut-menu parity for ASUS brightness/volume/distance behavior, plus the active external-HUD brightness-key/media-key mode, Android consumption state, step sizes, firmware passthrough expectation, and Windows gesture catalog entries for ASUS brightness swipe, play/pause tap, instant transparent, center virtual screens, 3D hold, and shortcut-menu hold/slide behavior; live hardware proof is needed for firmware-delivered events.
 - USB firmware-link diagnostics: M1 optional for review
   Review path: Settings > AirVision M1 > Firmware Link and Diagnostics Export.
   Evidence: Firmware Link shows per-control WAIT/CAPTURE/READY rows with target value, Android effect, firmware status, missing evidence, and blocker text. Offline demo shows blocked/write-readiness states; connected M1 adds live descriptor and HID report-path context.
@@ -208,7 +208,7 @@ Windows app apply matrix:
   Firmware gate: none
 - Gesture and hotkey settings
   Windows target: none
-  Android effect: Single tap, double tap, swipe, brightness-key, and media-key mappings
+  Android effect: Single tap, double tap, hold-to-talk, swipe, brightness-key, and media-key mappings
   Proof: Stored mappings are reviewable offline; firmware-delivered event proof needs live M1 hardware.
   Firmware gate: none
 - Windows spatial/mirror features

@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.8-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.9-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `444f2c187142215479745f50e87c23d8bf200c0ea794a1272ff3828da0d81a1b`
-- Latest HUD bundle version: `2026.7.17.8 (2026071708)`.
+  `ad8658d27a04f4862f678b19ed8d31a3b4e41d1bb5bca93f3074b4799e3e015f`
+- Latest HUD bundle version: `2026.7.17.9 (2026071709)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -83,11 +83,12 @@ Current local status:
   still separate from the runtime and automated evidence.
 - Live physical M1 capture on 2026-07-17 recorded three `KEY_PLAYPAUSE` tap
   events from `/dev/input/event16`; the first deliberate pair arrived 1,452 ms
-  apart. v2026071708 routes that media key through the mic input controller
+  apart. v2026071709 routes that media key through the mic input controller
   instead of the external Presentation's synthetic touchscreen path and uses a
-  measured 2,000 ms hardware double-tap window. Touchscreen gesture timing is
-  unchanged. Unit, input-routing, Android lint, R8, release-signing, and
-  Play-package checks pass. Exact v2026071708 device installation still
+  measured 2,000 ms hardware double-tap window. It also adds configurable
+  single-tap mic and focused hold-to-talk modes for generic external HUD keys.
+  Touchscreen gesture timing is unchanged. Unit, input-routing, Android lint,
+  R8, release-signing, and Play-package checks pass. Exact v2026071709 device installation still
   requires a Play-signed delivery because the installed Play build and local
   upload-key APK have different signing certificates.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,

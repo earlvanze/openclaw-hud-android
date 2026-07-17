@@ -179,9 +179,9 @@ current notification on the phone, double-tap toggles mic, vertical swipe
 scrolls chat, and horizontal swipe browses ranked navigation and message
 notifications. External DPAD left/right and gamepad L1/R1 browse the same
 notification list; DPAD up/down and Page Up/Down scroll the transcript.
-Accessory input does the same, while media/tap keys can use single-tap mic,
-double-tap mic, or focused hold-to-talk behavior. Brightness-key events can scroll chat,
+Accessory input does the same, while brightness-key events can scroll chat,
 step Android HUD brightness, or step virtual distance while the HUD is focused.
+Media/tap keys can use single-tap mic, double-tap mic, or focused hold-to-talk behavior.
 Brightness and distance key changes
 show a temporary green HUD text confirmation.
 
