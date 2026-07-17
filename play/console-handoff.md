@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.17.5-hud-release.aab`
-- SHA-256: `639f0cdb2c76ea451ba5882aeb966e965115f4b68ae6cea88d9b0396f05a673a`
-- Version: 2026.7.17.5 (2026071705)
+- AAB: `build/release-bundles/openclaw-2026.7.17.7-hud-release.aab`
+- SHA-256: `18db8725311cf4fb6c9333934e646a88c9e981b6992769f03f7a40ab0ade524f`
+- Version: 2026.7.17.7 (2026071707)
 
 ## Remaining Console Blockers
 
@@ -62,8 +62,7 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD:
-- Switch recent sessions and agents on the external HUD; locked during runs and approvals.
-- Deny or allow execution once; global approvals require admin scope.
+- Fix HUD double-tap mic activation, permission prompts, and touch routing.
 - external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
 - M1 tap and swipe support uses the capability-driven input path in External HUD Input.
 - Presentation recovery, display pinning, frame-shape morphing, In-app privacy policy.

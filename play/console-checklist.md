@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.5-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.7-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `639f0cdb2c76ea451ba5882aeb966e965115f4b68ae6cea88d9b0396f05a673a`
-- Latest HUD bundle version: `2026.7.17.5 (2026071705)`.
+  `18db8725311cf4fb6c9333934e646a88c9e981b6992769f03f7a40ab0ade524f`
+- Latest HUD bundle version: `2026.7.17.7 (2026071707)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -81,13 +81,14 @@ Current local status:
   Presentation window on display 8. Demo Mode exercised the reply-capable HUD
   state. Secure M1 screenshots remained black, so physical touch reply proof is
   still separate from the runtime and automated evidence.
-- v2026071705 adds direct recent-session switching on generic external HUD
-  displays alongside the agent switcher. The compact list preserves the active
-  session, refreshes on open, and locks in Demo Mode, active runs, and pending
-  execution approvals. It retains safe execution-request review, reconnect
-  synchronization, controller shortcuts, and explicit global-scope opt-in.
-  Unit, session/agent-selection, concurrency, input-routing, lint, R8,
-  release-signing, and Play-package checks pass; exact device installation
+- v2026071707 moves HUD tap and swipe capture onto a background input layer so
+  interactive controls remain above it, routes touch mic actions through the
+  same permission-aware activity path as hardware input, reports actual mic
+  state, and clears stale enabled preferences after permission or recognizer
+  failures. It retains direct recent-session and agent switching, safe
+  execution-request review, reconnect synchronization, controller shortcuts,
+  and explicit global-scope opt-in. Unit, input-routing, ktlint, Android lint,
+  R8, release-signing, and Play-package checks pass; exact device installation
   awaits the Fold's return to the tailnet.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, release notes character limits, and local Play
@@ -99,10 +100,10 @@ Current local status:
 - Browser staging verified the separate `ai.openclaw.app.hud` app, internal
   tester list, reviewer Demo Mode instructions, app-content forms, listing,
   contact details, graphics, screenshots, and replacement signed AAB version
-  `2026071705` on 2026-07-17; `2026071704`, `2026071703`, `2026071702`, and
-  `2026071701` are absent. The
+  `2026071707` on 2026-07-17; `2026071705`, `2026071704`, `2026071703`,
+  `2026071702`, and `2026071701` are absent. The
   saved release name is
-  `OpenClaw HUD 2026.7.17.5 session switching`; exact release notes
+  `OpenClaw HUD 2026.7.17.7 mic gesture fix`; exact release notes
   persisted after a full page reload, `Save as draft` is disabled, and `Next`
   was not used.
   API/OAuth preflight remains a separate authentication and package-access gate.
