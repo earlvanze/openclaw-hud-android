@@ -58,6 +58,11 @@ class MainViewModel(
     val airVisionIdentifyToken: StateFlow<Long> = _airVisionIdentifyToken
     private val _externalHudMediaKeyLearning = MutableStateFlow(false)
     val externalHudMediaKeyLearning: StateFlow<Boolean> = _externalHudMediaKeyLearning
+    private val _externalHudInputMonitorEnabled = MutableStateFlow(false)
+    val externalHudInputMonitorEnabled: StateFlow<Boolean> = _externalHudInputMonitorEnabled
+    private val _externalHudInputEvents = MutableStateFlow<List<ExternalHudInputEvent>>(emptyList())
+    val externalHudInputEvents: StateFlow<List<ExternalHudInputEvent>> = _externalHudInputEvents
+    private var externalHudInputSequence = 0L
 
     private fun ensureRuntime(reconnectPreferredGatewayOnForeground: Boolean = true): NodeRuntime {
         runtimeRef.value?.let { return it }
@@ -542,6 +547,48 @@ class MainViewModel(
         prefs.setExternalHudMediaDoubleTapWindow(window)
     }
 
+    fun setExternalHudInputMonitorEnabled(enabled: Boolean) {
+        if (_externalHudInputMonitorEnabled.value == enabled) return
+        _externalHudInputMonitorEnabled.value = enabled
+        if (enabled) {
+            clearExternalHudInputEvents(showMessage = false)
+            showHudTransientMessage("Input monitor on")
+        } else {
+            showHudTransientMessage("Input monitor off")
+        }
+    }
+
+    fun clearExternalHudInputEvents(showMessage: Boolean = true) {
+        _externalHudInputEvents.value = emptyList()
+        externalHudInputSequence = 0L
+        if (showMessage) showHudTransientMessage("Input history cleared")
+    }
+
+    fun recordExternalHudInput(
+        kind: ExternalHudInputKind,
+        input: String,
+        source: String,
+        deviceName: String?,
+        mappedAction: String,
+        handled: Boolean,
+        showOnHud: Boolean = true,
+    ) {
+        if (!_externalHudInputMonitorEnabled.value) return
+        externalHudInputSequence += 1L
+        val event =
+            ExternalHudInputEvent(
+                sequence = externalHudInputSequence,
+                kind = kind,
+                input = sanitizeExternalHudInputText(input) ?: kind.label,
+                source = sanitizeExternalHudInputText(source) ?: "Unknown source",
+                deviceName = sanitizeExternalHudInputText(deviceName),
+                mappedAction = sanitizeExternalHudInputText(mappedAction) ?: "Observed",
+                handled = handled,
+            )
+        _externalHudInputEvents.value = appendExternalHudInputEvent(_externalHudInputEvents.value, event)
+        if (showOnHud) showHudTransientMessage(event.hudMessage)
+    }
+
     fun startExternalHudMediaKeyLearning() {
         _externalHudMediaKeyLearning.value = true
         showHudTransientMessage("Press an external HUD button")
@@ -659,6 +706,8 @@ class MainViewModel(
                 translationCaptionTargetLanguage = translationCaptionTargetLanguage.value,
                 firmwareCaptureResults = airVisionFirmwareCaptureResults.value,
                 profileBackup = prefs.airVisionProfileBackupSnapshot(),
+                externalHudInputMonitorEnabled = externalHudInputMonitorEnabled.value,
+                externalHudInputEvents = externalHudInputEvents.value,
             ),
         )
 

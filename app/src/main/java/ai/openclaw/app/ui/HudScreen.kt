@@ -11,6 +11,7 @@ import ai.openclaw.app.AirVisionHudSwipeAction
 import ai.openclaw.app.AirVisionHudTouchAction
 import ai.openclaw.app.AirVisionHudTouchCommand
 import ai.openclaw.app.AirVisionSplendidMode
+import ai.openclaw.app.ExternalHudInputKind
 import ai.openclaw.app.GatewayAgentSummary
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.TranslationCaptionMode
@@ -404,6 +405,14 @@ fun HudScreen(
                     doubleTapKey = notificationLine?.key to airVisionHudControls.doubleTapAction,
                     swipeKey = airVisionHudControls.swipeAction to airVisionHudControls.horizontalSwipeAction,
                     onSingleTap = {
+                        viewModel.recordExternalHudInput(
+                            kind = ExternalHudInputKind.Gesture,
+                            input = "Single tap",
+                            source = "HUD surface",
+                            deviceName = null,
+                            mappedAction = airVisionHudControls.singleTapAction.label,
+                            handled = airVisionHudControls.singleTapAction != AirVisionHudTouchAction.None,
+                        )
                         performHudSingleTapAction(
                             action = airVisionHudControls.singleTapAction,
                             notificationLine = notificationLine,
@@ -413,6 +422,14 @@ fun HudScreen(
                         )
                     },
                     onDoubleTap = {
+                        viewModel.recordExternalHudInput(
+                            kind = ExternalHudInputKind.Gesture,
+                            input = "Double tap",
+                            source = "HUD surface",
+                            deviceName = null,
+                            mappedAction = airVisionHudControls.doubleTapAction.label,
+                            handled = airVisionHudControls.doubleTapAction != AirVisionHudDoubleTapAction.None,
+                        )
                         performHudDoubleTapAction(
                             action = airVisionHudControls.doubleTapAction,
                             notificationLine = notificationLine,
@@ -422,6 +439,14 @@ fun HudScreen(
                         )
                     },
                     onSwipeStarted = {
+                        viewModel.recordExternalHudInput(
+                            kind = ExternalHudInputKind.Gesture,
+                            input = "Vertical swipe",
+                            source = "HUD surface",
+                            deviceName = null,
+                            mappedAction = airVisionHudControls.swipeAction.label,
+                            handled = airVisionHudControls.swipeAction != AirVisionHudSwipeAction.None,
+                        )
                         if (
                             airVisionHudControls.swipeAction == AirVisionHudSwipeAction.ScrollChat &&
                             chatScrollState.maxValue == 0
@@ -435,6 +460,16 @@ fun HudScreen(
                         }
                     },
                     onHorizontalSwipe = { direction ->
+                        viewModel.recordExternalHudInput(
+                            kind = ExternalHudInputKind.Gesture,
+                            input = if (direction == HudHorizontalSwipeDirection.Left) "Swipe left" else "Swipe right",
+                            source = "HUD surface",
+                            deviceName = null,
+                            mappedAction = airVisionHudControls.horizontalSwipeAction.label,
+                            handled =
+                                airVisionHudControls.horizontalSwipeAction !=
+                                    AirVisionHudHorizontalSwipeAction.None,
+                        )
                         if (
                             airVisionHudControls.horizontalSwipeAction ==
                             AirVisionHudHorizontalSwipeAction.BrowseNotifications

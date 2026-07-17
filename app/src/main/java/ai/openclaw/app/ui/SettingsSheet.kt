@@ -71,10 +71,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -130,6 +134,8 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val airVisionDisplaySettings by viewModel.airVisionDisplaySettings.collectAsState()
     val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
     val externalHudMediaKeyLearning by viewModel.externalHudMediaKeyLearning.collectAsState()
+    val externalHudInputMonitorEnabled by viewModel.externalHudInputMonitorEnabled.collectAsState()
+    val externalHudInputEvents by viewModel.externalHudInputEvents.collectAsState()
     val airVisionAppLanguage by viewModel.airVisionAppLanguage.collectAsState()
     val airVisionStartupDestination by viewModel.airVisionStartupDestination.collectAsState()
     val airVisionHudDisplayTarget by viewModel.airVisionHudDisplayTarget.collectAsState()
@@ -1654,6 +1660,57 @@ fun SettingsSheet(viewModel: MainViewModel) {
                             )
                         },
                     )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Input Monitor", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                if (externalHudInputMonitorEnabled) {
+                                    "Active this session; ${externalHudInputEvents.size} recent sanitized inputs."
+                                } else {
+                                    "Off; input history is not persisted."
+                                },
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = externalHudInputMonitorEnabled,
+                                onCheckedChange = viewModel::setExternalHudInputMonitorEnabled,
+                            )
+                        },
+                    )
+                    if (externalHudInputMonitorEnabled) {
+                        HorizontalDivider(color = mobileBorder)
+                        ListItem(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = listItemColors,
+                            headlineContent = { Text("Recent Inputs", style = mobileHeadline) },
+                            supportingContent = {
+                                Text(
+                                    externalHudInputEvents
+                                        .takeIf { it.isNotEmpty() }
+                                        ?.joinToString("\n") { it.summary }
+                                        ?: "Waiting for external HUD input.",
+                                    style = mobileCallout.copy(fontFamily = FontFamily.Monospace),
+                                    maxLines = 8,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                            trailingContent = {
+                                if (externalHudInputEvents.isNotEmpty()) {
+                                    IconButton(onClick = viewModel::clearExternalHudInputEvents) {
+                                        Icon(
+                                            imageVector = Icons.Default.DeleteSweep,
+                                            contentDescription = "Clear input history",
+                                        )
+                                    }
+                                }
+                            },
+                        )
+                    }
                     HorizontalDivider(color = mobileBorder)
                     AirVisionOptionGroup(
                         title = "Single Tap",

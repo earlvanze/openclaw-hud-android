@@ -22,6 +22,7 @@ data class AirVisionDiagnosticsSnapshot(
     val windowsApplyMatrix: AirVisionDiagnosticsWindowsApplyMatrix,
     val companionParity: AirVisionDiagnosticsCompanionParity,
     val hardwareKeyMapping: AirVisionDiagnosticsHardwareKeyMapping,
+    val externalHudInputMonitor: AirVisionDiagnosticsExternalHudInputMonitor,
     val windowsGestureCatalog: AirVisionDiagnosticsWindowsGestureCatalog,
     val shortcutMenu: AirVisionDiagnosticsShortcutMenu,
     val hudControls: AirVisionBackupHudControls,
@@ -453,9 +454,30 @@ data class AirVisionDiagnosticsShortcutMenu(
     val summary: String,
 )
 
+@Serializable
+data class AirVisionDiagnosticsExternalHudInputMonitor(
+    val enabled: Boolean,
+    val retainedEventCount: Int,
+    val maxRetainedEvents: Int,
+    val events: List<AirVisionDiagnosticsExternalHudInputEvent>,
+    val summary: String,
+)
+
+@Serializable
+data class AirVisionDiagnosticsExternalHudInputEvent(
+    val sequence: Long,
+    val kind: String,
+    val input: String,
+    val source: String,
+    val deviceName: String?,
+    val mappedAction: String,
+    val handled: Boolean,
+    val summary: String,
+)
+
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 38
+    const val VERSION = 39
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
     private val SUPPORTED_PROFILE_BACKUP_VERSIONS = (1..AirVisionProfileBackups.VERSION).toList()
@@ -484,6 +506,8 @@ object AirVisionDiagnosticsSnapshots {
         translationCaptionTargetLanguage: String = TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
         firmwareCaptureResults: AirVisionFirmwareCaptureResults? = null,
         profileBackup: AirVisionProfileBackup? = null,
+        externalHudInputMonitorEnabled: Boolean = false,
+        externalHudInputEvents: List<ExternalHudInputEvent> = emptyList(),
     ): AirVisionDiagnosticsSnapshot {
         val effectiveHudScalePercent =
             (
@@ -762,6 +786,11 @@ object AirVisionDiagnosticsSnapshots {
                     translationCaptionTargetLanguage = translationCaptionTargetLanguage,
                 ),
             hardwareKeyMapping = hardwareKeyMapping(hudControls),
+            externalHudInputMonitor =
+                externalHudInputMonitor(
+                    enabled = externalHudInputMonitorEnabled,
+                    events = externalHudInputEvents,
+                ),
             windowsGestureCatalog = windowsGestureCatalog(hudControls),
             shortcutMenu = shortcutMenu(hudControls, speakerEnabled),
             hudControls =
@@ -805,6 +834,34 @@ object AirVisionDiagnosticsSnapshots {
                     sourceLanguageCode = translationCaptionSourceLanguage,
                     targetLanguageCode = translationCaptionTargetLanguage,
                 ),
+        )
+    }
+
+    private fun externalHudInputMonitor(
+        enabled: Boolean,
+        events: List<ExternalHudInputEvent>,
+    ): AirVisionDiagnosticsExternalHudInputMonitor {
+        val retained = events.take(MAX_EXTERNAL_HUD_INPUT_EVENTS)
+        return AirVisionDiagnosticsExternalHudInputMonitor(
+            enabled = enabled,
+            retainedEventCount = retained.size,
+            maxRetainedEvents = MAX_EXTERNAL_HUD_INPUT_EVENTS,
+            events =
+                retained.map { event ->
+                    AirVisionDiagnosticsExternalHudInputEvent(
+                        sequence = event.sequence,
+                        kind = event.kind.name.lowercase(),
+                        input = sanitizeExternalHudInputText(event.input) ?: event.kind.label,
+                        source = sanitizeExternalHudInputText(event.source) ?: "Unknown source",
+                        deviceName = sanitizeExternalHudInputText(event.deviceName),
+                        mappedAction = sanitizeExternalHudInputText(event.mappedAction) ?: "Observed",
+                        handled = event.handled,
+                        summary = sanitizeExternalHudInputText(event.summary, maxLength = 256) ?: "Observed input",
+                    )
+                },
+            summary =
+                "External HUD input monitor: ${if (enabled) "enabled" else "disabled"}; " +
+                    "${retained.size} of $MAX_EXTERNAL_HUD_INPUT_EVENTS recent events retained in memory.",
         )
     }
 

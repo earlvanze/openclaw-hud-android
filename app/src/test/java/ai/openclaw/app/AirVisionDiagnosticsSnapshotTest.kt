@@ -97,6 +97,19 @@ class AirVisionDiagnosticsSnapshotTest {
                 translationCaptionSourceLanguage = "pt-BR",
                 translationCaptionTargetLanguage = "ja",
                 profileBackup = diagnosticsProfileBackup(displaySettings),
+                externalHudInputMonitorEnabled = true,
+                externalHudInputEvents =
+                    listOf(
+                        ExternalHudInputEvent(
+                            sequence = 3,
+                            kind = ExternalHudInputKind.Key,
+                            input = "Media play/pause up",
+                            source = "Keyboard",
+                            deviceName = "Wearable\nControl",
+                            mappedAction = "Await second mic tap",
+                            handled = true,
+                        ),
+                    ),
             )
 
         val encoded = AirVisionDiagnosticsSnapshots.encode(snapshot)
@@ -119,6 +132,8 @@ class AirVisionDiagnosticsSnapshotTest {
         val windowsApplyMatrix = root.getValue("windowsApplyMatrix").jsonObject
         val companionParity = root.getValue("companionParity").jsonObject
         val hardwareKeyMapping = root.getValue("hardwareKeyMapping").jsonObject
+        val externalHudInputMonitor = root.getValue("externalHudInputMonitor").jsonObject
+        val externalHudInputEvent = externalHudInputMonitor.getValue("events").jsonArray.first().jsonObject
         val windowsGestureCatalog = root.getValue("windowsGestureCatalog").jsonObject
         val shortcutMenu = root.getValue("shortcutMenu").jsonObject
         val appPreferences = root.getValue("appPreferences").jsonObject
@@ -149,7 +164,14 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("38", root.getValue("version").jsonPrimitive.content)
+        assertEquals("39", root.getValue("version").jsonPrimitive.content)
+        assertEquals("true", externalHudInputMonitor.getValue("enabled").jsonPrimitive.content)
+        assertEquals("1", externalHudInputMonitor.getValue("retainedEventCount").jsonPrimitive.content)
+        assertEquals("8", externalHudInputMonitor.getValue("maxRetainedEvents").jsonPrimitive.content)
+        assertEquals("key", externalHudInputEvent.getValue("kind").jsonPrimitive.content)
+        assertEquals("Wearable Control", externalHudInputEvent.getValue("deviceName").jsonPrimitive.content)
+        assertEquals("Await second mic tap", externalHudInputEvent.getValue("mappedAction").jsonPrimitive.content)
+        assertEquals("true", externalHudInputEvent.getValue("handled").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)

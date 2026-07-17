@@ -61,6 +61,7 @@ class MainActivity : ComponentActivity() {
     private val externalHudKeyLearningController = ExternalHudKeyLearningController()
     private val hudMotionInputController = AirVisionHudMotionInputController()
     private val hudSystemBarsHandler = Handler(Looper.getMainLooper())
+    private var lastHudMotionMonitorReportUptimeMs = 0L
     private val hudDisplayListener =
         object : DisplayManager.DisplayListener {
             override fun onDisplayAdded(displayId: Int) {
@@ -226,6 +227,14 @@ class MainActivity : ComponentActivity() {
             presentation.dispatchExternalTouchEvent(event)
         ) {
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                viewModel.recordExternalHudInput(
+                    kind = ExternalHudInputKind.Touch,
+                    input = "Touch down",
+                    source = externalHudInputSourceLabel(event.source),
+                    deviceName = inputDevice.name,
+                    mappedAction = "Forward to HUD",
+                    handled = true,
+                )
                 Log.d(
                     TAG,
                     "Forwarded external HUD touch from ${inputDevice.name} source=0x${event.source.toString(16)} " +
@@ -411,6 +420,7 @@ class MainActivity : ComponentActivity() {
                 viewModel,
                 onHudKeyEvent = ::handleHudKeyEvent,
                 onHudMotionEvent = ::handleHudMotionEvent,
+                onHudTouchEventObserved = ::recordHudPresentationTouchEvent,
                 onMicToggleRequest = ::toggleMicFromHudInput,
             )
         hudPresentationSession.attach(presentation)
@@ -598,6 +608,22 @@ class MainActivity : ComponentActivity() {
                 )
                 Log.d(TAG, "Learned external HUD media key keyCode=$learnedKeyCode device=${event.device?.name}")
             }
+            if (event.repeatCount == 0) {
+                viewModel.recordExternalHudInput(
+                    kind = ExternalHudInputKind.Key,
+                    input = externalHudKeyInputLabel(event.keyCode, event.action),
+                    source = externalHudInputSourceLabel(event.source),
+                    deviceName = event.device?.name,
+                    mappedAction =
+                        if (learningDecision.learnedKeyCode != null) {
+                            "Learn custom mic key"
+                        } else {
+                            "Capture custom mic key"
+                        },
+                    handled = true,
+                    showOnHud = event.action == KeyEvent.ACTION_UP,
+                )
+            }
             return true
         }
         if (
@@ -612,6 +638,14 @@ class MainActivity : ComponentActivity() {
                 if (event.action == KeyEvent.ACTION_UP) {
                     presentation.dispatchAccessoryTap(
                         event.eventTime.takeIf { it > 0L } ?: SystemClock.uptimeMillis(),
+                    )
+                    viewModel.recordExternalHudInput(
+                        kind = ExternalHudInputKind.Key,
+                        input = externalHudKeyInputLabel(event.keyCode, event.action),
+                        source = externalHudInputSourceLabel(event.source),
+                        deviceName = event.device?.name,
+                        mappedAction = "Forward as HUD tap",
+                        handled = true,
                     )
                     Log.d(TAG, "Forwarded HUD accessory tap keyCode=${event.keyCode} to touch controls")
                 }
@@ -631,6 +665,17 @@ class MainActivity : ComponentActivity() {
                 canAllowPendingExecOnce = pendingApproval?.allows(ExecApprovalDecision.AllowOnce) == true,
                 canDenyPendingExec = pendingApproval?.allows(ExecApprovalDecision.Deny) == true,
             )
+        if (isHudAccessoryEvent && event.repeatCount == 0) {
+            viewModel.recordExternalHudInput(
+                kind = ExternalHudInputKind.Key,
+                input = externalHudKeyInputLabel(event.keyCode, event.action),
+                source = externalHudInputSourceLabel(event.source),
+                deviceName = event.device?.name,
+                mappedAction = externalHudKeyCommandLabel(decision.command, decision.consume),
+                handled = decision.consume,
+                showOnHud = decision.command != null || event.action == KeyEvent.ACTION_UP,
+            )
+        }
         handleHudKeyCommand(decision.command, event = event, source = source)
         return decision.consume
     }
@@ -657,12 +702,39 @@ class MainActivity : ComponentActivity() {
             } ?: return false
 
         viewModel.requestHudScroll(scrollDelta)
+        val eventTimeMs = event.eventTime.takeIf { it > 0L } ?: SystemClock.uptimeMillis()
+        if (eventTimeMs - lastHudMotionMonitorReportUptimeMs >= HUD_MOTION_MONITOR_INTERVAL_MS) {
+            lastHudMotionMonitorReportUptimeMs = eventTimeMs
+            viewModel.recordExternalHudInput(
+                kind = ExternalHudInputKind.Motion,
+                input = if (event.actionMasked == MotionEvent.ACTION_SCROLL) "Wheel / rotary" else "Axis motion",
+                source = externalHudInputSourceLabel(event.source),
+                deviceName = event.device?.name,
+                mappedAction = "Scroll chat",
+                handled = true,
+                showOnHud = false,
+            )
+        }
         Log.d(
             TAG,
             "HUD accessory swipe scrolled chat device=${event.device?.name} delta=$scrollDelta " +
                 "source=0x${event.source.toString(16)}",
         )
         return true
+    }
+
+    private fun recordHudPresentationTouchEvent(
+        event: MotionEvent,
+        handled: Boolean,
+    ) {
+        viewModel.recordExternalHudInput(
+            kind = ExternalHudInputKind.Touch,
+            input = "HUD touch down",
+            source = externalHudInputSourceLabel(event.source),
+            deviceName = event.device?.name,
+            mappedAction = if (handled) "Accepted by HUD" else "Not accepted by HUD",
+            handled = handled,
+        )
     }
 
     private fun absoluteHudScrollDelta(event: MotionEvent): Float? {
@@ -701,6 +773,14 @@ class MainActivity : ComponentActivity() {
                 AirVisionHudMediaKeyAction.HoldToTalk,
                 -> null
             }
+        viewModel.recordExternalHudInput(
+            kind = ExternalHudInputKind.Media,
+            input = source.replace('-', ' '),
+            source = "Media session",
+            deviceName = null,
+            mappedAction = externalHudKeyCommandLabel(command, consumed = command != null),
+            handled = command != null,
+        )
         handleHudKeyCommand(command = command, event = null, source = source)
     }
 
@@ -927,6 +1007,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private companion object {
+        private const val HUD_MOTION_MONITOR_INTERVAL_MS = 250L
         private const val TAG = "MainActivity"
         private const val ASUS_VENDOR_ID = 0x0b05
         private const val AIRVISION_M1_PRODUCT_ID = 0x1b3c

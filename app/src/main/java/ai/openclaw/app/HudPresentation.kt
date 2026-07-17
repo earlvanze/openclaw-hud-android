@@ -36,6 +36,7 @@ internal class HudPresentation(
     private val viewModel: MainViewModel,
     private val onHudKeyEvent: (KeyEvent) -> Boolean,
     private val onHudMotionEvent: (MotionEvent) -> Boolean = { false },
+    private val onHudTouchEventObserved: (MotionEvent, Boolean) -> Unit = { _, _ -> },
     private val onMicToggleRequest: () -> Unit,
 ) : Presentation(activity, display) {
     private val systemBarsHandler = Handler(Looper.getMainLooper())
@@ -106,6 +107,14 @@ internal class HudPresentation(
             return true
         }
         return super.dispatchGenericMotionEvent(event)
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        val handled = super.dispatchTouchEvent(event)
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            onHudTouchEventObserved(event, handled)
+        }
+        return handled
     }
 
     internal fun dispatchAccessoryTap(eventTimeMs: Long): Boolean {
