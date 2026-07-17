@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.15-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.16-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `746d43d15586d2ef23846c5bfb27cc6465c36487af3e6491e5c0adcb1265fd76`
-- Latest HUD bundle version: `2026.7.17.15 (2026071715)`.
+  `2b54cb99553e94025bf3bf528fae6530ca7ee0771001119cac7e03074275e94c`
+- Latest HUD bundle version: `2026.7.17.16 (2026071716)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -110,6 +110,12 @@ Current local status:
   checks pass. Exact v2026071715 device installation still requires a
   Play-signed delivery because the installed Play build and local
   upload-key APK have different signing certificates.
+  v2026071716 accepts Android 14+ identity-verified touchbar relays from the
+  separately installed AirVision Companion and routes one-tap, double-tap, and
+  slide events through the existing configurable HUD gesture surface. Relay
+  parser, synthetic tap/swipe, unit, Android lint, R8, signing, and Play-package
+  checks pass. Physical Fold/M1 validation remains pending while the Fold is
+  offline on Tailnet.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, release notes character limits, and local Play
   submission packet. It refuses stale local artifacts when HUD source/build
