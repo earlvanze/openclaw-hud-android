@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.14-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.15-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `0aa4600c904e9ca2690635ea724aadc62291f5ade1e86ff7d8deac3dd3179c29`
-- Latest HUD bundle version: `2026.7.17.14 (2026071714)`.
+  `746d43d15586d2ef23846c5bfb27cc6465c36487af3e6491e5c0adcb1265fd76`
+- Latest HUD bundle version: `2026.7.17.15 (2026071715)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -103,8 +103,11 @@ Current local status:
   v2026071714 adds persisted 0.5-2.5-second mic double-tap timing presets and
   threads the selected timing through settings, profile backup, diagnostics,
   first-tap feedback, and Windows handoff exports.
+  v2026071715 adds a session-only Input Monitor that traces forwarded and
+  Presentation touch, recognized gestures, accessory keys, media callbacks,
+  wheels, rotary input, and normalized axes with bounded sanitized history.
   Unit, input-routing, Android lint, R8, release-signing, and Play-package
-  checks pass. Exact v2026071714 device installation still requires a
+  checks pass. Exact v2026071715 device installation still requires a
   Play-signed delivery because the installed Play build and local
   upload-key APK have different signing certificates.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
