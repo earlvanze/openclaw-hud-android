@@ -120,13 +120,13 @@ Current local status:
 - Browser staging verified the separate `ai.openclaw.app.hud` app, internal
   tester list, reviewer Demo Mode instructions, app-content forms, listing,
   contact details, graphics, screenshots, and replacement signed AAB version
-  `2026071714` on 2026-07-17. The saved internal draft contains only
-  `2026071714 (2026.7.17.14)`; version `2026071713` was removed after 1714 was
+  `2026071715` on 2026-07-17. The saved internal draft contains only
+  `2026071715 (2026.7.17.15)`; version `2026071714` was removed after 1715 was
   attached, and the earlier versions remain absent. The saved release name is
-  `OpenClaw HUD 2026.7.17.14 tap timing`; exact release notes persisted after
-  a reload. Version 1714 remained the sole attached row, `Save as draft` was
+  `OpenClaw HUD 2026.7.17.15 input monitor`; exact release notes persisted after
+  a reload. Version 1715 remained the sole attached row, `Save as draft` was
   disabled, no error or dialog remained, and `Next` was not used. The default
-  `en-US` listing matches the exact local title, short description, and 3,879-character
+  `en-US` listing matches the exact local title, short description, and 3,919-character
   full description; all fields persisted after reload with `Save as draft`
   disabled, and no listing review action was used.
   API/OAuth preflight remains a separate authentication and package-access gate.
