@@ -107,19 +107,14 @@ Current local status:
 - Browser staging verified the separate `ai.openclaw.app.hud` app, internal
   tester list, reviewer Demo Mode instructions, app-content forms, listing,
   contact details, graphics, screenshots, and replacement signed AAB version
-  `2026071710` on 2026-07-17; `2026071709`, `2026071708`, `2026071707`,
-  `2026071705`, `2026071704`, `2026071703`, `2026071702`, and `2026071701`
-  are absent. The
-  saved release name is
-  `OpenClaw HUD 2026.7.17.10 custom key learning`; exact release notes
-  persisted after a full page reload, `Save as draft` is disabled, and `Next`
-  was not used.
-  The version `2026071711` backend upload completed on 2026-07-17, and the
-  saved draft name `OpenClaw HUD 2026.7.17.11 root gestures` plus exact release
-  notes persisted after a reload. Play's release editor did not consistently
-  render the attached artifact row afterward, so version `2026071711` is not
-  yet recorded here as a fully verified replacement draft. `Next` was not
-  used.
+  `2026071711` on 2026-07-17. The saved internal draft contains only
+  `2026071711 (2026.7.17.11)`; version `2026071710` was removed after 1711 was
+  attached, and the earlier versions remain absent. The saved release name is
+  `OpenClaw HUD 2026.7.17.11 root gestures`; exact release notes persisted
+  after a reload. Play's release editor lazily hydrated the artifact row only
+  after opening the artifact library; after hydration and closing the library,
+  1711 remained the sole attached row, `Save as draft` was disabled, no error
+  or dialog remained, and `Next` was not used.
   API/OAuth preflight remains a separate authentication and package-access gate.
   `node scripts/report-play-readiness.mjs` summarizes OAuth, service-account,
   local artifact, and dry-run gates together.
