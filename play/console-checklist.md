@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.3-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.4-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `fbb127340e3c77cffe2c849898f9d2e767ff5ab4956170ab428fe620bff6e2e7`
-- Latest HUD bundle version: `2026.7.17.3 (2026071703)`.
+  `da1e4d184c488f27fe29fe2b623a96b85124016ceda132b0a7a28bccd217d73d`
+- Latest HUD bundle version: `2026.7.17.4 (2026071704)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -81,10 +81,11 @@ Current local status:
   Presentation window on display 8. Demo Mode exercised the reply-capable HUD
   state. Secure M1 screenshots remained black, so physical touch reply proof is
   still separate from the runtime and automated evidence.
-- v2026071703 adds safe execution-request review with deny and allow-once
-  actions, expiry/reconnect synchronization, gamepad Y/B and keyboard Escape
-  routing, and default-off global visibility that requires explicit gateway
-  administrator scope. Unit, concurrency, input-routing, lint, R8,
+- v2026071704 adds direct active-agent switching on generic external HUD
+  displays, with context changes locked during active runs and pending
+  execution approvals. It retains v2026071703 safe execution-request review,
+  reconnect synchronization, controller shortcuts, and explicit global-scope
+  opt-in. Unit, agent-selection, concurrency, input-routing, lint, R8,
   release-signing, and Play-package checks pass; exact device installation
   awaits the Fold's return to the tailnet.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
