@@ -41,6 +41,7 @@ Current live target:
 - [x] Minimal HUD controls: single-tap opens notifications, double-tap toggles mic,
   vertical swipe scrolls chat, and horizontal swipe or DPAD/gamepad controls browse notifications
 - [x] HUD input: Enter sends, Shift+Enter inserts a newline, and compatible messaging notifications support direct replies
+- [x] Connected multi-agent gateways expose a compact agent switcher directly on the external HUD; context changes are locked during active runs and execution approvals
 - [x] Active OpenClaw runs can be stopped from the HUD or with external gamepad B / keyboard Escape
 - [x] Pending OpenClaw execution approvals show the sanitized command preview and support deny or allow-once decisions from the HUD; gamepad B / Escape denies and Y allows once. Global visibility is default-off and requires an explicit gateway administrator-scope opt-in; otherwise the HUD shows device-bound approvals only
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
@@ -161,6 +162,7 @@ HUD controls:
   -> OpenClaw translation -> Off.
 - Press Enter on a hardware keyboard to send the chat input.
 - Press Shift+Enter for a newline.
+- Switch the active OpenClaw agent from the compact account control beside the HUD session line; switching is disabled while a run or execution approval is active.
 - Stop an active OpenClaw run from the composer or press gamepad B / Escape on an external keyboard.
 - Review pending execution requests directly on the HUD. Press gamepad Y to allow once, or gamepad B / Escape to deny; persistent allow-list changes are intentionally unavailable on the HUD.
 

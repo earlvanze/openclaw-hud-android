@@ -43,6 +43,7 @@ Key features:
 - Minimal always-on HUD for external displays
 - OpenClaw gateway pairing and secure local setup storage
 - Compact chat with hardware keyboard send support
+- Direct external-HUD agent switching for connected multi-agent gateways, guarded during active runs and execution approvals
 - Safe execution approvals with gateway-sanitized command previews, deny and allow-once actions, expiry handling, external gamepad controls, and optional global visibility that requires explicit gateway administrator scope
 - In-app offensive-response reporting with explicit payload review, direct developer delivery, and receipt confirmation
 - Actionable notification summaries with tap-to-open and swipe browsing
@@ -60,11 +61,12 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 
 Release notes:
 
-In-app privacy policy
-- Review execution requests: deny or allow once. Global approvals require explicit administrator scope; Y allows once, B/Esc denies.
+OpenClaw HUD:
+- Switch agents on the external HUD; locked during runs and approvals.
+- Deny or allow execution once; global approvals require admin scope.
 - external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
-- M1 tap and swipe support stays on the capability-driven input path in External HUD Input.
-- Keep Presentation recovery, display pinning, frame-shape morphing, replies, and active-run stopping.
+- M1 tap and swipe support uses the capability-driven input path in External HUD Input.
+- Presentation recovery, display pinning, frame-shape morphing, In-app privacy policy.
 
 ## Privacy Policy
 

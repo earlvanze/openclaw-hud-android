@@ -11,6 +11,7 @@ import ai.openclaw.app.AirVisionHudSwipeAction
 import ai.openclaw.app.AirVisionHudTouchAction
 import ai.openclaw.app.AirVisionHudTouchCommand
 import ai.openclaw.app.AirVisionSplendidMode
+import ai.openclaw.app.GatewayAgentSummary
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.TranslationCaptionMode
 import ai.openclaw.app.airVisionHudDoubleTapCommand
@@ -22,6 +23,7 @@ import ai.openclaw.app.hudNotificationReplyResultMessage
 import ai.openclaw.app.node.ExecApprovalDecision
 import ai.openclaw.app.node.ExecApprovalRequest
 import ai.openclaw.app.openNativeCaptionSettings
+import ai.openclaw.app.resolveAgentIdFromMainSessionKey
 import ai.openclaw.app.voice.VoiceConversationEntry
 import ai.openclaw.app.voice.VoiceConversationRole
 import androidx.compose.animation.core.animateFloatAsState
@@ -44,6 +46,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
@@ -54,9 +57,13 @@ import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -114,6 +121,8 @@ fun HudScreen(viewModel: MainViewModel) {
     val serverName by viewModel.serverName.collectAsState()
     val remoteAddress by viewModel.remoteAddress.collectAsState()
     val mainSessionKey by viewModel.mainSessionKey.collectAsState()
+    val gatewayAgents by viewModel.gatewayAgents.collectAsState()
+    val gatewayDefaultAgentId by viewModel.gatewayDefaultAgentId.collectAsState()
     val messages by viewModel.chatMessages.collectAsState()
     val healthOk by viewModel.chatHealthOk.collectAsState()
     val thinkingLevel by viewModel.chatThinkingLevel.collectAsState()
@@ -145,7 +154,9 @@ fun HudScreen(viewModel: MainViewModel) {
     var replyDraft by remember { mutableStateOf("") }
 
     LaunchedEffect(mainSessionKey) {
-        viewModel.loadChat(mainSessionKey)
+        if (viewModel.chatSessionKey.value != mainSessionKey) {
+            viewModel.loadChat(mainSessionKey)
+        }
         viewModel.refreshChatSessions(limit = 20)
     }
 
@@ -294,6 +305,8 @@ fun HudScreen(viewModel: MainViewModel) {
                 ?: statusText.trim().takeIf { !isConnected && it.isNotBlank() }
         }
     val warning = !airVisionDemoModeEnabled && (chatError != null || (!isConnected && !isNodeConnected))
+    val activeAgentId = hudActiveAgentId(mainSessionKey, gatewayDefaultAgentId)
+    val activeAgent = gatewayAgents.firstOrNull { it.id == activeAgentId } ?: gatewayAgents.firstOrNull()
     val sessionLine =
         if (airVisionDemoModeEnabled) {
             "hud demo / session hud / mic listening"
@@ -306,7 +319,7 @@ fun HudScreen(viewModel: MainViewModel) {
                 micStatusText = micStatusText,
                 micInputLevel = micInputLevel,
                 micEnabled = micEnabled,
-            )
+            ) ?: activeAgent?.let { "agent ${hudAgentLabel(it)}" }
         }
     val hudScale =
         (
@@ -582,12 +595,22 @@ fun HudScreen(viewModel: MainViewModel) {
                 }
 
                 sessionLine?.let { line ->
-                    Text(
-                        line,
-                        style = hudReadableTextStyle,
-                        color = hudMuted,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    HudSessionLine(
+                        text = line,
+                        agents = gatewayAgents,
+                        activeAgentId = activeAgentId,
+                        pickerEnabled =
+                            hudAgentPickerEnabled(
+                                isConnected = isConnected,
+                                agentCount = gatewayAgents.size,
+                                pendingRunCount = pendingRunCount,
+                                hasPendingExecApproval = pendingExecApproval != null,
+                            ),
+                        onRefresh = viewModel::refreshGatewayAgents,
+                        onSelectAgent = { agent ->
+                            viewModel.selectAgent(agent.id)
+                            viewModel.showHudTransientMessage("Agent: ${hudAgentLabel(agent)}")
+                        },
                     )
                 }
             }
@@ -673,6 +696,108 @@ fun HudScreen(viewModel: MainViewModel) {
             )
         }
     }
+}
+
+@Composable
+private fun HudSessionLine(
+    text: String,
+    agents: List<GatewayAgentSummary>,
+    activeAgentId: String?,
+    pickerEnabled: Boolean,
+    onRefresh: () -> Unit,
+    onSelectAgent: (GatewayAgentSummary) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    LaunchedEffect(pickerEnabled, agents) {
+        if (!pickerEnabled) expanded = false
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.weight(1f),
+            style = hudReadableTextStyle,
+            color = hudMuted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (agents.size > 1) {
+            Box {
+                IconButton(
+                    onClick = {
+                        onRefresh()
+                        expanded = true
+                    },
+                    enabled = pickerEnabled,
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ManageAccounts,
+                        contentDescription = "Switch OpenClaw agent",
+                        modifier = Modifier.size(20.dp),
+                        tint = if (pickerEnabled) hudSecondary else hudMuted,
+                    )
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.widthIn(min = 180.dp, max = 300.dp),
+                    containerColor = hudBackground,
+                    tonalElevation = 0.dp,
+                    shadowElevation = 6.dp,
+                ) {
+                    agents.forEach { agent ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = hudAgentLabel(agent),
+                                    style = hudReadableTextStyle,
+                                    color = hudText,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                            onClick = {
+                                expanded = false
+                                onSelectAgent(agent)
+                            },
+                            trailingIcon = {
+                                if (agent.id == activeAgentId) {
+                                    Icon(
+                                        imageVector = Icons.Filled.CheckCircle,
+                                        contentDescription = "Active agent",
+                                        modifier = Modifier.size(18.dp),
+                                        tint = hudAccent,
+                                    )
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+internal fun hudActiveAgentId(
+    mainSessionKey: String,
+    defaultAgentId: String?,
+): String? = resolveAgentIdFromMainSessionKey(mainSessionKey) ?: defaultAgentId?.trim()?.takeIf { it.isNotEmpty() }
+
+internal fun hudAgentPickerEnabled(
+    isConnected: Boolean,
+    agentCount: Int,
+    pendingRunCount: Int,
+    hasPendingExecApproval: Boolean,
+): Boolean = isConnected && agentCount > 1 && pendingRunCount == 0 && !hasPendingExecApproval
+
+internal fun hudAgentLabel(agent: GatewayAgentSummary): String {
+    val name = agent.name?.trim()?.takeIf { it.isNotEmpty() } ?: agent.id
+    val emoji = agent.emoji?.trim()?.takeIf { it.isNotEmpty() }
+    return listOfNotNull(emoji, name).joinToString(" ")
 }
 
 @Composable
