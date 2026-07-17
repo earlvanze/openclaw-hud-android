@@ -165,7 +165,7 @@
         "capability": "Gesture and hotkey settings",
         "state": "M1 optional for review",
         "reviewPath": "Settings > External Display HUD > External HUD Input and Diagnostics Export.",
-        "evidence": "Single-tap, double-tap, hold-to-talk, swipe, brightness-key, and media-key mappings are stored offline. Custom Mic Key learns an arbitrary external remote, keyboard, gamepad, or wearable button while ignoring internal phone keys. Settings and diagnostics export the learned key code and label, active external-HUD brightness-key/media-key mode, Android consumption state, step sizes, firmware passthrough expectation, shortcut-menu parity, and Windows gesture catalog; live hardware proof is needed for firmware-delivered events."
+        "evidence": "Single-tap, double-tap, hold-to-talk, swipe, brightness-key, and media-key mappings are stored offline. Custom Mic Key learns an arbitrary external remote, keyboard, gamepad, or wearable button while ignoring internal phone keys. Settings and diagnostics export the learned key code and label, active external-HUD brightness-key/media-key mode, Android consumption state, step sizes, firmware passthrough expectation, shortcut-menu parity for brightness/volume/distance behavior, and Windows gesture catalog entries including instant transparent and shortcut-menu hold/slide; live hardware proof is needed for firmware-delivered events."
       },
       {
         "capability": "USB firmware-link diagnostics",

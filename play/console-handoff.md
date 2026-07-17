@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.17.9-hud-release.aab`
-- SHA-256: `4e06f1b15755cbce57f10e9b3432e5fd791f2614d29f2dc378b930e2c3555ea5`
-- Version: 2026.7.17.9 (2026071709)
+- AAB: `build/release-bundles/openclaw-2026.7.17.10-hud-release.aab`
+- SHA-256: `e87c8d591da07d916a1eacb1109f2d79305c2bc8687a0bd2b5a277f783fe1af1`
+- Version: 2026.7.17.10 (2026071710)
 
 ## Remaining Console Blockers
 
@@ -50,7 +50,7 @@ Key features:
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - External-display profiles for view mode, animated Full/Wide/Compact/Panoramic frame shapes, custom labels, JSON backup/import, placement, main-screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, gesture/hotkey behavior, profile reset, and low-overhead preferences
-- Capability-driven input for external touchscreens, touchpads, mice, styli, trackballs, wheels, rotary controls, DPAD/Page keys, gamepads, joystick/hat axes, and media-button mic control while the HUD is focused
+- Capability-driven input for external touchscreens, touchpads, mice, styli, trackballs, wheels, rotary controls, DPAD/Page keys, gamepads, joystick/hat axes, media-button mic control, and custom accessory-key learning
 - Optional speaker routing, IPD calibration, Eye Care, 3D Mode, USB diagnostics, and Windows handoff tools for AirVision M1
 - AirVision Windows app handoff export for applying saved Android profile values and reviewing active HUD runtime scale/caption capacity, all-profile runtime summaries, runtime metadata freshness, HUD controls, 18-feature companion parity states, Cyber-observed ASUS AirVision 1.0.7.1 settings-key evidence, Windows-only spatial/mirror capability status, and companion preferences during ASUS AirVision sessions on Cyber or another Windows host
 - AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
@@ -63,6 +63,7 @@ Release notes:
 
 OpenClaw HUD:
 - Single-tap, double-tap, or hold-to-talk microphone keys.
+- Learn any external accessory button as a custom mic key.
 - external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
 - M1 tap and swipe support uses the capability-driven input path in External HUD Input.
 - Presentation recovery, display pinning, frame-shape morphing, In-app privacy policy.
@@ -121,8 +122,8 @@ Capability states:
   Review path: Settings > AirVision M1 Motion Sync, 3D Mode, Light Load Mode, and runtime diagnostics.
   Evidence: Light Load trims Android HUD work offline; Motion Sync and panel 3D writes remain firmware-protocol gated.
 - Gesture and hotkey settings: M1 optional for review
-  Review path: Settings > AirVision M1 > Gesture & Hotkey Settings and Diagnostics Export.
-  Evidence: Single-tap, double-tap, hold-to-talk, swipe, brightness-key, and media-key mappings are stored offline. Settings and diagnostics export shortcut-menu parity for ASUS brightness/volume/distance behavior, plus the active external-HUD brightness-key/media-key mode, Android consumption state, step sizes, firmware passthrough expectation, and Windows gesture catalog entries for ASUS brightness swipe, play/pause tap, instant transparent, center virtual screens, 3D hold, and shortcut-menu hold/slide behavior; live hardware proof is needed for firmware-delivered events.
+  Review path: Settings > External Display HUD > External HUD Input and Diagnostics Export.
+  Evidence: Single-tap, double-tap, hold-to-talk, swipe, brightness-key, and media-key mappings are stored offline. Custom Mic Key learns an arbitrary external remote, keyboard, gamepad, or wearable button while ignoring internal phone keys. Settings and diagnostics export the learned key code and label, active external-HUD brightness-key/media-key mode, Android consumption state, step sizes, firmware passthrough expectation, shortcut-menu parity for brightness/volume/distance behavior, and Windows gesture catalog entries including instant transparent and shortcut-menu hold/slide; live hardware proof is needed for firmware-delivered events.
 - USB firmware-link diagnostics: M1 optional for review
   Review path: Settings > AirVision M1 > Firmware Link and Diagnostics Export.
   Evidence: Firmware Link shows per-control WAIT/CAPTURE/READY rows with target value, Android effect, firmware status, missing evidence, and blocker text. Offline demo shows blocked/write-readiness states; connected M1 adds live descriptor and HID report-path context.
@@ -208,7 +209,7 @@ Windows app apply matrix:
   Firmware gate: none
 - Gesture and hotkey settings
   Windows target: none
-  Android effect: Single tap, double tap, hold-to-talk, swipe, brightness-key, and media-key mappings
+  Android effect: Single tap, double tap, hold-to-talk, swipe, brightness-key, media-key, and learned custom-key mappings
   Proof: Stored mappings are reviewable offline; firmware-delivered event proof needs live M1 hardware.
   Firmware gate: none
 - Windows spatial/mirror features

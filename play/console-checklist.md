@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.9-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.10-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `4e06f1b15755cbce57f10e9b3432e5fd791f2614d29f2dc378b930e2c3555ea5`
-- Latest HUD bundle version: `2026.7.17.9 (2026071709)`.
+  `e87c8d591da07d916a1eacb1109f2d79305c2bc8687a0bd2b5a277f783fe1af1`
+- Latest HUD bundle version: `2026.7.17.10 (2026071710)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -87,8 +87,11 @@ Current local status:
   instead of the external Presentation's synthetic touchscreen path and uses a
   measured 2,000 ms hardware double-tap window. It also adds configurable
   single-tap mic and focused hold-to-talk modes for generic external HUD keys.
-  Touchscreen gesture timing is unchanged. Unit, input-routing, Android lint,
-  R8, release-signing, and Play-package checks pass. Exact v2026071709 device installation still
+  v2026071710 also learns an arbitrary external accessory key for the selected
+  mic mode, persists it in profile backup and diagnostics, and keeps optional
+  ASUS firmware tools collapsed when the hardware is absent. Touchscreen
+  gesture timing is unchanged. Unit, input-routing, Android lint, R8,
+  release-signing, and Play-package checks pass. Exact v2026071710 device installation still
   requires a Play-signed delivery because the installed Play build and local
   upload-key APK have different signing certificates.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
