@@ -1,7 +1,7 @@
 OpenClaw HUD:
-- Double-tap mic confirms the first accepted accessory tap.
+- Double-tap mic confirms first accepted tap.
 - Adaptive frames fit portrait, square, landscape, and ultra-wide displays.
 - external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
 - M1 tap and swipe support: capability-driven input path in External HUD Input.
 - Learn any external accessory button.
-- Presentation recovery, display pinning, frame-shape morphing.
+- Presentation recovery, display pinning, frame-shape morphing, in-app privacy policy.

@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.17.12-hud-release.aab`
-- SHA-256: `81284efcc4d88847ee1aa7df4f7ae9a69fd9e01c724e9c93aba5ccba8c213376`
-- Version: 2026.7.17.12 (2026071712)
+- AAB: `build/release-bundles/openclaw-2026.7.17.13-hud-release.aab`
+- SHA-256: `05067bd7166538e155971627bb5c51c955b0181c2e00d372b418bffd285e6509`
+- Version: 2026.7.17.13 (2026071713)
 
 ## Remaining Console Blockers
 
@@ -50,7 +50,7 @@ Key features:
 - Voice controls with wake-word and push-to-talk workflows
 - Samsung/native caption launcher plus OpenClaw realtime translation fallback
 - External-display profiles for view mode, adaptive or explicit Full/Wide/Compact/Panoramic frame shapes, custom labels, JSON backup/import, placement, main-screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, gesture/hotkey behavior, profile reset, and low-overhead preferences
-- Capability-driven input for external touchscreens, touchpads, mice, styli, trackballs, wheels, rotary controls, DPAD/Page keys, gamepads, joystick/hat axes, media-button mic control, and custom accessory-key learning
+- Capability-driven input for external touchscreens, touchpads, mice, styli, trackballs, wheels, rotary controls, DPAD/Page keys, gamepads, joystick/hat axes, media-button mic control, visible first-tap feedback for mic double taps, and custom accessory-key learning
 - Optional speaker routing, IPD calibration, Eye Care, 3D Mode, USB diagnostics, and Windows handoff tools for AirVision M1
 - AirVision Windows app handoff export for applying saved Android profile values and reviewing active HUD runtime scale/caption capacity, all-profile runtime summaries, runtime metadata freshness, HUD controls, 18-feature companion parity states, Cyber-observed ASUS AirVision 1.0.7.1 settings-key evidence, Windows-only spatial/mirror capability status, and companion preferences during ASUS AirVision sessions on Cyber or another Windows host
 - AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
@@ -62,10 +62,11 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD:
+- Double-tap mic confirms first accepted tap.
 - Adaptive frames fit portrait, square, landscape, and ultra-wide displays.
 - external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
-- M1 tap and swipe support uses the root capability-driven input path in External HUD Input.
-- Learn any external accessory button as a custom mic key.
+- M1 tap and swipe support: capability-driven input path in External HUD Input.
+- Learn any external accessory button.
 - Presentation recovery, display pinning, frame-shape morphing, in-app privacy policy.
 
 ## Privacy Policy

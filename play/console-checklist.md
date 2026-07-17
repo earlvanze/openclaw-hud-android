@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.12-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.13-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `81284efcc4d88847ee1aa7df4f7ae9a69fd9e01c724e9c93aba5ccba8c213376`
-- Latest HUD bundle version: `2026.7.17.12 (2026071712)`.
+  `05067bd7166538e155971627bb5c51c955b0181c2e00d372b418bffd285e6509`
+- Latest HUD bundle version: `2026.7.17.13 (2026071713)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -97,8 +97,11 @@ Current local status:
   Android Presentation window into Compact portrait, Full square, Wide
   landscape, or Panoramic ultra-wide framing while preserving every explicit
   frame choice. Settings reports the effective frame for the selected display.
+  v2026071713 acknowledges the first accepted external accessory tap directly
+  on the HUD and prompts for the second tap within the measured two-second mic
+  window, distinguishing input-routing failures from incomplete double taps.
   Unit, input-routing, Android lint, R8, release-signing, and Play-package
-  checks pass. Exact v2026071712 device installation still requires a
+  checks pass. Exact v2026071713 device installation still requires a
   Play-signed delivery because the installed Play build and local
   upload-key APK have different signing certificates.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
