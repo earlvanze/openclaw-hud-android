@@ -148,11 +148,11 @@ Current local status:
   and records evidence for the hosted privacy URL, app creation, internal
   testers, reviewer access, and phone screenshots. Keep it aligned with the
   exact Console forms and draft release.
-- The same file records the unfinished in-app AI-content reporting requirement.
-  Final-mode verification must remain blocked until that feature submits
-  reports to ECO Systems LLC without leaving the app. Local screenshot paths
-  are validated by the final submission verifier.
-  before commit publishing.
+- The same file records the completed in-app AI-content reporting requirement.
+  Assistant-response reports are reviewed explicitly, submitted to the ECO
+  Systems LLC receiver without leaving the app, and return a receipt. The live
+  endpoint and receipt-backed storage were verified on 2026-07-15; local
+  screenshot paths are validated by the final submission verifier.
 - `docs/privacy-policy.html` is the generated GitHub Pages privacy-policy page.
   It is published at
   `https://earlvanze.github.io/openclaw-hud-android/privacy-policy.html` and
