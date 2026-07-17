@@ -100,6 +100,7 @@ data class AirVisionHudControls(
         AirVisionHudHorizontalSwipeAction.BrowseNotifications,
     val brightnessKeyAction: AirVisionHudKeyAction = AirVisionHudKeyAction.ScrollChat,
     val mediaKeyAction: AirVisionHudMediaKeyAction = AirVisionHudMediaKeyAction.DoubleTapToggleMic,
+    val customMediaKeyCode: Int? = null,
 )
 
 internal sealed interface AirVisionHudTouchCommand {

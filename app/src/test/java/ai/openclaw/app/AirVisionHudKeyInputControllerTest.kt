@@ -494,6 +494,68 @@ class AirVisionHudKeyInputControllerTest {
     }
 
     @Test
+    fun learnedExternalKeyUsesConfiguredMediaMode() {
+        val controller = AirVisionHudKeyInputController()
+        val controls =
+            AirVisionHudControls(
+                mediaKeyAction = AirVisionHudMediaKeyAction.SingleTapToggleMic,
+                customMediaKeyCode = KeyEvent.KEYCODE_F12,
+            )
+
+        assertEquals(
+            AirVisionHudKeyDecision(consume = true),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_F12,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isHudAccessoryEvent = true,
+                controls = controls,
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.ToggleMic,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_F12,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_050L,
+                isHudAccessoryEvent = true,
+                controls = controls,
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(consume = false),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_F12,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 2_000L,
+                isHudAccessoryEvent = false,
+                controls = controls,
+            ),
+        )
+
+        val reservedKeyControls = controls.copy(customMediaKeyCode = KeyEvent.KEYCODE_BUTTON_B)
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.ToggleMic,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BUTTON_B,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 3_000L,
+                isHudAccessoryEvent = true,
+                controls = reservedKeyControls,
+                hasActiveRun = true,
+                hasPendingExecApproval = true,
+                canDenyPendingExec = true,
+            ),
+        )
+    }
+
+    @Test
     fun holdToTalkConsumesRepeatsAndEndsAfterModeChange() {
         val controller = AirVisionHudKeyInputController()
         val controls = AirVisionHudControls(mediaKeyAction = AirVisionHudMediaKeyAction.HoldToTalk)

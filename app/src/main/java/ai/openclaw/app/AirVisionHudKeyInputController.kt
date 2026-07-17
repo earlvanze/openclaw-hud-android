@@ -63,6 +63,15 @@ internal class AirVisionHudKeyInputController(
         canAllowPendingExecOnce: Boolean = false,
         canDenyPendingExec: Boolean = false,
     ): AirVisionHudKeyDecision {
+        if (isHudAccessoryEvent && controls.customMediaKeyCode == keyCode) {
+            return handleMediaKeyEvent(
+                keyCode = keyCode,
+                action = action,
+                eventTimeMs = eventTimeMs,
+                mediaKeyAction = controls.mediaKeyAction,
+            )
+        }
+
         if (isHudAccessoryEvent && hasPendingExecApproval && keyCode in hudApprovalActionKeys) {
             val command =
                 if (action == KeyEvent.ACTION_DOWN) {
@@ -172,7 +181,7 @@ internal class AirVisionHudKeyInputController(
             )
         }
 
-        val isHudMediaKey = hudMicToggleKeys.contains(keyCode)
+        val isHudMediaKey = hudMicToggleKeys.contains(keyCode) || controls.customMediaKeyCode == keyCode
         if (!isHudMediaKey || (!isHudAccessoryEvent && keyCode !in hudGlobalMicToggleKeys)) {
             return AirVisionHudKeyDecision(
                 consume = false,
@@ -185,6 +194,20 @@ internal class AirVisionHudKeyInputController(
             )
         }
 
+        return handleMediaKeyEvent(
+            keyCode = keyCode,
+            action = action,
+            eventTimeMs = eventTimeMs,
+            mediaKeyAction = controls.mediaKeyAction,
+        )
+    }
+
+    private fun handleMediaKeyEvent(
+        keyCode: Int,
+        action: Int,
+        eventTimeMs: Long,
+        mediaKeyAction: AirVisionHudMediaKeyAction,
+    ): AirVisionHudKeyDecision {
         if (micHoldKeyCode == keyCode && action == KeyEvent.ACTION_UP) {
             micHoldKeyCode = null
             lastMicTapUptimeMs = 0L
@@ -194,7 +217,7 @@ internal class AirVisionHudKeyInputController(
             )
         }
 
-        return when (controls.mediaKeyAction) {
+        return when (mediaKeyAction) {
             AirVisionHudMediaKeyAction.None -> AirVisionHudKeyDecision(consume = false)
             AirVisionHudMediaKeyAction.SingleTapToggleMic -> {
                 lastMicTapUptimeMs = 0L

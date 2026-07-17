@@ -4,6 +4,7 @@ package ai.openclaw.app
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.view.KeyEvent
 import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
@@ -57,6 +58,7 @@ class SecurePrefs(
         private const val AIR_VISION_HUD_HORIZONTAL_SWIPE_ACTION_KEY = "airVision.hud.horizontalSwipeAction"
         private const val AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY = "airVision.hud.brightnessKeyAction"
         private const val AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY = "airVision.hud.mediaKeyAction"
+        private const val EXTERNAL_HUD_CUSTOM_MEDIA_KEY_CODE_KEY = "externalHud.input.customMediaKeyCode"
         private const val AIR_VISION_APP_LANGUAGE_KEY = "airVision.app.language"
         private const val AIR_VISION_STARTUP_DESTINATION_KEY = "airVision.app.startupDestination"
         private const val AIR_VISION_HUD_DISPLAY_TARGET_KEY = "airVision.app.hudDisplayTarget"
@@ -829,6 +831,18 @@ class SecurePrefs(
         _airVisionHudControls.value = _airVisionHudControls.value.copy(mediaKeyAction = action)
     }
 
+    fun setExternalHudCustomMediaKeyCode(keyCode: Int?) {
+        val normalized = normalizeExternalHudKeyCode(keyCode)
+        plainPrefs.edit {
+            if (normalized == null) {
+                remove(EXTERNAL_HUD_CUSTOM_MEDIA_KEY_CODE_KEY)
+            } else {
+                putInt(EXTERNAL_HUD_CUSTOM_MEDIA_KEY_CODE_KEY, normalized)
+            }
+        }
+        _airVisionHudControls.value = _airVisionHudControls.value.copy(customMediaKeyCode = normalized)
+    }
+
     fun setAirVisionAppLanguage(language: AirVisionAppLanguage) {
         plainPrefs.edit { putString(AIR_VISION_APP_LANGUAGE_KEY, language.rawValue) }
         _airVisionAppLanguage.value = language
@@ -927,6 +941,7 @@ class SecurePrefs(
                     horizontalSwipeAction = _airVisionHudControls.value.horizontalSwipeAction.rawValue,
                     brightnessKeyAction = _airVisionHudControls.value.brightnessKeyAction.rawValue,
                     mediaKeyAction = _airVisionHudControls.value.mediaKeyAction.rawValue,
+                    customMediaKeyCode = _airVisionHudControls.value.customMediaKeyCode,
                 ),
             appPreferences =
                 AirVisionBackupAppPreferences(
@@ -979,6 +994,9 @@ class SecurePrefs(
             putString(AIR_VISION_HUD_HORIZONTAL_SWIPE_ACTION_KEY, controls.horizontalSwipeAction.rawValue)
             putString(AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY, controls.brightnessKeyAction.rawValue)
             putString(AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY, controls.mediaKeyAction.rawValue)
+            controls.customMediaKeyCode?.let {
+                putInt(EXTERNAL_HUD_CUSTOM_MEDIA_KEY_CODE_KEY, it)
+            } ?: remove(EXTERNAL_HUD_CUSTOM_MEDIA_KEY_CODE_KEY)
             putString(AIR_VISION_APP_LANGUAGE_KEY, appPreferences.language.rawValue)
             putString(AIR_VISION_STARTUP_DESTINATION_KEY, appPreferences.startupDestination.rawValue)
             putString(AIR_VISION_HUD_DISPLAY_TARGET_KEY, appPreferences.hudDisplayTarget.rawValue)
@@ -1342,6 +1360,12 @@ class SecurePrefs(
             mediaKeyAction =
                 AirVisionHudMediaKeyAction.fromRawValue(
                     plainPrefs.getString(AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY, null),
+                ),
+            customMediaKeyCode =
+                normalizeExternalHudKeyCode(
+                    plainPrefs
+                        .takeIf { it.contains(EXTERNAL_HUD_CUSTOM_MEDIA_KEY_CODE_KEY) }
+                        ?.getInt(EXTERNAL_HUD_CUSTOM_MEDIA_KEY_CODE_KEY, KeyEvent.KEYCODE_UNKNOWN),
                 ),
         )
 

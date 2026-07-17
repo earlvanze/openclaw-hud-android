@@ -56,6 +56,8 @@ class MainViewModel(
     val hudTransientMessages: SharedFlow<String> = _hudTransientMessages
     private val _airVisionIdentifyToken = MutableStateFlow(0L)
     val airVisionIdentifyToken: StateFlow<Long> = _airVisionIdentifyToken
+    private val _externalHudMediaKeyLearning = MutableStateFlow(false)
+    val externalHudMediaKeyLearning: StateFlow<Boolean> = _externalHudMediaKeyLearning
 
     private fun ensureRuntime(reconnectPreferredGatewayOnForeground: Boolean = true): NodeRuntime {
         runtimeRef.value?.let { return it }
@@ -534,6 +536,40 @@ class MainViewModel(
 
     fun setAirVisionHudMediaKeyAction(action: AirVisionHudMediaKeyAction) {
         prefs.setAirVisionHudMediaKeyAction(action)
+    }
+
+    fun startExternalHudMediaKeyLearning() {
+        _externalHudMediaKeyLearning.value = true
+        showHudTransientMessage("Press an external HUD button")
+    }
+
+    fun cancelExternalHudMediaKeyLearning(showMessage: Boolean = true) {
+        if (!_externalHudMediaKeyLearning.value) return
+        _externalHudMediaKeyLearning.value = false
+        if (showMessage) showHudTransientMessage("Key learning canceled")
+    }
+
+    fun completeExternalHudMediaKeyLearning(
+        keyCode: Int,
+        deviceName: String?,
+    ) {
+        val normalized = normalizeExternalHudKeyCode(keyCode) ?: return
+        prefs.setExternalHudCustomMediaKeyCode(normalized)
+        _externalHudMediaKeyLearning.value = false
+        val source = deviceName?.trim()?.takeIf { it.isNotEmpty() }?.take(48)
+        showHudTransientMessage(
+            buildString {
+                append("Learned ")
+                append(externalHudKeyLabel(normalized))
+                if (source != null) append(" from $source")
+            },
+        )
+    }
+
+    fun clearExternalHudCustomMediaKey() {
+        prefs.setExternalHudCustomMediaKeyCode(null)
+        _externalHudMediaKeyLearning.value = false
+        showHudTransientMessage("Custom HUD key cleared")
     }
 
     fun setAirVisionAppLanguage(language: AirVisionAppLanguage) {

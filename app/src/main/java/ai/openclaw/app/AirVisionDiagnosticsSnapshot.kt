@@ -416,6 +416,8 @@ data class AirVisionDiagnosticsHardwareKeyMapping(
     val mediaKeyAction: String,
     val mediaKeyLabel: String,
     val mediaKeyDoubleTapTimeoutMs: Long,
+    val customMediaKeyCode: Int?,
+    val customMediaKeyLabel: String,
     val firmwareBrightnessPassthroughPossible: Boolean,
     val summary: String,
 )
@@ -453,10 +455,10 @@ data class AirVisionDiagnosticsShortcutMenu(
 
 object AirVisionDiagnosticsSnapshots {
     const val SCHEMA = "openclaw.airvision.m1.diagnostics"
-    const val VERSION = 37
+    const val VERSION = 38
     private const val ASUS_MIN_IPD_MM = 53.5
     private const val ASUS_MAX_IPD_MM = 74.5
-    private val SUPPORTED_PROFILE_BACKUP_VERSIONS = listOf(1, 2, 3, 4, 5, AirVisionProfileBackups.VERSION)
+    private val SUPPORTED_PROFILE_BACKUP_VERSIONS = (1..AirVisionProfileBackups.VERSION).toList()
 
     private val json =
         Json {
@@ -941,10 +943,13 @@ object AirVisionDiagnosticsSnapshots {
                 } else {
                     0L
                 },
+            customMediaKeyCode = controls.customMediaKeyCode,
+            customMediaKeyLabel = externalHudKeyLabel(controls.customMediaKeyCode),
             firmwareBrightnessPassthroughPossible = firmwarePassthrough,
             summary =
                 "M1 brightness keys: ${controls.brightnessKeyAction.label}; $effect; " +
-                    "media key ${controls.mediaKeyAction.label}.",
+                    "media key ${controls.mediaKeyAction.label}; " +
+                    "custom mic key ${externalHudKeyLabel(controls.customMediaKeyCode)}.",
         )
     }
 
@@ -1063,7 +1068,8 @@ object AirVisionDiagnosticsSnapshots {
                         "single tap ${controls.singleTapAction.label}, double tap ${controls.doubleTapAction.label}, " +
                             "vertical swipe ${controls.swipeAction.label}, horizontal swipe ${controls.horizontalSwipeAction.label}, " +
                             "brightness key ${controls.brightnessKeyAction.label}, " +
-                            "media key ${controls.mediaKeyAction.label}",
+                            "media key ${controls.mediaKeyAction.label}, " +
+                            "custom mic key ${externalHudKeyLabel(controls.customMediaKeyCode)}",
                     liveM1ProofRequired = true,
                     firmwareGate = "none",
                     windowsOnly = false,

@@ -1,6 +1,7 @@
 package ai.openclaw.app
 
 import android.content.Context
+import android.view.KeyEvent
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.int
@@ -237,6 +238,7 @@ class SecurePrefsTest {
         prefs.setAirVisionHudSwipeAction(AirVisionHudSwipeAction.None)
         prefs.setAirVisionHudBrightnessKeyAction(AirVisionHudKeyAction.AdjustDistance)
         prefs.setAirVisionHudMediaKeyAction(AirVisionHudMediaKeyAction.None)
+        prefs.setExternalHudCustomMediaKeyCode(KeyEvent.KEYCODE_BUTTON_MODE)
         prefs.setAirVisionAppLanguage(AirVisionAppLanguage.Spanish)
         prefs.setAirVisionStartupDestination(AirVisionStartupDestination.Voice)
         prefs.setAirVisionRememberedDisplay(AirVisionHudDisplayFingerprint("Samsung DeX Monitor", 2560, 1440))
@@ -277,7 +279,16 @@ class SecurePrefsTest {
                 .first { it.jsonObject.getValue("viewMode").jsonPrimitive.content == AirVisionViewMode.Infinity.rawValue }
                 .jsonObject
 
-        assertEquals("6", backupRoot.getValue("version").jsonPrimitive.content)
+        assertEquals("7", backupRoot.getValue("version").jsonPrimitive.content)
+        assertEquals(
+            KeyEvent.KEYCODE_BUTTON_MODE,
+            backupRoot
+                .getValue("hudControls")
+                .jsonObject
+                .getValue("customMediaKeyCode")
+                .jsonPrimitive
+                .int,
+        )
         assertEquals(AirVisionViewMode.entries.size, runtimeProfiles.size)
         assertEquals(false, appPreferences.getValue("speakerEnabled").jsonPrimitive.boolean)
         assertEquals(true, appPreferences.getValue("nativeCaptionsEnabled").jsonPrimitive.boolean)
@@ -329,6 +340,7 @@ class SecurePrefsTest {
         assertEquals(AirVisionHudSwipeAction.None, importedPrefs.airVisionHudControls.value.swipeAction)
         assertEquals(AirVisionHudKeyAction.AdjustDistance, importedPrefs.airVisionHudControls.value.brightnessKeyAction)
         assertEquals(AirVisionHudMediaKeyAction.None, importedPrefs.airVisionHudControls.value.mediaKeyAction)
+        assertEquals(KeyEvent.KEYCODE_BUTTON_MODE, importedPrefs.airVisionHudControls.value.customMediaKeyCode)
         assertEquals(AirVisionAppLanguage.Spanish, importedPrefs.airVisionAppLanguage.value)
         assertEquals(AirVisionStartupDestination.Voice, importedPrefs.airVisionStartupDestination.value)
         assertEquals(AirVisionHudDisplayTarget.RememberedExternal, importedPrefs.airVisionHudDisplayTarget.value)
@@ -690,6 +702,7 @@ class SecurePrefsTest {
         prefs.setAirVisionHudSwipeAction(AirVisionHudSwipeAction.None)
         prefs.setAirVisionHudBrightnessKeyAction(AirVisionHudKeyAction.AdjustDistance)
         prefs.setAirVisionHudMediaKeyAction(AirVisionHudMediaKeyAction.None)
+        prefs.setExternalHudCustomMediaKeyCode(KeyEvent.KEYCODE_F12)
 
         val reloaded = SecurePrefs(context)
         val controls = reloaded.airVisionHudControls.value
@@ -699,6 +712,11 @@ class SecurePrefsTest {
         assertEquals(AirVisionHudSwipeAction.None, controls.swipeAction)
         assertEquals(AirVisionHudKeyAction.AdjustDistance, controls.brightnessKeyAction)
         assertEquals(AirVisionHudMediaKeyAction.None, controls.mediaKeyAction)
+        assertEquals(KeyEvent.KEYCODE_F12, controls.customMediaKeyCode)
+
+        reloaded.setExternalHudCustomMediaKeyCode(KeyEvent.KEYCODE_UNKNOWN)
+        assertNull(reloaded.airVisionHudControls.value.customMediaKeyCode)
+        assertNull(SecurePrefs(context).airVisionHudControls.value.customMediaKeyCode)
     }
 
     @Test

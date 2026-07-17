@@ -95,5 +95,11 @@ class AirVisionHudMotionInputControllerTest {
         assertTrue(isHudAccessoryTapKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE))
         assertTrue(shouldDispatchHudAccessoryTapToPresentation(KeyEvent.KEYCODE_ENTER))
         assertFalse(shouldDispatchHudAccessoryTapToPresentation(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE))
+        assertFalse(
+            shouldDispatchHudAccessoryTapToPresentation(
+                keyCode = KeyEvent.KEYCODE_ENTER,
+                customMediaKeyCode = KeyEvent.KEYCODE_ENTER,
+            ),
+        )
     }
 }

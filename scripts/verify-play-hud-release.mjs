@@ -351,6 +351,7 @@ async function verifyListing(listingDir, language) {
     "external touchscreens",
     "rotary controls",
     "joystick/hat axes",
+    "custom accessory-key learning",
     "HID report-path summaries",
     "per-feature firmware-apply readiness",
     "desired firmware-sync state",
@@ -366,6 +367,7 @@ async function verifyListing(listingDir, language) {
     "Presentation recovery",
     "display pinning",
     "frame-shape morphing",
+    "Learn any external accessory button",
   ]);
 
   return {
@@ -579,6 +581,8 @@ async function verifyReadmeAirVisionParity() {
     "rotary encoders",
     "normalized to",
     "without making ASUS identity a requirement",
+    "Custom Mic Key learning",
+    "Internal phone keys are ignored",
   ]);
   requireIncludes("README captions parity", readme, [
     "Samsung/Android native captioning",
@@ -661,6 +665,13 @@ async function verifySettingsAirVisionParity() {
     "M1-optional",
     "firmware-gated",
     "Windows-only",
+  ]);
+  requireIncludes("Settings generic external HUD priority", settingsSheet, [
+    "EXTERNAL DISPLAY HUD",
+    "showAirVisionTools",
+    "Optional ASUS integration",
+    "External HUD Input",
+    "Custom Mic Key",
   ]);
   requireIncludes("Settings AirVision caption mode", settingsSheet, [
     "AirVisionCaptionModeStatus.from",

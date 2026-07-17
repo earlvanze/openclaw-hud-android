@@ -276,6 +276,7 @@ object AirVisionWindowsProfileHandoffs {
         add("- Swipe: ${AirVisionHudSwipeAction.fromRawValue(controls.swipeAction).label}")
         add("- Brightness key: ${AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction).label}")
         add("- Media key: ${AirVisionHudMediaKeyAction.fromRawValue(controls.mediaKeyAction).label}")
+        add("- Custom mic key: ${externalHudKeyLabel(controls.customMediaKeyCode)}")
     }
 
     private fun MutableList<String>.addHardwareKeyMapping(controls: AirVisionBackupHudControls) {
@@ -293,6 +294,7 @@ object AirVisionWindowsProfileHandoffs {
                 },
         )
         add("- Media key action: ${mediaKeyAction.label}")
+        add("- Custom external HUD mic key: ${externalHudKeyLabel(controls.customMediaKeyCode)}")
         add(
             "- Media key double-tap window: " +
                 if (mediaKeyAction == AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
@@ -510,6 +512,7 @@ object AirVisionWindowsProfileHandoffs {
             horizontalSwipeAction = AirVisionHudHorizontalSwipeAction.fromRawValue(horizontalSwipeAction),
             brightnessKeyAction = AirVisionHudKeyAction.fromRawValue(brightnessKeyAction),
             mediaKeyAction = AirVisionHudMediaKeyAction.fromRawValue(mediaKeyAction),
+            customMediaKeyCode = normalizeExternalHudKeyCode(customMediaKeyCode),
         )
 
     private fun onOff(value: Boolean): String = if (value) "on" else "off"

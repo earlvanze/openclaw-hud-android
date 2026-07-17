@@ -53,7 +53,7 @@ const validListingFiles = {
   "full-description.txt": [
     "OpenClaw HUD uses Android Presentation with USB-C and wireless displays, including Samsung DeX on foldable Android phones and AirVision M1.",
     "Remembered-display pinning survives Android display-ID changes.",
-    "Capability-driven input supports external touchscreens, rotary controls, and joystick/hat axes.",
+    "Capability-driven input supports external touchscreens, rotary controls, joystick/hat axes, and custom accessory-key learning.",
     "It includes HID report-path summaries, per-feature firmware-apply readiness, desired firmware-sync state, and protocol-capture targets.",
   ].join("\n"),
   "release-notes.txt": [
@@ -62,6 +62,7 @@ const validListingFiles = {
     "- Keep M1 tap and swipe support through the same capability-driven input path.",
     "- Configure gestures and accessory keys under External HUD Input.",
     "- Keep Presentation recovery, display pinning, and frame-shape morphing.",
+    "- Learn any external accessory button as a custom mic key.",
   ].join("\n"),
 };
 
@@ -70,6 +71,7 @@ const validReadme = [
   "",
   "The controls are configurable under External HUD Input. External touchscreens, touchpads, mice, styli, trackballs, DPAD/gamepad controls, rotary encoders, and axes route to the HUD.",
   "Absolute axes are normalized to their Android ranges. M1 remains supported without making ASUS identity a requirement.",
+  "Custom Mic Key learning maps an external button while Internal phone keys are ignored.",
   "Defaults are tuned for walking HUD use: single-tap opens the current notification on the phone, double-tap toggles mic, vertical swipe scrolls chat, and M1 brightness-key events can scroll chat.",
   "",
   "| Windows AirVision feature | Android HUD status |",
@@ -119,6 +121,11 @@ const validSettingsSheet = [
   '\"m1_optional\" -> \"M1-optional\"',
   '\"firmware_gated\" -> \"firmware-gated\"',
   '\"windows_only\" -> \"Windows-only\"',
+  "EXTERNAL DISPLAY HUD",
+  "showAirVisionTools",
+  "Optional ASUS integration",
+  "External HUD Input",
+  "Custom Mic Key",
   "Fallback model:",
   "thinking",
   "Languages:",

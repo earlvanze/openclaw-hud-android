@@ -31,6 +31,7 @@ data class AirVisionBackupHudControls(
     val horizontalSwipeAction: String = AirVisionHudHorizontalSwipeAction.BrowseNotifications.rawValue,
     val brightnessKeyAction: String,
     val mediaKeyAction: String,
+    val customMediaKeyCode: Int? = null,
 )
 
 @Serializable
@@ -87,8 +88,8 @@ data class AirVisionBackupRuntimeProfile(
 
 object AirVisionProfileBackups {
     const val SCHEMA = "openclaw.airvision.m1.profile-backup"
-    const val VERSION = 6
-    private val SUPPORTED_VERSIONS = setOf(1, 2, 3, 4, 5, VERSION)
+    const val VERSION = 7
+    private val SUPPORTED_VERSIONS = setOf(1, 2, 3, 4, 5, 6, VERSION)
 
     private val json =
         Json {
@@ -171,7 +172,8 @@ object AirVisionProfileBackups {
                     "${active.hudPlacement.label}, ${active.hudFrameShape.label} frame",
                 "Single tap ${controls.singleTapAction.label}; double tap ${controls.doubleTapAction.label}; " +
                     "vertical swipe ${controls.swipeAction.label}; horizontal swipe ${controls.horizontalSwipeAction.label}",
-                "Brightness key ${controls.brightnessKeyAction.label}; media key ${controls.mediaKeyAction.label}",
+                "Brightness key ${controls.brightnessKeyAction.label}; media key ${controls.mediaKeyAction.label}; " +
+                    "custom mic key ${externalHudKeyLabel(controls.customMediaKeyCode)}",
                 "Runtime effective HUD scale ${runtime.effectiveHudScalePercent}%, " +
                     "transcript ${runtime.hudTranscriptEntryCount}, captions ${runtime.hudCaptionEntryCount}",
                 "Runtime overlays ${enabledDisabled(runtime.colorPreviewOverlaysEnabled)}; " +
@@ -324,6 +326,7 @@ object AirVisionProfileBackups {
             horizontalSwipeAction = requireHorizontalSwipeAction(controls.horizontalSwipeAction),
             brightnessKeyAction = requireBrightnessKeyAction(controls.brightnessKeyAction),
             mediaKeyAction = requireMediaKeyAction(controls.mediaKeyAction),
+            customMediaKeyCode = requireExternalHudKeyCode(controls.customMediaKeyCode),
         )
 
     fun appPreferencesFromBackup(preferences: AirVisionBackupAppPreferences): AirVisionBackupResolvedAppPreferences {
@@ -404,6 +407,13 @@ object AirVisionProfileBackups {
     private fun requireMediaKeyAction(rawValue: String): AirVisionHudMediaKeyAction =
         AirVisionHudMediaKeyAction.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }
             ?: throw IllegalArgumentException("Unsupported AirVision media-key action: $rawValue")
+
+    private fun requireExternalHudKeyCode(keyCode: Int?): Int? {
+        require(keyCode == null || normalizeExternalHudKeyCode(keyCode) == keyCode) {
+            "Unsupported external HUD custom media key code: $keyCode"
+        }
+        return keyCode
+    }
 
     private fun requireAppLanguage(rawValue: String): AirVisionAppLanguage =
         AirVisionAppLanguage.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }

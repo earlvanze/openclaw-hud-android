@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
     private var appliedAirVisionAppLanguage: AirVisionAppLanguage? = null
     private val hudKeyInputController = AirVisionHudKeyInputController()
     private val hudMicHoldController = AirVisionHudMicHoldController()
+    private val externalHudKeyLearningController = ExternalHudKeyLearningController()
     private val hudMotionInputController = AirVisionHudMotionInputController()
     private val hudSystemBarsHandler = Handler(Looper.getMainLooper())
     private val hudDisplayListener =
@@ -257,6 +258,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         endHudMicHold(showMessage = false)
+        externalHudKeyLearningController.cancel()
+        viewModel.cancelExternalHudMediaKeyLearning(showMessage = false)
         unregisterHudDisplayListener()
         unregisterHudUnlockReceiver()
         cancelHudPresentationRecovery(resetAttempts = true)
@@ -579,7 +582,31 @@ class MainActivity : ComponentActivity() {
         source: String,
     ): Boolean {
         if (!BuildConfig.OPENCLAW_DEFAULT_HUD) return false
-        if (event.isHudAccessoryEvent() && shouldDispatchHudAccessoryTapToPresentation(event.keyCode)) {
+        val isHudAccessoryEvent = event.isHudAccessoryEvent()
+        val learningDecision =
+            externalHudKeyLearningController.handleKeyEvent(
+                keyCode = event.keyCode,
+                action = event.action,
+                learningEnabled = viewModel.externalHudMediaKeyLearning.value,
+                isExternalAccessory = isHudAccessoryEvent,
+            )
+        if (learningDecision.consume) {
+            learningDecision.learnedKeyCode?.let { learnedKeyCode ->
+                viewModel.completeExternalHudMediaKeyLearning(
+                    keyCode = learnedKeyCode,
+                    deviceName = event.device?.name,
+                )
+                Log.d(TAG, "Learned external HUD media key keyCode=$learnedKeyCode device=${event.device?.name}")
+            }
+            return true
+        }
+        if (
+            isHudAccessoryEvent &&
+            shouldDispatchHudAccessoryTapToPresentation(
+                keyCode = event.keyCode,
+                customMediaKeyCode = viewModel.airVisionHudControls.value.customMediaKeyCode,
+            )
+        ) {
             val presentation = hudPresentationSession.current
             if (presentation?.isShowing == true) {
                 if (event.action == KeyEvent.ACTION_UP) {
@@ -597,7 +624,7 @@ class MainActivity : ComponentActivity() {
                 keyCode = event.keyCode,
                 action = event.action,
                 eventTimeMs = event.eventTime.takeIf { it > 0L } ?: SystemClock.uptimeMillis(),
-                isHudAccessoryEvent = event.isHudAccessoryEvent(),
+                isHudAccessoryEvent = isHudAccessoryEvent,
                 controls = viewModel.airVisionHudControls.value,
                 hasActiveRun = viewModel.pendingRunCount.value > 0,
                 hasPendingExecApproval = pendingApproval != null,

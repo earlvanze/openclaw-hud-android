@@ -149,7 +149,7 @@ class AirVisionDiagnosticsSnapshotTest {
                 .jsonObject
 
         assertEquals("openclaw.airvision.m1.diagnostics", root.getValue("schema").jsonPrimitive.content)
-        assertEquals("37", root.getValue("version").jsonPrimitive.content)
+        assertEquals("38", root.getValue("version").jsonPrimitive.content)
         assertEquals("USB descriptor 1.02", deviceInfo.getValue("firmwareVersion").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceClass").jsonPrimitive.content)
         assertEquals("0", deviceInfo.getValue("deviceSubclass").jsonPrimitive.content)
@@ -417,9 +417,9 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("false", hudRuntime.getValue("usedNonDefaultDisplayFallback").jsonPrimitive.content)
         assertEquals("selected_presentation_display", hudRuntime.getValue("displayRouteReason").jsonPrimitive.content)
         assertEquals("openclaw.airvision.m1.profile-backup", profileBackup.getValue("schema").jsonPrimitive.content)
-        assertEquals("6", profileBackup.getValue("currentVersion").jsonPrimitive.content)
+        assertEquals("7", profileBackup.getValue("currentVersion").jsonPrimitive.content)
         assertEquals(
-            listOf("1", "2", "3", "4", "5", "6"),
+            listOf("1", "2", "3", "4", "5", "6", "7"),
             profileBackup.getValue("supportedVersions").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals("working", profileBackup.getValue("activeViewMode").jsonPrimitive.content)
@@ -515,7 +515,7 @@ class AirVisionDiagnosticsSnapshotTest {
             profileBackup.getValue("restoreScope").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals(
-            "profile backup v6: 5/5 profiles, 5 runtime profiles, HUD controls and app preferences included.",
+            "profile backup v7: 5/5 profiles, 5 runtime profiles, HUD controls and app preferences included.",
             profileBackup.getValue("summary").jsonPrimitive.content,
         )
         assertEquals("67", fitAndClarity.getValue("ipdMm").jsonPrimitive.content)
@@ -706,7 +706,8 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("none", layoutApply.getValue("firmwareGate").jsonPrimitive.content)
         assertEquals(
             "single tap Dismiss notification, double tap Toggle mic, vertical swipe Scroll chat, " +
-                "horizontal swipe Browse notifications, brightness key Scroll chat, media key Double-tap mic",
+                "horizontal swipe Browse notifications, brightness key Scroll chat, media key Double-tap mic, " +
+                "custom mic key Built-in accessory keys",
             gestureApply.getValue("androidEffect").jsonPrimitive.content,
         )
         assertEquals("Cursor Follow, Center Cursor, 3DoF, or Unity mirror when needed", spatialApply.getValue("windowsAppTarget").jsonPrimitive.content)
@@ -719,9 +720,11 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("double_tap_toggle_mic", hardwareKeyMapping.getValue("mediaKeyAction").jsonPrimitive.content)
         assertEquals("Double-tap mic", hardwareKeyMapping.getValue("mediaKeyLabel").jsonPrimitive.content)
         assertEquals("2000", hardwareKeyMapping.getValue("mediaKeyDoubleTapTimeoutMs").jsonPrimitive.content)
+        assertEquals("Built-in accessory keys", hardwareKeyMapping.getValue("customMediaKeyLabel").jsonPrimitive.content)
         assertEquals("false", hardwareKeyMapping.getValue("firmwareBrightnessPassthroughPossible").jsonPrimitive.content)
         assertEquals(
-            "M1 brightness keys: Scroll chat; brightness keys scroll the HUD chat transcript; media key Double-tap mic.",
+            "M1 brightness keys: Scroll chat; brightness keys scroll the HUD chat transcript; " +
+                "media key Double-tap mic; custom mic key Built-in accessory keys.",
             hardwareKeyMapping.getValue("summary").jsonPrimitive.content,
         )
         assertEquals("7", windowsGestureCatalog.getValue("itemCount").jsonPrimitive.content)
@@ -1284,7 +1287,8 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("5", hardwareKeyMapping.getValue("brightnessStepPercent").jsonPrimitive.content)
         assertEquals("false", hardwareKeyMapping.getValue("firmwareBrightnessPassthroughPossible").jsonPrimitive.content)
         assertEquals(
-            "M1 brightness keys: Adjust brightness; brightness keys step Android HUD dimming by 5%; media key Double-tap mic.",
+            "M1 brightness keys: Adjust brightness; brightness keys step Android HUD dimming by 5%; " +
+                "media key Double-tap mic; custom mic key Built-in accessory keys.",
             hardwareKeyMapping.getValue("summary").jsonPrimitive.content,
         )
     }
@@ -1321,6 +1325,36 @@ class AirVisionDiagnosticsSnapshotTest {
             mediaGesture.getValue("androidStatus").jsonPrimitive.content,
         )
         assertEquals("false", mediaGesture.getValue("firmwarePassthroughRequired").jsonPrimitive.content)
+    }
+
+    @Test
+    fun fromState_exportsLearnedGenericExternalHudKey() {
+        val encoded =
+            AirVisionDiagnosticsSnapshots.encode(
+                AirVisionDiagnosticsSnapshots.fromState(
+                    usbState = AirVisionUsbState(),
+                    displaySettings = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working),
+                    hudControls =
+                        AirVisionHudControls(
+                            mediaKeyAction = AirVisionHudMediaKeyAction.SingleTapToggleMic,
+                            customMediaKeyCode = android.view.KeyEvent.KEYCODE_F12,
+                        ),
+                    appLanguage = AirVisionAppLanguage.System,
+                    startupDestination = AirVisionStartupDestination.Hud,
+                    hudDisplayTarget = AirVisionHudDisplayTarget.FirstExternal,
+                    demoModeEnabled = false,
+                ),
+            )
+        val mapping =
+            Json
+                .parseToJsonElement(encoded)
+                .jsonObject
+                .getValue("hardwareKeyMapping")
+                .jsonObject
+
+        assertEquals("142", mapping.getValue("customMediaKeyCode").jsonPrimitive.content)
+        assertEquals("F12 (142)", mapping.getValue("customMediaKeyLabel").jsonPrimitive.content)
+        assertTrue(mapping.getValue("summary").jsonPrimitive.content.contains("custom mic key F12 (142)"))
     }
 
     private fun diagnosticsProfileBackup(activeSettings: AirVisionDisplaySettings): AirVisionProfileBackup {

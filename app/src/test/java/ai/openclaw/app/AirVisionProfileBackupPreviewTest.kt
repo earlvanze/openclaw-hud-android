@@ -114,6 +114,23 @@ class AirVisionProfileBackupPreviewTest {
 
         assertEquals("Remembered HUD display target requires a display fingerprint.", error.message)
     }
+
+    @Test
+    fun resolve_rejectsInvalidCustomExternalHudKeyCode() {
+        val raw =
+            profileBackupJson()
+                .replace(
+                    "\"mediaKeyAction\": \"double_tap_toggle_mic\"",
+                    "\"mediaKeyAction\": \"double_tap_toggle_mic\", \"customMediaKeyCode\": 99999",
+                )
+
+        val error =
+            org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
+                AirVisionProfileBackups.resolve(raw)
+            }
+
+        assertEquals("Unsupported external HUD custom media key code: 99999", error.message)
+    }
 }
 
 private fun profileBackupJson(

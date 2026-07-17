@@ -31,6 +31,7 @@ import ai.openclaw.app.LocationMode
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.NotificationPackageFilterMode
 import ai.openclaw.app.PrivacyPolicyText
+import ai.openclaw.app.externalHudKeyLabel
 import ai.openclaw.app.node.DeviceNotificationListenerService
 import ai.openclaw.app.normalizeLocalHourMinute
 import android.Manifest
@@ -127,6 +128,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val notificationForwardingSessionKey by viewModel.notificationForwardingSessionKey.collectAsState()
     val airVisionDisplaySettings by viewModel.airVisionDisplaySettings.collectAsState()
     val airVisionHudControls by viewModel.airVisionHudControls.collectAsState()
+    val externalHudMediaKeyLearning by viewModel.externalHudMediaKeyLearning.collectAsState()
     val airVisionAppLanguage by viewModel.airVisionAppLanguage.collectAsState()
     val airVisionStartupDestination by viewModel.airVisionStartupDestination.collectAsState()
     val airVisionHudDisplayTarget by viewModel.airVisionHudDisplayTarget.collectAsState()
@@ -178,6 +180,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     var notificationQuietStartDraft by remember(notificationForwardingQuietStart) {
         mutableStateOf(notificationForwardingQuietStart)
     }
+    var showAirVisionTools by remember { mutableStateOf(airVisionUsbState.connected) }
     var notificationQuietEndDraft by remember(notificationForwardingQuietEnd) {
         mutableStateOf(notificationForwardingQuietEnd)
     }
@@ -997,62 +1000,78 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         headlineContent = { Text("AirVision Firmware Link", style = mobileHeadline) },
                         supportingContent = {
                             Text(
-                                airVisionUsbStatusText(
-                                    statusText = airVisionUsbState.statusText,
-                                    deviceLabel = airVisionUsbState.deviceLabel,
-                                    vendorProduct = airVisionUsbState.vendorProduct,
-                                    deviceInfoText = airVisionUsbState.deviceInfoText,
-                                    hidControlInterface = airVisionUsbState.hidControlInterface,
-                                    audioInterface = airVisionUsbState.audioInterface,
-                                    inputInterface = airVisionUsbState.inputInterface,
-                                    firmwareCapabilitySummary = airVisionUsbState.firmwareCapabilities.summary,
-                                    firmwareFeatureReadinessSummary = airVisionUsbState.firmwareCapabilities.featureReadinessSummary,
-                                    firmwareSyncSummary = airVisionFirmwareSyncPlan.summary,
-                                    firmwareWriteGateSummary = airVisionFirmwareSyncPlan.writeGateSummary,
-                                    firmwareWriteGateProtocolReadyFeatureLabels =
-                                        airVisionFirmwareSyncPlan.writeGate.protocolReadyFeatureLabels,
-                                    firmwareWriteGateBlockedFeatureLabels =
-                                        airVisionFirmwareSyncPlan.writeGate.blockedFeatureLabels,
-                                    firmwareWriteGateLiveTestChecklist =
-                                        airVisionFirmwareSyncPlan.writeGate.liveTestChecklist,
-                                    firmwareWriteGateNextStep = airVisionFirmwareSyncPlan.writeGate.nextStep,
-                                    firmwareApplyPreviewSummary = airVisionFirmwareSyncPlan.applyPreview.summary,
-                                    firmwareApplyCommandSummaries =
-                                        airVisionFirmwareSyncPlan.applyPreview.commands.map { it.summary },
-                                    diagnosticsText = airVisionUsbState.diagnosticsText,
-                                ),
+                                if (showAirVisionTools) {
+                                    airVisionUsbStatusText(
+                                        statusText = airVisionUsbState.statusText,
+                                        deviceLabel = airVisionUsbState.deviceLabel,
+                                        vendorProduct = airVisionUsbState.vendorProduct,
+                                        deviceInfoText = airVisionUsbState.deviceInfoText,
+                                        hidControlInterface = airVisionUsbState.hidControlInterface,
+                                        audioInterface = airVisionUsbState.audioInterface,
+                                        inputInterface = airVisionUsbState.inputInterface,
+                                        firmwareCapabilitySummary = airVisionUsbState.firmwareCapabilities.summary,
+                                        firmwareFeatureReadinessSummary = airVisionUsbState.firmwareCapabilities.featureReadinessSummary,
+                                        firmwareSyncSummary = airVisionFirmwareSyncPlan.summary,
+                                        firmwareWriteGateSummary = airVisionFirmwareSyncPlan.writeGateSummary,
+                                        firmwareWriteGateProtocolReadyFeatureLabels =
+                                            airVisionFirmwareSyncPlan.writeGate.protocolReadyFeatureLabels,
+                                        firmwareWriteGateBlockedFeatureLabels =
+                                            airVisionFirmwareSyncPlan.writeGate.blockedFeatureLabels,
+                                        firmwareWriteGateLiveTestChecklist =
+                                            airVisionFirmwareSyncPlan.writeGate.liveTestChecklist,
+                                        firmwareWriteGateNextStep = airVisionFirmwareSyncPlan.writeGate.nextStep,
+                                        firmwareApplyPreviewSummary = airVisionFirmwareSyncPlan.applyPreview.summary,
+                                        firmwareApplyCommandSummaries =
+                                            airVisionFirmwareSyncPlan.applyPreview.commands.map { it.summary },
+                                        diagnosticsText = airVisionUsbState.diagnosticsText,
+                                    )
+                                } else {
+                                    "Optional ASUS integration. ${airVisionUsbState.statusText}"
+                                },
                                 style = mobileCallout,
                             )
                         },
                         trailingContent = {
-                            Button(
-                                onClick = {
-                                    if (airVisionUsbState.connected && !airVisionUsbState.permissionGranted) {
-                                        viewModel.requestAirVisionUsbPermission()
-                                    } else {
-                                        viewModel.refreshAirVisionUsb()
-                                    }
-                                },
-                                colors = settingsPrimaryButtonColors(),
-                                shape = RoundedCornerShape(14.dp),
-                            ) {
-                                Text(
-                                    if (airVisionUsbState.connected && !airVisionUsbState.permissionGranted) {
-                                        "Grant"
-                                    } else {
-                                        "Refresh"
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                TextButton(
+                                    onClick = { showAirVisionTools = !showAirVisionTools },
+                                    shape = RoundedCornerShape(14.dp),
+                                ) {
+                                    Text(
+                                        if (showAirVisionTools) "Hide" else "Details",
+                                        style = mobileCallout.copy(fontWeight = FontWeight.Bold),
+                                    )
+                                }
+                                Button(
+                                    onClick = {
+                                        if (airVisionUsbState.connected && !airVisionUsbState.permissionGranted) {
+                                            viewModel.requestAirVisionUsbPermission()
+                                        } else {
+                                            viewModel.refreshAirVisionUsb()
+                                        }
                                     },
-                                    style = mobileCallout.copy(fontWeight = FontWeight.Bold),
-                                )
+                                    colors = settingsPrimaryButtonColors(),
+                                    shape = RoundedCornerShape(14.dp),
+                                ) {
+                                    Text(
+                                        if (airVisionUsbState.connected && !airVisionUsbState.permissionGranted) {
+                                            "Grant"
+                                        } else {
+                                            "Refresh"
+                                        },
+                                        style = mobileCallout.copy(fontWeight = FontWeight.Bold),
+                                    )
+                                }
                             }
                         },
                     )
-                    airVisionFirmwareSyncPlan.items.forEach { item ->
+                    if (showAirVisionTools) {
+                        airVisionFirmwareSyncPlan.items.forEach { item ->
+                            HorizontalDivider(color = mobileBorder)
+                            AirVisionFirmwareSyncItemRow(item)
+                        }
                         HorizontalDivider(color = mobileBorder)
-                        AirVisionFirmwareSyncItemRow(item)
-                    }
-                    HorizontalDivider(color = mobileBorder)
-                    ListItem(
+                        ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
                         headlineContent = { Text("Firmware Capture Results", style = mobileHeadline) },
@@ -1086,9 +1105,9 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 }
                             }
                         },
-                    )
-                    HorizontalDivider(color = mobileBorder)
-                    ListItem(
+                        )
+                        HorizontalDivider(color = mobileBorder)
+                        ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
                         headlineContent = { Text("Firmware Capture Plan", style = mobileHeadline) },
@@ -1111,9 +1130,9 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 Text("Export", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
                             }
                         },
-                    )
-                    HorizontalDivider(color = mobileBorder)
-                    ListItem(
+                        )
+                        HorizontalDivider(color = mobileBorder)
+                        ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
                         headlineContent = { Text("Firmware Updates", style = mobileHeadline) },
@@ -1136,9 +1155,9 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 Text("Export", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
                             }
                         },
-                    )
-                    HorizontalDivider(color = mobileBorder)
-                    ListItem(
+                        )
+                        HorizontalDivider(color = mobileBorder)
+                        ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
                         headlineContent = { Text("Windows App Handoff", style = mobileHeadline) },
@@ -1161,9 +1180,9 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 Text("Export", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
                             }
                         },
-                    )
-                    HorizontalDivider(color = mobileBorder)
-                    ListItem(
+                        )
+                        HorizontalDivider(color = mobileBorder)
+                        ListItem(
                         modifier = Modifier.fillMaxWidth(),
                         colors = listItemColors,
                         headlineContent = { Text("Diagnostics Export", style = mobileHeadline) },
@@ -1186,7 +1205,8 @@ fun SettingsSheet(viewModel: MainViewModel) {
                                 Text("Export", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
                             }
                         },
-                    )
+                        )
+                    }
                     HorizontalDivider(color = mobileBorder)
                     AirVisionOptionGroup(
                         title = "HUD Display Target",
@@ -1693,6 +1713,51 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         optionLabel = { it.label },
                         optionDescription = ::airVisionMediaKeyActionDescription,
                         onSelected = viewModel::setAirVisionHudMediaKeyAction,
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Custom Mic Key", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                if (externalHudMediaKeyLearning) {
+                                    "Press a button on the external HUD remote, keyboard, gamepad, or wearable control."
+                                } else {
+                                    "Current: ${externalHudKeyLabel(airVisionHudControls.customMediaKeyCode)}. " +
+                                        "The selected Media / Tap Keys mode applies to this button and replaces its built-in HUD command."
+                                },
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (airVisionHudControls.customMediaKeyCode != null && !externalHudMediaKeyLearning) {
+                                    TextButton(
+                                        onClick = viewModel::clearExternalHudCustomMediaKey,
+                                        shape = RoundedCornerShape(14.dp),
+                                    ) {
+                                        Text("Clear", style = mobileCallout.copy(fontWeight = FontWeight.Bold))
+                                    }
+                                }
+                                Button(
+                                    onClick = {
+                                        if (externalHudMediaKeyLearning) {
+                                            viewModel.cancelExternalHudMediaKeyLearning()
+                                        } else {
+                                            viewModel.startExternalHudMediaKeyLearning()
+                                        }
+                                    },
+                                    colors = settingsPrimaryButtonColors(),
+                                    shape = RoundedCornerShape(14.dp),
+                                ) {
+                                    Text(
+                                        if (externalHudMediaKeyLearning) "Cancel" else "Learn",
+                                        style = mobileCallout.copy(fontWeight = FontWeight.Bold),
+                                    )
+                                }
+                            }
+                        },
                     )
                     HorizontalDivider(color = mobileBorder)
                     ListItem(
