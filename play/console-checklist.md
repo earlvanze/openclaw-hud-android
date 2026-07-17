@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.11-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.12-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `3bfee7348c640bc250be39e1ea56fbc9d8544932d5efd3da158ea0218c26a700`
-- Latest HUD bundle version: `2026.7.17.11 (2026071711)`.
+  `81284efcc4d88847ee1aa7df4f7ae9a69fd9e01c724e9c93aba5ccba8c213376`
+- Latest HUD bundle version: `2026.7.17.12 (2026071712)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -93,8 +93,12 @@ Current local status:
   gesture timing is unchanged. v2026071711 moves external touch gesture
   recognition onto the root HUD surface so foreground content cannot prevent
   the configured mic double-tap or swipe action from receiving the gesture.
+  v2026071712 adds a persisted Adaptive frame option that resolves the actual
+  Android Presentation window into Compact portrait, Full square, Wide
+  landscape, or Panoramic ultra-wide framing while preserving every explicit
+  frame choice. Settings reports the effective frame for the selected display.
   Unit, input-routing, Android lint, R8, release-signing, and Play-package
-  checks pass. Exact v2026071711 device installation still requires a
+  checks pass. Exact v2026071712 device installation still requires a
   Play-signed delivery because the installed Play build and local
   upload-key APK have different signing certificates.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
