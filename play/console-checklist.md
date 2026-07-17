@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.1-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.2-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `3c6d9af35dd512ca119aa79f612d8dfbc194db1e939b9fa1229bdad92ebce3a8`
-- Latest HUD bundle version: `2026.7.17.1 (2026071701)`.
+  `cb484b6a58c7195049d2b4905d6932a0bfb3a79b369145f9aa0493d25b27cc35`
+- Latest HUD bundle version: `2026.7.17.2 (2026071702)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -81,6 +81,10 @@ Current local status:
   Presentation window on display 8. Demo Mode exercised the reply-capable HUD
   state. Secure M1 screenshots remained black, so physical touch reply proof is
   still separate from the runtime and automated evidence.
+- v2026071702 adds direct active-run cancellation through the HUD and external
+  gamepad B / keyboard Escape. Unit, input-routing, lint, R8, release-signing,
+  and Play-package checks pass; exact device installation awaits the Fold's
+  return to the tailnet.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, release notes character limits, and local Play
   submission packet. It refuses stale local artifacts when HUD source/build
@@ -91,8 +95,8 @@ Current local status:
 - Browser staging verified the separate `ai.openclaw.app.hud` app, internal
   tester list, reviewer Demo Mode instructions, app-content forms, listing,
   contact details, graphics, screenshots, and replacement signed AAB version
-  `2026071701` on 2026-07-17; `2026071700` is absent. The saved release name is
-  `OpenClaw HUD 2026.7.17.1 notification replies`; exact release notes persisted
+  `2026071702` on 2026-07-17; `2026071701` is absent. The saved release name is
+  `OpenClaw HUD 2026.7.17.2 active run controls`; exact release notes persisted
   after a full page reload, `Save as draft` is disabled, and `Next` was not used.
   API/OAuth preflight remains a separate authentication and package-access gate.
   `node scripts/report-play-readiness.mjs` summarizes OAuth, service-account,

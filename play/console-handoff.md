@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.17.1-hud-release.aab`
-- SHA-256: `3c6d9af35dd512ca119aa79f612d8dfbc194db1e939b9fa1229bdad92ebce3a8`
-- Version: 2026.7.17.1 (2026071701)
+- AAB: `build/release-bundles/openclaw-2026.7.17.2-hud-release.aab`
+- SHA-256: `cb484b6a58c7195049d2b4905d6932a0bfb3a79b369145f9aa0493d25b27cc35`
+- Version: 2026.7.17.2 (2026071702)
 
 ## Remaining Console Blockers
 
@@ -60,7 +60,7 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD update:
-- Open alerts; reply to compatible messages by HUD or gamepad X.
+- Reply to compatible messages; stop OpenClaw runs by HUD, B, or Esc.
 - Browse by swipe, DPAD, or gamepad.
 - Keep Presentation recovery, display pinning, and frame-shape morphing.
 - Route external touchscreens, touchpads, mice, styli, and trackballs.
