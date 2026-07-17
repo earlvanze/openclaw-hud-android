@@ -114,6 +114,12 @@ Current local status:
   `OpenClaw HUD 2026.7.17.10 custom key learning`; exact release notes
   persisted after a full page reload, `Save as draft` is disabled, and `Next`
   was not used.
+  The version `2026071711` backend upload completed on 2026-07-17, and the
+  saved draft name `OpenClaw HUD 2026.7.17.11 root gestures` plus exact release
+  notes persisted after a reload. Play's release editor did not consistently
+  render the attached artifact row afterward, so version `2026071711` is not
+  yet recorded here as a fully verified replacement draft. `Next` was not
+  used.
   API/OAuth preflight remains a separate authentication and package-access gate.
   `node scripts/report-play-readiness.mjs` summarizes OAuth, service-account,
   local artifact, and dry-run gates together.
