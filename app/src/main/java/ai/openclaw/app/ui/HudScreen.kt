@@ -118,7 +118,10 @@ private const val HUD_FRAME_MORPH_DURATION_MS = 320
 private const val HUD_SESSION_PICKER_LIMIT = 8
 
 @Composable
-fun HudScreen(viewModel: MainViewModel) {
+fun HudScreen(
+    viewModel: MainViewModel,
+    onMicToggleRequest: () -> Unit,
+) {
     val context = LocalContext.current
     val statusText by viewModel.statusText.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
@@ -387,8 +390,14 @@ fun HudScreen(viewModel: MainViewModel) {
                 .fillMaxSize()
                 .background(hudBackground)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
-                .padding(safePadding)
-                .hudTouchGestures(
+                .padding(safePadding),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .zIndex(0.5f)
+                    .hudTouchGestures(
                     singleTapKey = notificationLine?.key to airVisionHudControls.singleTapAction,
                     doubleTapKey = notificationLine?.key to airVisionHudControls.doubleTapAction,
                     swipeKey = airVisionHudControls.swipeAction to airVisionHudControls.horizontalSwipeAction,
@@ -398,6 +407,7 @@ fun HudScreen(viewModel: MainViewModel) {
                             notificationLine = notificationLine,
                             demoMode = airVisionDemoModeEnabled,
                             viewModel = viewModel,
+                            onMicToggleRequest = onMicToggleRequest,
                         )
                     },
                     onDoubleTap = {
@@ -406,6 +416,7 @@ fun HudScreen(viewModel: MainViewModel) {
                             notificationLine = notificationLine,
                             demoMode = airVisionDemoModeEnabled,
                             viewModel = viewModel,
+                            onMicToggleRequest = onMicToggleRequest,
                         )
                     },
                     onSwipeStarted = {
@@ -444,7 +455,8 @@ fun HudScreen(viewModel: MainViewModel) {
                         }
                     },
                 ),
-    ) {
+        )
+
         if (splendidOverlayAlpha > 0f) {
             Box(
                 modifier =
@@ -1164,6 +1176,7 @@ private fun performHudSingleTapAction(
     notificationLine: HudNotificationLine?,
     demoMode: Boolean,
     viewModel: MainViewModel,
+    onMicToggleRequest: () -> Unit,
 ) {
     val command =
         airVisionHudSingleTapCommand(
@@ -1182,6 +1195,7 @@ private fun performHudSingleTapAction(
                 notificationSource = notificationLine?.source,
                 demoMode = demoMode,
                 viewModel = viewModel,
+                onMicToggleRequest = onMicToggleRequest,
             )
     }
 }
@@ -1191,6 +1205,7 @@ private fun performHudDoubleTapAction(
     notificationLine: HudNotificationLine?,
     demoMode: Boolean,
     viewModel: MainViewModel,
+    onMicToggleRequest: () -> Unit,
 ) {
     val command =
         airVisionHudDoubleTapCommand(
@@ -1209,6 +1224,7 @@ private fun performHudDoubleTapAction(
                 notificationSource = notificationLine?.source,
                 demoMode = demoMode,
                 viewModel = viewModel,
+                onMicToggleRequest = onMicToggleRequest,
             )
     }
 }
@@ -1218,12 +1234,12 @@ private fun performHudTouchCommand(
     notificationSource: String?,
     demoMode: Boolean,
     viewModel: MainViewModel,
+    onMicToggleRequest: () -> Unit,
 ) {
     when (command) {
         null -> Unit
         AirVisionHudTouchCommand.ToggleMic -> {
-            viewModel.toggleMicEnabled()
-            viewModel.showHudTransientMessage("Mic toggled")
+            onMicToggleRequest()
         }
         is AirVisionHudTouchCommand.OpenNotification -> {
             if (demoMode) {

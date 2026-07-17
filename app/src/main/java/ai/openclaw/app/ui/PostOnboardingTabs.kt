@@ -109,6 +109,7 @@ private fun AirVisionStartupDestination.toHomeTab(): HomeTab =
 @Composable
 fun PostOnboardingTabs(
     viewModel: MainViewModel,
+    onMicToggleRequest: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var activeTab by rememberSaveable {
@@ -238,7 +239,11 @@ fun PostOnboardingTabs(
                 }
 
                 when (activeTab) {
-                    HomeTab.Hud -> HudScreen(viewModel = viewModel)
+                    HomeTab.Hud ->
+                        HudScreen(
+                            viewModel = viewModel,
+                            onMicToggleRequest = onMicToggleRequest,
+                        )
                     HomeTab.Chat -> if (!chatTabStarted) ChatSheet(viewModel = viewModel)
                     HomeTab.Voice -> VoiceTabScreen(viewModel = viewModel)
                     HomeTab.Agents -> Unit

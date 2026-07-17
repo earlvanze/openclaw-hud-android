@@ -20,6 +20,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.speech.SpeechRecognizer
 import android.os.SystemClock
 import android.util.Log
 import android.view.Display
@@ -170,7 +171,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             OpenClawTheme {
                 Surface(modifier = Modifier) {
-                    RootScreen(viewModel = viewModel)
+                    RootScreen(
+                        viewModel = viewModel,
+                        onMicToggleRequest = ::toggleMicFromHudInput,
+                    )
                 }
             }
         }
@@ -399,6 +403,7 @@ class MainActivity : ComponentActivity() {
                 viewModel,
                 onHudKeyEvent = ::handleHudKeyEvent,
                 onHudMotionEvent = ::handleHudMotionEvent,
+                onMicToggleRequest = ::toggleMicFromHudInput,
             )
         hudPresentationSession.attach(presentation)
         presentation.setOnDismissListener {
@@ -709,9 +714,7 @@ class MainActivity : ComponentActivity() {
             }
             AirVisionHudKeyCommand.ToggleMic -> {
                 toggleMicFromHudInput()
-                Log.d(TAG, "HUD $source double-tap toggled mic enabled=${viewModel.micEnabled.value}")
-                refreshHudMediaSessionState()
-                applyPhoneSystemBars()
+                Log.d(TAG, "HUD $source double-tap requested mic toggle")
             }
             AirVisionHudKeyCommand.ArmMicDoubleTap -> {
                 Log.d(TAG, "HUD $source tap armed mic double-tap")
@@ -726,6 +729,13 @@ class MainActivity : ComponentActivity() {
     private fun toggleMicFromHudInput() {
         if (viewModel.micEnabled.value) {
             viewModel.setMicEnabled(false)
+            finishHudMicToggle("Mic off")
+            return
+        }
+
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            viewModel.setMicEnabled(false)
+            finishHudMicToggle("Speech recognizer unavailable")
             return
         }
 
@@ -733,17 +743,31 @@ class MainActivity : ComponentActivity() {
             ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) ==
             PackageManager.PERMISSION_GRANTED
         ) {
-            viewModel.toggleMicEnabled()
+            viewModel.setMicEnabled(true)
+            finishHudMicToggle("Mic on")
             return
         }
 
+        viewModel.setMicEnabled(false)
+        viewModel.showHudTransientMessage("Allow microphone on phone")
         lifecycleScope.launch {
             val granted =
-                permissionRequester.requestIfMissing(listOf(Manifest.permission.RECORD_AUDIO))[Manifest.permission.RECORD_AUDIO] == true
+                runCatching {
+                    permissionRequester.requestIfMissing(listOf(Manifest.permission.RECORD_AUDIO))[Manifest.permission.RECORD_AUDIO] == true
+                }.getOrDefault(false)
             if (granted) {
                 viewModel.setMicEnabled(true)
+                finishHudMicToggle("Mic on")
+            } else {
+                finishHudMicToggle("Microphone permission required")
             }
         }
+    }
+
+    private fun finishHudMicToggle(message: String) {
+        viewModel.showHudTransientMessage(message)
+        refreshHudMediaSessionState()
+        applyPhoneSystemBars()
     }
 
     private fun KeyEvent.isHudAccessoryEvent(): Boolean =

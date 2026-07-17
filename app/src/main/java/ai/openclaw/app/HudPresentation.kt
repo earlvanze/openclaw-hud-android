@@ -36,6 +36,7 @@ internal class HudPresentation(
     private val viewModel: MainViewModel,
     private val onHudKeyEvent: (KeyEvent) -> Boolean,
     private val onHudMotionEvent: (MotionEvent) -> Boolean = { false },
+    private val onMicToggleRequest: () -> Unit,
 ) : Presentation(activity, display) {
     private val systemBarsHandler = Handler(Looper.getMainLooper())
     private val keepSystemBarsHidden =
@@ -61,7 +62,10 @@ internal class HudPresentation(
                     CompositionLocalProvider(LocalActivityResultRegistryOwner provides activity) {
                         OpenClawTheme {
                             Surface(modifier = Modifier, color = ComposeColor.Black) {
-                                HudScreen(viewModel = viewModel)
+                                HudScreen(
+                                    viewModel = viewModel,
+                                    onMicToggleRequest = onMicToggleRequest,
+                                )
                             }
                         }
                     }

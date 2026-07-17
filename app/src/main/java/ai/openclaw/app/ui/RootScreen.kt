@@ -8,7 +8,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 
 @Composable
-fun RootScreen(viewModel: MainViewModel) {
+fun RootScreen(
+    viewModel: MainViewModel,
+    onMicToggleRequest: () -> Unit,
+) {
     val onboardingCompleted by viewModel.onboardingCompleted.collectAsState()
 
     if (!onboardingCompleted) {
@@ -16,5 +19,9 @@ fun RootScreen(viewModel: MainViewModel) {
         return
     }
 
-    PostOnboardingTabs(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+    PostOnboardingTabs(
+        viewModel = viewModel,
+        onMicToggleRequest = onMicToggleRequest,
+        modifier = Modifier.fillMaxSize(),
+    )
 }

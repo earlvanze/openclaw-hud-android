@@ -22,7 +22,14 @@ class HudPresentationDisplayContextTest {
         val displayId = ShadowDisplayManager.addDisplay("w1280dp-h720dp-mdpi")
         val display = activity.getSystemService(DisplayManager::class.java).getDisplay(displayId)
         val app = RuntimeEnvironment.getApplication() as NodeApp
-        val presentation = HudPresentation(activity, display, MainViewModel(app), onHudKeyEvent = { false })
+        val presentation =
+            HudPresentation(
+                activity,
+                display,
+                MainViewModel(app),
+                onHudKeyEvent = { false },
+                onMicToggleRequest = {},
+            )
 
         val composeContext = presentation.composeDisplayContext()
 

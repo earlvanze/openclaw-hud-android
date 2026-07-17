@@ -131,7 +131,7 @@ class MainViewModel(
     val canvasDebugStatusEnabled: StateFlow<Boolean> = prefs.canvasDebugStatusEnabled
     val globalExecApprovalsEnabled: StateFlow<Boolean> = prefs.globalExecApprovalsEnabled
     val speakerEnabled: StateFlow<Boolean> = prefs.speakerEnabled
-    val micEnabled: StateFlow<Boolean> = prefs.talkEnabled
+    val micEnabled: StateFlow<Boolean> = runtimeState(initial = false) { it.micEnabled }
     val nativeCaptionsEnabled: StateFlow<Boolean> = prefs.nativeCaptionsEnabled
     val airVisionDisplaySettings: StateFlow<AirVisionDisplaySettings> = prefs.airVisionDisplaySettings
     val airVisionHudControls: StateFlow<AirVisionHudControls> = prefs.airVisionHudControls
