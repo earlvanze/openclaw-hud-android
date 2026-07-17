@@ -1,4 +1,4 @@
-OpenClaw HUD update:
+In-app privacy policy
 - Review execution requests: deny or allow once. Global approvals require explicit administrator scope; Y allows once, B/Esc denies.
 - external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
 - M1 tap and swipe support stays on the capability-driven input path in External HUD Input.

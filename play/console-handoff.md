@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.17.2-hud-release.aab`
-- SHA-256: `cb484b6a58c7195049d2b4905d6932a0bfb3a79b369145f9aa0493d25b27cc35`
-- Version: 2026.7.17.2 (2026071702)
+- AAB: `build/release-bundles/openclaw-2026.7.17.3-hud-release.aab`
+- SHA-256: `fbb127340e3c77cffe2c849898f9d2e767ff5ab4956170ab428fe620bff6e2e7`
+- Version: 2026.7.17.3 (2026071703)
 
 ## Remaining Console Blockers
 
@@ -43,6 +43,7 @@ Key features:
 - Minimal always-on HUD for external displays
 - OpenClaw gateway pairing and secure local setup storage
 - Compact chat with hardware keyboard send support
+- Safe execution approvals with gateway-sanitized command previews, deny and allow-once actions, expiry handling, external gamepad controls, and optional global visibility that requires explicit gateway administrator scope
 - In-app offensive-response reporting with explicit payload review, direct developer delivery, and receipt confirmation
 - Actionable notification summaries with tap-to-open and swipe browsing
 - Voice controls with wake-word and push-to-talk workflows
@@ -59,14 +60,11 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 
 Release notes:
 
-OpenClaw HUD update:
-- Reply to compatible messages; stop OpenClaw runs by HUD, B, or Esc.
-- Browse by swipe, DPAD, or gamepad.
-- Keep Presentation recovery, display pinning, and frame-shape morphing.
-- Route external touchscreens, touchpads, mice, styli, and trackballs.
-- Route wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.
-- Keep M1 tap and swipe support on the capability-driven input path in External HUD Input.
-- Keep the In-app privacy policy.
+In-app privacy policy
+- Review execution requests: deny or allow once. Global approvals require explicit administrator scope; Y allows once, B/Esc denies.
+- external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
+- M1 tap and swipe support stays on the capability-driven input path in External HUD Input.
+- Keep Presentation recovery, display pinning, frame-shape morphing, replies, and active-run stopping.
 
 ## Privacy Policy
 
@@ -253,7 +251,7 @@ Collected data:
 
 - Audio files: optional; purpose App functionality; Wake word, push-to-talk, and realtime caption/translation workflows when enabled by the user.
 - Messages: optional; purpose App functionality, Developer communications; HUD chat prompts, assistant responses, and notification summaries when the user connects to a gateway. A user-confirmed offensive-content report sends only the selected assistant excerpt, category, optional note, app version, and one-way message hash.
-- App activity: optional; purpose App functionality; Assistant run controls plus active session, agent, provider, and model selections when enabled.
+- App activity: optional; purpose App functionality; Assistant run controls, deny or allow-once execution-approval decisions, plus active session, agent, provider, and model selections when enabled.
 - App info and performance: optional; purpose App functionality; Gateway connection state, external-display capability status, optional AirVision profile state, and diagnostics exports created explicitly by the user.
 
 Not collected:
