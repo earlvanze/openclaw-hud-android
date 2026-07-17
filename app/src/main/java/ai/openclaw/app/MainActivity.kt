@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
     private var hudPresentationStabilityRunnable: Runnable? = null
     private var hudDisplayListenerRegistered = false
     private var hudUnlockReceiverRegistered = false
+    private var hudCompanionInputReceiverRegistered = false
     private var appliedAirVisionAppLanguage: AirVisionAppLanguage? = null
     private val hudKeyInputController = AirVisionHudKeyInputController()
     private val hudMicHoldController = AirVisionHudMicHoldController()
@@ -90,6 +91,22 @@ class MainActivity : ComponentActivity() {
                 recoverHudPresentationAfterUnlock()
             }
         }
+    private val hudCompanionInputReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(
+                context: Context?,
+                intent: Intent?,
+            ) {
+                val receiverContext = context ?: return
+                val inputIntent = intent ?: return
+                if (!isTrustedExternalHudCompanionSender(receiverContext, this)) {
+                    Log.w(TAG, "Rejected untrusted external HUD companion input")
+                    return
+                }
+                val input = parseExternalHudCompanionInput(inputIntent) ?: return
+                handleExternalHudCompanionInput(input)
+            }
+        }
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(AirVisionAppLocale.wrap(newBase, AirVisionAppLocale.storedLanguage(newBase)))
@@ -115,6 +132,7 @@ class MainActivity : ComponentActivity() {
         setupHudMediaSession()
         registerHudDisplayListener()
         registerHudUnlockReceiver()
+        registerHudCompanionInputReceiver()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -271,6 +289,7 @@ class MainActivity : ComponentActivity() {
         viewModel.cancelExternalHudMediaKeyLearning(showMessage = false)
         unregisterHudDisplayListener()
         unregisterHudUnlockReceiver()
+        unregisterHudCompanionInputReceiver()
         cancelHudPresentationRecovery(resetAttempts = true)
         cancelHudPresentationStability()
         hudPresentationSession.current?.let { releaseHudPresentation(it, dismiss = true) }
@@ -335,6 +354,23 @@ class MainActivity : ComponentActivity() {
         if (!hudUnlockReceiverRegistered) return
         unregisterReceiver(hudUnlockReceiver)
         hudUnlockReceiverRegistered = false
+    }
+
+    private fun registerHudCompanionInputReceiver() {
+        if (!BuildConfig.OPENCLAW_DEFAULT_HUD || hudCompanionInputReceiverRegistered) return
+        ContextCompat.registerReceiver(
+            this,
+            hudCompanionInputReceiver,
+            IntentFilter(EXTERNAL_HUD_COMPANION_ACTION),
+            ContextCompat.RECEIVER_EXPORTED,
+        )
+        hudCompanionInputReceiverRegistered = true
+    }
+
+    private fun unregisterHudCompanionInputReceiver() {
+        if (!hudCompanionInputReceiverRegistered) return
+        unregisterReceiver(hudCompanionInputReceiver)
+        hudCompanionInputReceiverRegistered = false
     }
 
     private fun recoverHudPresentationAfterUnlock() {
@@ -734,6 +770,41 @@ class MainActivity : ComponentActivity() {
             deviceName = event.device?.name,
             mappedAction = if (handled) "Accepted by HUD" else "Not accepted by HUD",
             handled = handled,
+        )
+    }
+
+    private fun handleExternalHudCompanionInput(input: ExternalHudCompanionInput) {
+        val presentation = hudPresentationSession.current?.takeIf { it.isShowing }
+        val canDispatch = presentation != null && input.action != ExternalHudCompanionAction.ObserveOnly
+        viewModel.recordExternalHudInput(
+            kind = ExternalHudInputKind.Relay,
+            input = input.event.replace('_', ' ').replaceFirstChar(Char::uppercase),
+            source = "Verified companion relay",
+            deviceName = null,
+            mappedAction = if (canDispatch) input.action.label else "Observed only",
+            handled = canDispatch,
+            showOnHud = false,
+        )
+        if (presentation == null) {
+            Log.d(TAG, "Observed companion input ${input.event} without an active HUD presentation")
+            return
+        }
+
+        val eventTimeMs = SystemClock.uptimeMillis()
+        val handled =
+            when (input.action) {
+                ExternalHudCompanionAction.SingleTap -> presentation.dispatchAccessoryTap(eventTimeMs)
+                ExternalHudCompanionAction.DoubleTap -> presentation.dispatchAccessoryDoubleTap(eventTimeMs)
+                ExternalHudCompanionAction.SwipeForward ->
+                    presentation.dispatchAccessorySwipe(forward = true, eventTimeMs = eventTimeMs)
+                ExternalHudCompanionAction.SwipeBackward ->
+                    presentation.dispatchAccessorySwipe(forward = false, eventTimeMs = eventTimeMs)
+                ExternalHudCompanionAction.ObserveOnly -> false
+            }
+        Log.d(
+            TAG,
+            "Companion input ${input.event} raw=${input.rawTouch} slide=${input.slide} " +
+                "action=${input.action} handled=$handled",
         )
     }
 

@@ -351,6 +351,7 @@ async function verifyListing(listingDir, language) {
     "external touchscreens",
     "rotary controls",
     "joystick/hat axes",
+    "identity-verified companion tap/swipe relays",
     "custom accessory-key learning",
     "HID report-path summaries",
     "per-feature firmware-apply readiness",
@@ -359,17 +360,16 @@ async function verifyListing(listingDir, language) {
     "adaptive or explicit Full/Wide/Compact/Panoramic frame shapes",
   ]);
   requireIncludes("Release notes", releaseNotes, [
-    "external touchscreens, touchpads, mice, styli, and trackballs",
-    "wheels, rotary controls, DPAD/Page keys, gamepads",
-    "normalized joystick or hat axes",
-    "M1 tap and swipe support",
-    "capability-driven input path",
-    "External HUD Input",
-    "Presentation recovery",
+    "identity-verified touchbar relays",
+    "AirVision Companion",
+    "Android 14+",
+    "one-tap, double-tap, and slide gestures",
+    "configurable HUD actions",
+    "session-only Input Monitor",
+    "presentation recovery",
     "display pinning",
-    "frame-shape morphing",
-    "Learn any external accessory button",
-    "Adaptive frames fit portrait, square, landscape, and ultra-wide displays",
+    "adaptive frame morphing",
+    "custom accessory keys",
   ]);
 
   return {

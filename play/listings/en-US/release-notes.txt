@@ -1,7 +1,5 @@
 OpenClaw HUD:
-- Input Monitor traces touch, keys, gestures, motion.
-- Adaptive frames fit portrait, square, landscape, and ultra-wide displays.
-- external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
-- M1 tap and swipe support: capability-driven input path in External HUD Input.
-- Learn any external accessory button.
-- Presentation recovery, display pinning, frame-shape morphing, in-app privacy policy.
+- Accepts identity-verified touchbar relays from the separately installed AirVision Companion on Android 14+.
+- Routes companion one-tap, double-tap, and slide gestures through existing configurable HUD actions.
+- Records accepted relays in the session-only Input Monitor.
+- Keeps adaptive frame morphing, external-display input, custom accessory keys, presentation recovery, and display pinning.

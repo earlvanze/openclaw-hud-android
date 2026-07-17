@@ -11,6 +11,7 @@ enum class ExternalHudInputKind(
     Key("Key"),
     Media("Media"),
     Motion("Motion"),
+    Relay("Companion relay"),
 }
 
 data class ExternalHudInputEvent(

@@ -30,6 +30,27 @@ import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import androidx.compose.ui.graphics.Color as ComposeColor
 
+internal data class HudAccessorySwipeMotion(
+    val x: Float,
+    val startY: Float,
+    val endY: Float,
+)
+
+internal fun hudAccessorySwipeMotion(
+    width: Int,
+    height: Int,
+    forward: Boolean,
+): HudAccessorySwipeMotion? {
+    if (width <= 0 || height <= 0) return null
+    val upper = height * 0.3f
+    val lower = height * 0.7f
+    return HudAccessorySwipeMotion(
+        x = width / 2f,
+        startY = if (forward) lower else upper,
+        endY = if (forward) upper else lower,
+    )
+}
+
 internal class HudPresentation(
     private val activity: ComponentActivity,
     display: Display,
@@ -136,6 +157,49 @@ internal class HudPresentation(
         }
     }
 
+    internal fun dispatchAccessoryDoubleTap(eventTimeMs: Long): Boolean {
+        val firstHandled = dispatchAccessoryTap(eventTimeMs)
+        val secondHandled = dispatchAccessoryTap(eventTimeMs + ACCESSORY_DOUBLE_TAP_INTERVAL_MS)
+        return firstHandled || secondHandled
+    }
+
+    internal fun dispatchAccessorySwipe(
+        forward: Boolean,
+        eventTimeMs: Long,
+    ): Boolean {
+        val targetView = window?.decorView ?: return false
+        val motion = hudAccessorySwipeMotion(targetView.width, targetView.height, forward) ?: return false
+        val down = MotionEvent.obtain(eventTimeMs, eventTimeMs, MotionEvent.ACTION_DOWN, motion.x, motion.startY, 0)
+        val move =
+            MotionEvent.obtain(
+                eventTimeMs,
+                eventTimeMs + ACCESSORY_SWIPE_STEP_INTERVAL_MS,
+                MotionEvent.ACTION_MOVE,
+                motion.x,
+                motion.endY,
+                0,
+            )
+        val up =
+            MotionEvent.obtain(
+                eventTimeMs,
+                eventTimeMs + ACCESSORY_SWIPE_STEP_INTERVAL_MS * 2,
+                MotionEvent.ACTION_UP,
+                motion.x,
+                motion.endY,
+                0,
+            )
+        return try {
+            listOf(down, move, up).forEach { it.source = InputDevice.SOURCE_TOUCHSCREEN }
+            val downHandled = dispatchTouchEvent(down)
+            val moveHandled = dispatchTouchEvent(move)
+            dispatchTouchEvent(up) || moveHandled || downHandled
+        } finally {
+            down.recycle()
+            move.recycle()
+            up.recycle()
+        }
+    }
+
     internal fun dispatchExternalTouchEvent(event: MotionEvent): Boolean {
         val sourceView = activity.window.decorView
         val targetView = window?.decorView ?: return false
@@ -197,6 +261,8 @@ internal class HudPresentation(
     }
 
     private companion object {
+        private const val ACCESSORY_DOUBLE_TAP_INTERVAL_MS = 120L
+        private const val ACCESSORY_SWIPE_STEP_INTERVAL_MS = 80L
         private const val SYSTEM_BARS_HIDE_INTERVAL_MS = 1_000L
     }
 }

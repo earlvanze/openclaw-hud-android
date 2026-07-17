@@ -175,7 +175,9 @@ encoders, and mouse wheels route through the same Presentation-owned HUD input
 path. Absolute joystick, hat, and wearable touch-strip axes are normalized to
 their reported Android motion ranges before scrolling chat. M1 accessory tap
 keys and `AXIS_GENERIC_1` remain supported without making ASUS identity a
-requirement. Defaults are tuned for walking HUD use: single-tap opens the
+requirement. On Android 14 or newer, the separately installed AirVision
+Companion can also relay identity-verified touchbar taps, double taps, and
+slides through this same configurable HUD gesture surface. Defaults are tuned for walking HUD use: single-tap opens the
 current notification on the phone, double-tap toggles mic, vertical swipe
 scrolls chat, and horizontal swipe browses ranked navigation and message
 notifications. External DPAD left/right and gamepad L1/R1 browse the same
@@ -189,7 +191,7 @@ Custom Mic Key learning captures the next external remote, keyboard, gamepad, or
 wearable button and applies the selected media/tap mic mode without requiring a
 device-specific key map. Internal phone keys are ignored during learning.
 Input Monitor keeps the eight newest sanitized touch, gesture, key, media, wheel,
-and axis-routing records in memory for the current session, shows mapped actions
+axis-routing, and verified companion-relay records in memory for the current session, shows mapped actions
 and Android passthrough state, and includes the bounded history in diagnostics
 exports without raw USB serial values.
 Brightness and distance key changes
