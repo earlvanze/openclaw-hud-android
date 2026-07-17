@@ -2,6 +2,9 @@ package ai.openclaw.app
 
 import android.view.KeyEvent
 
+// M1 firmware can deliver deliberate tap pairs roughly 1.5 seconds apart.
+internal const val HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS = 2_000L
+
 internal sealed interface AirVisionHudKeyCommand {
     data class ScrollChat(
         val deltaPx: Float,
@@ -40,7 +43,7 @@ internal data class AirVisionHudKeyDecision(
 )
 
 internal class AirVisionHudKeyInputController(
-    private val doubleTapTimeoutMs: Long = HUD_MIC_DOUBLE_TAP_TIMEOUT_MS,
+    private val doubleTapTimeoutMs: Long = HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS,
 ) {
     private var lastMicTapUptimeMs = 0L
 
@@ -260,6 +263,5 @@ internal class AirVisionHudKeyInputController(
         private const val HUD_KEY_PAGE_SCROLL_PIXELS = 480f
         private const val HUD_KEY_BRIGHTNESS_STEP_PERCENT = 5
         private const val HUD_KEY_DISTANCE_STEP_CM = 5
-        private const val HUD_MIC_DOUBLE_TAP_TIMEOUT_MS = 500L
     }
 }

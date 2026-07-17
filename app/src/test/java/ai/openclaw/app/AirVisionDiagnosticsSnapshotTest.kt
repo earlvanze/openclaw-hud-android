@@ -718,7 +718,7 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("160.0", hardwareKeyMapping.getValue("scrollStepPx").jsonPrimitive.content)
         assertEquals("double_tap_toggle_mic", hardwareKeyMapping.getValue("mediaKeyAction").jsonPrimitive.content)
         assertEquals("Double-tap mic", hardwareKeyMapping.getValue("mediaKeyLabel").jsonPrimitive.content)
-        assertEquals("500", hardwareKeyMapping.getValue("mediaKeyDoubleTapTimeoutMs").jsonPrimitive.content)
+        assertEquals("2000", hardwareKeyMapping.getValue("mediaKeyDoubleTapTimeoutMs").jsonPrimitive.content)
         assertEquals("false", hardwareKeyMapping.getValue("firmwareBrightnessPassthroughPossible").jsonPrimitive.content)
         assertEquals(
             "M1 brightness keys: Scroll chat; brightness keys scroll the HUD chat transcript; media key Double-tap mic.",

@@ -2,6 +2,7 @@ package ai.openclaw.app
 
 import android.view.KeyEvent
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -92,5 +93,7 @@ class AirVisionHudMotionInputControllerTest {
     fun recognizesAccessoryTapKeys() {
         assertTrue(isHudAccessoryTapKey(KeyEvent.KEYCODE_ENTER))
         assertTrue(isHudAccessoryTapKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE))
+        assertTrue(shouldDispatchHudAccessoryTapToPresentation(KeyEvent.KEYCODE_ENTER))
+        assertFalse(shouldDispatchHudAccessoryTapToPresentation(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE))
     }
 }

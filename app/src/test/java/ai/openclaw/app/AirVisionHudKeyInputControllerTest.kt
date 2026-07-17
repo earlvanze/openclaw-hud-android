@@ -382,6 +382,17 @@ class AirVisionHudKeyInputControllerTest {
     }
 
     @Test
+    fun defaultMediaDoubleTapWindowAcceptsMeasuredM1TapSpacing() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(AirVisionHudKeyCommand.ArmMicDoubleTap, controller.handleMicTap(1_000L))
+        assertEquals(AirVisionHudKeyCommand.ToggleMic, controller.handleMicTap(2_452L))
+
+        assertEquals(AirVisionHudKeyCommand.ArmMicDoubleTap, controller.handleMicTap(5_000L))
+        assertEquals(AirVisionHudKeyCommand.ArmMicDoubleTap, controller.handleMicTap(7_001L))
+    }
+
+    @Test
     fun accessoryCenterKeyRequiresDoubleTapButBuiltInCenterKeyPassesThrough() {
         val controller = AirVisionHudKeyInputController()
 

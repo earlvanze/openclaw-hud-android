@@ -296,7 +296,7 @@ object AirVisionWindowsProfileHandoffs {
         add(
             "- Media key double-tap window: " +
                 if (mediaKeyAction == AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
-                    "500 ms"
+                    "$HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS ms"
                 } else {
                     "off"
                 },

@@ -185,7 +185,7 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("- Brightness key consumed by Android: yes"))
         assertTrue(markdown.contains("- Brightness key effect: steps Android HUD dimming by 5% per press"))
         assertTrue(markdown.contains("- Media key action: Double-tap mic"))
-        assertTrue(markdown.contains("- Media key double-tap window: 500 ms"))
+        assertTrue(markdown.contains("- Media key double-tap window: 2000 ms"))
         assertTrue(markdown.contains("- Firmware brightness passthrough expected: no"))
         assertTrue(markdown.contains("## Windows Gesture Catalog"))
         assertTrue(markdown.contains("- Two-finger tap: ASUS instant transparent / lowest brightness; Android status firmware passthrough."))

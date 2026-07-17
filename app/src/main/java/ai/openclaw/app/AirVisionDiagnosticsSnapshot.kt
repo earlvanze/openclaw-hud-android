@@ -931,7 +931,7 @@ object AirVisionDiagnosticsSnapshots {
                 },
             mediaKeyAction = controls.mediaKeyAction.rawValue,
             mediaKeyLabel = controls.mediaKeyAction.label,
-            mediaKeyDoubleTapTimeoutMs = 500L,
+            mediaKeyDoubleTapTimeoutMs = HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS,
             firmwareBrightnessPassthroughPossible = firmwarePassthrough,
             summary =
                 "M1 brightness keys: ${controls.brightnessKeyAction.label}; $effect; " +

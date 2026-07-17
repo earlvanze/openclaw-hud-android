@@ -62,3 +62,6 @@ internal fun isHudAccessoryTapKey(keyCode: Int): Boolean =
             KeyEvent.KEYCODE_HEADSETHOOK,
             KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
         )
+
+internal fun shouldDispatchHudAccessoryTapToPresentation(keyCode: Int): Boolean =
+    isHudAccessoryTapKey(keyCode) && keyCode != KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE

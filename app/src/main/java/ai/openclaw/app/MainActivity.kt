@@ -574,7 +574,7 @@ class MainActivity : ComponentActivity() {
         source: String,
     ): Boolean {
         if (!BuildConfig.OPENCLAW_DEFAULT_HUD) return false
-        if (event.isHudAccessoryEvent() && isHudAccessoryTapKey(event.keyCode)) {
+        if (event.isHudAccessoryEvent() && shouldDispatchHudAccessoryTapToPresentation(event.keyCode)) {
             val presentation = hudPresentationSession.current
             if (presentation?.isShowing == true) {
                 if (event.action == KeyEvent.ACTION_UP) {
