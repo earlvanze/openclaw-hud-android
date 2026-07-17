@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.17.10-hud-release.aab`
-- SHA-256: `e87c8d591da07d916a1eacb1109f2d79305c2bc8687a0bd2b5a277f783fe1af1`
-- Version: 2026.7.17.10 (2026071710)
+- AAB: `build/release-bundles/openclaw-2026.7.17.11-hud-release.aab`
+- SHA-256: `3bfee7348c640bc250be39e1ea56fbc9d8544932d5efd3da158ea0218c26a700`
+- Version: 2026.7.17.11 (2026071711)
 
 ## Remaining Console Blockers
 
@@ -65,7 +65,7 @@ OpenClaw HUD:
 - Single-tap, double-tap, or hold-to-talk microphone keys.
 - Learn any external accessory button as a custom mic key.
 - external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
-- M1 tap and swipe support uses the capability-driven input path in External HUD Input.
+- M1 tap and swipe support now reaches the root capability-driven input path in External HUD Input.
 - Presentation recovery, display pinning, frame-shape morphing, In-app privacy policy.
 
 ## Privacy Policy

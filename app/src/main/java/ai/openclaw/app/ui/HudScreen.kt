@@ -390,14 +390,8 @@ fun HudScreen(
                 .fillMaxSize()
                 .background(hudBackground)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
-                .padding(safePadding),
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .zIndex(0.5f)
-                    .hudTouchGestures(
+                .padding(safePadding)
+                .hudTouchGestures(
                     singleTapKey = notificationLine?.key to airVisionHudControls.singleTapAction,
                     doubleTapKey = notificationLine?.key to airVisionHudControls.doubleTapAction,
                     swipeKey = airVisionHudControls.swipeAction to airVisionHudControls.horizontalSwipeAction,
@@ -455,8 +449,7 @@ fun HudScreen(
                         }
                     },
                 ),
-        )
-
+    ) {
         if (splendidOverlayAlpha > 0f) {
             Box(
                 modifier =

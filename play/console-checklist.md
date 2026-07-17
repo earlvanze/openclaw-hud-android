@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.10-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.11-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `e87c8d591da07d916a1eacb1109f2d79305c2bc8687a0bd2b5a277f783fe1af1`
-- Latest HUD bundle version: `2026.7.17.10 (2026071710)`.
+  `3bfee7348c640bc250be39e1ea56fbc9d8544932d5efd3da158ea0218c26a700`
+- Latest HUD bundle version: `2026.7.17.11 (2026071711)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -90,9 +90,12 @@ Current local status:
   v2026071710 also learns an arbitrary external accessory key for the selected
   mic mode, persists it in profile backup and diagnostics, and keeps optional
   ASUS firmware tools collapsed when the hardware is absent. Touchscreen
-  gesture timing is unchanged. Unit, input-routing, Android lint, R8,
-  release-signing, and Play-package checks pass. Exact v2026071710 device installation still
-  requires a Play-signed delivery because the installed Play build and local
+  gesture timing is unchanged. v2026071711 moves external touch gesture
+  recognition onto the root HUD surface so foreground content cannot prevent
+  the configured mic double-tap or swipe action from receiving the gesture.
+  Unit, input-routing, Android lint, R8, release-signing, and Play-package
+  checks pass. Exact v2026071711 device installation still requires a
+  Play-signed delivery because the installed Play build and local
   upload-key APK have different signing certificates.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, release notes character limits, and local Play
