@@ -65,6 +65,14 @@ class AirVisionHudControlsTest {
             AirVisionHudMediaKeyAction.None,
             AirVisionHudMediaKeyAction.fromRawValue(" NONE "),
         )
+        assertEquals(
+            AirVisionHudMediaKeyAction.SingleTapToggleMic,
+            AirVisionHudMediaKeyAction.fromRawValue(" SINGLE_TAP_TOGGLE_MIC "),
+        )
+        assertEquals(
+            AirVisionHudMediaKeyAction.HoldToTalk,
+            AirVisionHudMediaKeyAction.fromRawValue(" HOLD_TO_TALK "),
+        )
     }
 
     @Test

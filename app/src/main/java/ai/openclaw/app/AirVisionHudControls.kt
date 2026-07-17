@@ -81,7 +81,9 @@ enum class AirVisionHudMediaKeyAction(
     val label: String,
 ) {
     None("none", "None"),
+    SingleTapToggleMic("single_tap_toggle_mic", "Single-tap mic"),
     DoubleTapToggleMic("double_tap_toggle_mic", "Double-tap mic"),
+    HoldToTalk("hold_to_talk", "Hold to talk"),
     ;
 
     companion object {

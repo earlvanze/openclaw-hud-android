@@ -165,7 +165,7 @@
         "capability": "Gesture and hotkey settings",
         "state": "M1 optional for review",
         "reviewPath": "Settings > AirVision M1 > Gesture & Hotkey Settings and Diagnostics Export.",
-        "evidence": "Single-tap, double-tap, swipe, brightness-key, and media-key mappings are stored offline. Settings and diagnostics export shortcut-menu parity for ASUS brightness/volume/distance behavior, plus the active M1 brightness-key/media-key mode, Android consumption state, step sizes, firmware passthrough expectation, and Windows gesture catalog entries for ASUS brightness swipe, play/pause tap, instant transparent, center virtual screens, 3D hold, and shortcut-menu hold/slide behavior; live M1 proof is needed for firmware-delivered events."
+        "evidence": "Single-tap, double-tap, hold-to-talk, swipe, brightness-key, and media-key mappings are stored offline. Settings and diagnostics export shortcut-menu parity for ASUS brightness/volume/distance behavior, plus the active external-HUD brightness-key/media-key mode, Android consumption state, step sizes, firmware passthrough expectation, and Windows gesture catalog entries for ASUS brightness swipe, play/pause tap, instant transparent, center virtual screens, 3D hold, and shortcut-menu hold/slide behavior; live hardware proof is needed for firmware-delivered events."
       },
       {
         "capability": "USB firmware-link diagnostics",
@@ -302,7 +302,7 @@
       {
         "feature": "Gesture and hotkey settings",
         "windowsAppTarget": "none",
-        "androidEffect": "Single tap, double tap, swipe, brightness-key, and media-key mappings",
+        "androidEffect": "Single tap, double tap, hold-to-talk, swipe, brightness-key, and media-key mappings",
         "proof": "Stored mappings are reviewable offline; firmware-delivered event proof needs live M1 hardware.",
         "firmwareGate": "none"
       },

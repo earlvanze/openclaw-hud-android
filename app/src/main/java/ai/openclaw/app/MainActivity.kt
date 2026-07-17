@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
     private var hudUnlockReceiverRegistered = false
     private var appliedAirVisionAppLanguage: AirVisionAppLanguage? = null
     private val hudKeyInputController = AirVisionHudKeyInputController()
+    private val hudMicHoldController = AirVisionHudMicHoldController()
     private val hudMotionInputController = AirVisionHudMotionInputController()
     private val hudSystemBarsHandler = Handler(Looper.getMainLooper())
     private val hudDisplayListener =
@@ -196,6 +197,8 @@ class MainActivity : ComponentActivity() {
             applyPhoneSystemBars()
             AirVisionAudioRouter.applyHudRoute(this)
             showHudPresentationIfAvailable()
+        } else {
+            endHudMicHold(showMessage = false)
         }
     }
 
@@ -241,6 +244,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
+        endHudMicHold(showMessage = false)
         if (BuildConfig.OPENCLAW_DEFAULT_HUD && hudPresentationSession.current?.isShowing == true) {
             setHudMediaSessionActive(true)
             viewModel.setForeground(true)
@@ -252,6 +256,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        endHudMicHold(showMessage = false)
         unregisterHudDisplayListener()
         unregisterHudUnlockReceiver()
         cancelHudPresentationRecovery(resetAttempts = true)
@@ -523,11 +528,11 @@ class MainActivity : ComponentActivity() {
                         }
 
                         override fun onPlay() {
-                            handleHudMicTap(source = "media-play")
+                            handleHudMediaSessionTap(source = "media-play")
                         }
 
                         override fun onPause() {
-                            handleHudMicTap(source = "media-pause")
+                            handleHudMediaSessionTap(source = "media-pause")
                         }
                     },
                 )
@@ -656,15 +661,17 @@ class MainActivity : ComponentActivity() {
         return null
     }
 
-    private fun handleHudMicTap(source: String) {
-        if (viewModel.airVisionHudControls.value.mediaKeyAction != AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
-            return
-        }
-        handleHudKeyCommand(
-            command = hudKeyInputController.handleMicTap(SystemClock.uptimeMillis()),
-            event = null,
-            source = source,
-        )
+    private fun handleHudMediaSessionTap(source: String) {
+        val command =
+            when (viewModel.airVisionHudControls.value.mediaKeyAction) {
+                AirVisionHudMediaKeyAction.SingleTapToggleMic -> AirVisionHudKeyCommand.ToggleMic
+                AirVisionHudMediaKeyAction.DoubleTapToggleMic ->
+                    hudKeyInputController.handleMicTap(SystemClock.uptimeMillis())
+                AirVisionHudMediaKeyAction.None,
+                AirVisionHudMediaKeyAction.HoldToTalk,
+                -> null
+            }
+        handleHudKeyCommand(command = command, event = null, source = source)
     }
 
     private fun handleHudKeyCommand(
@@ -714,10 +721,18 @@ class MainActivity : ComponentActivity() {
             }
             AirVisionHudKeyCommand.ToggleMic -> {
                 toggleMicFromHudInput()
-                Log.d(TAG, "HUD $source double-tap requested mic toggle")
+                Log.d(TAG, "HUD $source requested mic toggle")
             }
             AirVisionHudKeyCommand.ArmMicDoubleTap -> {
                 Log.d(TAG, "HUD $source tap armed mic double-tap")
+            }
+            AirVisionHudKeyCommand.BeginMicHold -> {
+                beginHudMicHold()
+                Log.d(TAG, "HUD $source began hold-to-talk keyCode=${event?.keyCode}")
+            }
+            AirVisionHudKeyCommand.EndMicHold -> {
+                endHudMicHold(showMessage = true)
+                Log.d(TAG, "HUD $source ended hold-to-talk keyCode=${event?.keyCode}")
             }
             AirVisionHudKeyCommand.LogUnhandledHudAccessoryKey -> {
                 Log.d(TAG, "unhandled HUD accessory key keyCode=${event?.keyCode} scanCode=${event?.scanCode}")
@@ -733,9 +748,38 @@ class MainActivity : ComponentActivity() {
             return
         }
 
+        enableMicFromHudInput(message = "Mic on") { true }
+    }
+
+    private fun beginHudMicHold() {
+        val start = hudMicHoldController.begin(viewModel.micEnabled.value) ?: return
+        if (!start.shouldEnableMic) return
+        enableMicFromHudInput(message = "Listening while held") {
+            hudMicHoldController.isEnableRequestCurrent(start.generation)
+        }
+    }
+
+    private fun endHudMicHold(showMessage: Boolean) {
+        hudKeyInputController.cancelMicHold()
+        val end = hudMicHoldController.end() ?: return
+        if (!end.shouldDisableMic || !viewModel.micEnabled.value) return
+        viewModel.setMicEnabled(false)
+        if (showMessage) {
+            finishHudMicToggle("Mic off")
+        } else {
+            refreshHudMediaSessionState()
+        }
+    }
+
+    private fun enableMicFromHudInput(
+        message: String,
+        shouldEnable: () -> Boolean,
+    ) {
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            viewModel.setMicEnabled(false)
-            finishHudMicToggle("Speech recognizer unavailable")
+            if (shouldEnable()) {
+                viewModel.setMicEnabled(false)
+                finishHudMicToggle("Speech recognizer unavailable")
+            }
             return
         }
 
@@ -743,8 +787,10 @@ class MainActivity : ComponentActivity() {
             ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) ==
             PackageManager.PERMISSION_GRANTED
         ) {
-            viewModel.setMicEnabled(true)
-            finishHudMicToggle("Mic on")
+            if (shouldEnable()) {
+                viewModel.setMicEnabled(true)
+                finishHudMicToggle(message)
+            }
             return
         }
 
@@ -755,10 +801,10 @@ class MainActivity : ComponentActivity() {
                 runCatching {
                     permissionRequester.requestIfMissing(listOf(Manifest.permission.RECORD_AUDIO))[Manifest.permission.RECORD_AUDIO] == true
                 }.getOrDefault(false)
-            if (granted) {
+            if (granted && shouldEnable()) {
                 viewModel.setMicEnabled(true)
-                finishHudMicToggle("Mic on")
-            } else {
+                finishHudMicToggle(message)
+            } else if (!granted && shouldEnable()) {
                 finishHudMicToggle("Microphone permission required")
             }
         }

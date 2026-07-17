@@ -179,7 +179,8 @@ current notification on the phone, double-tap toggles mic, vertical swipe
 scrolls chat, and horizontal swipe browses ranked navigation and message
 notifications. External DPAD left/right and gamepad L1/R1 browse the same
 notification list; DPAD up/down and Page Up/Down scroll the transcript.
-Accessory input does the same, while brightness-key events can scroll chat,
+Accessory input does the same, while media/tap keys can use single-tap mic,
+double-tap mic, or focused hold-to-talk behavior. Brightness-key events can scroll chat,
 step Android HUD brightness, or step virtual distance while the HUD is focused.
 Brightness and distance key changes
 show a temporary green HUD text confirmation.
@@ -199,7 +200,7 @@ AirVision M1 companion settings live in Settings -> AirVision M1:
 | Motion Sync | Stored in the AirVision profile; hardware apply needs HID support. |
 | 3D Mode | Stored in the AirVision profile and disabled while Light Load Mode is enabled. Hardware apply needs HID support. |
 | Light Load Mode | Stored in the AirVision profile for low-overhead HUD operation, trims transcript/caption history, skips nonessential color-preview overlays, and locks IPD/3D adjustment while enabled. |
-| Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, and M1 media/tap key double-tap mic behavior. Settings, diagnostics, and Windows App Handoff also include shortcut-menu parity for ASUS brightness/volume/distance behavior plus a Windows gesture catalog for ASUS-documented brightness swipe, play/pause tap, instant transparent two-finger tap, center virtual screens, positioning/floating double tap, 3D hold, and shortcut-menu hold/slide behavior. |
+| Gesture & Hotkey Settings | Implemented for HUD touch actions, swipe-to-scroll, brightness-key scroll, Android HUD brightness, or virtual-distance handling, plus configurable media/tap-key single-tap mic, double-tap mic, and focused hold-to-talk behavior. Settings, diagnostics, and Windows App Handoff also include shortcut-menu parity for ASUS brightness/volume/distance behavior plus a Windows gesture catalog for ASUS-documented brightness swipe, play/pause tap, instant transparent two-finger tap, center virtual screens, positioning/floating double tap, 3D hold, and shortcut-menu hold/slide behavior. |
 | Cursor Follow / Center Cursor / 3DoF | Surfaced as structured Windows-only capability status in Android settings, diagnostics, and the Windows app handoff. Android can map the AirVision distance hotkey concept to M1 brightness-key events, but it does not claim Windows virtual-cursor or 3DoF control. |
 | Unity mirror window / projected glasses view | Surfaced as structured Windows-only capability status in Android settings, diagnostics, and the Windows app handoff. Android cannot open the ASUS Unity mirror window or `Ctrl+Alt+E` shortcut, but Settings and handoff guidance provide Cast, Display, and Samsung DeX screen-sharing fallback actions outside the HUD. |
 | Demo Mode / Tutorials | Implemented as Android Demo Mode for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway or live M1. The hidden ASUS Windows tutorial shortcut remains Windows-only and is reported separately in diagnostics. |

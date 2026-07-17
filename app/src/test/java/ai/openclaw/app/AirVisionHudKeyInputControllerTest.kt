@@ -464,6 +464,124 @@ class AirVisionHudKeyInputControllerTest {
     }
 
     @Test
+    fun singleTapMediaModeTogglesOnKeyUp() {
+        val controller = AirVisionHudKeyInputController()
+        val controls = AirVisionHudControls(mediaKeyAction = AirVisionHudMediaKeyAction.SingleTapToggleMic)
+
+        assertEquals(
+            AirVisionHudKeyDecision(consume = true),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isHudAccessoryEvent = true,
+                controls = controls,
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.ToggleMic,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_050L,
+                isHudAccessoryEvent = true,
+                controls = controls,
+            ),
+        )
+    }
+
+    @Test
+    fun holdToTalkConsumesRepeatsAndEndsAfterModeChange() {
+        val controller = AirVisionHudKeyInputController()
+        val controls = AirVisionHudControls(mediaKeyAction = AirVisionHudMediaKeyAction.HoldToTalk)
+
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.BeginMicHold,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isHudAccessoryEvent = true,
+                controls = controls,
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(consume = true),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_100L,
+                isHudAccessoryEvent = true,
+                controls = controls,
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.EndMicHold,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_200L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(mediaKeyAction = AirVisionHudMediaKeyAction.None),
+            ),
+        )
+    }
+
+    @Test
+    fun cancelledHoldCanBeginAgain() {
+        val controller = AirVisionHudKeyInputController()
+        val controls = AirVisionHudControls(mediaKeyAction = AirVisionHudMediaKeyAction.HoldToTalk)
+
+        controller.handleKeyEvent(
+            keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+            action = KeyEvent.ACTION_DOWN,
+            eventTimeMs = 1_000L,
+            isHudAccessoryEvent = true,
+            controls = controls,
+        )
+        controller.cancelMicHold()
+
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.BeginMicHold,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 2_000L,
+                isHudAccessoryEvent = true,
+                controls = controls,
+            ),
+        )
+    }
+
+    @Test
+    fun micHoldStateRestoresPriorMicAndCancelsStalePermissionEnable() {
+        val controller = AirVisionHudMicHoldController()
+
+        val disabledStart = requireNotNull(controller.begin(micEnabled = false))
+        assertEquals(true, disabledStart.shouldEnableMic)
+        assertEquals(true, controller.isEnableRequestCurrent(disabledStart.generation))
+        assertEquals(AirVisionHudMicHoldEnd(shouldDisableMic = true), controller.end())
+        assertEquals(false, controller.isEnableRequestCurrent(disabledStart.generation))
+
+        val enabledStart = requireNotNull(controller.begin(micEnabled = true))
+        assertEquals(false, enabledStart.shouldEnableMic)
+        assertEquals(null, controller.begin(micEnabled = true))
+        assertEquals(AirVisionHudMicHoldEnd(shouldDisableMic = false), controller.end())
+    }
+
+    @Test
     fun unhandledAccessoryKeyIsLoggedButNotConsumed() {
         val controller = AirVisionHudKeyInputController()
         val decision =

@@ -34,6 +34,10 @@ internal sealed interface AirVisionHudKeyCommand {
 
     data object ArmMicDoubleTap : AirVisionHudKeyCommand
 
+    data object BeginMicHold : AirVisionHudKeyCommand
+
+    data object EndMicHold : AirVisionHudKeyCommand
+
     data object LogUnhandledHudAccessoryKey : AirVisionHudKeyCommand
 }
 
@@ -46,6 +50,7 @@ internal class AirVisionHudKeyInputController(
     private val doubleTapTimeoutMs: Long = HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS,
 ) {
     private var lastMicTapUptimeMs = 0L
+    private var micHoldKeyCode: Int? = null
 
     fun handleKeyEvent(
         keyCode: Int,
@@ -180,21 +185,50 @@ internal class AirVisionHudKeyInputController(
             )
         }
 
-        if (controls.mediaKeyAction != AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
-            return AirVisionHudKeyDecision(consume = false)
+        if (micHoldKeyCode == keyCode && action == KeyEvent.ACTION_UP) {
+            micHoldKeyCode = null
+            lastMicTapUptimeMs = 0L
+            return AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.EndMicHold,
+            )
         }
 
-        if (action == KeyEvent.ACTION_DOWN) {
-            return AirVisionHudKeyDecision(consume = true)
+        return when (controls.mediaKeyAction) {
+            AirVisionHudMediaKeyAction.None -> AirVisionHudKeyDecision(consume = false)
+            AirVisionHudMediaKeyAction.SingleTapToggleMic -> {
+                lastMicTapUptimeMs = 0L
+                AirVisionHudKeyDecision(
+                    consume = action == KeyEvent.ACTION_DOWN || action == KeyEvent.ACTION_UP,
+                    command = AirVisionHudKeyCommand.ToggleMic.takeIf { action == KeyEvent.ACTION_UP },
+                )
+            }
+            AirVisionHudMediaKeyAction.DoubleTapToggleMic -> {
+                if (action == KeyEvent.ACTION_DOWN) {
+                    AirVisionHudKeyDecision(consume = true)
+                } else if (action == KeyEvent.ACTION_UP) {
+                    AirVisionHudKeyDecision(
+                        consume = true,
+                        command = handleMicTap(eventTimeMs),
+                    )
+                } else {
+                    AirVisionHudKeyDecision(consume = false)
+                }
+            }
+            AirVisionHudMediaKeyAction.HoldToTalk -> {
+                lastMicTapUptimeMs = 0L
+                if (action == KeyEvent.ACTION_DOWN) {
+                    val begin = micHoldKeyCode == null
+                    if (begin) micHoldKeyCode = keyCode
+                    AirVisionHudKeyDecision(
+                        consume = true,
+                        command = AirVisionHudKeyCommand.BeginMicHold.takeIf { begin },
+                    )
+                } else {
+                    AirVisionHudKeyDecision(consume = action == KeyEvent.ACTION_UP)
+                }
+            }
         }
-        if (action != KeyEvent.ACTION_UP) {
-            return AirVisionHudKeyDecision(consume = false)
-        }
-
-        return AirVisionHudKeyDecision(
-            consume = true,
-            command = handleMicTap(eventTimeMs),
-        )
     }
 
     fun handleMicTap(eventTimeMs: Long): AirVisionHudKeyCommand {
@@ -206,6 +240,10 @@ internal class AirVisionHudKeyInputController(
 
         lastMicTapUptimeMs = eventTimeMs
         return AirVisionHudKeyCommand.ArmMicDoubleTap
+    }
+
+    fun cancelMicHold() {
+        micHoldKeyCode = null
     }
 
     private companion object {
@@ -264,4 +302,40 @@ internal class AirVisionHudKeyInputController(
         private const val HUD_KEY_BRIGHTNESS_STEP_PERCENT = 5
         private const val HUD_KEY_DISTANCE_STEP_CM = 5
     }
+}
+
+internal data class AirVisionHudMicHoldStart(
+    val generation: Long,
+    val shouldEnableMic: Boolean,
+)
+
+internal data class AirVisionHudMicHoldEnd(
+    val shouldDisableMic: Boolean,
+)
+
+internal class AirVisionHudMicHoldController {
+    private var active = false
+    private var restoreMicEnabled = false
+    private var generation = 0L
+
+    fun begin(micEnabled: Boolean): AirVisionHudMicHoldStart? {
+        if (active) return null
+        active = true
+        restoreMicEnabled = micEnabled
+        generation += 1L
+        return AirVisionHudMicHoldStart(
+            generation = generation,
+            shouldEnableMic = !micEnabled,
+        )
+    }
+
+    fun end(): AirVisionHudMicHoldEnd? {
+        if (!active) return null
+        active = false
+        generation += 1L
+        return AirVisionHudMicHoldEnd(shouldDisableMic = !restoreMicEnabled)
+            .also { restoreMicEnabled = false }
+    }
+
+    fun isEnableRequestCurrent(requestGeneration: Long): Boolean = active && generation == requestGeneration
 }

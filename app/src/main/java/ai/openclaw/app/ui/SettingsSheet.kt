@@ -2870,7 +2870,11 @@ private fun airVisionStartupDestinationDescription(destination: AirVisionStartup
 private fun airVisionMediaKeyActionDescription(action: AirVisionHudMediaKeyAction): String =
     when (action) {
         AirVisionHudMediaKeyAction.None -> "Let Android handle media key events."
+        AirVisionHudMediaKeyAction.SingleTapToggleMic ->
+            "Toggle the microphone after one media or accessory-key tap."
         AirVisionHudMediaKeyAction.DoubleTapToggleMic -> "Toggle the microphone only after a double tap."
+        AirVisionHudMediaKeyAction.HoldToTalk ->
+            "Enable the microphone only while a focused accessory key is held."
     }
 
 private fun airVisionUsbStatusText(

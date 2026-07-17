@@ -1289,6 +1289,40 @@ class AirVisionDiagnosticsSnapshotTest {
         )
     }
 
+    @Test
+    fun fromState_exportsHoldToTalkMediaMappingWithoutDoubleTapWindow() {
+        val encoded =
+            AirVisionDiagnosticsSnapshots.encode(
+                AirVisionDiagnosticsSnapshots.fromState(
+                    usbState = AirVisionUsbState(),
+                    displaySettings = AirVisionDisplaySettings.defaultsForViewMode(AirVisionViewMode.Working),
+                    hudControls = AirVisionHudControls(mediaKeyAction = AirVisionHudMediaKeyAction.HoldToTalk),
+                    appLanguage = AirVisionAppLanguage.System,
+                    startupDestination = AirVisionStartupDestination.Hud,
+                    hudDisplayTarget = AirVisionHudDisplayTarget.AirVisionPreferred,
+                    demoModeEnabled = false,
+                ),
+            )
+        val root = Json.parseToJsonElement(encoded).jsonObject
+        val hardwareKeyMapping = root.getValue("hardwareKeyMapping").jsonObject
+        val mediaGesture =
+            root.getValue("windowsGestureCatalog")
+                .jsonObject
+                .getValue("items")
+                .jsonArray
+                .first { it.jsonObject.getValue("gesture").jsonPrimitive.content == "One-finger tap" }
+                .jsonObject
+
+        assertEquals("hold_to_talk", hardwareKeyMapping.getValue("mediaKeyAction").jsonPrimitive.content)
+        assertEquals("Hold to talk", hardwareKeyMapping.getValue("mediaKeyLabel").jsonPrimitive.content)
+        assertEquals("0", hardwareKeyMapping.getValue("mediaKeyDoubleTapTimeoutMs").jsonPrimitive.content)
+        assertEquals(
+            "mapped to focused HUD accessory hold-to-talk behavior",
+            mediaGesture.getValue("androidStatus").jsonPrimitive.content,
+        )
+        assertEquals("false", mediaGesture.getValue("firmwarePassthroughRequired").jsonPrimitive.content)
+    }
+
     private fun diagnosticsProfileBackup(activeSettings: AirVisionDisplaySettings): AirVisionProfileBackup {
         val settingsByMode =
             AirVisionViewMode.entries.map { mode ->

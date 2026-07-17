@@ -825,10 +825,14 @@ object AirVisionDiagnosticsSnapshots {
                     gesture = "One-finger tap",
                     windowsAction = "Audio/video play/pause in floating mode",
                     androidStatus =
-                        if (controls.mediaKeyAction == AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
-                            "mapped to HUD media-key double-tap mic behavior"
-                        } else {
-                            "left to Android or firmware media handling"
+                        when (controls.mediaKeyAction) {
+                            AirVisionHudMediaKeyAction.None -> "left to Android or firmware media handling"
+                            AirVisionHudMediaKeyAction.SingleTapToggleMic ->
+                                "mapped to HUD media-key single-tap mic behavior"
+                            AirVisionHudMediaKeyAction.DoubleTapToggleMic ->
+                                "mapped to HUD media-key double-tap mic behavior"
+                            AirVisionHudMediaKeyAction.HoldToTalk ->
+                                "mapped to focused HUD accessory hold-to-talk behavior"
                         },
                     androidMapping = controls.mediaKeyAction.label,
                     firmwarePassthroughRequired = controls.mediaKeyAction == AirVisionHudMediaKeyAction.None,
@@ -931,7 +935,12 @@ object AirVisionDiagnosticsSnapshots {
                 },
             mediaKeyAction = controls.mediaKeyAction.rawValue,
             mediaKeyLabel = controls.mediaKeyAction.label,
-            mediaKeyDoubleTapTimeoutMs = HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS,
+            mediaKeyDoubleTapTimeoutMs =
+                if (controls.mediaKeyAction == AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
+                    HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS
+                } else {
+                    0L
+                },
             firmwareBrightnessPassthroughPossible = firmwarePassthrough,
             summary =
                 "M1 brightness keys: ${controls.brightnessKeyAction.label}; $effect; " +
