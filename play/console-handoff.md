@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.17.4-hud-release.aab`
-- SHA-256: `da1e4d184c488f27fe29fe2b623a96b85124016ceda132b0a7a28bccd217d73d`
-- Version: 2026.7.17.4 (2026071704)
+- AAB: `build/release-bundles/openclaw-2026.7.17.5-hud-release.aab`
+- SHA-256: `639f0cdb2c76ea451ba5882aeb966e965115f4b68ae6cea88d9b0396f05a673a`
+- Version: 2026.7.17.5 (2026071705)
 
 ## Remaining Console Blockers
 
@@ -43,7 +43,7 @@ Key features:
 - Minimal always-on HUD for external displays
 - OpenClaw gateway pairing and secure local setup storage
 - Compact chat with hardware keyboard send support
-- Direct external-HUD agent switching for connected multi-agent gateways, guarded during active runs and execution approvals
+- Direct external-HUD switching for recent sessions and connected gateway agents, guarded during active runs and execution approvals
 - Safe execution approvals with gateway-sanitized command previews, deny and allow-once actions, expiry handling, external gamepad controls, and optional global visibility that requires explicit gateway administrator scope
 - In-app offensive-response reporting with explicit payload review, direct developer delivery, and receipt confirmation
 - Actionable notification summaries with tap-to-open and swipe browsing
@@ -62,7 +62,7 @@ OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does 
 Release notes:
 
 OpenClaw HUD:
-- Switch agents on the external HUD; locked during runs and approvals.
+- Switch recent sessions and agents on the external HUD; locked during runs and approvals.
 - Deny or allow execution once; global approvals require admin scope.
 - external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
 - M1 tap and swipe support uses the capability-driven input path in External HUD Input.

@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.4-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.5-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `da1e4d184c488f27fe29fe2b623a96b85124016ceda132b0a7a28bccd217d73d`
-- Latest HUD bundle version: `2026.7.17.4 (2026071704)`.
+  `639f0cdb2c76ea451ba5882aeb966e965115f4b68ae6cea88d9b0396f05a673a`
+- Latest HUD bundle version: `2026.7.17.5 (2026071705)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -81,11 +81,12 @@ Current local status:
   Presentation window on display 8. Demo Mode exercised the reply-capable HUD
   state. Secure M1 screenshots remained black, so physical touch reply proof is
   still separate from the runtime and automated evidence.
-- v2026071704 adds direct active-agent switching on generic external HUD
-  displays, with context changes locked during active runs and pending
-  execution approvals. It retains v2026071703 safe execution-request review,
-  reconnect synchronization, controller shortcuts, and explicit global-scope
-  opt-in. Unit, agent-selection, concurrency, input-routing, lint, R8,
+- v2026071705 adds direct recent-session switching on generic external HUD
+  displays alongside the agent switcher. The compact list preserves the active
+  session, refreshes on open, and locks in Demo Mode, active runs, and pending
+  execution approvals. It retains safe execution-request review, reconnect
+  synchronization, controller shortcuts, and explicit global-scope opt-in.
+  Unit, session/agent-selection, concurrency, input-routing, lint, R8,
   release-signing, and Play-package checks pass; exact device installation
   awaits the Fold's return to the tailnet.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
