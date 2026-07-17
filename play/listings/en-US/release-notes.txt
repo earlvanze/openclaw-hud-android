@@ -1,5 +1,5 @@
 OpenClaw HUD:
-- Fix HUD double-tap mic activation, permission prompts, and touch routing.
+- Fix physical M1 media-key double-tap microphone control using measured hardware timing.
 - external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
 - M1 tap and swipe support uses the capability-driven input path in External HUD Input.
 - Presentation recovery, display pinning, frame-shape morphing, In-app privacy policy.

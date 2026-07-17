@@ -63,10 +63,10 @@ Use this checklist before running `node scripts/publish-play-internal.mjs --comm
 Current local status:
 
 - Latest signed HUD AAB builds successfully from the current release commit:
-  `build/release-bundles/openclaw-2026.7.17.7-hud-release.aab`
+  `build/release-bundles/openclaw-2026.7.17.8-hud-release.aab`
 - Latest HUD AAB SHA-256:
-  `18db8725311cf4fb6c9333934e646a88c9e981b6992769f03f7a40ab0ade524f`
-- Latest HUD bundle version: `2026.7.17.7 (2026071707)`.
+  `444f2c187142215479745f50e87c23d8bf200c0ea794a1272ff3828da0d81a1b`
+- Latest HUD bundle version: `2026.7.17.8 (2026071708)`.
 - `node scripts/verify-play-hud-release.mjs` passes against the latest signed
   HUD AAB, packaged HUD manifest, and English Play listing copy.
 - `lintHudRelease` passes.
@@ -81,15 +81,15 @@ Current local status:
   Presentation window on display 8. Demo Mode exercised the reply-capable HUD
   state. Secure M1 screenshots remained black, so physical touch reply proof is
   still separate from the runtime and automated evidence.
-- v2026071707 moves HUD tap and swipe capture onto a background input layer so
-  interactive controls remain above it, routes touch mic actions through the
-  same permission-aware activity path as hardware input, reports actual mic
-  state, and clears stale enabled preferences after permission or recognizer
-  failures. It retains direct recent-session and agent switching, safe
-  execution-request review, reconnect synchronization, controller shortcuts,
-  and explicit global-scope opt-in. Unit, input-routing, ktlint, Android lint,
-  R8, release-signing, and Play-package checks pass; exact device installation
-  awaits the Fold's return to the tailnet.
+- Live physical M1 capture on 2026-07-17 recorded three `KEY_PLAYPAUSE` tap
+  events from `/dev/input/event16`; the first deliberate pair arrived 1,452 ms
+  apart. v2026071708 routes that media key through the mic input controller
+  instead of the external Presentation's synthetic touchscreen path and uses a
+  measured 2,000 ms hardware double-tap window. Touchscreen gesture timing is
+  unchanged. Unit, input-routing, Android lint, R8, release-signing, and
+  Play-package checks pass. Exact v2026071708 device installation still
+  requires a Play-signed delivery because the installed Play build and local
+  upload-key APK have different signing certificates.
 - `node scripts/publish-play-internal.mjs --dry-run` validates the local AAB,
   English listing copy, release notes character limits, and local Play
   submission packet. It refuses stale local artifacts when HUD source/build
@@ -100,10 +100,10 @@ Current local status:
 - Browser staging verified the separate `ai.openclaw.app.hud` app, internal
   tester list, reviewer Demo Mode instructions, app-content forms, listing,
   contact details, graphics, screenshots, and replacement signed AAB version
-  `2026071707` on 2026-07-17; `2026071705`, `2026071704`, `2026071703`,
-  `2026071702`, and `2026071701` are absent. The
+  `2026071708` on 2026-07-17; `2026071707`, `2026071705`, `2026071704`,
+  `2026071703`, `2026071702`, and `2026071701` are absent. The
   saved release name is
-  `OpenClaw HUD 2026.7.17.7 mic gesture fix`; exact release notes
+  `OpenClaw HUD 2026.7.17.8 M1 mic fix`; exact release notes
   persisted after a full page reload, `Save as draft` is disabled, and `Next`
   was not used.
   API/OAuth preflight remains a separate authentication and package-access gate.
