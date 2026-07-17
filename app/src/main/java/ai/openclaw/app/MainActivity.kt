@@ -706,6 +706,7 @@ class MainActivity : ComponentActivity() {
         event: KeyEvent?,
         source: String,
     ) {
+        hudKeyCommandFeedback(command)?.let(viewModel::showHudTransientMessage)
         when (command) {
             is AirVisionHudKeyCommand.ScrollChat -> {
                 viewModel.requestHudScroll(command.deltaPx)

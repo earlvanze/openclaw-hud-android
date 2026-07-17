@@ -46,6 +46,12 @@ internal data class AirVisionHudKeyDecision(
     val command: AirVisionHudKeyCommand? = null,
 )
 
+internal fun hudKeyCommandFeedback(command: AirVisionHudKeyCommand?): String? =
+    when (command) {
+        AirVisionHudKeyCommand.ArmMicDoubleTap -> "Tap again within 2 seconds for mic"
+        else -> null
+    }
+
 internal class AirVisionHudKeyInputController(
     private val doubleTapTimeoutMs: Long = HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS,
 ) {

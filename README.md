@@ -169,7 +169,7 @@ HUD controls:
 - Review pending execution requests directly on the HUD. Press gamepad Y to allow once, or gamepad B / Escape to deny; persistent allow-list changes are intentionally unavailable on the HUD.
 
 The single-tap, double-tap, vertical-swipe, horizontal-swipe, brightness-key, and media/tap-key actions are
-configurable in Settings -> AirVision M1 -> External HUD Input. External
+configurable in Settings -> External Display HUD -> External HUD Input. External
 touchscreens, touchpads, mice, styli, trackballs, DPAD/gamepad controls, rotary
 encoders, and mouse wheels route through the same Presentation-owned HUD input
 path. Absolute joystick, hat, and wearable touch-strip axes are normalized to
@@ -183,6 +183,8 @@ notification list; DPAD up/down and Page Up/Down scroll the transcript.
 Accessory input does the same, while brightness-key events can scroll chat,
 step Android HUD brightness, or step virtual distance while the HUD is focused.
 Media/tap keys can use single-tap mic, double-tap mic, or focused hold-to-talk behavior.
+Double-tap mode acknowledges the first accepted accessory tap on the HUD and
+prompts for the second tap within the measured two-second input window.
 Custom Mic Key learning captures the next external remote, keyboard, gamepad, or
 wearable button and applies the selected media/tap mic mode without requiring a
 device-specific key map. Internal phone keys are ignored during learning.

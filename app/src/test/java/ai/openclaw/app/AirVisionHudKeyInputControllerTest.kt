@@ -7,6 +7,16 @@ import org.junit.Test
 
 class AirVisionHudKeyInputControllerTest {
     @Test
+    fun armedDoubleTapProvidesVisibleTimingFeedback() {
+        assertEquals(
+            "Tap again within 2 seconds for mic",
+            hudKeyCommandFeedback(AirVisionHudKeyCommand.ArmMicDoubleTap),
+        )
+        assertNull(hudKeyCommandFeedback(AirVisionHudKeyCommand.ToggleMic))
+        assertNull(hudKeyCommandFeedback(null))
+    }
+
+    @Test
     fun pendingApprovalActionsTakePriorityOverRunAbort() {
         val controller = AirVisionHudKeyInputController()
 
