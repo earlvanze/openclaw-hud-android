@@ -23,6 +23,10 @@ internal sealed interface AirVisionHudKeyCommand {
 
     data object AbortActiveRun : AirVisionHudKeyCommand
 
+    data object AllowPendingExecOnce : AirVisionHudKeyCommand
+
+    data object DenyPendingExecApproval : AirVisionHudKeyCommand
+
     data object ToggleMic : AirVisionHudKeyCommand
 
     data object ArmMicDoubleTap : AirVisionHudKeyCommand
@@ -47,7 +51,29 @@ internal class AirVisionHudKeyInputController(
         isHudAccessoryEvent: Boolean,
         controls: AirVisionHudControls,
         hasActiveRun: Boolean = false,
+        hasPendingExecApproval: Boolean = false,
+        canAllowPendingExecOnce: Boolean = false,
+        canDenyPendingExec: Boolean = false,
     ): AirVisionHudKeyDecision {
+        if (isHudAccessoryEvent && hasPendingExecApproval && keyCode in hudApprovalActionKeys) {
+            val command =
+                if (action == KeyEvent.ACTION_DOWN) {
+                    when (keyCode) {
+                        KeyEvent.KEYCODE_BUTTON_Y ->
+                            AirVisionHudKeyCommand.AllowPendingExecOnce.takeIf { canAllowPendingExecOnce }
+                        KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_ESCAPE ->
+                            AirVisionHudKeyCommand.DenyPendingExecApproval.takeIf { canDenyPendingExec }
+                        else -> null
+                    }
+                } else {
+                    null
+                }
+            return AirVisionHudKeyDecision(
+                consume = action == KeyEvent.ACTION_DOWN || action == KeyEvent.ACTION_UP,
+                command = command,
+            )
+        }
+
         if (keyCode in hudAbortRunKeys && isHudAccessoryEvent && hasActiveRun) {
             return AirVisionHudKeyDecision(
                 consume = action == KeyEvent.ACTION_DOWN || action == KeyEvent.ACTION_UP,
@@ -218,6 +244,8 @@ internal class AirVisionHudKeyInputController(
             )
         private val hudNotificationReplyKeys = setOf(KeyEvent.KEYCODE_BUTTON_X)
         private val hudAbortRunKeys = setOf(KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_ESCAPE)
+        private val hudApprovalActionKeys =
+            setOf(KeyEvent.KEYCODE_BUTTON_Y, KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_ESCAPE)
         private val hudBrightnessKeyDeltas =
             mapOf(
                 KeyEvent.KEYCODE_BRIGHTNESS_DOWN to -HUD_KEY_BRIGHTNESS_STEP_PERCENT,

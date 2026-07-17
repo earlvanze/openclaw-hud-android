@@ -7,6 +7,74 @@ import org.junit.Test
 
 class AirVisionHudKeyInputControllerTest {
     @Test
+    fun pendingApprovalActionsTakePriorityOverRunAbort() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.DenyPendingExecApproval,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BUTTON_B,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(),
+                hasActiveRun = true,
+                hasPendingExecApproval = true,
+                canDenyPendingExec = true,
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(
+                consume = true,
+                command = AirVisionHudKeyCommand.AllowPendingExecOnce,
+            ),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BUTTON_Y,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_100L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(),
+                hasPendingExecApproval = true,
+                canAllowPendingExecOnce = true,
+            ),
+        )
+    }
+
+    @Test
+    fun pendingApprovalKeysConsumeUpAndUnavailableActionsWithoutFallingThrough() {
+        val controller = AirVisionHudKeyInputController()
+
+        assertEquals(
+            AirVisionHudKeyDecision(consume = true),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BUTTON_B,
+                action = KeyEvent.ACTION_DOWN,
+                eventTimeMs = 1_000L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(),
+                hasActiveRun = true,
+                hasPendingExecApproval = true,
+                canDenyPendingExec = false,
+            ),
+        )
+        assertEquals(
+            AirVisionHudKeyDecision(consume = true),
+            controller.handleKeyEvent(
+                keyCode = KeyEvent.KEYCODE_BUTTON_Y,
+                action = KeyEvent.ACTION_UP,
+                eventTimeMs = 1_100L,
+                isHudAccessoryEvent = true,
+                controls = AirVisionHudControls(),
+                hasPendingExecApproval = true,
+                canAllowPendingExecOnce = true,
+            ),
+        )
+    }
+
+    @Test
     fun accessoryCancelKeysAbortOnlyWhileRunIsActive() {
         val controller = AirVisionHudKeyInputController()
 

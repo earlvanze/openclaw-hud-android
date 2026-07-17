@@ -116,6 +116,7 @@ fun SettingsSheet(viewModel: MainViewModel) {
     val locationPreciseEnabled by viewModel.locationPreciseEnabled.collectAsState()
     val preventSleep by viewModel.preventSleep.collectAsState()
     val canvasDebugStatusEnabled by viewModel.canvasDebugStatusEnabled.collectAsState()
+    val globalExecApprovalsEnabled by viewModel.globalExecApprovalsEnabled.collectAsState()
     val notificationForwardingEnabled by viewModel.notificationForwardingEnabled.collectAsState()
     val notificationForwardingMode by viewModel.notificationForwardingMode.collectAsState()
     val notificationForwardingPackages by viewModel.notificationForwardingPackages.collectAsState()
@@ -1823,6 +1824,24 @@ fun SettingsSheet(viewModel: MainViewModel) {
                             Switch(
                                 checked = airVisionDemoModeEnabled,
                                 onCheckedChange = viewModel::setAirVisionDemoModeEnabled,
+                            )
+                        },
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = listItemColors,
+                        headlineContent = { Text("Global execution approvals", style = mobileHeadline) },
+                        supportingContent = {
+                            Text(
+                                "Requests gateway administrator scope so this device can review all pending execution requests. Disable it to return to device-bound approvals only.",
+                                style = mobileCallout,
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = globalExecApprovalsEnabled,
+                                onCheckedChange = viewModel::setGlobalExecApprovalsEnabled,
                             )
                         },
                     )

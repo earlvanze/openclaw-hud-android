@@ -777,6 +777,20 @@ class SecurePrefsTest {
     }
 
     @Test
+    fun globalExecApprovalsEnabled_defaultsOffAndPersistsExplicitOptIn() {
+        val context = RuntimeEnvironment.getApplication()
+        val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+        plainPrefs.edit().clear().commit()
+
+        val prefs = SecurePrefs(context)
+        assertFalse(prefs.globalExecApprovalsEnabled.value)
+
+        prefs.setGlobalExecApprovalsEnabled(true)
+
+        assertEquals(true, SecurePrefs(context).globalExecApprovalsEnabled.value)
+    }
+
+    @Test
     fun airVisionPhysicalMainScreenVisible_persists() {
         val context = RuntimeEnvironment.getApplication()
         val plainPrefs = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)

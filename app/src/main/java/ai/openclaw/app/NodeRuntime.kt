@@ -27,6 +27,10 @@ import ai.openclaw.app.node.DebugHandler
 import ai.openclaw.app.node.DeviceHandler
 import ai.openclaw.app.node.DeviceNotificationListenerService
 import ai.openclaw.app.node.DeviceNotificationSnapshot
+import ai.openclaw.app.node.ExecApprovalController
+import ai.openclaw.app.node.ExecApprovalDecision
+import ai.openclaw.app.node.ExecApprovalRequest
+import ai.openclaw.app.node.ExecApprovalResolutionResult
 import ai.openclaw.app.node.InvokeDispatcher
 import ai.openclaw.app.node.LocationCaptureManager
 import ai.openclaw.app.node.LocationHandler
@@ -198,6 +202,7 @@ class NodeRuntime(
             callLogAvailable = { BuildConfig.OPENCLAW_ENABLE_CALL_LOG },
             hasRecordAudioPermission = { hasRecordAudioPermission() },
             manualTls = { manualTls.value },
+            globalExecApprovalsEnabled = { prefs.globalExecApprovalsEnabled.value },
         )
 
     private val invokeDispatcher: InvokeDispatcher =
@@ -313,8 +318,14 @@ class NodeRuntime(
     private var operatorStatusText: String = "Offline"
     private var nodeStatusText: String = "Offline"
     private var suppressNextPreferredGatewayReconnect = false
+    private val execApprovalController: ExecApprovalController =
+        ExecApprovalController(
+            request = { method, paramsJson ->
+                operatorSession.request(method, paramsJson)
+            },
+        )
 
-    private val operatorSession =
+    private val operatorSession: GatewaySession =
         GatewaySession(
             scope = scope,
             identityStore = identityStore,
@@ -329,6 +340,7 @@ class NodeRuntime(
                 updateStatus()
                 micCapture.onGatewayConnectionChanged(true)
                 scope.launch {
+                    execApprovalController.refresh()
                     refreshHomeCanvasOverviewIfConnected()
                     if (voiceReplySpeakerLazy.isInitialized()) {
                         voiceReplySpeaker.refreshConfig()
@@ -341,6 +353,7 @@ class NodeRuntime(
                 _serverName.value = null
                 _remoteAddress.value = null
                 _seamColorArgb.value = DEFAULT_SEAM_COLOR_ARGB
+                execApprovalController.clear()
                 chat.applyMainSessionKey(resolveMainSessionKey())
                 chat.onDisconnected(message)
                 updateStatus()
@@ -401,10 +414,14 @@ class NodeRuntime(
         scope.launch {
             while (true) {
                 refreshHudNotifications()
+                execApprovalController.pruneExpired()
                 delay(5_000)
             }
         }
     }
+
+    val pendingExecApprovals: StateFlow<List<ExecApprovalRequest>>
+        get() = execApprovalController.pending
 
     private val chat: ChatController =
         ChatController(
@@ -848,6 +865,13 @@ class NodeRuntime(
 
     fun setPreventSleep(value: Boolean) {
         prefs.setPreventSleep(value)
+    }
+
+    fun setGlobalExecApprovalsEnabled(value: Boolean) {
+        if (prefs.globalExecApprovalsEnabled.value == value) return
+        prefs.setGlobalExecApprovalsEnabled(value)
+        execApprovalController.clear()
+        if (connectedEndpoint != null) refreshGatewayConnection()
     }
 
     fun setManualEnabled(value: Boolean) {
@@ -1317,6 +1341,11 @@ class NodeRuntime(
         chat.abort()
     }
 
+    suspend fun resolveExecApproval(
+        id: String,
+        decision: ExecApprovalDecision,
+    ): ExecApprovalResolutionResult = execApprovalController.resolve(id, decision)
+
     fun sendChat(
         message: String,
         thinking: String,
@@ -1335,6 +1364,7 @@ class NodeRuntime(
         event: String,
         payloadJson: String?,
     ) {
+        execApprovalController.handleGatewayEvent(event, payloadJson)
         micCapture.handleGatewayEvent(event, payloadJson)
         talkMode.handleGatewayEvent(event, payloadJson)
         chat.handleGatewayEvent(event, payloadJson)

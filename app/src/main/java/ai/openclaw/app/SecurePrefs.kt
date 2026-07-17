@@ -37,6 +37,7 @@ class SecurePrefs(
         private const val notificationsForwardingMaxEventsPerMinuteKey =
             "notifications.forwarding.maxEventsPerMinute"
         private const val notificationsForwardingSessionKeyKey = "notifications.forwarding.sessionKey"
+        private const val GLOBAL_EXEC_APPROVALS_ENABLED_KEY = "gateway.execApprovals.globalEnabled"
         private const val AIR_VISION_VIEW_MODE_KEY = "airVision.viewMode"
         private const val AIR_VISION_SPLENDID_MODE_KEY = "airVision.splendidMode"
         private const val AIR_VISION_HUD_PLACEMENT_KEY = "airVision.hudPlacement"
@@ -138,6 +139,10 @@ class SecurePrefs(
     private val _canvasDebugStatusEnabled =
         MutableStateFlow(plainPrefs.getBoolean("canvas.debugStatusEnabled", false))
     val canvasDebugStatusEnabled: StateFlow<Boolean> = _canvasDebugStatusEnabled
+
+    private val _globalExecApprovalsEnabled =
+        MutableStateFlow(plainPrefs.getBoolean(GLOBAL_EXEC_APPROVALS_ENABLED_KEY, false))
+    val globalExecApprovalsEnabled: StateFlow<Boolean> = _globalExecApprovalsEnabled
 
     private val _notificationForwardingEnabled =
         MutableStateFlow(plainPrefs.getBoolean(notificationsForwardingEnabledKey, defaultNotificationForwardingEnabled))
@@ -347,6 +352,11 @@ class SecurePrefs(
     fun setCanvasDebugStatusEnabled(value: Boolean) {
         plainPrefs.edit { putBoolean("canvas.debugStatusEnabled", value) }
         _canvasDebugStatusEnabled.value = value
+    }
+
+    fun setGlobalExecApprovalsEnabled(value: Boolean) {
+        plainPrefs.edit { putBoolean(GLOBAL_EXEC_APPROVALS_ENABLED_KEY, value) }
+        _globalExecApprovalsEnabled.value = value
     }
 
     internal fun getNotificationForwardingPolicy(appPackageName: String): NotificationForwardingPolicy {

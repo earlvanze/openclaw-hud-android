@@ -10,6 +10,8 @@ import ai.openclaw.app.gateway.GatewayEndpoint
 import ai.openclaw.app.node.CameraCaptureManager
 import ai.openclaw.app.node.CanvasController
 import ai.openclaw.app.node.DeviceNotificationSnapshot
+import ai.openclaw.app.node.ExecApprovalDecision
+import ai.openclaw.app.node.ExecApprovalRequest
 import ai.openclaw.app.node.SmsManager
 import ai.openclaw.app.voice.VoiceConversationEntry
 import android.app.Application
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(
@@ -126,6 +129,7 @@ class MainViewModel(
     val gatewayBootstrapToken: StateFlow<String> = prefs.gatewayBootstrapToken
     val onboardingCompleted: StateFlow<Boolean> = prefs.onboardingCompleted
     val canvasDebugStatusEnabled: StateFlow<Boolean> = prefs.canvasDebugStatusEnabled
+    val globalExecApprovalsEnabled: StateFlow<Boolean> = prefs.globalExecApprovalsEnabled
     val speakerEnabled: StateFlow<Boolean> = prefs.speakerEnabled
     val micEnabled: StateFlow<Boolean> = prefs.talkEnabled
     val nativeCaptionsEnabled: StateFlow<Boolean> = prefs.nativeCaptionsEnabled
@@ -171,6 +175,8 @@ class MainViewModel(
     val chatSessionModel: StateFlow<String?> = runtimeState(initial = null) { it.chatSessionModel }
     val chatSessionModelProvider: StateFlow<String?> = runtimeState(initial = null) { it.chatSessionModelProvider }
     val pendingRunCount: StateFlow<Int> = runtimeState(initial = 0) { it.pendingRunCount }
+    val pendingExecApprovals: StateFlow<List<ExecApprovalRequest>> =
+        runtimeState(initial = emptyList()) { it.pendingExecApprovals }
 
     init {
         nodeApp.airVisionUsb.start()
@@ -237,6 +243,10 @@ class MainViewModel(
 
     fun setPreventSleep(value: Boolean) {
         prefs.setPreventSleep(value)
+    }
+
+    fun setGlobalExecApprovalsEnabled(value: Boolean) {
+        ensureRuntime().setGlobalExecApprovalsEnabled(value)
     }
 
     fun setManualEnabled(value: Boolean) {
@@ -781,6 +791,16 @@ class MainViewModel(
 
     fun abortChat() {
         ensureRuntime().abortChat()
+    }
+
+    fun resolveExecApproval(
+        id: String,
+        decision: ExecApprovalDecision,
+    ) {
+        viewModelScope.launch {
+            val result = ensureRuntime().resolveExecApproval(id, decision)
+            showHudTransientMessage(result.message)
+        }
     }
 
     fun sendChat(

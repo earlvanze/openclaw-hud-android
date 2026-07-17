@@ -67,7 +67,7 @@
         "playSubtype": "Other actions",
         "optional": true,
         "purpose": ["App functionality"],
-        "whereUsed": "Assistant run controls plus active session, agent, provider, and model selections when enabled.",
+        "whereUsed": "Assistant run controls, deny or allow-once execution-approval decisions, plus active session, agent, provider, and model selections when enabled.",
         "destination": "Configured OpenClaw gateway."
       },
       {

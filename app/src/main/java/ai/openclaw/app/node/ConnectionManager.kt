@@ -25,6 +25,7 @@ class ConnectionManager(
     private val callLogAvailable: () -> Boolean,
     private val hasRecordAudioPermission: () -> Boolean,
     private val manualTls: () -> Boolean,
+    private val globalExecApprovalsEnabled: () -> Boolean,
 ) {
     companion object {
         internal fun resolveTlsParamsForEndpoint(
@@ -162,7 +163,11 @@ class ConnectionManager(
     fun buildOperatorConnectOptions(): GatewayConnectOptions =
         GatewayConnectOptions(
             role = "operator",
-            scopes = listOf("operator.read", "operator.write", "operator.talk.secrets"),
+            scopes =
+                buildList {
+                    addAll(listOf("operator.approvals", "operator.read", "operator.write", "operator.talk.secrets"))
+                    if (globalExecApprovalsEnabled()) add("operator.admin")
+                }.sorted(),
             caps = emptyList(),
             commands = emptyList(),
             permissions = emptyMap(),

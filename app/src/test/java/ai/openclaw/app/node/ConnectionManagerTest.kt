@@ -500,6 +500,24 @@ class ConnectionManagerTest {
         assertFalse(options.caps.contains(OpenClawCapability.Motion.rawValue))
     }
 
+    @Test
+    fun buildOperatorConnectOptionsRequestsApprovalScope() {
+        val options = newManager().buildOperatorConnectOptions()
+
+        assertTrue(options.scopes.contains("operator.approvals"))
+        assertTrue(options.scopes.contains("operator.read"))
+        assertTrue(options.scopes.contains("operator.write"))
+        assertFalse(options.scopes.contains("operator.admin"))
+    }
+
+    @Test
+    fun buildOperatorConnectOptionsRequestsAdminOnlyForGlobalApprovals() {
+        val options = newManager(globalExecApprovalsEnabled = true).buildOperatorConnectOptions()
+
+        assertTrue(options.scopes.contains("operator.admin"))
+        assertTrue(options.scopes.contains("operator.approvals"))
+    }
+
     private fun newManager(
         cameraEnabled: Boolean = false,
         locationMode: LocationMode = LocationMode.Off,
@@ -511,6 +529,7 @@ class ConnectionManagerTest {
         smsSearchPossible: Boolean = false,
         callLogAvailable: Boolean = false,
         hasRecordAudioPermission: Boolean = false,
+        globalExecApprovalsEnabled: Boolean = false,
     ): ConnectionManager {
         val context = RuntimeEnvironment.getApplication()
         val prefs =
@@ -532,6 +551,7 @@ class ConnectionManagerTest {
             callLogAvailable = { callLogAvailable },
             hasRecordAudioPermission = { hasRecordAudioPermission },
             manualTls = { false },
+            globalExecApprovalsEnabled = { globalExecApprovalsEnabled },
         )
     }
 }

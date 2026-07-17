@@ -1,5 +1,6 @@
 package ai.openclaw.app
 
+import ai.openclaw.app.node.ExecApprovalDecision
 import ai.openclaw.app.ui.OpenClawTheme
 import ai.openclaw.app.ui.RootScreen
 import android.Manifest
@@ -580,6 +581,7 @@ class MainActivity : ComponentActivity() {
                 return event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
             }
         }
+        val pendingApproval = viewModel.pendingExecApprovals.value.firstOrNull()
         val decision =
             hudKeyInputController.handleKeyEvent(
                 keyCode = event.keyCode,
@@ -588,6 +590,9 @@ class MainActivity : ComponentActivity() {
                 isHudAccessoryEvent = event.isHudAccessoryEvent(),
                 controls = viewModel.airVisionHudControls.value,
                 hasActiveRun = viewModel.pendingRunCount.value > 0,
+                hasPendingExecApproval = pendingApproval != null,
+                canAllowPendingExecOnce = pendingApproval?.allows(ExecApprovalDecision.AllowOnce) == true,
+                canDenyPendingExec = pendingApproval?.allows(ExecApprovalDecision.Deny) == true,
             )
         handleHudKeyCommand(decision.command, event = event, source = source)
         return decision.consume
@@ -691,6 +696,16 @@ class MainActivity : ComponentActivity() {
                 viewModel.abortChat()
                 viewModel.showHudTransientMessage(hudChatAbortRequestMessage(pendingRunCount))
                 Log.d(TAG, "HUD $source key requested chat abort keyCode=${event?.keyCode} runs=$pendingRunCount")
+            }
+            AirVisionHudKeyCommand.AllowPendingExecOnce -> {
+                val approval = viewModel.pendingExecApprovals.value.firstOrNull() ?: return
+                viewModel.resolveExecApproval(approval.id, ExecApprovalDecision.AllowOnce)
+                Log.d(TAG, "HUD $source key allowed one pending execution keyCode=${event?.keyCode}")
+            }
+            AirVisionHudKeyCommand.DenyPendingExecApproval -> {
+                val approval = viewModel.pendingExecApprovals.value.firstOrNull() ?: return
+                viewModel.resolveExecApproval(approval.id, ExecApprovalDecision.Deny)
+                Log.d(TAG, "HUD $source key denied pending execution keyCode=${event?.keyCode}")
             }
             AirVisionHudKeyCommand.ToggleMic -> {
                 toggleMicFromHudInput()

@@ -19,6 +19,8 @@ import ai.openclaw.app.chat.ChatMessage
 import ai.openclaw.app.hudChatAbortRequestMessage
 import ai.openclaw.app.hudNotificationOpenResultMessage
 import ai.openclaw.app.hudNotificationReplyResultMessage
+import ai.openclaw.app.node.ExecApprovalDecision
+import ai.openclaw.app.node.ExecApprovalRequest
 import ai.openclaw.app.openNativeCaptionSettings
 import ai.openclaw.app.voice.VoiceConversationEntry
 import ai.openclaw.app.voice.VoiceConversationRole
@@ -47,9 +49,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.automirrored.filled.Reply
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.AlertDialog
@@ -97,6 +100,9 @@ private val hudDanger = Color(0xFF7CFF7C)
 private val hudMicOn = Color(0xFFFF2D2D)
 private val hudMicOff = Color(0xFF3A0505)
 private val hudConnectedOff = Color(0xFF07210D)
+private val hudApprovalDanger = Color(0xFFFF5C5C)
+private val hudApprovalAllow = Color(0xFF4DD0E1)
+private val hudApprovalBackground = Color(0xFF190707)
 private const val HUD_FRAME_MORPH_DURATION_MS = 320
 
 @Composable
@@ -114,6 +120,7 @@ fun HudScreen(viewModel: MainViewModel) {
     val streamingAssistantText by viewModel.chatStreamingAssistantText.collectAsState()
     val pendingToolCalls by viewModel.chatPendingToolCalls.collectAsState()
     val pendingRunCount by viewModel.pendingRunCount.collectAsState()
+    val pendingExecApprovals by viewModel.pendingExecApprovals.collectAsState()
     val chatError by viewModel.chatError.collectAsState()
     val micEnabled by viewModel.micEnabled.collectAsState()
     val speakerEnabled by viewModel.speakerEnabled.collectAsState()
@@ -235,6 +242,7 @@ fun HudScreen(viewModel: MainViewModel) {
         } else {
             hudRunningLine(pendingRunCount, pendingToolCalls.map { it.name })
         }
+    val pendingExecApproval = pendingExecApprovals.firstOrNull().takeUnless { airVisionDemoModeEnabled }
     val latestAssistant = streamingAssistantText?.trim()?.takeIf { it.isNotEmpty() } ?: messages.latestAssistantText()
     val latestUser = messages.latestUserText()
     val chatTranscript =
@@ -487,7 +495,18 @@ fun HudScreen(viewModel: MainViewModel) {
                         ),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                if (transientHudText != null) {
+                if (pendingExecApproval != null) {
+                    HudExecApprovalBlock(
+                        approval = pendingExecApproval,
+                        queueSize = pendingExecApprovals.size,
+                        onDeny = {
+                            viewModel.resolveExecApproval(pendingExecApproval.id, ExecApprovalDecision.Deny)
+                        },
+                        onAllowOnce = {
+                            viewModel.resolveExecApproval(pendingExecApproval.id, ExecApprovalDecision.AllowOnce)
+                        },
+                    )
+                } else if (transientHudText != null) {
                     HudTransientText(message = transientHudText.orEmpty())
                 } else {
                     notificationLine?.let { line ->
@@ -575,7 +594,9 @@ fun HudScreen(viewModel: MainViewModel) {
 
             HudChatInputBar(
                 prompt = replyTarget?.let { replyDraft } ?: prompt,
-                enabled = replyTarget != null || (!airVisionDemoModeEnabled && healthOk && pendingRunCount == 0),
+                enabled =
+                    pendingExecApproval == null &&
+                        (replyTarget != null || (!airVisionDemoModeEnabled && healthOk && pendingRunCount == 0)),
                 placeholder = replyTarget?.let { "reply to ${it.source}" } ?: "ask",
                 actionLabel = if (replyTarget == null) "send" else "reply",
                 onPromptChange = { value ->
@@ -655,9 +676,93 @@ fun HudScreen(viewModel: MainViewModel) {
 }
 
 @Composable
-private fun HudTransientText(
-    message: String,
+private fun HudExecApprovalBlock(
+    approval: ExecApprovalRequest,
+    queueSize: Int,
+    onDeny: () -> Unit,
+    onAllowOnce: () -> Unit,
 ) {
+    val resolving = approval.resolvingDecision != null
+    val contextLine =
+        listOfNotNull(
+            approval.host?.uppercase(),
+            approval.agentId?.let { "agent $it" },
+            queueSize.takeIf { it > 1 }?.let { "$it pending" },
+        ).joinToString(" / ")
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(hudApprovalBackground)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(
+            text = "Execution approval",
+            style = hudReadableTextStyle.copy(fontWeight = FontWeight.Bold),
+            color = hudApprovalDanger,
+            maxLines = 1,
+        )
+        if (contextLine.isNotEmpty()) {
+            Text(
+                text = contextLine,
+                style = hudCompactTextStyle,
+                color = hudMuted,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Text(
+            text = approval.displayCommand,
+            style = hudReadableTextStyle,
+            color = hudText,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
+        approval.warningText?.let { warning ->
+            Text(
+                text = warning,
+                style = hudCompactTextStyle,
+                color = hudWarn,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.End),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TextButton(
+                enabled = !resolving && approval.allows(ExecApprovalDecision.Deny),
+                onClick = onDeny,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = hudApprovalDanger,
+                )
+                Text("Deny", color = hudApprovalDanger)
+            }
+            TextButton(
+                enabled = !resolving && approval.allows(ExecApprovalDecision.AllowOnce),
+                onClick = onAllowOnce,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = hudApprovalAllow,
+                )
+                Text("Allow once", color = hudApprovalAllow)
+            }
+        }
+    }
+}
+
+@Composable
+private fun HudTransientText(message: String) {
     Text(
         message,
         style = hudPrimaryTextStyle.copy(fontWeight = FontWeight.SemiBold),
@@ -1244,6 +1349,13 @@ private val hudReadableTextStyle: TextStyle =
     mobileHeadline.copy(
         fontSize = 22.sp,
         lineHeight = 30.sp,
+        letterSpacing = 0.sp,
+    )
+
+private val hudCompactTextStyle: TextStyle =
+    mobileHeadline.copy(
+        fontSize = 16.sp,
+        lineHeight = 20.sp,
         letterSpacing = 0.sp,
     )
 
