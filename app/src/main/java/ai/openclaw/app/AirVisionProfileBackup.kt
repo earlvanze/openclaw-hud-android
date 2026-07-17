@@ -31,6 +31,7 @@ data class AirVisionBackupHudControls(
     val horizontalSwipeAction: String = AirVisionHudHorizontalSwipeAction.BrowseNotifications.rawValue,
     val brightnessKeyAction: String,
     val mediaKeyAction: String,
+    val mediaDoubleTapWindow: String = ExternalHudDoubleTapWindow.Extended.rawValue,
     val customMediaKeyCode: Int? = null,
 )
 
@@ -88,8 +89,8 @@ data class AirVisionBackupRuntimeProfile(
 
 object AirVisionProfileBackups {
     const val SCHEMA = "openclaw.airvision.m1.profile-backup"
-    const val VERSION = 7
-    private val SUPPORTED_VERSIONS = setOf(1, 2, 3, 4, 5, 6, VERSION)
+    const val VERSION = 8
+    private val SUPPORTED_VERSIONS = setOf(1, 2, 3, 4, 5, 6, 7, VERSION)
 
     private val json =
         Json {
@@ -173,6 +174,7 @@ object AirVisionProfileBackups {
                 "Single tap ${controls.singleTapAction.label}; double tap ${controls.doubleTapAction.label}; " +
                     "vertical swipe ${controls.swipeAction.label}; horizontal swipe ${controls.horizontalSwipeAction.label}",
                 "Brightness key ${controls.brightnessKeyAction.label}; media key ${controls.mediaKeyAction.label}; " +
+                    "double-tap window ${controls.mediaDoubleTapWindow.label}; " +
                     "custom mic key ${externalHudKeyLabel(controls.customMediaKeyCode)}",
                 "Runtime effective HUD scale ${runtime.effectiveHudScalePercent}%, " +
                     "transcript ${runtime.hudTranscriptEntryCount}, captions ${runtime.hudCaptionEntryCount}",
@@ -326,6 +328,7 @@ object AirVisionProfileBackups {
             horizontalSwipeAction = requireHorizontalSwipeAction(controls.horizontalSwipeAction),
             brightnessKeyAction = requireBrightnessKeyAction(controls.brightnessKeyAction),
             mediaKeyAction = requireMediaKeyAction(controls.mediaKeyAction),
+            mediaDoubleTapWindow = requireMediaDoubleTapWindow(controls.mediaDoubleTapWindow),
             customMediaKeyCode = requireExternalHudKeyCode(controls.customMediaKeyCode),
         )
 
@@ -407,6 +410,10 @@ object AirVisionProfileBackups {
     private fun requireMediaKeyAction(rawValue: String): AirVisionHudMediaKeyAction =
         AirVisionHudMediaKeyAction.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }
             ?: throw IllegalArgumentException("Unsupported AirVision media-key action: $rawValue")
+
+    private fun requireMediaDoubleTapWindow(rawValue: String): ExternalHudDoubleTapWindow =
+        ExternalHudDoubleTapWindow.entries.firstOrNull { it.rawValue == rawValue.trim().lowercase() }
+            ?: throw IllegalArgumentException("Unsupported external HUD double-tap window: $rawValue")
 
     private fun requireExternalHudKeyCode(keyCode: Int?): Int? {
         require(keyCode == null || normalizeExternalHudKeyCode(keyCode) == keyCode) {

@@ -12,6 +12,13 @@ class AirVisionHudKeyInputControllerTest {
             "Tap again within 2 seconds for mic",
             hudKeyCommandFeedback(AirVisionHudKeyCommand.ArmMicDoubleTap),
         )
+        assertEquals(
+            "Tap again within 0.5 seconds for mic",
+            hudKeyCommandFeedback(
+                AirVisionHudKeyCommand.ArmMicDoubleTap,
+                ExternalHudDoubleTapWindow.Quick,
+            ),
+        )
         assertNull(hudKeyCommandFeedback(AirVisionHudKeyCommand.ToggleMic))
         assertNull(hudKeyCommandFeedback(null))
     }
@@ -384,11 +391,20 @@ class AirVisionHudKeyInputControllerTest {
 
     @Test
     fun mediaDoubleTapRespectsTimeout() {
-        val controller = AirVisionHudKeyInputController(doubleTapTimeoutMs = 500L)
+        val controller = AirVisionHudKeyInputController()
 
-        assertEquals(AirVisionHudKeyCommand.ArmMicDoubleTap, controller.handleMicTap(1_000L))
-        assertEquals(AirVisionHudKeyCommand.ArmMicDoubleTap, controller.handleMicTap(1_700L))
-        assertEquals(AirVisionHudKeyCommand.ToggleMic, controller.handleMicTap(2_000L))
+        assertEquals(
+            AirVisionHudKeyCommand.ArmMicDoubleTap,
+            controller.handleMicTap(1_000L, ExternalHudDoubleTapWindow.Quick),
+        )
+        assertEquals(
+            AirVisionHudKeyCommand.ArmMicDoubleTap,
+            controller.handleMicTap(1_700L, ExternalHudDoubleTapWindow.Quick),
+        )
+        assertEquals(
+            AirVisionHudKeyCommand.ToggleMic,
+            controller.handleMicTap(2_000L, ExternalHudDoubleTapWindow.Quick),
+        )
     }
 
     @Test

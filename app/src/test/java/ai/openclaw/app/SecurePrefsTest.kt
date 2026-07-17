@@ -238,6 +238,7 @@ class SecurePrefsTest {
         prefs.setAirVisionHudSwipeAction(AirVisionHudSwipeAction.None)
         prefs.setAirVisionHudBrightnessKeyAction(AirVisionHudKeyAction.AdjustDistance)
         prefs.setAirVisionHudMediaKeyAction(AirVisionHudMediaKeyAction.None)
+        prefs.setExternalHudMediaDoubleTapWindow(ExternalHudDoubleTapWindow.Accessibility)
         prefs.setExternalHudCustomMediaKeyCode(KeyEvent.KEYCODE_BUTTON_MODE)
         prefs.setAirVisionAppLanguage(AirVisionAppLanguage.Spanish)
         prefs.setAirVisionStartupDestination(AirVisionStartupDestination.Voice)
@@ -279,7 +280,16 @@ class SecurePrefsTest {
                 .first { it.jsonObject.getValue("viewMode").jsonPrimitive.content == AirVisionViewMode.Infinity.rawValue }
                 .jsonObject
 
-        assertEquals("7", backupRoot.getValue("version").jsonPrimitive.content)
+        assertEquals("8", backupRoot.getValue("version").jsonPrimitive.content)
+        assertEquals(
+            ExternalHudDoubleTapWindow.Accessibility.rawValue,
+            backupRoot
+                .getValue("hudControls")
+                .jsonObject
+                .getValue("mediaDoubleTapWindow")
+                .jsonPrimitive
+                .content,
+        )
         assertEquals(
             KeyEvent.KEYCODE_BUTTON_MODE,
             backupRoot
@@ -340,6 +350,10 @@ class SecurePrefsTest {
         assertEquals(AirVisionHudSwipeAction.None, importedPrefs.airVisionHudControls.value.swipeAction)
         assertEquals(AirVisionHudKeyAction.AdjustDistance, importedPrefs.airVisionHudControls.value.brightnessKeyAction)
         assertEquals(AirVisionHudMediaKeyAction.None, importedPrefs.airVisionHudControls.value.mediaKeyAction)
+        assertEquals(
+            ExternalHudDoubleTapWindow.Accessibility,
+            importedPrefs.airVisionHudControls.value.mediaDoubleTapWindow,
+        )
         assertEquals(KeyEvent.KEYCODE_BUTTON_MODE, importedPrefs.airVisionHudControls.value.customMediaKeyCode)
         assertEquals(AirVisionAppLanguage.Spanish, importedPrefs.airVisionAppLanguage.value)
         assertEquals(AirVisionStartupDestination.Voice, importedPrefs.airVisionStartupDestination.value)
@@ -425,6 +439,10 @@ class SecurePrefsTest {
         assertEquals(44, prefs.airVisionDisplaySettings.value.brightnessPercent)
         assertEquals(92, prefs.airVisionDisplaySettings.value.distanceCm)
         assertEquals("Walk HUD", prefs.airVisionCustomProfileLabels.value.custom1)
+        assertEquals(
+            ExternalHudDoubleTapWindow.Extended,
+            prefs.airVisionHudControls.value.mediaDoubleTapWindow,
+        )
         assertEquals(true, prefs.speakerEnabled.value)
         assertEquals(false, prefs.nativeCaptionsEnabled.value)
         assertEquals(TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE, prefs.translationCaptionSourceLanguage.value)
@@ -702,6 +720,7 @@ class SecurePrefsTest {
         prefs.setAirVisionHudSwipeAction(AirVisionHudSwipeAction.None)
         prefs.setAirVisionHudBrightnessKeyAction(AirVisionHudKeyAction.AdjustDistance)
         prefs.setAirVisionHudMediaKeyAction(AirVisionHudMediaKeyAction.None)
+        prefs.setExternalHudMediaDoubleTapWindow(ExternalHudDoubleTapWindow.Relaxed)
         prefs.setExternalHudCustomMediaKeyCode(KeyEvent.KEYCODE_F12)
 
         val reloaded = SecurePrefs(context)
@@ -712,6 +731,7 @@ class SecurePrefsTest {
         assertEquals(AirVisionHudSwipeAction.None, controls.swipeAction)
         assertEquals(AirVisionHudKeyAction.AdjustDistance, controls.brightnessKeyAction)
         assertEquals(AirVisionHudMediaKeyAction.None, controls.mediaKeyAction)
+        assertEquals(ExternalHudDoubleTapWindow.Relaxed, controls.mediaDoubleTapWindow)
         assertEquals(KeyEvent.KEYCODE_F12, controls.customMediaKeyCode)
 
         reloaded.setExternalHudCustomMediaKeyCode(KeyEvent.KEYCODE_UNKNOWN)

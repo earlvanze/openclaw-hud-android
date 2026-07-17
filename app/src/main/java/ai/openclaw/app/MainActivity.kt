@@ -693,7 +693,10 @@ class MainActivity : ComponentActivity() {
             when (viewModel.airVisionHudControls.value.mediaKeyAction) {
                 AirVisionHudMediaKeyAction.SingleTapToggleMic -> AirVisionHudKeyCommand.ToggleMic
                 AirVisionHudMediaKeyAction.DoubleTapToggleMic ->
-                    hudKeyInputController.handleMicTap(SystemClock.uptimeMillis())
+                    hudKeyInputController.handleMicTap(
+                        SystemClock.uptimeMillis(),
+                        viewModel.airVisionHudControls.value.mediaDoubleTapWindow,
+                    )
                 AirVisionHudMediaKeyAction.None,
                 AirVisionHudMediaKeyAction.HoldToTalk,
                 -> null
@@ -706,7 +709,10 @@ class MainActivity : ComponentActivity() {
         event: KeyEvent?,
         source: String,
     ) {
-        hudKeyCommandFeedback(command)?.let(viewModel::showHudTransientMessage)
+        hudKeyCommandFeedback(
+            command = command,
+            doubleTapWindow = viewModel.airVisionHudControls.value.mediaDoubleTapWindow,
+        )?.let(viewModel::showHudTransientMessage)
         when (command) {
             is AirVisionHudKeyCommand.ScrollChat -> {
                 viewModel.requestHudScroll(command.deltaPx)

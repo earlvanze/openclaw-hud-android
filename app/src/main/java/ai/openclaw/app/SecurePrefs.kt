@@ -58,6 +58,7 @@ class SecurePrefs(
         private const val AIR_VISION_HUD_HORIZONTAL_SWIPE_ACTION_KEY = "airVision.hud.horizontalSwipeAction"
         private const val AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY = "airVision.hud.brightnessKeyAction"
         private const val AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY = "airVision.hud.mediaKeyAction"
+        private const val EXTERNAL_HUD_MEDIA_DOUBLE_TAP_WINDOW_KEY = "externalHud.input.mediaDoubleTapWindow"
         private const val EXTERNAL_HUD_CUSTOM_MEDIA_KEY_CODE_KEY = "externalHud.input.customMediaKeyCode"
         private const val AIR_VISION_APP_LANGUAGE_KEY = "airVision.app.language"
         private const val AIR_VISION_STARTUP_DESTINATION_KEY = "airVision.app.startupDestination"
@@ -831,6 +832,11 @@ class SecurePrefs(
         _airVisionHudControls.value = _airVisionHudControls.value.copy(mediaKeyAction = action)
     }
 
+    fun setExternalHudMediaDoubleTapWindow(window: ExternalHudDoubleTapWindow) {
+        plainPrefs.edit { putString(EXTERNAL_HUD_MEDIA_DOUBLE_TAP_WINDOW_KEY, window.rawValue) }
+        _airVisionHudControls.value = _airVisionHudControls.value.copy(mediaDoubleTapWindow = window)
+    }
+
     fun setExternalHudCustomMediaKeyCode(keyCode: Int?) {
         val normalized = normalizeExternalHudKeyCode(keyCode)
         plainPrefs.edit {
@@ -941,6 +947,7 @@ class SecurePrefs(
                     horizontalSwipeAction = _airVisionHudControls.value.horizontalSwipeAction.rawValue,
                     brightnessKeyAction = _airVisionHudControls.value.brightnessKeyAction.rawValue,
                     mediaKeyAction = _airVisionHudControls.value.mediaKeyAction.rawValue,
+                    mediaDoubleTapWindow = _airVisionHudControls.value.mediaDoubleTapWindow.rawValue,
                     customMediaKeyCode = _airVisionHudControls.value.customMediaKeyCode,
                 ),
             appPreferences =
@@ -994,6 +1001,7 @@ class SecurePrefs(
             putString(AIR_VISION_HUD_HORIZONTAL_SWIPE_ACTION_KEY, controls.horizontalSwipeAction.rawValue)
             putString(AIR_VISION_HUD_BRIGHTNESS_KEY_ACTION_KEY, controls.brightnessKeyAction.rawValue)
             putString(AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY, controls.mediaKeyAction.rawValue)
+            putString(EXTERNAL_HUD_MEDIA_DOUBLE_TAP_WINDOW_KEY, controls.mediaDoubleTapWindow.rawValue)
             controls.customMediaKeyCode?.let {
                 putInt(EXTERNAL_HUD_CUSTOM_MEDIA_KEY_CODE_KEY, it)
             } ?: remove(EXTERNAL_HUD_CUSTOM_MEDIA_KEY_CODE_KEY)
@@ -1360,6 +1368,10 @@ class SecurePrefs(
             mediaKeyAction =
                 AirVisionHudMediaKeyAction.fromRawValue(
                     plainPrefs.getString(AIR_VISION_HUD_MEDIA_KEY_ACTION_KEY, null),
+                ),
+            mediaDoubleTapWindow =
+                ExternalHudDoubleTapWindow.fromRawValue(
+                    plainPrefs.getString(EXTERNAL_HUD_MEDIA_DOUBLE_TAP_WINDOW_KEY, null),
                 ),
             customMediaKeyCode =
                 normalizeExternalHudKeyCode(

@@ -538,6 +538,10 @@ class MainViewModel(
         prefs.setAirVisionHudMediaKeyAction(action)
     }
 
+    fun setExternalHudMediaDoubleTapWindow(window: ExternalHudDoubleTapWindow) {
+        prefs.setExternalHudMediaDoubleTapWindow(window)
+    }
+
     fun startExternalHudMediaKeyLearning() {
         _externalHudMediaKeyLearning.value = true
         showHudTransientMessage("Press an external HUD button")

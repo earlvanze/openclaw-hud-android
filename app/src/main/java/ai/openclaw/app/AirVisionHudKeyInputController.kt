@@ -2,9 +2,6 @@ package ai.openclaw.app
 
 import android.view.KeyEvent
 
-// M1 firmware can deliver deliberate tap pairs roughly 1.5 seconds apart.
-internal const val HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS = 2_000L
-
 internal sealed interface AirVisionHudKeyCommand {
     data class ScrollChat(
         val deltaPx: Float,
@@ -46,15 +43,17 @@ internal data class AirVisionHudKeyDecision(
     val command: AirVisionHudKeyCommand? = null,
 )
 
-internal fun hudKeyCommandFeedback(command: AirVisionHudKeyCommand?): String? =
+internal fun hudKeyCommandFeedback(
+    command: AirVisionHudKeyCommand?,
+    doubleTapWindow: ExternalHudDoubleTapWindow = ExternalHudDoubleTapWindow.Extended,
+): String? =
     when (command) {
-        AirVisionHudKeyCommand.ArmMicDoubleTap -> "Tap again within 2 seconds for mic"
+        AirVisionHudKeyCommand.ArmMicDoubleTap ->
+            "Tap again within ${doubleTapWindow.durationLabel} for mic"
         else -> null
     }
 
-internal class AirVisionHudKeyInputController(
-    private val doubleTapTimeoutMs: Long = HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS,
-) {
+internal class AirVisionHudKeyInputController {
     private var lastMicTapUptimeMs = 0L
     private var micHoldKeyCode: Int? = null
 
@@ -75,6 +74,7 @@ internal class AirVisionHudKeyInputController(
                 action = action,
                 eventTimeMs = eventTimeMs,
                 mediaKeyAction = controls.mediaKeyAction,
+                doubleTapWindow = controls.mediaDoubleTapWindow,
             )
         }
 
@@ -205,6 +205,7 @@ internal class AirVisionHudKeyInputController(
             action = action,
             eventTimeMs = eventTimeMs,
             mediaKeyAction = controls.mediaKeyAction,
+            doubleTapWindow = controls.mediaDoubleTapWindow,
         )
     }
 
@@ -213,6 +214,7 @@ internal class AirVisionHudKeyInputController(
         action: Int,
         eventTimeMs: Long,
         mediaKeyAction: AirVisionHudMediaKeyAction,
+        doubleTapWindow: ExternalHudDoubleTapWindow,
     ): AirVisionHudKeyDecision {
         if (micHoldKeyCode == keyCode && action == KeyEvent.ACTION_UP) {
             micHoldKeyCode = null
@@ -238,7 +240,7 @@ internal class AirVisionHudKeyInputController(
                 } else if (action == KeyEvent.ACTION_UP) {
                     AirVisionHudKeyDecision(
                         consume = true,
-                        command = handleMicTap(eventTimeMs),
+                        command = handleMicTap(eventTimeMs, doubleTapWindow),
                     )
                 } else {
                     AirVisionHudKeyDecision(consume = false)
@@ -260,9 +262,12 @@ internal class AirVisionHudKeyInputController(
         }
     }
 
-    fun handleMicTap(eventTimeMs: Long): AirVisionHudKeyCommand {
+    fun handleMicTap(
+        eventTimeMs: Long,
+        doubleTapWindow: ExternalHudDoubleTapWindow = ExternalHudDoubleTapWindow.Extended,
+    ): AirVisionHudKeyCommand {
         val elapsedMs = eventTimeMs - lastMicTapUptimeMs
-        if (lastMicTapUptimeMs > 0L && elapsedMs in 1..doubleTapTimeoutMs) {
+        if (lastMicTapUptimeMs > 0L && elapsedMs in 1..doubleTapWindow.timeoutMs) {
             lastMicTapUptimeMs = 0L
             return AirVisionHudKeyCommand.ToggleMic
         }

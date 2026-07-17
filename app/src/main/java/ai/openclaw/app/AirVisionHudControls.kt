@@ -92,6 +92,25 @@ enum class AirVisionHudMediaKeyAction(
     }
 }
 
+enum class ExternalHudDoubleTapWindow(
+    val rawValue: String,
+    val timeoutMs: Long,
+    val label: String,
+    val durationLabel: String,
+) {
+    Quick("quick", 500L, "Quick (0.5 s)", "0.5 seconds"),
+    Standard("standard", 1_000L, "Standard (1 s)", "1 second"),
+    Relaxed("relaxed", 1_500L, "Relaxed (1.5 s)", "1.5 seconds"),
+    Extended("extended", 2_000L, "Extended (2 s)", "2 seconds"),
+    Accessibility("accessibility", 2_500L, "Accessibility (2.5 s)", "2.5 seconds"),
+    ;
+
+    companion object {
+        fun fromRawValue(rawValue: String?): ExternalHudDoubleTapWindow =
+            entries.firstOrNull { it.rawValue == rawValue?.trim()?.lowercase() } ?: Extended
+    }
+}
+
 data class AirVisionHudControls(
     val singleTapAction: AirVisionHudTouchAction = AirVisionHudTouchAction.OpenNotification,
     val doubleTapAction: AirVisionHudDoubleTapAction = AirVisionHudDoubleTapAction.ToggleMic,
@@ -100,6 +119,7 @@ data class AirVisionHudControls(
         AirVisionHudHorizontalSwipeAction.BrowseNotifications,
     val brightnessKeyAction: AirVisionHudKeyAction = AirVisionHudKeyAction.ScrollChat,
     val mediaKeyAction: AirVisionHudMediaKeyAction = AirVisionHudMediaKeyAction.DoubleTapToggleMic,
+    val mediaDoubleTapWindow: ExternalHudDoubleTapWindow = ExternalHudDoubleTapWindow.Extended,
     val customMediaKeyCode: Int? = null,
 )
 

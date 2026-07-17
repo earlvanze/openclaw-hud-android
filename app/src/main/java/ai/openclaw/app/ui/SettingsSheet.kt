@@ -27,6 +27,7 @@ import ai.openclaw.app.AirVisionStartupDestination
 import ai.openclaw.app.AirVisionSupportMetadata
 import ai.openclaw.app.AirVisionViewMode
 import ai.openclaw.app.BuildConfig
+import ai.openclaw.app.ExternalHudDoubleTapWindow
 import ai.openclaw.app.LocationMode
 import ai.openclaw.app.MainViewModel
 import ai.openclaw.app.NotificationPackageFilterMode
@@ -1718,6 +1719,23 @@ fun SettingsSheet(viewModel: MainViewModel) {
                         optionLabel = { it.label },
                         optionDescription = ::airVisionMediaKeyActionDescription,
                         onSelected = viewModel::setAirVisionHudMediaKeyAction,
+                    )
+                    HorizontalDivider(color = mobileBorder)
+                    AirVisionOptionGroup(
+                        title = "Double-tap Window",
+                        currentLabel = airVisionHudControls.mediaDoubleTapWindow.label,
+                        supportingText = "Sets how long compatible external accessories have to complete a mic double tap.",
+                        options = ExternalHudDoubleTapWindow.entries.toList(),
+                        selected = airVisionHudControls.mediaDoubleTapWindow,
+                        optionLabel = { it.label },
+                        optionDescription = { window ->
+                            if (window == ExternalHudDoubleTapWindow.Extended) {
+                                "Default timing for compatible external accessories."
+                            } else {
+                                "Accept a second tap within ${window.durationLabel}."
+                            }
+                        },
+                        onSelected = viewModel::setExternalHudMediaDoubleTapWindow,
                     )
                     HorizontalDivider(color = mobileBorder)
                     ListItem(

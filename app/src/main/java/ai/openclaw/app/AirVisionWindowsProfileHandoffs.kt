@@ -276,12 +276,14 @@ object AirVisionWindowsProfileHandoffs {
         add("- Swipe: ${AirVisionHudSwipeAction.fromRawValue(controls.swipeAction).label}")
         add("- Brightness key: ${AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction).label}")
         add("- Media key: ${AirVisionHudMediaKeyAction.fromRawValue(controls.mediaKeyAction).label}")
+        add("- Media double-tap window: ${ExternalHudDoubleTapWindow.fromRawValue(controls.mediaDoubleTapWindow).label}")
         add("- Custom mic key: ${externalHudKeyLabel(controls.customMediaKeyCode)}")
     }
 
     private fun MutableList<String>.addHardwareKeyMapping(controls: AirVisionBackupHudControls) {
         val brightnessKeyAction = AirVisionHudKeyAction.fromRawValue(controls.brightnessKeyAction)
         val mediaKeyAction = AirVisionHudMediaKeyAction.fromRawValue(controls.mediaKeyAction)
+        val mediaDoubleTapWindow = ExternalHudDoubleTapWindow.fromRawValue(controls.mediaDoubleTapWindow)
         add("- Brightness key action: ${brightnessKeyAction.label}")
         add("- Brightness key consumed by Android: ${yesNo(brightnessKeyAction != AirVisionHudKeyAction.None)}")
         add(
@@ -298,7 +300,7 @@ object AirVisionWindowsProfileHandoffs {
         add(
             "- Media key double-tap window: " +
                 if (mediaKeyAction == AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
-                    "$HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS ms"
+                    "${mediaDoubleTapWindow.timeoutMs} ms (${mediaDoubleTapWindow.label})"
                 } else {
                     "not used"
                 },
@@ -512,6 +514,7 @@ object AirVisionWindowsProfileHandoffs {
             horizontalSwipeAction = AirVisionHudHorizontalSwipeAction.fromRawValue(horizontalSwipeAction),
             brightnessKeyAction = AirVisionHudKeyAction.fromRawValue(brightnessKeyAction),
             mediaKeyAction = AirVisionHudMediaKeyAction.fromRawValue(mediaKeyAction),
+            mediaDoubleTapWindow = ExternalHudDoubleTapWindow.fromRawValue(mediaDoubleTapWindow),
             customMediaKeyCode = normalizeExternalHudKeyCode(customMediaKeyCode),
         )
 

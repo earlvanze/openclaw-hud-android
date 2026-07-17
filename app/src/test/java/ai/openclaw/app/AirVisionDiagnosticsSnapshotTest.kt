@@ -417,9 +417,9 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("false", hudRuntime.getValue("usedNonDefaultDisplayFallback").jsonPrimitive.content)
         assertEquals("selected_presentation_display", hudRuntime.getValue("displayRouteReason").jsonPrimitive.content)
         assertEquals("openclaw.airvision.m1.profile-backup", profileBackup.getValue("schema").jsonPrimitive.content)
-        assertEquals("7", profileBackup.getValue("currentVersion").jsonPrimitive.content)
+        assertEquals("8", profileBackup.getValue("currentVersion").jsonPrimitive.content)
         assertEquals(
-            listOf("1", "2", "3", "4", "5", "6", "7"),
+            listOf("1", "2", "3", "4", "5", "6", "7", "8"),
             profileBackup.getValue("supportedVersions").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals("working", profileBackup.getValue("activeViewMode").jsonPrimitive.content)
@@ -515,7 +515,7 @@ class AirVisionDiagnosticsSnapshotTest {
             profileBackup.getValue("restoreScope").jsonArray.map { it.jsonPrimitive.content },
         )
         assertEquals(
-            "profile backup v7: 5/5 profiles, 5 runtime profiles, HUD controls and app preferences included.",
+            "profile backup v8: 5/5 profiles, 5 runtime profiles, HUD controls and app preferences included.",
             profileBackup.getValue("summary").jsonPrimitive.content,
         )
         assertEquals("67", fitAndClarity.getValue("ipdMm").jsonPrimitive.content)
@@ -707,7 +707,7 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals(
             "single tap Dismiss notification, double tap Toggle mic, vertical swipe Scroll chat, " +
                 "horizontal swipe Browse notifications, brightness key Scroll chat, media key Double-tap mic, " +
-                "custom mic key Built-in accessory keys",
+                "double-tap window Extended (2 s), custom mic key Built-in accessory keys",
             gestureApply.getValue("androidEffect").jsonPrimitive.content,
         )
         assertEquals("Cursor Follow, Center Cursor, 3DoF, or Unity mirror when needed", spatialApply.getValue("windowsAppTarget").jsonPrimitive.content)
@@ -724,7 +724,8 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("false", hardwareKeyMapping.getValue("firmwareBrightnessPassthroughPossible").jsonPrimitive.content)
         assertEquals(
             "M1 brightness keys: Scroll chat; brightness keys scroll the HUD chat transcript; " +
-                "media key Double-tap mic; custom mic key Built-in accessory keys.",
+                "media key Double-tap mic; double-tap window Extended (2 s); " +
+                "custom mic key Built-in accessory keys.",
             hardwareKeyMapping.getValue("summary").jsonPrimitive.content,
         )
         assertEquals("7", windowsGestureCatalog.getValue("itemCount").jsonPrimitive.content)
@@ -1288,7 +1289,8 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("false", hardwareKeyMapping.getValue("firmwareBrightnessPassthroughPossible").jsonPrimitive.content)
         assertEquals(
             "M1 brightness keys: Adjust brightness; brightness keys step Android HUD dimming by 5%; " +
-                "media key Double-tap mic; custom mic key Built-in accessory keys.",
+                "media key Double-tap mic; double-tap window Extended (2 s); " +
+                "custom mic key Built-in accessory keys.",
             hardwareKeyMapping.getValue("summary").jsonPrimitive.content,
         )
     }
@@ -1320,6 +1322,7 @@ class AirVisionDiagnosticsSnapshotTest {
         assertEquals("hold_to_talk", hardwareKeyMapping.getValue("mediaKeyAction").jsonPrimitive.content)
         assertEquals("Hold to talk", hardwareKeyMapping.getValue("mediaKeyLabel").jsonPrimitive.content)
         assertEquals("0", hardwareKeyMapping.getValue("mediaKeyDoubleTapTimeoutMs").jsonPrimitive.content)
+        assertFalse(hardwareKeyMapping.getValue("summary").jsonPrimitive.content.contains("double-tap window"))
         assertEquals(
             "mapped to focused HUD accessory hold-to-talk behavior",
             mediaGesture.getValue("androidStatus").jsonPrimitive.content,

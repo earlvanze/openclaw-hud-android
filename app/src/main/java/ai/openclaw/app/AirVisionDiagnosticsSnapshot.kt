@@ -772,6 +772,8 @@ object AirVisionDiagnosticsSnapshots {
                     horizontalSwipeAction = hudControls.horizontalSwipeAction.rawValue,
                     brightnessKeyAction = hudControls.brightnessKeyAction.rawValue,
                     mediaKeyAction = hudControls.mediaKeyAction.rawValue,
+                    mediaDoubleTapWindow = hudControls.mediaDoubleTapWindow.rawValue,
+                    customMediaKeyCode = hudControls.customMediaKeyCode,
                 ),
             appPreferences =
                 AirVisionBackupAppPreferences(
@@ -913,6 +915,12 @@ object AirVisionDiagnosticsSnapshots {
                 AirVisionHudKeyAction.AdjustBrightness -> "brightness keys step Android HUD dimming by 5%"
                 AirVisionHudKeyAction.AdjustDistance -> "brightness keys step virtual projection distance by 5 cm"
             }
+        val doubleTapWindowSummary =
+            if (controls.mediaKeyAction == AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
+                "double-tap window ${controls.mediaDoubleTapWindow.label}; "
+            } else {
+                ""
+            }
         return AirVisionDiagnosticsHardwareKeyMapping(
             brightnessKeyAction = controls.brightnessKeyAction.rawValue,
             brightnessKeyLabel = controls.brightnessKeyAction.label,
@@ -939,7 +947,7 @@ object AirVisionDiagnosticsSnapshots {
             mediaKeyLabel = controls.mediaKeyAction.label,
             mediaKeyDoubleTapTimeoutMs =
                 if (controls.mediaKeyAction == AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
-                    HUD_MEDIA_KEY_DOUBLE_TAP_TIMEOUT_MS
+                    controls.mediaDoubleTapWindow.timeoutMs
                 } else {
                     0L
                 },
@@ -948,7 +956,7 @@ object AirVisionDiagnosticsSnapshots {
             firmwareBrightnessPassthroughPossible = firmwarePassthrough,
             summary =
                 "M1 brightness keys: ${controls.brightnessKeyAction.label}; $effect; " +
-                    "media key ${controls.mediaKeyAction.label}; " +
+                    "media key ${controls.mediaKeyAction.label}; $doubleTapWindowSummary" +
                     "custom mic key ${externalHudKeyLabel(controls.customMediaKeyCode)}.",
         )
     }
@@ -1069,6 +1077,11 @@ object AirVisionDiagnosticsSnapshots {
                             "vertical swipe ${controls.swipeAction.label}, horizontal swipe ${controls.horizontalSwipeAction.label}, " +
                             "brightness key ${controls.brightnessKeyAction.label}, " +
                             "media key ${controls.mediaKeyAction.label}, " +
+                            if (controls.mediaKeyAction == AirVisionHudMediaKeyAction.DoubleTapToggleMic) {
+                                "double-tap window ${controls.mediaDoubleTapWindow.label}, "
+                            } else {
+                                ""
+                            } +
                             "custom mic key ${externalHudKeyLabel(controls.customMediaKeyCode)}",
                     liveM1ProofRequired = true,
                     firmwareGate = "none",
