@@ -1,5 +1,5 @@
 OpenClaw HUD:
-- Switch agents on the external HUD; locked during runs and approvals.
+- Switch recent sessions and agents on the external HUD; locked during runs and approvals.
 - Deny or allow execution once; global approvals require admin scope.
 - external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.
 - M1 tap and swipe support uses the capability-driven input path in External HUD Input.

@@ -17,6 +17,7 @@ import ai.openclaw.app.TranslationCaptionMode
 import ai.openclaw.app.airVisionHudDoubleTapCommand
 import ai.openclaw.app.airVisionHudSingleTapCommand
 import ai.openclaw.app.chat.ChatMessage
+import ai.openclaw.app.chat.ChatSessionEntry
 import ai.openclaw.app.hudChatAbortRequestMessage
 import ai.openclaw.app.hudNotificationOpenResultMessage
 import ai.openclaw.app.hudNotificationReplyResultMessage
@@ -24,6 +25,8 @@ import ai.openclaw.app.node.ExecApprovalDecision
 import ai.openclaw.app.node.ExecApprovalRequest
 import ai.openclaw.app.openNativeCaptionSettings
 import ai.openclaw.app.resolveAgentIdFromMainSessionKey
+import ai.openclaw.app.ui.chat.friendlySessionName
+import ai.openclaw.app.ui.chat.resolveSessionChoices
 import ai.openclaw.app.voice.VoiceConversationEntry
 import ai.openclaw.app.voice.VoiceConversationRole
 import androidx.compose.animation.core.animateFloatAsState
@@ -57,6 +60,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.AlertDialog
@@ -111,6 +115,7 @@ private val hudApprovalDanger = Color(0xFFFF5C5C)
 private val hudApprovalAllow = Color(0xFF4DD0E1)
 private val hudApprovalBackground = Color(0xFF190707)
 private const val HUD_FRAME_MORPH_DURATION_MS = 320
+private const val HUD_SESSION_PICKER_LIMIT = 8
 
 @Composable
 fun HudScreen(viewModel: MainViewModel) {
@@ -123,6 +128,8 @@ fun HudScreen(viewModel: MainViewModel) {
     val mainSessionKey by viewModel.mainSessionKey.collectAsState()
     val gatewayAgents by viewModel.gatewayAgents.collectAsState()
     val gatewayDefaultAgentId by viewModel.gatewayDefaultAgentId.collectAsState()
+    val chatSessionKey by viewModel.chatSessionKey.collectAsState()
+    val chatSessions by viewModel.chatSessions.collectAsState()
     val messages by viewModel.chatMessages.collectAsState()
     val healthOk by viewModel.chatHealthOk.collectAsState()
     val thinkingLevel by viewModel.chatThinkingLevel.collectAsState()
@@ -307,19 +314,32 @@ fun HudScreen(viewModel: MainViewModel) {
     val warning = !airVisionDemoModeEnabled && (chatError != null || (!isConnected && !isNodeConnected))
     val activeAgentId = hudActiveAgentId(mainSessionKey, gatewayDefaultAgentId)
     val activeAgent = gatewayAgents.firstOrNull { it.id == activeAgentId } ?: gatewayAgents.firstOrNull()
+    val sessionChoices =
+        remember(chatSessionKey, chatSessions, mainSessionKey) {
+            hudSessionChoices(
+                currentSessionKey = chatSessionKey,
+                sessions = chatSessions,
+                mainSessionKey = mainSessionKey,
+            )
+        }
+    val activeSession = sessionChoices.firstOrNull { it.key == chatSessionKey }
+    val activeSessionLabel = hudSessionLabel(activeSession ?: ChatSessionEntry(key = chatSessionKey, updatedAtMs = null))
     val sessionLine =
         if (airVisionDemoModeEnabled) {
             "hud demo / session hud / mic listening"
         } else {
             hudSessionText(
-                mainSessionKey = mainSessionKey,
+                sessionLabel = activeSessionLabel,
                 pendingRunCount = pendingRunCount,
                 pendingToolCalls = pendingToolCalls.map { it.name },
                 healthOk = healthOk,
                 micStatusText = micStatusText,
                 micInputLevel = micInputLevel,
                 micEnabled = micEnabled,
-            ) ?: activeAgent?.let { "agent ${hudAgentLabel(it)}" }
+            ) ?: listOfNotNull(
+                "session $activeSessionLabel",
+                activeAgent?.let { "agent ${hudAgentLabel(it)}" },
+            ).joinToString(" / ")
         }
     val hudScale =
         (
@@ -594,25 +614,37 @@ fun HudScreen(viewModel: MainViewModel) {
                     }
                 }
 
-                sessionLine?.let { line ->
-                    HudSessionLine(
-                        text = line,
-                        agents = gatewayAgents,
-                        activeAgentId = activeAgentId,
-                        pickerEnabled =
-                            hudAgentPickerEnabled(
-                                isConnected = isConnected,
-                                agentCount = gatewayAgents.size,
-                                pendingRunCount = pendingRunCount,
-                                hasPendingExecApproval = pendingExecApproval != null,
-                            ),
-                        onRefresh = viewModel::refreshGatewayAgents,
-                        onSelectAgent = { agent ->
-                            viewModel.selectAgent(agent.id)
-                            viewModel.showHudTransientMessage("Agent: ${hudAgentLabel(agent)}")
-                        },
-                    )
-                }
+                HudSessionLine(
+                    text = sessionLine,
+                    sessions = sessionChoices,
+                    activeSessionKey = chatSessionKey,
+                    sessionPickerEnabled =
+                        hudSessionPickerEnabled(
+                            isConnected = isConnected && !airVisionDemoModeEnabled,
+                            sessionCount = sessionChoices.size,
+                            pendingRunCount = pendingRunCount,
+                            hasPendingExecApproval = pendingExecApproval != null,
+                        ),
+                    agents = gatewayAgents,
+                    activeAgentId = activeAgentId,
+                    agentPickerEnabled =
+                        hudAgentPickerEnabled(
+                            isConnected = isConnected && !airVisionDemoModeEnabled,
+                            agentCount = gatewayAgents.size,
+                            pendingRunCount = pendingRunCount,
+                            hasPendingExecApproval = pendingExecApproval != null,
+                        ),
+                    onRefreshSessions = { viewModel.refreshChatSessions(limit = 20) },
+                    onSelectSession = { session ->
+                        viewModel.switchChatSession(session.key)
+                        viewModel.showHudTransientMessage("Session: ${hudSessionLabel(session)}")
+                    },
+                    onRefreshAgents = viewModel::refreshGatewayAgents,
+                    onSelectAgent = { agent ->
+                        viewModel.selectAgent(agent.id)
+                        viewModel.showHudTransientMessage("Agent: ${hudAgentLabel(agent)}")
+                    },
+                )
             }
 
             HudChatInputBar(
@@ -701,15 +733,24 @@ fun HudScreen(viewModel: MainViewModel) {
 @Composable
 private fun HudSessionLine(
     text: String,
+    sessions: List<ChatSessionEntry>,
+    activeSessionKey: String,
+    sessionPickerEnabled: Boolean,
     agents: List<GatewayAgentSummary>,
     activeAgentId: String?,
-    pickerEnabled: Boolean,
-    onRefresh: () -> Unit,
+    agentPickerEnabled: Boolean,
+    onRefreshSessions: () -> Unit,
+    onSelectSession: (ChatSessionEntry) -> Unit,
+    onRefreshAgents: () -> Unit,
     onSelectAgent: (GatewayAgentSummary) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    LaunchedEffect(pickerEnabled, agents) {
-        if (!pickerEnabled) expanded = false
+    var sessionsExpanded by remember { mutableStateOf(false) }
+    var agentsExpanded by remember { mutableStateOf(false) }
+    LaunchedEffect(sessionPickerEnabled, sessions) {
+        if (!sessionPickerEnabled) sessionsExpanded = false
+    }
+    LaunchedEffect(agentPickerEnabled, agents) {
+        if (!agentPickerEnabled) agentsExpanded = false
     }
 
     Row(
@@ -724,26 +765,83 @@ private fun HudSessionLine(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+        if (sessions.size > 1) {
+            Box {
+                IconButton(
+                    onClick = {
+                        agentsExpanded = false
+                        onRefreshSessions()
+                        sessionsExpanded = true
+                    },
+                    enabled = sessionPickerEnabled,
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.History,
+                        contentDescription = "Switch OpenClaw session",
+                        modifier = Modifier.size(20.dp),
+                        tint = if (sessionPickerEnabled) hudSecondary else hudMuted,
+                    )
+                }
+                DropdownMenu(
+                    expanded = sessionsExpanded,
+                    onDismissRequest = { sessionsExpanded = false },
+                    modifier = Modifier.widthIn(min = 180.dp, max = 320.dp),
+                    containerColor = hudBackground,
+                    tonalElevation = 0.dp,
+                    shadowElevation = 6.dp,
+                ) {
+                    sessions.forEach { session ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = hudSessionLabel(session),
+                                    style = hudReadableTextStyle,
+                                    color = hudText,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                            onClick = {
+                                sessionsExpanded = false
+                                onSelectSession(session)
+                            },
+                            trailingIcon = {
+                                if (session.key == activeSessionKey) {
+                                    Icon(
+                                        imageVector = Icons.Filled.CheckCircle,
+                                        contentDescription = "Active session",
+                                        modifier = Modifier.size(18.dp),
+                                        tint = hudAccent,
+                                    )
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+        }
         if (agents.size > 1) {
             Box {
                 IconButton(
                     onClick = {
-                        onRefresh()
-                        expanded = true
+                        sessionsExpanded = false
+                        onRefreshAgents()
+                        agentsExpanded = true
                     },
-                    enabled = pickerEnabled,
+                    enabled = agentPickerEnabled,
                     modifier = Modifier.size(36.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Filled.ManageAccounts,
                         contentDescription = "Switch OpenClaw agent",
                         modifier = Modifier.size(20.dp),
-                        tint = if (pickerEnabled) hudSecondary else hudMuted,
+                        tint = if (agentPickerEnabled) hudSecondary else hudMuted,
                     )
                 }
                 DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
+                    expanded = agentsExpanded,
+                    onDismissRequest = { agentsExpanded = false },
                     modifier = Modifier.widthIn(min = 180.dp, max = 300.dp),
                     containerColor = hudBackground,
                     tonalElevation = 0.dp,
@@ -761,7 +859,7 @@ private fun HudSessionLine(
                                 )
                             },
                             onClick = {
-                                expanded = false
+                                agentsExpanded = false
                                 onSelectAgent(agent)
                             },
                             trailingIcon = {
@@ -793,6 +891,39 @@ internal fun hudAgentPickerEnabled(
     pendingRunCount: Int,
     hasPendingExecApproval: Boolean,
 ): Boolean = isConnected && agentCount > 1 && pendingRunCount == 0 && !hasPendingExecApproval
+
+internal fun hudSessionPickerEnabled(
+    isConnected: Boolean,
+    sessionCount: Int,
+    pendingRunCount: Int,
+    hasPendingExecApproval: Boolean,
+): Boolean = isConnected && sessionCount > 1 && pendingRunCount == 0 && !hasPendingExecApproval
+
+internal fun hudSessionChoices(
+    currentSessionKey: String,
+    sessions: List<ChatSessionEntry>,
+    mainSessionKey: String,
+    nowMs: Long = System.currentTimeMillis(),
+): List<ChatSessionEntry> {
+    val resolved =
+        resolveSessionChoices(
+            currentSessionKey = currentSessionKey,
+            sessions = sessions,
+            mainSessionKey = mainSessionKey,
+            nowMs = nowMs,
+        )
+    if (resolved.size <= HUD_SESSION_PICKER_LIMIT) return resolved
+
+    val compact = resolved.take(HUD_SESSION_PICKER_LIMIT).toMutableList()
+    val active = resolved.firstOrNull { it.key == currentSessionKey.trim() }
+    if (active != null && compact.none { it.key == active.key }) {
+        compact[compact.lastIndex] = active
+    }
+    return compact
+}
+
+internal fun hudSessionLabel(session: ChatSessionEntry): String =
+    friendlySessionName(session.displayName?.trim()?.takeIf { it.isNotEmpty() } ?: session.key)
 
 internal fun hudAgentLabel(agent: GatewayAgentSummary): String {
     val name = agent.name?.trim()?.takeIf { it.isNotEmpty() } ?: agent.id
@@ -1485,7 +1616,7 @@ private val hudCompactTextStyle: TextStyle =
     )
 
 private fun hudSessionText(
-    mainSessionKey: String,
+    sessionLabel: String,
     pendingRunCount: Int,
     pendingToolCalls: List<String>,
     healthOk: Boolean,
@@ -1502,7 +1633,7 @@ private fun hudSessionText(
         }
     val tool = pendingToolCalls.firstOrNull()?.take(24)?.let { "tool $it" }
     val mic = if (micInputLevel > 0.12f) "$micStatusText listening" else micStatusText.takeIf { micEnabled }
-    return listOfNotNull(gateway, tool, "session ${mainSessionKey.shortSessionLabel()}", mic).joinToString(" / ")
+    return listOfNotNull(gateway, tool, "session $sessionLabel", mic).joinToString(" / ")
 }
 
 private fun hudRunningLine(
