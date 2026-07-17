@@ -1402,7 +1402,12 @@ fun SettingsSheet(viewModel: MainViewModel) {
                     HorizontalDivider(color = mobileBorder)
                     AirVisionOptionGroup(
                         title = "HUD Frame Shape",
-                        currentLabel = airVisionDisplaySettings.hudFrameShape.label,
+                        currentLabel =
+                            airVisionHudFrameShapeLabel(
+                                shape = airVisionDisplaySettings.hudFrameShape,
+                                displayWidth = airVisionHudDisplayRoute.selectedCandidate?.widthPx ?: 0,
+                                displayHeight = airVisionHudDisplayRoute.selectedCandidate?.heightPx ?: 0,
+                            ),
                         supportingText =
                             "Morphs the usable HUD canvas without changing the external display resolution. Saved with this viewing mode.",
                         options = AirVisionHudFrameShape.entries.toList(),
@@ -2859,11 +2864,22 @@ private fun airVisionHudPlacementDescription(placement: AirVisionHudPlacement): 
 
 private fun airVisionHudFrameShapeDescription(shape: AirVisionHudFrameShape): String =
     when (shape) {
+        AirVisionHudFrameShape.Adaptive -> "Matches the frame to the selected display's aspect ratio."
         AirVisionHudFrameShape.Full -> "Uses the full-height canvas for dense dashboards and long transcripts."
         AirVisionHudFrameShape.Wide -> "Uses a wide, moderately shallow canvas for balanced HUD work."
         AirVisionHudFrameShape.Compact -> "Concentrates controls and status near the selected placement."
         AirVisionHudFrameShape.Panoramic -> "Uses a low panoramic strip for distant, low-distraction overlays."
     }
+
+private fun airVisionHudFrameShapeLabel(
+    shape: AirVisionHudFrameShape,
+    displayWidth: Int,
+    displayHeight: Int,
+): String {
+    if (shape != AirVisionHudFrameShape.Adaptive) return shape.label
+    val effective = AirVisionDisplaySettings.effectiveHudFrameShape(shape, displayWidth, displayHeight)
+    return "${shape.label} -> ${effective.label}"
+}
 
 private fun airVisionHudDisplayTargetDescription(
     target: AirVisionHudDisplayTarget,

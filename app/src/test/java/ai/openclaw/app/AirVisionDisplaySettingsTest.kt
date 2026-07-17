@@ -136,10 +136,43 @@ class AirVisionDisplaySettingsTest {
 
     @Test
     fun hudFrameShape_parsesSavedValuesAndUsesExplicitFallback() {
+        assertEquals(AirVisionHudFrameShape.Adaptive, AirVisionHudFrameShape.fromRawValue("ADAPTIVE"))
         assertEquals(AirVisionHudFrameShape.Full, AirVisionHudFrameShape.fromRawValue("FULL"))
         assertEquals(
             AirVisionHudFrameShape.Panoramic,
             AirVisionHudFrameShape.fromRawValue("unknown", fallback = AirVisionHudFrameShape.Panoramic),
+        )
+    }
+
+    @Test
+    fun adaptiveHudFrameShape_mapsExternalDisplayAspectRatios() {
+        assertEquals(
+            AirVisionHudFrameShape.Compact,
+            AirVisionDisplaySettings.effectiveHudFrameShape(AirVisionHudFrameShape.Adaptive, 800, 1280),
+        )
+        assertEquals(
+            AirVisionHudFrameShape.Full,
+            AirVisionDisplaySettings.effectiveHudFrameShape(AirVisionHudFrameShape.Adaptive, 1200, 1200),
+        )
+        assertEquals(
+            AirVisionHudFrameShape.Wide,
+            AirVisionDisplaySettings.effectiveHudFrameShape(AirVisionHudFrameShape.Adaptive, 1920, 1080),
+        )
+        assertEquals(
+            AirVisionHudFrameShape.Panoramic,
+            AirVisionDisplaySettings.effectiveHudFrameShape(AirVisionHudFrameShape.Adaptive, 2560, 1080),
+        )
+    }
+
+    @Test
+    fun effectiveHudFrameShape_preservesExplicitChoiceAndUsesSafeAdaptiveFallback() {
+        assertEquals(
+            AirVisionHudFrameShape.Compact,
+            AirVisionDisplaySettings.effectiveHudFrameShape(AirVisionHudFrameShape.Compact, 2560, 1080),
+        )
+        assertEquals(
+            AirVisionHudFrameShape.Wide,
+            AirVisionDisplaySettings.effectiveHudFrameShape(AirVisionHudFrameShape.Adaptive, 0, 0),
         )
     }
 

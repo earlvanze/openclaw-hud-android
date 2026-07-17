@@ -79,6 +79,7 @@ enum class AirVisionHudFrameShape(
     val rawValue: String,
     val label: String,
 ) {
+    Adaptive("adaptive", "Adaptive"),
     Full("full", "Full"),
     Wide("wide", "Wide"),
     Compact("compact", "Compact"),
@@ -260,6 +261,23 @@ data class AirVisionDisplaySettings(
         fun isWithinAsusIpdRange(value: Int): Boolean = value in MIN_ASUS_IPD_MM..MAX_ASUS_IPD_MM
 
         fun normalizeSafeAreaPercent(value: Int): Int = value.coerceIn(MIN_SAFE_AREA_PERCENT, MAX_SAFE_AREA_PERCENT)
+
+        fun effectiveHudFrameShape(
+            requested: AirVisionHudFrameShape,
+            displayWidth: Int,
+            displayHeight: Int,
+        ): AirVisionHudFrameShape {
+            if (requested != AirVisionHudFrameShape.Adaptive) return requested
+            if (displayWidth <= 0 || displayHeight <= 0) return AirVisionHudFrameShape.Wide
+
+            val aspectRatio = displayWidth.toFloat() / displayHeight.toFloat()
+            return when {
+                aspectRatio >= 2.2f -> AirVisionHudFrameShape.Panoramic
+                aspectRatio >= 1.3f -> AirVisionHudFrameShape.Wide
+                aspectRatio >= 0.85f -> AirVisionHudFrameShape.Full
+                else -> AirVisionHudFrameShape.Compact
+            }
+        }
 
         fun hudScaleForDistanceCm(value: Int): Float {
             val normalized = normalizeDistanceCm(value)

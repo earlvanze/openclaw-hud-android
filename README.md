@@ -48,6 +48,7 @@ Current live target:
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
 - [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
 - [x] Per-mode external HUD profiles with viewing mode, animated frame shape,
+  adaptive portrait/square/landscape/ultra-wide framing,
   placement, safe area, Splendid mode, brightness, blue-light filter, distance, HUD scale, IPD,
   Motion Sync, 3D Mode, Light Load, and active-profile reset controls
 - [x] Optional AirVision M1 USB firmware-link detection, permission flow, and
@@ -192,7 +193,7 @@ Generic controls live first in Settings -> External Display HUD. Optional AirVis
 
 | Windows AirVision feature | Android HUD status |
 | --- | --- |
-| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with distinct Wide, Compact, and Panoramic frame defaults, animated frame morphing on any Android Presentation display, explicit Full/Wide/Compact/Panoramic overrides, user-named Custom 1 / Custom 2 labels, copy-current-to-custom actions, JSON profile backup/import, active-profile reset, HUD placement, physical main screen behavior, safe area, explicit HUD scale/zoom, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
+| Working / Gaming / Infinity / Custom modes | Implemented as saved HUD profile slots with distinct Wide, Compact, and Panoramic frame defaults, animated frame morphing on any Android Presentation display, adaptive portrait/square/landscape/ultra-wide framing, explicit Full/Wide/Compact/Panoramic overrides, user-named Custom 1 / Custom 2 labels, copy-current-to-custom actions, JSON profile backup/import, active-profile reset, HUD placement, physical main screen behavior, safe area, explicit HUD scale/zoom, brightness, distance, IPD, Splendid, Eye Care, Motion Sync, and Light Load values. |
 | Brightness | Implemented as software HUD dimming. Hardware brightness remains available from the M1 touch bar. |
 | Screen distance | Implemented as virtual HUD distance scaling. |
 | HUD scale / zoom | Implemented as a per-profile Android Presentation scale percentage layered with view-mode and virtual-distance scaling. |

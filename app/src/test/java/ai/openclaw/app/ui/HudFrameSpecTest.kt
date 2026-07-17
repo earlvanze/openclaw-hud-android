@@ -30,4 +30,12 @@ class HudFrameSpecTest {
             assertTrue(spec.paddingScale in 0f..1f)
         }
     }
+
+    @Test
+    fun unresolvedAdaptiveFrameUsesWideFallback() {
+        assertEquals(
+            hudFrameSpec(AirVisionHudFrameShape.Wide),
+            hudFrameSpec(AirVisionHudFrameShape.Adaptive),
+        )
+    }
 }

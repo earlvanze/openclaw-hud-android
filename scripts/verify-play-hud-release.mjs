@@ -356,6 +356,7 @@ async function verifyListing(listingDir, language) {
     "per-feature firmware-apply readiness",
     "desired firmware-sync state",
     "protocol-capture targets",
+    "adaptive or explicit Full/Wide/Compact/Panoramic frame shapes",
   ]);
   requireIncludes("Release notes", releaseNotes, [
     "external touchscreens, touchpads, mice, styli, and trackballs",
@@ -368,6 +369,7 @@ async function verifyListing(listingDir, language) {
     "display pinning",
     "frame-shape morphing",
     "Learn any external accessory button",
+    "Adaptive frames fit portrait, square, landscape, and ultra-wide displays",
   ]);
 
   return {

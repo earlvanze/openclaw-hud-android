@@ -54,15 +54,16 @@ const validListingFiles = {
     "OpenClaw HUD uses Android Presentation with USB-C and wireless displays, including Samsung DeX on foldable Android phones and AirVision M1.",
     "Remembered-display pinning survives Android display-ID changes.",
     "Capability-driven input supports external touchscreens, rotary controls, joystick/hat axes, and custom accessory-key learning.",
+    "Profiles include adaptive or explicit Full/Wide/Compact/Panoramic frame shapes.",
     "It includes HID report-path summaries, per-feature firmware-apply readiness, desired firmware-sync state, and protocol-capture targets.",
   ].join("\n"),
   "release-notes.txt": [
-    "Route external touchscreens, touchpads, mice, styli, and trackballs to the HUD.",
-    "- Scroll with wheels, rotary controls, DPAD/Page keys, gamepads, and normalized joystick or hat axes.",
-    "- Keep M1 tap and swipe support through the same capability-driven input path.",
-    "- Configure gestures and accessory keys under External HUD Input.",
-    "- Keep Presentation recovery, display pinning, and frame-shape morphing.",
+    "OpenClaw HUD:",
+    "- Adaptive frames fit portrait, square, landscape, and ultra-wide displays.",
+    "- external touchscreens, touchpads, mice, styli, and trackballs; wheels, rotary controls, DPAD/Page keys, gamepads; normalized joystick or hat axes.",
+    "- M1 tap and swipe support uses the root capability-driven input path in External HUD Input.",
     "- Learn any external accessory button as a custom mic key.",
+    "- Presentation recovery, display pinning, frame-shape morphing, in-app privacy policy.",
   ].join("\n"),
 };
 

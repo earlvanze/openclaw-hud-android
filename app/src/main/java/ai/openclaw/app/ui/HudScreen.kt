@@ -91,6 +91,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -123,6 +124,7 @@ fun HudScreen(
     onMicToggleRequest: () -> Unit,
 ) {
     val context = LocalContext.current
+    val windowSize = LocalWindowInfo.current.containerSize
     val statusText by viewModel.statusText.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
     val isNodeConnected by viewModel.isNodeConnected.collectAsState()
@@ -364,7 +366,13 @@ fun HudScreen(
     val captionEntryCount = AirVisionDisplaySettings.hudCaptionEntryCount(airVisionSettings.lightLoadModeEnabled)
     val safePadding = (22 + airVisionSettings.safeAreaPercent * 3).dp
     val layoutSpec = hudLayoutSpec(airVisionSettings.hudPlacement)
-    val frameSpec = hudFrameSpec(airVisionSettings.hudFrameShape)
+    val effectiveFrameShape =
+        AirVisionDisplaySettings.effectiveHudFrameShape(
+            requested = airVisionSettings.hudFrameShape,
+            displayWidth = windowSize.width,
+            displayHeight = windowSize.height,
+        )
+    val frameSpec = hudFrameSpec(effectiveFrameShape)
     val frameWidthFraction by
         animateFloatAsState(
             targetValue = (layoutSpec.widthFraction * frameSpec.widthMultiplier).coerceIn(0.42f, 0.98f),
@@ -1080,6 +1088,7 @@ internal data class HudFrameSpec(
 
 internal fun hudFrameSpec(shape: AirVisionHudFrameShape): HudFrameSpec =
     when (shape) {
+        AirVisionHudFrameShape.Adaptive -> hudFrameSpec(AirVisionHudFrameShape.Wide)
         AirVisionHudFrameShape.Full ->
             HudFrameSpec(
                 widthMultiplier = 1.08f,
