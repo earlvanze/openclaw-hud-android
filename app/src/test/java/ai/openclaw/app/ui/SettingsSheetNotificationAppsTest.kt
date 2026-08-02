@@ -48,7 +48,7 @@ class SettingsSheetNotificationAppsTest {
         val text = airVisionCaptionModeSettingsText(status)
 
         assertTrue(text.contains("Captions: native on, OpenClaw fallback Auto -> Spanish"))
-        assertTrue(text.contains("Native provider: Android/Samsung native captions floating window"))
+        assertTrue(text.contains("Native provider: Android system caption settings / native captions"))
         assertTrue(text.contains("OpenClaw fallback: available"))
         assertTrue(text.contains("Fallback model: ${TranslationCaptionMode.DEFAULT_FAST_MODEL}; thinking off"))
         assertTrue(text.contains("Languages: Auto -> Spanish"))

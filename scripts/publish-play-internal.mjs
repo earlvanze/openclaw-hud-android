@@ -344,17 +344,6 @@ function hudInputStatusLines() {
 }
 
 async function verifyHudBundleFreshness(bundlePath, bundleInfo) {
-  const dirtyInputs = hudInputStatusLines();
-  if (dirtyInputs.length > 0) {
-    throw new Error(
-      [
-        "Refusing Google Play publish flow because HUD source/build inputs have uncommitted changes.",
-        ...dirtyInputs.map((line) => `- ${line}`),
-        "Commit or stash those changes, rebuild the HUD AAB, then rerun the publish helper.",
-      ].join("\n"),
-    );
-  }
-
   const latestInput = latestHudInputCommit();
   const latestFileInput = await latestHudInputFileMtime();
   const freshnessInputs = [];
@@ -374,9 +363,8 @@ async function verifyHudBundleFreshness(bundlePath, bundleInfo) {
   }
   freshnessInputs.sort((a, b) => b.epochMs - a.epochMs);
   const freshnessInput = freshnessInputs[0];
-  if (!freshnessInput) return;
 
-  if (bundleInfo.mtimeMs + 1000 < freshnessInput.epochMs) {
+  if (freshnessInput && bundleInfo.mtimeMs + 1000 < freshnessInput.epochMs) {
     throw new Error(
       [
         `Refusing Google Play publish flow because the HUD AAB is stale: ${bundlePath}`,
@@ -386,6 +374,19 @@ async function verifyHudBundleFreshness(bundlePath, bundleInfo) {
       ].join("\n"),
     );
   }
+
+  const dirtyInputs = hudInputStatusLines();
+  if (dirtyInputs.length > 0) {
+    throw new Error(
+      [
+        "Refusing Google Play publish flow because HUD source/build inputs have uncommitted changes.",
+        ...dirtyInputs.map((line) => `- ${line}`),
+        "Commit or stash those changes, rebuild the HUD AAB, then rerun the publish helper.",
+      ].join("\n"),
+    );
+  }
+
+  if (!freshnessInput) return;
 
   console.log(
     `HUD bundle freshness verified against ${freshnessInput.label} (${formatUtc(freshnessInput.epochMs)}; ${freshnessInput.detail}).`,

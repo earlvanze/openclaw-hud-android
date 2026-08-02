@@ -251,6 +251,7 @@ async function main() {
     submissionFinal: runNodeScript("verify-play-submission-package.mjs", ["--final"]),
   };
   const gcloud = gcloudAccounts();
+  const authenticatedAllowedAccounts = allowedAccounts.filter((account) => gcloud.accounts.includes(account));
   const oauth = allowedAccounts.map((account) => ({
     account,
     ...authCheck(account),
@@ -309,7 +310,13 @@ async function main() {
     const serviceAccountHint = hasServiceAccount
       ? ` or resolve service-account preflight blocker ${serviceAccountPreflightBlocker.code}`
       : "";
-    const blocker = `Authenticate one allowed publisher account with gcloud: ${allowedAccounts.join(" or ")}${serviceAccountHint}.`;
+    const blockedAuthenticatedAccount = oauth.find(
+      (entry) => authenticatedAllowedAccounts.includes(entry.account) && !entry.ok,
+    );
+    const blocker =
+      blockedAuthenticatedAccount?.detail.includes("Invalid scopes value")
+        ? `Allowed publisher ${blockedAuthenticatedAccount.account} is authenticated, but this gcloud credential cannot mint the Android Publisher scope. Configure an Android Publisher service account${serviceAccountHint}.`
+        : `Authenticate one allowed publisher account with gcloud: ${allowedAccounts.join(" or ")}${serviceAccountHint}.`;
     blockers.push(blocker);
     externalBlockers.push(blocker);
   }
@@ -329,6 +336,7 @@ async function main() {
     oauthReady,
     serviceAccountReady,
     gcloud,
+    authenticatedAllowedAccounts,
     serviceAccount: {
       configured: serviceAccount.configured,
       authCheck: {

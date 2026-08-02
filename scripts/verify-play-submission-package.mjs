@@ -778,7 +778,7 @@ function verifyAirVisionCompanionCapabilityStates(states) {
     "Gesture and hotkey settings",
     "USB firmware-link diagnostics",
     "Firmware apply and update",
-    "Samsung/native captions and OpenClaw translation fallback",
+    "System/native caption settings and OpenClaw translation fallback",
     "App preferences and profile backup",
     "Windows app profile handoff",
     "Device information",

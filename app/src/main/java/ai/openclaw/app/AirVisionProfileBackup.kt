@@ -43,7 +43,7 @@ data class AirVisionBackupAppPreferences(
     val rememberedHudDisplay: AirVisionBackupDisplayFingerprint? = null,
     val demoModeEnabled: Boolean,
     val speakerEnabled: Boolean = true,
-    val nativeCaptionsEnabled: Boolean = false,
+    val nativeCaptionsEnabled: Boolean = true,
     val translationCaptionSourceLanguage: String = TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
     val translationCaptionTargetLanguage: String = TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
 )
@@ -189,7 +189,7 @@ object AirVisionProfileBackups {
                     "remembered display ${preferences.rememberedHudDisplay?.label() ?: "none"}; " +
                     "language ${preferences.language.label}",
                 "Speaker ${enabledDisabled(preferences.speakerEnabled)}; " +
-                    "Samsung/native captions ${enabledDisabled(preferences.nativeCaptionsEnabled)}; " +
+                    "system/native captions ${enabledDisabled(preferences.nativeCaptionsEnabled)}; " +
                     "translation captions ${sourceLanguage.label} -> ${targetLanguage.label}",
             )
         val warnings =

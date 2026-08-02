@@ -37,6 +37,8 @@
 
     <queries>
         <package android:name="com.ecosystems.airvision" />
+        <!-- Lets the user-selected caption control discover the Android system app. -->
+        <package android:name="com.google.audio.hearing.visualization.accessibility.scribe" />
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />

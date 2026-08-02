@@ -208,7 +208,10 @@ class SecurePrefs(
     private val _speakerEnabled = MutableStateFlow(plainPrefs.getBoolean("voice.speakerEnabled", true))
     val speakerEnabled: StateFlow<Boolean> = _speakerEnabled
 
-    private val _nativeCaptionsEnabled = MutableStateFlow(plainPrefs.getBoolean("nativeCaptions.enabled", false))
+    // Prefer the device's Live Caption provider for new installs. It gives the
+    // lowest-latency same-language captions; OpenClaw translation remains an
+    // explicit, reversible provider choice in the HUD.
+    private val _nativeCaptionsEnabled = MutableStateFlow(plainPrefs.getBoolean("nativeCaptions.enabled", true))
     val nativeCaptionsEnabled: StateFlow<Boolean> = _nativeCaptionsEnabled
 
     private val _airVisionDisplaySettings = MutableStateFlow(loadAirVisionDisplaySettings())

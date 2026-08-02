@@ -13,7 +13,7 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 - AAB: `build/release-bundles/openclaw-2026.7.17.16-hud-release.aab`
 - SHA-256: `2b54cb99553e94025bf3bf528fae6530ca7ee0771001119cac7e03074275e94c`
-- Version: 2026.7.17.16 (2026071716)
+- Version: 2026.8.2.0 (2026080200)
 
 ## Remaining Console Blockers
 
@@ -48,7 +48,7 @@ Key features:
 - In-app offensive-response reporting with explicit payload review, direct developer delivery, and receipt confirmation
 - Actionable notification summaries with tap-to-open and swipe browsing
 - Voice controls with wake-word and push-to-talk workflows
-- Samsung/native caption launcher plus OpenClaw realtime translation fallback
+- System/native caption settings launcher plus OpenClaw realtime translation fallback
 - External-display profiles for view mode, adaptive or explicit Full/Wide/Compact/Panoramic frame shapes, custom labels, JSON backup/import, placement, main-screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, gesture/hotkey behavior, profile reset, and low-overhead preferences
 - Capability-driven input for external touchscreens, touchpads, mice, styli, trackballs, wheels, rotary controls, DPAD/Page keys, gamepads, joystick/hat axes, identity-verified companion tap/swipe relays, media-button mic control, visible first-tap feedback and configurable 0.5-2.5-second timing for mic double taps, custom accessory-key learning, and a session-only sanitized Input Monitor
 - Optional speaker routing, IPD calibration, Eye Care, 3D Mode, USB diagnostics, and Windows handoff tools for AirVision M1
@@ -65,7 +65,7 @@ OpenClaw HUD:
 - Accepts identity-verified touchbar relays from the separately installed AirVision Companion on Android 14+.
 - Routes companion one-tap, double-tap, and slide gestures through existing configurable HUD actions.
 - Records accepted relays in the session-only Input Monitor.
-- Keeps adaptive frame morphing, external-display input, custom accessory keys, presentation recovery, and display pinning.
+- In-app privacy policy remains available with adaptive frame morphing, external-display input, custom accessory keys, presentation recovery, and display pinning.
 
 ## Privacy Policy
 
@@ -129,9 +129,9 @@ Capability states:
 - Firmware apply and update: Firmware-gated
   Review path: Settings > AirVision M1 > Firmware Updates > Export.
   Evidence: Android write actions remain blocked until sanitized ASUS HID capture evidence and live M1 write tests are both present.
-- Samsung/native captions and OpenClaw translation fallback: Reviewable offline
-  Review path: Voice tab caption controls and Samsung/native caption launcher.
-  Evidence: Native captioning is delegated to Android/Samsung UI; OpenClaw fallback exports structured caption-mode status with sage-router fast profile, thinking off, selected source/target languages, and S1/S2 speaker labels.
+- System/native caption settings and OpenClaw translation fallback: Reviewable offline
+  Review path: Voice tab caption controls and system/native caption settings.
+  Evidence: Native captioning is delegated to a launchable Android system transcription app when Android exposes one, otherwise Android caption settings; OpenClaw fallback exports structured caption-mode status with sage-router fast profile, thinking off, selected source/target languages, and S1/S2 speaker labels.
 - App preferences and profile backup: Reviewable offline
   Review path: Settings > AirVision M1 > App Preferences and Profile Backup.
   Evidence: Startup view, display target, language, speaker, visible structured native captions plus OpenClaw translation fallback status, translation languages, demo mode, structured support/legal/registration metadata, privacy/support links, and JSON backup/import are reviewable offline.

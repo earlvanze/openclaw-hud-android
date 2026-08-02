@@ -45,6 +45,7 @@ async function main() {
   try {
     const fakeBin = join(tempDir, "bin");
     const fakeGcloud = join(fakeBin, "gcloud");
+    const fakeGit = join(fakeBin, "git");
     await mkdir(fakeBin);
     await writeFile(
       fakeGcloud,
@@ -81,6 +82,16 @@ exit 64
 `,
     );
     await chmod(fakeGcloud, 0o755);
+    await writeFile(
+      fakeGit,
+      `#!/usr/bin/env bash
+if [[ "$1" == "status" && "$2" == "--porcelain" ]]; then
+  exit 0
+fi
+exec /usr/bin/git "$@"
+`,
+    );
+    await chmod(fakeGit, 0o755);
 
     const env = {
       ...process.env,

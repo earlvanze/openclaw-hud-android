@@ -15,7 +15,7 @@ class AirVisionCaptionModeStatusTest {
             )
 
         assertEquals(true, status.nativeCaptionsEnabled)
-        assertEquals("Android/Samsung native captions floating window", status.nativeProvider)
+        assertEquals("Android system caption settings / native captions", status.nativeProvider)
         assertEquals(true, status.openClawFallbackAvailable)
         assertEquals(TranslationCaptionMode.DEFAULT_FAST_MODEL, status.openClawFallbackModel)
         assertEquals("off", status.openClawFallbackThinking)

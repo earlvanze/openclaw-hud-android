@@ -587,7 +587,7 @@ async function verifyReadmeAirVisionParity() {
     "Internal phone keys are ignored",
   ]);
   requireIncludes("README captions parity", readme, [
-    "Samsung/Android native captioning",
+    "system native captioning",
     "OpenClaw fallback",
     "sage-router/fast",
     "S1` / `S2",
@@ -595,7 +595,7 @@ async function verifyReadmeAirVisionParity() {
   requireIncludes("README AirVision profile backup boundary", readme, [
     "gesture/hotkey settings",
     "speaker state",
-    "Samsung/native captions preference",
+    "system/native captions preference",
     "OpenClaw translation caption",
     "never includes gateway endpoints",
     "auth tokens",

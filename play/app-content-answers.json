@@ -180,10 +180,10 @@
         "evidence": "Android write actions remain blocked until sanitized ASUS HID capture evidence and live M1 write tests are both present."
       },
       {
-        "capability": "Samsung/native captions and OpenClaw translation fallback",
+        "capability": "System/native caption settings and OpenClaw translation fallback",
         "state": "Reviewable offline",
-        "reviewPath": "Voice tab caption controls and Samsung/native caption launcher.",
-        "evidence": "Native captioning is delegated to Android/Samsung UI; OpenClaw fallback exports structured caption-mode status with sage-router fast profile, thinking off, selected source/target languages, and S1/S2 speaker labels."
+        "reviewPath": "Voice tab caption controls and system/native caption settings.",
+        "evidence": "Native captioning is delegated to a launchable Android system transcription app when Android exposes one, otherwise Android caption settings; OpenClaw fallback exports structured caption-mode status with sage-router fast profile, thinking off, selected source/target languages, and S1/S2 speaker labels."
       },
       {
         "capability": "App preferences and profile backup",

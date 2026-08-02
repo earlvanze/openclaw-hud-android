@@ -31,6 +31,31 @@ enum class VoiceConversationRole {
     Assistant,
 }
 
+/**
+ * Returns the part of a recognizer final result that was not already sent as an
+ * idle partial. Android often extends a partial with more words before it
+ * emits the final callback; replaying the whole final result would produce two
+ * caption turns for the same spoken phrase.
+ */
+internal fun unsentFinalTranscript(
+    finalTranscript: String,
+    flushedPartialTranscript: String?,
+): String? {
+    val final = finalTranscript.trim()
+    val flushed = flushedPartialTranscript?.trim().orEmpty()
+    if (final.isEmpty()) return null
+    if (flushed.isEmpty()) return final
+    if (final == flushed) return null
+
+    val nextCharacter = final.getOrNull(flushed.length)
+    val extendsFlushedPartial =
+        final.startsWith(flushed) &&
+            (nextCharacter == null ||
+                nextCharacter.isWhitespace() ||
+                nextCharacter in ",.!?;:)".toCharArray())
+    return if (extendsFlushedPartial) final.substring(flushed.length).trim().takeIf { it.isNotEmpty() } else final
+}
+
 data class VoiceConversationEntry(
     val id: String,
     val role: VoiceConversationRole,
@@ -42,6 +67,12 @@ class MicCaptureManager(
     private val context: Context,
     private val scope: CoroutineScope,
     /**
+     * The language to request from Android speech recognition, or null to let
+     * the recognizer auto-detect. Caption translation supplies its selected
+     * source language here so the transcript matches the translation prompt.
+     */
+    private val recognitionLanguage: () -> String? = { null },
+    /**
      * Send [message] to the gateway and return the run ID.
      * [onRunIdKnown] is called with the idempotency key *before* the network
      * round-trip so [pendingRunId] is set before any chat events can arrive.
@@ -52,9 +83,11 @@ class MicCaptureManager(
     companion object {
         private const val tag = "MicCapture"
         private const val speechMinSessionMs = 30_000L
-        private const val speechCompleteSilenceMs = 1_500L
-        private const val speechPossibleSilenceMs = 900L
-        private const val transcriptIdleFlushMs = 1_600L
+        // Caption mode favours short turns. The old 1.5 s silence window made a
+        // completed phrase disappear from the HUD before its translation began.
+        private const val speechCompleteSilenceMs = 750L
+        private const val speechPossibleSilenceMs = 400L
+        private const val transcriptIdleFlushMs = 700L
         private const val maxConversationEntries = 40
         private const val pendingRunTimeoutMs = 45_000L
     }
@@ -273,12 +306,14 @@ class MicCaptureManager(
             "delta" -> {
                 val deltaText = parseAssistantText(payload)
                 if (!deltaText.isNullOrBlank()) {
+                    Log.d(tag, "caption translation delta chars=${deltaText.length}")
                     upsertPendingAssistant(text = deltaText.trim(), isStreaming = true)
                 }
             }
             "final" -> {
                 val finalText = parseAssistantText(payload)?.trim().orEmpty()
                 if (finalText.isNotEmpty()) {
+                    Log.d(tag, "caption translation final chars=${finalText.length}")
                     upsertPendingAssistant(text = finalText, isStreaming = false)
                     playAssistantReplyAsync(finalText)
                 } else if (pendingAssistantEntryId != null) {
@@ -353,6 +388,10 @@ class MicCaptureManager(
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
                 putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
+                recognitionLanguage()
+                    ?.trim()
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.let { putExtra(RecognizerIntent.EXTRA_LANGUAGE, it) }
                 putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, speechMinSessionMs)
                 putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, speechCompleteSilenceMs)
                 putExtra(
@@ -392,6 +431,7 @@ class MicCaptureManager(
         val message = text.trim()
         _liveTranscript.value = null
         if (message.isEmpty()) return
+        Log.d(tag, "caption turn queued chars=${message.length}")
         appendConversation(
             role = VoiceConversationRole.User,
             text = message,
@@ -441,6 +481,7 @@ class MicCaptureManager(
 
         scope.launch {
             try {
+                Log.d(tag, "caption gateway send chars=${next.length} queued=${queuedMessageCount()}")
                 val runId =
                     sendToGateway(next) { earlyRunId ->
                         // Called with the idempotency key before chat.send fires so that
@@ -628,7 +669,9 @@ class MicCaptureManager(
 
             override fun onEndOfSpeech() {
                 _inputLevel.value = 0f
-                scheduleRestart()
+                // Android delivers this before onResults. Restarting here can race
+                // the final callback, surface ERROR_RECOGNIZER_BUSY, and add a
+                // retry delay to the next caption. onResults/onError own restart.
             }
 
             override fun onError(error: Int) {
@@ -680,11 +723,13 @@ class MicCaptureManager(
                 val text = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).orEmpty().firstOrNull()
                 if (!text.isNullOrBlank()) {
                     val trimmed = text.trim()
-                    if (trimmed != flushedPartialTranscript) {
-                        queueRecognizedMessage(trimmed)
+                    Log.d(tag, "caption recognizer final chars=${trimmed.length}")
+                    val unsent = unsentFinalTranscript(trimmed, flushedPartialTranscript)
+                    flushedPartialTranscript = null
+                    if (unsent != null) {
+                        queueRecognizedMessage(unsent)
                         sendQueuedIfIdle()
                     } else {
-                        flushedPartialTranscript = null
                         _liveTranscript.value = null
                     }
                 }
@@ -695,6 +740,7 @@ class MicCaptureManager(
                 val text = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).orEmpty().firstOrNull()
                 if (!text.isNullOrBlank()) {
                     val trimmed = text.trim()
+                    Log.d(tag, "caption recognizer partial chars=${trimmed.length}")
                     _liveTranscript.value = trimmed
                     scheduleTranscriptFlush(trimmed)
                 }

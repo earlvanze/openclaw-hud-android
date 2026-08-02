@@ -501,7 +501,7 @@ object AirVisionDiagnosticsSnapshots {
         hudDisplayRoute: AirVisionHudDisplayRoute = AirVisionHudDisplayRoute(target = hudDisplayTarget),
         demoModeEnabled: Boolean,
         speakerEnabled: Boolean = true,
-        nativeCaptionsEnabled: Boolean = false,
+        nativeCaptionsEnabled: Boolean = true,
         translationCaptionSourceLanguage: String = TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE,
         translationCaptionTargetLanguage: String = TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE,
         firmwareCaptureResults: AirVisionFirmwareCaptureResults? = null,

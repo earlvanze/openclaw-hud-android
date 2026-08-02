@@ -108,6 +108,7 @@ fun VoiceTabScreen(viewModel: MainViewModel) {
 
     var hasMicPermission by remember { mutableStateOf(context.hasRecordAudioPermission()) }
     var pendingMicEnable by remember { mutableStateOf(false) }
+    var pendingTranslationCaptionsEnable by remember { mutableStateOf(false) }
 
     DisposableEffect(lifecycleOwner, context) {
         val observer =
@@ -127,10 +128,13 @@ fun VoiceTabScreen(viewModel: MainViewModel) {
     val requestMicPermission =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             hasMicPermission = granted
-            if (granted && pendingMicEnable) {
+            if (granted && pendingTranslationCaptionsEnable) {
+                viewModel.setTranslationCaptionsEnabled(true)
+            } else if (granted && pendingMicEnable) {
                 viewModel.setMicEnabled(true)
             }
             pendingMicEnable = false
+            pendingTranslationCaptionsEnable = false
         }
 
     LaunchedEffect(micConversation.size, showThinkingBubble) {
@@ -212,7 +216,12 @@ fun VoiceTabScreen(viewModel: MainViewModel) {
                 },
                 onOpenClawSelected = {
                     viewModel.setNativeCaptionsEnabled(false)
-                    viewModel.setTranslationCaptionsEnabled(true)
+                    if (hasMicPermission) {
+                        viewModel.setTranslationCaptionsEnabled(true)
+                    } else {
+                        pendingTranslationCaptionsEnable = true
+                        requestMicPermission.launch(Manifest.permission.RECORD_AUDIO)
+                    }
                 },
                 onOffSelected = {
                     viewModel.setNativeCaptionsEnabled(false)
@@ -413,7 +422,7 @@ private fun CaptionProviderRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         CaptionProviderButton(
-            label = "Samsung",
+            label = "System",
             selected = nativeEnabled,
             modifier = Modifier.weight(1f),
             onClick = onNativeSelected,

@@ -142,7 +142,7 @@ object AirVisionCompanionParity {
                 entry(
                     feature = "Captions and translation",
                     androidState = REVIEWABLE_OFFLINE,
-                    reviewPath = "Settings > AirVision M1 > App Preferences > Samsung/native captions and Translation captions.",
+                    reviewPath = "Settings > AirVision M1 > App Preferences > System/native captions and Translation captions.",
                     evidence =
                         "Native captions preference is ${onOff(nativeCaptionsEnabled)}; OpenClaw translation captions are " +
                             "$sourceLanguage -> $targetLanguage.",

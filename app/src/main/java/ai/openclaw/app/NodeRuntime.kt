@@ -461,6 +461,14 @@ class NodeRuntime(
         MicCaptureManager(
             context = appContext,
             scope = scope,
+            recognitionLanguage = {
+                if (_translationCaptionsEnabled.value) {
+                    prefs.translationCaptionSourceLanguage.value
+                        .takeUnless { it == TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE }
+                } else {
+                    null
+                }
+            },
             sendToGateway = { message, onRunIdKnown ->
                 val idempotencyKey = UUID.randomUUID().toString()
                 // Notify MicCaptureManager of the idempotency key *before* the network

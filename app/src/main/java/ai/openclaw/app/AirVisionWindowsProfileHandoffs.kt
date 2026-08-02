@@ -394,7 +394,7 @@ object AirVisionWindowsProfileHandoffs {
         }
         add("- Companion language: ${AirVisionAppLanguage.fromRawValue(preferences.language).label}")
         add("- Speaker output: ${onOff(preferences.speakerEnabled)}")
-        add("- Samsung/native captions: ${onOff(preferences.nativeCaptionsEnabled)}")
+        add("- System/native captions: ${onOff(preferences.nativeCaptionsEnabled)}")
         add("- Translation captions: ${sourceLanguage.label} -> ${targetLanguage.label}")
         add("- Demo Mode: ${onOff(preferences.demoModeEnabled)}")
     }

@@ -29,7 +29,7 @@ class AirVisionProfileBackupPreviewTest {
         assertTrue(preview.details.any { it.contains("Startup HUD") })
         assertTrue(preview.details.any { it.contains("display target AirVision Preferred") })
         assertTrue(preview.details.any { it.contains("Speaker disabled") })
-        assertTrue(preview.details.any { it.contains("Samsung/native captions enabled") })
+        assertTrue(preview.details.any { it.contains("system/native captions enabled") })
         assertTrue(preview.details.any { it.contains("translation captions Auto -> Spanish") })
         assertTrue(preview.warnings.any { it.contains("Light Load is enabled") })
         assertTrue(preview.warnings.any { it.contains("Runtime metadata is missing") })

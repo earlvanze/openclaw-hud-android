@@ -2,4 +2,4 @@ OpenClaw HUD:
 - Accepts identity-verified touchbar relays from the separately installed AirVision Companion on Android 14+.
 - Routes companion one-tap, double-tap, and slide gestures through existing configurable HUD actions.
 - Records accepted relays in the session-only Input Monitor.
-- Keeps adaptive frame morphing, external-display input, custom accessory keys, presentation recovery, and display pinning.
+- In-app privacy policy remains available with adaptive frame morphing, external-display input, custom accessory keys, presentation recovery, and display pinning.

@@ -444,7 +444,7 @@ class SecurePrefsTest {
             prefs.airVisionHudControls.value.mediaDoubleTapWindow,
         )
         assertEquals(true, prefs.speakerEnabled.value)
-        assertEquals(false, prefs.nativeCaptionsEnabled.value)
+        assertEquals(true, prefs.nativeCaptionsEnabled.value)
         assertEquals(TranslationCaptionMode.DEFAULT_SOURCE_LANGUAGE, prefs.translationCaptionSourceLanguage.value)
         assertEquals(TranslationCaptionMode.DEFAULT_TARGET_LANGUAGE, prefs.translationCaptionTargetLanguage.value)
     }

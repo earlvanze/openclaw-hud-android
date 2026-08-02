@@ -46,7 +46,7 @@ Current live target:
 - [x] Active OpenClaw runs can be stopped from the HUD or with external gamepad B / keyboard Escape
 - [x] Pending OpenClaw execution approvals show the sanitized command preview and support deny or allow-once decisions from the HUD; gamepad B / Escape denies and Y allows once. Global visibility is default-off and requires an explicit gateway administrator-scope opt-in; otherwise the HUD shows device-bound approvals only
 - [x] HUD notification redaction for token/password/signature-key-shaped fields
-- [x] Samsung/native captions provider plus OpenClaw realtime translation fallback
+- [x] System Live Transcribe/native captions provider plus OpenClaw realtime translation fallback
 - [x] Per-mode external HUD profiles with viewing mode, animated frame shape,
   adaptive portrait/square/landscape/ultra-wide framing,
   placement, safe area, Splendid mode, brightness, blue-light filter, distance, HUD scale, IPD,
@@ -160,7 +160,7 @@ HUD controls:
 - Swipe left or right to browse ranked HUD notifications.
 - Reply directly to compatible messaging notifications from the HUD; gamepad X opens reply mode for the selected notification.
 - Tap the thinking-level text in the status lights to cycle thinking level.
-- Tap `cc` in the HUD status lights to cycle captions: Off -> Samsung/native
+- Tap `cc` in the HUD status lights to cycle captions: Off -> System/native
   -> OpenClaw translation -> Off.
 - Press Enter on a hardware keyboard to send the chat input.
 - Press Shift+Enter for a newline.
@@ -217,7 +217,7 @@ Generic controls live first in Settings -> External Display HUD. Optional AirVis
 | Unity mirror window / projected glasses view | Surfaced as structured Windows-only capability status in Android settings, diagnostics, and the Windows app handoff. Android cannot open the ASUS Unity mirror window or `Ctrl+Alt+E` shortcut, but Settings and handoff guidance provide Cast, Display, and Samsung DeX screen-sharing fallback actions outside the HUD. |
 | Demo Mode / Tutorials | Implemented as Android Demo Mode for deterministic HUD review, tutorials, screenshots, and fit checks without a live gateway or live M1. The hidden ASUS Windows tutorial shortcut remains Windows-only and is reported separately in diagnostics. |
 | Companion parity states | Implemented as an 18-feature canonical app/export catalog that marks AirVision features as offline-reviewable, M1-optional, firmware-gated, or Windows-only. Settings, diagnostics, Windows App Handoff, and Play review evidence render from this catalog so Android UI claims and Windows handoff guidance stay aligned. |
-| App Preferences | Implemented with startup view, AirVision companion language preference with Android locale application, speaker state, visible structured Samsung/native captions plus OpenClaw translation fallback status, OpenClaw translation caption source/target languages, demo mode, JSON profile backup/import, software version/build display, structured support/legal/registration metadata, EULA note, in-app privacy policy, official FAQ/tutorial, product registration, and ASUS support links. |
+| App Preferences | Implemented with startup view, AirVision companion language preference with Android locale application, speaker state, visible structured system/native captions plus OpenClaw translation fallback status, OpenClaw translation caption source/target languages, demo mode, JSON profile backup/import, software version/build display, structured support/legal/registration metadata, EULA note, in-app privacy policy, official FAQ/tutorial, product registration, and ASUS support links. |
 | Windows app profile handoff | Implemented as an exportable Markdown handoff containing the active profile, derived active-runtime HUD scale/transcript/caption and overlay/dimming state, runtime-metadata freshness, a per-feature Windows app apply matrix with Android effect/live-M1/firmware-gate state plus row-level observed Windows surfaces/keys/defaults/capture implications, Cyber-observed ASUS AirVision 1.0.7.1 build/settings-key evidence, all saved profile values with compact runtime summaries, Android HUD gesture/hotkey mappings, structured M1 hardware-key mapping with brightness/media key consumption state and step sizes, Windows-only spatial/mirror capability status, companion app preferences, structured caption/translation mode status, structured support/legal/registration metadata, ASUS Windows app apply steps for Cyber sessions, Android USB context, and privacy reminders that omit raw USB serial values. |
 | Device Information | Implemented Android USB identity details for manufacturer, product, USB ID, device path, device class/subclass/protocol, interface count, serial availability, USB descriptor version when Android exposes it, and firmware protocol status. Actual ASUS HID firmware version still needs vendor protocol support. |
 | Firmware link | Implemented USB detection for the known AirVision M1 device (`0x0b05:0x1b3c`), Android USB permission, HID/audio/input interface status, derived readable/writable HID report-path capability summaries with endpoint packet sizes, per-feature firmware-apply readiness for Windows-style controls, per-feature Windows protocol-capture targets for View Mode/brightness/distance/IPD/Splendid/Eye Care/Motion Sync/Light Load/3D Mode, USB interface/endpoint diagnostics for protocol capture work, and a JSON diagnostics export that omits raw USB serial values. |
@@ -336,9 +336,10 @@ node scripts/render-airvision-firmware-capture-plan.mjs --check
 node scripts/verify-airvision-firmware-capture-results.mjs
 ```
 
-Captions default to Samsung/Android native captioning so the system floating
-caption window can sit over the minimal HUD. The HUD `cc` status light cycles
-between Samsung, OpenClaw, and Off; the Voice tab exposes the same providers as
+Captions default to system native captioning. When Android exposes a launchable
+system transcription app, the HUD opens it; otherwise it opens Android caption
+preferences. The HUD `cc` status light cycles between System, OpenClaw, and Off;
+the Voice tab exposes the same providers as
 larger controls. The OpenClaw fallback is intended for low-latency walking use
 when native captions are not available or when captions need OpenClaw session
 context. It forces thinking `off`, prefers the
@@ -383,7 +384,7 @@ Profile Backup lives under Settings -> AirVision M1 -> App Preferences. Export
 writes a JSON file containing AirVision M1 tuning profiles, custom labels,
 gesture/hotkey settings, display targeting and remembered-display identity,
 startup view, language preference,
-speaker state, Samsung/native captions preference, OpenClaw translation caption
+speaker state, system/native captions preference, OpenClaw translation caption
 source/target languages, demo mode, and derived HUD runtime metadata such as Light Load limits and
 locked control availability. Import validates the same AirVision-only schema,
 previews the active profile, profile slots, all-profile runtime summaries,

@@ -63,7 +63,7 @@ const validListingFiles = {
     "- Accepts identity-verified touchbar relays from AirVision Companion on Android 14+.",
     "- Routes one-tap, double-tap, and slide gestures through configurable HUD actions.",
     "- Records relays in the session-only Input Monitor.",
-    "- Keeps adaptive frame morphing, custom accessory keys, presentation recovery, and display pinning.",
+    "- In-app privacy policy remains available with adaptive frame morphing, custom accessory keys, presentation recovery, and display pinning.",
   ].join("\n"),
 };
 
@@ -100,11 +100,11 @@ const validReadme = [
   "| Identify | Temporary HUD marker. |",
   "| Multi-screen desktop layouts | Configurable external-display targeting. |",
   "",
-  "Captions default to Samsung/Android native captioning. The OpenClaw fallback forces thinking off, prefers sage-router/fast, and labels alternating turns as `S1` / `S2`.",
+  "Captions default to system native captioning. The OpenClaw fallback forces thinking off, prefers sage-router/fast, and labels alternating turns as `S1` / `S2`.",
   "Diagnostics exports include Android demo/offline reviewer experience state, profile backup/restore readiness, all saved AirVision profile values, runtime profile metadata, structured M1 brightness-key/media-key mapping evidence with Android consumption state and step sizes, shortcut-menu parity for ASUS brightness/volume/distance behavior, structured Android Cast/Display/Samsung DeX mirror fallback actions and limitations, row-level observed Windows surfaces/keys/defaults/capture implications, structured caption/translation mode status, structured support/legal/registration metadata, Windows gesture catalog with instant transparent and shortcut-menu hold/slide behavior, Cyber-observed ASUS AirVision 1.0.7.1 build/settings-key evidence for VirtualSpaceDistance, SoftwareIPD, DisplaySplendidMode, EyeCareLevel, PreventMotionBlur, IsEcoMode, CenterCursorHotkey, and DistanceHotkey, and companion parity-state counts for offline-reviewable, M1-optional, firmware-gated, and Windows-only features.",
   "Firmware Link shows per-control WAIT/CAPTURE/READY rows for target value, Android effect, firmware status, missing evidence, and blocker text while writes remain blocked.",
   "Windows App Handoff exports ASUS Windows app apply steps, ASUS AirVision 1.0.7.1 build/settings-key evidence, VirtualSpaceDistance, SoftwareIPD, DisplaySplendidMode, DistanceHotkey, row-level observed Windows surfaces/keys/defaults/capture implications, structured M1 hardware-key mapping, brightness/media key consumption state, Windows gesture catalog entries, structured caption/translation mode status, structured support/legal/registration metadata, and privacy reminders while omitting raw USB serial values.",
-  "Profile Backup exports gesture/hotkey settings, speaker state, visible structured native captions plus OpenClaw translation fallback status, Samsung/native captions preference, and OpenClaw translation caption settings, and never includes gateway endpoints, auth tokens, or chat history.",
+  "Profile Backup exports gesture/hotkey settings, speaker state, visible structured native captions plus OpenClaw translation fallback status, system/native captions preference, and OpenClaw translation caption settings, and never includes gateway endpoints, auth tokens, or chat history.",
   "`play/airvision-firmware-capture-results.json` is the machine-checked sanitized capture-results file. Android firmware writes remain blocked until evidence is validated.",
 ].join("\n");
 

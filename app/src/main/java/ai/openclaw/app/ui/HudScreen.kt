@@ -30,6 +30,10 @@ import ai.openclaw.app.ui.chat.friendlySessionName
 import ai.openclaw.app.ui.chat.resolveSessionChoices
 import ai.openclaw.app.voice.VoiceConversationEntry
 import ai.openclaw.app.voice.VoiceConversationRole
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -100,6 +104,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
@@ -165,6 +170,16 @@ fun HudScreen(
     var transientHudText by remember { mutableStateOf<String?>(null) }
     var replyTargetKey by remember { mutableStateOf<String?>(null) }
     var replyDraft by remember { mutableStateOf("") }
+    var pendingTranslationCaptionsEnable by remember { mutableStateOf(false) }
+    val requestCaptionMicPermission =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted && pendingTranslationCaptionsEnable) {
+                viewModel.setTranslationCaptionsEnabled(true)
+            } else if (!granted && pendingTranslationCaptionsEnable) {
+                viewModel.showHudTransientMessage("Microphone permission required for OpenClaw captions")
+            }
+            pendingTranslationCaptionsEnable = false
+        }
 
     LaunchedEffect(mainSessionKey) {
         if (viewModel.chatSessionKey.value != mainSessionKey) {
@@ -543,7 +558,15 @@ fun HudScreen(
                     }
                     HudCaptionProvider.OpenClaw -> {
                         viewModel.setNativeCaptionsEnabled(false)
-                        viewModel.setTranslationCaptionsEnabled(true)
+                        if (
+                            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+                            PackageManager.PERMISSION_GRANTED
+                        ) {
+                            viewModel.setTranslationCaptionsEnabled(true)
+                        } else {
+                            pendingTranslationCaptionsEnable = true
+                            requestCaptionMicPermission.launch(Manifest.permission.RECORD_AUDIO)
+                        }
                     }
                     HudCaptionProvider.Off -> {
                         viewModel.setNativeCaptionsEnabled(false)
@@ -1426,7 +1449,7 @@ private fun HudTranslationCaptions(
             entries.forEachIndexed { index, entry ->
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
-                        entry.speaker,
+                        if (entry.isSource) "${entry.speaker} · source" else entry.speaker,
                         style = hudReadableTextStyle,
                         color = if (entry.speaker == "S1") hudSecondary else hudAccent,
                         maxLines = 1,
@@ -1733,38 +1756,60 @@ private val demoHudChatTranscript =
         HudChatTranscriptEntry(role = "assistant", text = "Calendar moved to 3:30 PM. No action needed."),
     )
 
-private data class HudCaptionEntry(
+internal data class HudCaptionEntry(
     val speaker: String,
     val text: String,
     val isLive: Boolean = false,
+    /** A finalized local transcript that remains visible while its translation is pending. */
+    val isSource: Boolean = false,
 )
 
-private fun hudCaptionEntries(
+internal fun hudCaptionEntries(
     conversation: List<VoiceConversationEntry>,
     liveTranscript: String?,
     entryCount: Int = AirVisionDisplaySettings.HUD_CAPTION_ENTRY_COUNT,
 ): List<HudCaptionEntry> {
     val entries = mutableListOf<HudCaptionEntry>()
     var userTurnIndex = 0
-    var lastSpeaker = "S1"
+    val pendingSourceIndices = ArrayDeque<Int>()
     for (entry in conversation) {
         val text = entry.text.trim()
         if (text.isEmpty()) continue
         when (entry.role) {
             VoiceConversationRole.User -> {
-                lastSpeaker = TranslationCaptionMode.speakerLabelForTurn(userTurnIndex)
+                val speaker = TranslationCaptionMode.speakerLabelForTurn(userTurnIndex)
                 userTurnIndex += 1
+                // Keep the recognized source sentence on screen while the gateway
+                // streams its translation. Assistant deltas/final replace it below.
+                entries += HudCaptionEntry(speaker = speaker, text = text, isLive = true, isSource = true)
+                pendingSourceIndices.addLast(entries.lastIndex)
             }
             VoiceConversationRole.Assistant -> {
                 val (speaker, caption) = TranslationCaptionMode.stripSpeakerPrefix(text)
-                entries += HudCaptionEntry(speaker = speaker ?: lastSpeaker, text = caption)
+                val pendingIndex = pendingSourceIndices.firstOrNull()
+                if (pendingIndex == null) {
+                    entries += HudCaptionEntry(
+                        speaker = speaker ?: TranslationCaptionMode.speakerLabelForTurn(userTurnIndex),
+                        text = caption,
+                        isLive = entry.isStreaming,
+                    )
+                } else {
+                    val pending = entries[pendingIndex]
+                    entries[pendingIndex] =
+                        HudCaptionEntry(
+                            speaker = speaker ?: pending.speaker,
+                            text = caption,
+                            isLive = entry.isStreaming,
+                        )
+                    if (!entry.isStreaming) pendingSourceIndices.removeFirst()
+                }
             }
         }
     }
     val live = liveTranscript?.trim()?.takeIf { it.isNotEmpty() }
     if (live != null) {
         val speaker = TranslationCaptionMode.speakerLabelForTurn(userTurnIndex)
-        entries += HudCaptionEntry(speaker = speaker, text = live, isLive = true)
+        entries += HudCaptionEntry(speaker = speaker, text = live, isLive = true, isSource = true)
     }
     return entries.takeLast(entryCount)
 }
