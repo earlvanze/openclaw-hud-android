@@ -32,9 +32,9 @@ enum class VoiceConversationRole {
 }
 
 /**
- * Returns the part of a recognizer final result that was not already sent as an
- * idle partial. Android often extends a partial with more words before it
- * emits the final callback; replaying the whole final result would produce two
+ * Returns the part of an updated recognizer result that was not already sent as
+ * an idle partial. Android often extends a partial with more words before its
+ * next partial or final callback; replaying the whole result would produce two
  * caption turns for the same spoken phrase.
  */
 internal fun unsentFinalTranscript(
@@ -83,11 +83,11 @@ class MicCaptureManager(
     companion object {
         private const val tag = "MicCapture"
         private const val speechMinSessionMs = 30_000L
-        // Caption mode favours short turns. The old 1.5 s silence window made a
-        // completed phrase disappear from the HUD before its translation began.
-        private const val speechCompleteSilenceMs = 750L
-        private const val speechPossibleSilenceMs = 400L
-        private const val transcriptIdleFlushMs = 700L
+        // Caption mode favors short turns, while partials make ongoing speech
+        // visible before Android has declared a final recognition result.
+        private const val speechCompleteSilenceMs = 550L
+        private const val speechPossibleSilenceMs = 250L
+        private const val transcriptIdleFlushMs = 350L
         private const val maxConversationEntries = 40
         private const val pendingRunTimeoutMs = 45_000L
     }
@@ -448,9 +448,12 @@ class MicCaptureManager(
                 if (!_micEnabled.value || _isSending.value) return@launch
                 val current = _liveTranscript.value?.trim().orEmpty()
                 if (current.isEmpty() || current != expectedText) return@launch
+                val unsent = unsentFinalTranscript(current, flushedPartialTranscript)
                 flushedPartialTranscript = current
-                queueRecognizedMessage(current)
-                sendQueuedIfIdle()
+                if (unsent != null) {
+                    queueRecognizedMessage(unsent)
+                    sendQueuedIfIdle()
+                }
             }
     }
 

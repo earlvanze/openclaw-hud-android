@@ -36,7 +36,7 @@ data class AirVisionCaptionModeStatus(
             val target = TranslationCaptionMode.languageFor(targetCode)
             return AirVisionCaptionModeStatus(
                 nativeCaptionsEnabled = nativeCaptionsEnabled,
-                nativeProvider = "Android system caption settings / native captions",
+                nativeProvider = "Android system captions (Samsung/OEM provider when available)",
                 openClawFallbackAvailable = true,
                 openClawFallbackModel = TranslationCaptionMode.DEFAULT_FAST_MODEL,
                 openClawFallbackThinking = "off",

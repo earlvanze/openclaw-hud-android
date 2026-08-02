@@ -235,7 +235,7 @@ class AirVisionWindowsProfileHandoffTest {
         assertTrue(markdown.contains("- Demo Mode: on"))
         assertTrue(markdown.contains("## Caption and Translation Mode"))
         assertTrue(markdown.contains("- Captions: native on, OpenClaw fallback Auto -> Spanish, model sage-router/fast, thinking off, speakers S1/S2."))
-        assertTrue(markdown.contains("- Native provider: Android system caption settings / native captions"))
+        assertTrue(markdown.contains("- Native provider: Android system captions (Samsung/OEM provider when available)"))
         assertTrue(markdown.contains("- OpenClaw fallback available: yes"))
         assertTrue(markdown.contains("- OpenClaw fallback model: sage-router/fast"))
         assertTrue(markdown.contains("- OpenClaw fallback thinking: off"))

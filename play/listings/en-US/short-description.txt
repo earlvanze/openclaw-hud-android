@@ -1,1 +1,1 @@
-Minimal assistant HUD for Android external and wearable displays.
+OpenClaw HUD for Android external, wearable displays, voice, and captions.

@@ -28,44 +28,37 @@ Console flags and evidence entries live in `play/app-content-answers.json` under
 
 Title: OpenClaw HUD
 
-Short description: Minimal assistant HUD for Android external and wearable displays.
+Short description: OpenClaw HUD for Android external, wearable displays, voice, and captions.
 
 Full description:
 
-OpenClaw HUD is a low-distraction assistant companion for Android devices connected to external or wearable displays.
+OpenClaw HUD is a low-distraction companion for OpenClaw users on Android external and wearable displays.
 
-The app uses Android Presentation mode and automatically targets a compatible USB-C, HDMI, wireless, or wearable display. It has been tested with Samsung DeX, foldable Android phones, and AirVision M1. Glanceable green text on black keeps status, chat, notifications, captions, microphone state, and speaker state readable without filling the display with a full desktop interface.
+It uses Android Presentation mode to place concise status, chat, notifications, microphone state, and captions on a compatible USB-C, HDMI, wireless, or wearable display. The green-on-black HUD is made for a glance, rather than a full desktop interface. It supports Samsung DeX, foldable Android phones, and AirVision M1 workflows.
 
-Key features:
-- Automatic Android Presentation routing with first, last, largest, and optional AirVision-preferred display targets
-- Remembered-display pinning that survives Android display-ID changes, waits safely when selected hardware disconnects, and recovers from transient Presentation failures
-- Runtime display names in identification and host restore screens
-- Minimal always-on HUD for external displays
-- OpenClaw gateway pairing and secure local setup storage
-- Compact chat with hardware keyboard send support
-- Direct external-HUD switching for recent sessions and connected gateway agents, guarded during active runs and execution approvals
-- Safe execution approvals with gateway-sanitized command previews, deny and allow-once actions, expiry handling, external gamepad controls, and optional global visibility that requires explicit gateway administrator scope
-- In-app offensive-response reporting with explicit payload review, direct developer delivery, and receipt confirmation
-- Actionable notification summaries with tap-to-open and swipe browsing
-- Voice controls with wake-word and push-to-talk workflows
-- System/native caption settings launcher plus OpenClaw realtime translation fallback
-- External-display profiles for view mode, adaptive or explicit Full/Wide/Compact/Panoramic frame shapes, custom labels, JSON backup/import, placement, main-screen visibility, safe area, display identification, software brightness, virtual distance, HUD scale, gesture/hotkey behavior, profile reset, and low-overhead preferences
-- Capability-driven input for external touchscreens, touchpads, mice, styli, trackballs, wheels, rotary controls, DPAD/Page keys, gamepads, joystick/hat axes, identity-verified companion tap/swipe relays, media-button mic control, visible first-tap feedback and configurable 0.5-2.5-second timing for mic double taps, custom accessory-key learning, and a session-only sanitized Input Monitor
-- Optional speaker routing, IPD calibration, Eye Care, 3D Mode, USB diagnostics, and Windows handoff tools for AirVision M1
-- AirVision Windows app handoff export for applying saved Android profile values and reviewing active HUD runtime scale/caption capacity, all-profile runtime summaries, runtime metadata freshness, HUD controls, 18-feature companion parity states, Cyber-observed ASUS AirVision 1.0.7.1 settings-key evidence, Windows-only spatial/mirror capability status, and companion preferences during ASUS AirVision sessions on Cyber or another Windows host
-- AirVision companion app preferences for startup view, language intent, demo mode, software version, EULA note, in-app privacy policy, FAQ/tutorials, product registration, and ASUS support links
-- Optional USB firmware-link detection, device identity, descriptor diagnostics, readable/writable HID report-path summaries, per-feature firmware-apply readiness, per-profile runtime summaries, desired firmware-sync state, protocol-capture targets, sanitized capture-results import preview with captured-review, pending, and source-evidence labels, and firmware-update handoff provenance for AirVision M1 hardware status
-- Agent and provider/model controls for OpenClaw sessions
+Remembered-display pinning survives display-ID changes. Profiles include adaptive or explicit Full/Wide/Compact/Panoramic frame shapes. Capability-driven input supports external touchscreens, rotary controls, joystick/hat axes, identity-verified companion tap/swipe relays, and custom accessory-key learning. AirVision diagnostics include HID report-path summaries, per-feature firmware-apply readiness, desired firmware-sync state, and protocol-capture targets.
 
-OpenClaw HUD is intended for users who already run an OpenClaw gateway. It does not use AccessibilityService, overlay windows, SMS, or Call Log permissions in the Play/HUD build. Notification access is optional and is used only after the user grants Android notification-listener access.
+What you can do:
+- Connect to an OpenClaw gateway and use compact chat with hardware-keyboard send support
+- Route the HUD automatically to a first, last, largest, remembered, or AirVision-preferred display; recover safely when a display disconnects or Android recreates it
+- Use voice controls with wake-word or push-to-talk workflows
+- Choose native Android captions by default. The caption control opens Android system caption settings first, so Samsung or another device provider can be used when available. Switch the same control to OpenClaw real-time captions and translation, or turn captions off.
+- Read and act on optional notification summaries with tap-to-open and swipe browsing
+- Switch recent sessions and connected gateway agents on the external HUD, with safeguards during active runs and execution approvals
+- Review safe execution approvals with gateway-sanitized command previews, deny and allow-once choices, expiry handling, and optional administrator-scoped global visibility
+- Use keyboards, external touchscreens, touchpads, mice, styli, rotary controls, DPAD/Page keys, gamepads, media buttons, custom accessory keys, and verified AirVision Companion tap/swipe relays
+- Tune HUD placement, safe area, scale, frame shape, brightness, display identity, view profiles, gestures, and hotkeys; export or import profile backups
+- Use optional speaker routing, AirVision M1 calibration and diagnostics, and Windows handoff tools
+
+OpenClaw HUD is intended for people who already run an OpenClaw gateway. An in-app privacy policy explains the app's data handling. The Play/HUD build does not use AccessibilityService, overlay windows, SMS, or Call Log permissions. Notification access is optional and used only after you grant Android notification-listener access.
 
 Release notes:
 
-OpenClaw HUD:
-- Accepts identity-verified touchbar relays from the separately installed AirVision Companion on Android 14+.
-- Routes companion one-tap, double-tap, and slide gestures through existing configurable HUD actions.
-- Records accepted relays in the session-only Input Monitor.
-- In-app privacy policy remains available with adaptive frame morphing, external-display input, custom accessory keys, presentation recovery, and display pinning.
+OpenClaw HUD 2026.8.2:
+- Captions: faster turns/partials; no duplicate expanded partials.
+- Android captions first (Samsung/OEM when available); OpenClaw selectable.
+- Accepts identity-verified touchbar relays from AirVision Companion on Android 14+; one-tap, double-tap, and slide gestures use configurable HUD actions; records relays in the session-only Input Monitor.
+- In-app privacy policy covers adaptive frame morphing, custom accessory keys, presentation recovery, and display pinning.
 
 ## Privacy Policy
 
