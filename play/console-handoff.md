@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.7.17.16-hud-release.aab`
-- SHA-256: `2b54cb99553e94025bf3bf528fae6530ca7ee0771001119cac7e03074275e94c`
-- Version: 2026.8.2.0 (2026080200)
+- AAB: `build/release-bundles/openclaw-2026.8.12.0-hud-release.aab`
+- SHA-256: `18c08761d3e0623c6219e94cee9318f4de177f5186dbab31c532a8deff76c8af`
+- Version: 2026.8.12.0 (2026081200)
 
 ## Remaining Console Blockers
 
@@ -54,11 +54,10 @@ OpenClaw HUD is intended for people who already run an OpenClaw gateway. An in-a
 
 Release notes:
 
-OpenClaw HUD 2026.8.2:
-- Captions: faster turns/partials; no duplicate expanded partials.
-- Android captions first (Samsung/OEM when available); OpenClaw selectable.
-- Accepts identity-verified touchbar relays from AirVision Companion on Android 14+; one-tap, double-tap, and slide gestures use configurable HUD actions; records relays in the session-only Input Monitor.
-- In-app privacy policy covers adaptive frame morphing, custom accessory keys, presentation recovery, and display pinning.
+OpenClaw HUD 2026.8.12:
+- Captions stay live through recognition restarts; no repeated partial when mic drains. Android captions default (Samsung/OEM); OpenClaw selectable.
+- AirVision Companion accepts identity-verified touchbar relays on Android 14+; one-tap, double-tap, and slide gestures trigger configurable HUD actions and record in the session-only Input Monitor.
+- In-app privacy policy covers presentation recovery, display pinning, adaptive frame morphing, and custom accessory keys.
 
 ## Privacy Policy
 

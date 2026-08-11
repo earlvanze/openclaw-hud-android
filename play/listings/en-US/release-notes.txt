@@ -1,5 +1,4 @@
-OpenClaw HUD 2026.8.2:
-- Captions: faster turns/partials; no duplicate expanded partials.
-- Android captions first (Samsung/OEM when available); OpenClaw selectable.
-- Accepts identity-verified touchbar relays from AirVision Companion on Android 14+; one-tap, double-tap, and slide gestures use configurable HUD actions; records relays in the session-only Input Monitor.
-- In-app privacy policy covers adaptive frame morphing, custom accessory keys, presentation recovery, and display pinning.
+OpenClaw HUD 2026.8.12:
+- Captions stay live through recognition restarts; no repeated partial when mic drains. Android captions default (Samsung/OEM); OpenClaw selectable.
+- AirVision Companion accepts identity-verified touchbar relays on Android 14+; one-tap, double-tap, and slide gestures trigger configurable HUD actions and record in the session-only Input Monitor.
+- In-app privacy policy covers presentation recovery, display pinning, adaptive frame morphing, and custom accessory keys.
