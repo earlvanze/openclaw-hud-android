@@ -11,9 +11,9 @@ Generated from repository sources. Run `node scripts/render-play-console-handoff
 
 ## Signed Bundle
 
-- AAB: `build/release-bundles/openclaw-2026.8.12.1-hud-release.aab`
-- SHA-256: `0c4015f6c95c4ea7dea9d75e87775bd584b43183786937b8f9b3cff9301e4fac`
-- Version: 2026.8.12.1 (2026081201)
+- AAB: `build/release-bundles/openclaw-2026.8.12.2-hud-release.aab`
+- SHA-256: `18afaf083bf3f4b11439c1b8006a3b2f8c63316068519c07fdb91eb852a1832e`
+- Version: 2026.8.12.2 (2026081202)
 
 ## Remaining Console Blockers
 
@@ -54,8 +54,8 @@ OpenClaw HUD is intended for people who already run an OpenClaw gateway. An in-a
 
 Release notes:
 
-OpenClaw HUD 2026.8.12.1:
-- Captions stay live across retries; stale partials cannot send after an error or mic off. Android captions default (Samsung/OEM); OpenClaw selectable.
+OpenClaw HUD 2026.8.12.2:
+- Live captions reject retraced partials, preventing duplicate sends. Android captions remain the Samsung/OEM default.
 - AirVision Companion accepts identity-verified touchbar relays on Android 14+; one-tap, double-tap, and slide gestures trigger configurable HUD actions and record in the session-only Input Monitor.
 - In-app privacy policy covers presentation recovery, display pinning, adaptive frame morphing, and custom accessory keys.
 
