@@ -40,6 +40,16 @@ class MicCaptureTranscriptTest {
     }
 
     @Test
+    fun accumulator_doesNotResendARegressedPartialOrForgetTheLongerPrefix() {
+        val accumulator = CaptionTranscriptAccumulator()
+
+        assertEquals("hello there", accumulator.flushPartial("hello there"))
+        assertNull(accumulator.flushPartial("hello"))
+
+        assertNull(accumulator.finish("hello there"))
+    }
+
+    @Test
     fun accumulator_doesNotResendAnIdlePartialWhenMicDrains() {
         val accumulator = CaptionTranscriptAccumulator()
 

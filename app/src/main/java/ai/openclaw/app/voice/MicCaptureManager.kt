@@ -57,6 +57,21 @@ internal fun unsentFinalTranscript(
 }
 
 /**
+ * Whether [candidate] is an earlier, whole-word version of [alreadyFlushed].
+ *
+ * Speech recognizers sometimes retract the tail of an interim result while
+ * settling on a final phrase. That is not a new caption turn; emitting it
+ * would duplicate words that the idle flush already sent to the gateway.
+ */
+private fun isTranscriptRegression(candidate: String, alreadyFlushed: String): Boolean {
+    if (candidate.length >= alreadyFlushed.length || !alreadyFlushed.startsWith(candidate)) return false
+    val nextCharacter = alreadyFlushed.getOrNull(candidate.length)
+    return nextCharacter == null ||
+        nextCharacter.isWhitespace() ||
+        nextCharacter in ",.!?;:)".toCharArray()
+}
+
+/**
  * Keeps partial-caption de-duplication scoped to one recognizer session.
  *
  * Android can deliver an error, or the user can pause/stop the microphone,
@@ -70,6 +85,13 @@ internal class CaptionTranscriptAccumulator {
 
     fun flushPartial(partialTranscript: String): String? {
         val partial = partialTranscript.trim()
+        val flushed = flushedPartialTranscript?.trim().orEmpty()
+        // Keep the longer sent prefix when Android temporarily retracts words.
+        // Replacing it with the shorter partial would make a later final result
+        // resend the removed suffix as though it had never been delivered.
+        if (partial.isNotEmpty() && flushed.isNotEmpty() && isTranscriptRegression(partial, flushed)) {
+            return null
+        }
         val unsent = unsentFinalTranscript(partial, flushedPartialTranscript)
         flushedPartialTranscript = partial.takeIf { it.isNotEmpty() }
         return unsent
