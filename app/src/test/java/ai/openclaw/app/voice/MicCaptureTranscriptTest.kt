@@ -19,4 +19,23 @@ class MicCaptureTranscriptTest {
     fun unsentFinalTranscript_keepsARevisedFinalIntact() {
         assertEquals("I can't", unsentFinalTranscript("I can't", "I can"))
     }
+
+    @Test
+    fun accumulator_doesNotSuppressTheSamePhraseAfterARecognizerSessionResets() {
+        val accumulator = CaptionTranscriptAccumulator()
+
+        assertEquals("hello", accumulator.flushPartial("hello"))
+        accumulator.reset()
+
+        assertEquals("hello", accumulator.finish("hello"))
+    }
+
+    @Test
+    fun accumulator_sendsOnlyTheNewWordsWhenTheSameSessionGetsItsFinalResult() {
+        val accumulator = CaptionTranscriptAccumulator()
+
+        assertEquals("hello", accumulator.flushPartial("hello"))
+
+        assertEquals("world", accumulator.finish("hello world"))
+    }
 }

@@ -56,6 +56,36 @@ internal fun unsentFinalTranscript(
     return if (extendsFlushedPartial) final.substring(flushed.length).trim().takeIf { it.isNotEmpty() } else final
 }
 
+/**
+ * Keeps partial-caption de-duplication scoped to one recognizer session.
+ *
+ * Android can deliver an error, or the user can pause/stop the microphone,
+ * after an idle partial was already sent to the gateway but before a final
+ * result arrives. Carrying that partial into the next recognizer session can
+ * incorrectly suppress the next spoken phrase when it happens to be the same
+ * text. Every recognizer-session boundary must therefore call [reset].
+ */
+internal class CaptionTranscriptAccumulator {
+    private var flushedPartialTranscript: String? = null
+
+    fun flushPartial(partialTranscript: String): String? {
+        val partial = partialTranscript.trim()
+        val unsent = unsentFinalTranscript(partial, flushedPartialTranscript)
+        flushedPartialTranscript = partial.takeIf { it.isNotEmpty() }
+        return unsent
+    }
+
+    fun finish(finalTranscript: String): String? {
+        val unsent = unsentFinalTranscript(finalTranscript, flushedPartialTranscript)
+        reset()
+        return unsent
+    }
+
+    fun reset() {
+        flushedPartialTranscript = null
+    }
+}
+
 data class VoiceConversationEntry(
     val id: String,
     val role: VoiceConversationRole,
@@ -124,7 +154,7 @@ class MicCaptureManager(
 
     private val messageQueue = ArrayDeque<String>()
     private val messageQueueLock = Any()
-    private var flushedPartialTranscript: String? = null
+    private val captionTranscriptAccumulator = CaptionTranscriptAccumulator()
     private var pendingRunId: String? = null
     private var pendingAssistantEntryId: String? = null
     private var gatewayConnected = false
@@ -223,6 +253,7 @@ class MicCaptureManager(
                 restartJob = null
                 transcriptFlushJob?.cancel()
                 transcriptFlushJob = null
+                captionTranscriptAccumulator.reset()
                 _isListening.value = false
                 _inputLevel.value = 0f
                 _liveTranscript.value = null
@@ -340,6 +371,8 @@ class MicCaptureManager(
 
     private fun start() {
         stopRequested = false
+        // setMicEnabled(true) starts a fresh recognizer session.
+        captionTranscriptAccumulator.reset()
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
             _statusText.value = "Speech recognizer unavailable"
             _micEnabled.value = false
@@ -370,6 +403,7 @@ class MicCaptureManager(
         restartJob = null
         transcriptFlushJob?.cancel()
         transcriptFlushJob = null
+        captionTranscriptAccumulator.reset()
         _isListening.value = false
         _statusText.value = if (_isSending.value) "Mic off · sending…" else "Mic off"
         _inputLevel.value = 0f
@@ -448,8 +482,7 @@ class MicCaptureManager(
                 if (!_micEnabled.value || _isSending.value) return@launch
                 val current = _liveTranscript.value?.trim().orEmpty()
                 if (current.isEmpty() || current != expectedText) return@launch
-                val unsent = unsentFinalTranscript(current, flushedPartialTranscript)
-                flushedPartialTranscript = current
+                val unsent = captionTranscriptAccumulator.flushPartial(current)
                 if (unsent != null) {
                     queueRecognizedMessage(unsent)
                     sendQueuedIfIdle()
@@ -623,6 +656,7 @@ class MicCaptureManager(
         restartJob = null
         transcriptFlushJob?.cancel()
         transcriptFlushJob = null
+        captionTranscriptAccumulator.reset()
         _micEnabled.value = false
         _isListening.value = false
         _inputLevel.value = 0f
@@ -681,6 +715,9 @@ class MicCaptureManager(
                 if (stopRequested) return
                 _isListening.value = false
                 _inputLevel.value = 0f
+                // This recognizer session cannot yield a final result now.
+                // Do not let a previously sent idle partial affect the retry.
+                captionTranscriptAccumulator.reset()
                 val status =
                     when (error) {
                         SpeechRecognizer.ERROR_AUDIO -> "Audio error"
@@ -727,14 +764,18 @@ class MicCaptureManager(
                 if (!text.isNullOrBlank()) {
                     val trimmed = text.trim()
                     Log.d(tag, "caption recognizer final chars=${trimmed.length}")
-                    val unsent = unsentFinalTranscript(trimmed, flushedPartialTranscript)
-                    flushedPartialTranscript = null
+                    val unsent = captionTranscriptAccumulator.finish(trimmed)
                     if (unsent != null) {
                         queueRecognizedMessage(unsent)
                         sendQueuedIfIdle()
                     } else {
                         _liveTranscript.value = null
                     }
+                } else {
+                    // A completed callback without text still ends this
+                    // recognizer session, so stale partials cannot suppress
+                    // a phrase after the scheduled restart.
+                    captionTranscriptAccumulator.reset()
                 }
                 scheduleRestart()
             }
