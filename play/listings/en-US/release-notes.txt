@@ -1,4 +1,4 @@
-OpenClaw HUD 2026.8.12:
-- Captions stay live through recognition restarts; no repeated partial when mic drains. Android captions default (Samsung/OEM); OpenClaw selectable.
+OpenClaw HUD 2026.8.12.1:
+- Captions stay live across retries; stale partials cannot send after an error or mic off. Android captions default (Samsung/OEM); OpenClaw selectable.
 - AirVision Companion accepts identity-verified touchbar relays on Android 14+; one-tap, double-tap, and slide gestures trigger configurable HUD actions and record in the session-only Input Monitor.
 - In-app privacy policy covers presentation recovery, display pinning, adaptive frame morphing, and custom accessory keys.
