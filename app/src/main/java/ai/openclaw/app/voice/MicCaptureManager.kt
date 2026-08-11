@@ -722,7 +722,13 @@ class MicCaptureManager(
                 _isListening.value = false
                 _inputLevel.value = 0f
                 // This recognizer session cannot yield a final result now.
-                // Do not let a previously sent idle partial affect the retry.
+                // Do not let a scheduled partial from the failed session reach
+                // the gateway after its retry has begun. In particular, an
+                // ERROR_RECOGNIZER_BUSY callback can arrive while the idle
+                // flush delay is still pending.
+                transcriptFlushJob?.cancel()
+                transcriptFlushJob = null
+                _liveTranscript.value = null
                 captionTranscriptAccumulator.reset()
                 val status =
                     when (error) {
