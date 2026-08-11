@@ -38,4 +38,13 @@ class MicCaptureTranscriptTest {
 
         assertEquals("world", accumulator.finish("hello world"))
     }
+
+    @Test
+    fun accumulator_doesNotResendAnIdlePartialWhenMicDrains() {
+        val accumulator = CaptionTranscriptAccumulator()
+
+        assertEquals("hello", accumulator.flushPartial("hello"))
+
+        assertNull(accumulator.finish("hello"))
+    }
 }

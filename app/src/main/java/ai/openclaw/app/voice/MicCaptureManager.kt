@@ -227,11 +227,17 @@ class MicCaptureManager(
             drainJob =
                 scope.launch {
                     delay(2000L)
-                    stop()
-                    // Capture any partial transcript that didn't get a final result from the recognizer
+                    // Finish through the same accumulator used by the idle flush.  Sending the raw
+                    // live value here used to duplicate a partial that had already been sent while
+                    // the mic was draining.
                     val partial = _liveTranscript.value?.trim().orEmpty()
-                    if (partial.isNotEmpty()) {
-                        queueRecognizedMessage(partial)
+                    val unsent =
+                        partial
+                            .takeIf { it.isNotEmpty() }
+                            ?.let(captionTranscriptAccumulator::finish)
+                    stop()
+                    if (unsent != null) {
+                        queueRecognizedMessage(unsent)
                     }
                     drainJob = null
                     _micCooldown.value = false
